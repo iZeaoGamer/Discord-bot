@@ -1,4 +1,4 @@
-# Discord-bot-Teest
+# Discord-bot Feature-Rich
 A discord-feature rich API plugin for PMMP.
 
 
