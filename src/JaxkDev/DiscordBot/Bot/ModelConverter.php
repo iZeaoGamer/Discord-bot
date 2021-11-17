@@ -146,7 +146,6 @@ abstract class ModelConverter{
      * @template T of ServerChannel
      * @param DiscordChannel $dc
      * @param ServerChannel $c
-     * @return ServerChannel
      */
     static private function applyPermissionOverwrites(DiscordChannel $dc, $c){
         /** @var DiscordOverwrite $overwrite */
@@ -169,7 +168,7 @@ abstract class ModelConverter{
     /**
      * Generates a model based on whatever type $channel is. (Excludes game store/group type)
      * @param DiscordChannel $channel
-     * @return ?ServerChannel Null if type is invalid/unused.
+     * @return null|ServerChannel
      */
     static public function genModelChannel(DiscordChannel $channel): ?ServerChannel{
         switch($channel->type){

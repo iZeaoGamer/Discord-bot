@@ -340,21 +340,21 @@ array(5) {
         $this->client->getThread()->writeOutboundData(new ThreadDeletePacket(ModelConverter::genModelThread($parent)));
 
     }
-    public function onThreadList(DiscordThread $thread, Discord $discord){
+    public function onThreadList(DiscordThread $thread, Discord $discord): void{
         $parent = $thread->parent;
         if($parent === null){
             throw new \AssertionError("Thread must belong in a channel.");
         }
         $this->client->getThread()->writeOutboundData(new ThreadListPacket(ModelConverter::genModelThread($parent)));
     }
-    public function onThreadMembersUpdate(DiscordThread $thread, Discord $discord){
+    public function onThreadMembersUpdate(DiscordThread $thread, Discord $discord): void{
         $parent = $thread->parent;
         if($parent === null){
             throw new \AssertionError("Thread must belong in a channel.");
         }
         $this->client->getThread()->writeOutboundData(new ThreadMembersUpdatePacket(ModelConverter::genModelThread($parent)));
     }
-    public function onThreadMemberUpdate(DiscordThread $thread, Discord $discord){
+    public function onThreadMemberUpdate(DiscordThread $thread, Discord $discord): void{
         $parent = $thread->parent;
         if($parent === null){
             throw new \AssertionError("Thread must belong in a channel.");

@@ -582,9 +582,9 @@ class Api{
         if(!Utils::validDiscordSnowflake($server_id)){
             return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
         }
-     /*   if($channel_id === null){
+        if($channel_id === null){
             return rejectPromise(new APIRejection("Channel ID must be present."));
-        }*/
+        }
         if(!Utils::validDiscordSnowflake($channel_id)){
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
         }

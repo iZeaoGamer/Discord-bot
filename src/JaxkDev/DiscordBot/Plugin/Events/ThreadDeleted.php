@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Channels\ServerChannel as ThreadChannel;
 use pocketmine\plugin\Plugin;
 
 /**

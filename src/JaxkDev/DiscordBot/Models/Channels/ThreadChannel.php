@@ -74,7 +74,7 @@ class ThreadChannel extends ServerChannel{
     }
 
     /** Sets a Timestamp for the given thread.
-     * @param null|int $timestamp
+     * @param int|null $timestamp
      * @return void
      */
     public function setTimestamp(?int $timestamp): void{
@@ -82,14 +82,14 @@ class ThreadChannel extends ServerChannel{
     }
 
     /** Get's the current timestamp for the given thread.
-     * @return null|int
+     * @return int|null
      */
     public function getTimestamp(): ?int{
         return $this->timestamp;
     }
 
     /** Get's the rate limit (Slowmode) in seconds for the given thread.
-     * @return null|int
+     * @return int|null
     */
     public function getRateLimit(): ?int{
         return $this->rate_limit;
@@ -113,12 +113,12 @@ class ThreadChannel extends ServerChannel{
         $this->threadOwner = $threadOwner;
     }
 
-    /** @return null|string */
+    /** @return string|null */
     public function getOwner(): ?string{
         return $this->threadOwner;
     }
     /**
-     * @param null|string $parent_id
+     * @param string|null $parent_id
      * @return void
      * */
     public function setParentID(?string $parent_id): void{
@@ -131,7 +131,7 @@ class ThreadChannel extends ServerChannel{
 
 
     //----- Serialization -----//
-    
+
     public function serialize(): ?string{
         return serialize([
             $this->id,
