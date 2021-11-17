@@ -1,0 +1,10 @@
+/vendor/
+/dist/
+
+*.phar
+*.txt
+*.DS_STORE
+
+TEST.php
+PHPSTAN.php
+phpstan.neon
