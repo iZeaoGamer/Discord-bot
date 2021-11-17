@@ -77,7 +77,8 @@ abstract class ModelConverter{
             $webhook->avatar, $webhook->token);
     }
     static public function genModelThread(DiscordChannel $thread): ThreadChannel{
-        if($thread->type !== DiscordChannel::TYPE_NEWS_THREAD || $thread->type !== DiscordChannel::TYPE_PUBLIC_THREAD || $thread->type !== DiscordChannel::TYPE_PRIVATE_THREAD){
+        //if($thread->type !== DiscordChannel::TYPE_NEWS_THREAD or $thread->type !== DiscordChannel::TYPE_PUBLIC_THREAD || $thread->type !== DiscordChannel::TYPE_PRIVATE_THREAD){
+          if($thread->type < DiscordChannel::TYPE_NEWS_THREAD){
             throw new AssertionError("Discord channel type must be `Public`, `Private` or `news` threads.");
         }
         if($thread->guild_id === null){
@@ -147,7 +148,7 @@ abstract class ModelConverter{
      * @param ServerChannel $c
      * @return ServerChannel
      */
-    static private function applyPermissionOverwrites(DiscordChannel $dc, ServerChannel $c){
+    static private function applyPermissionOverwrites(DiscordChannel $dc, $c){
         /** @var DiscordOverwrite $overwrite */
         foreach($dc->overwrites as $overwrite){
             $allowed = new ChannelPermissions($overwrite->allow->bitwise);

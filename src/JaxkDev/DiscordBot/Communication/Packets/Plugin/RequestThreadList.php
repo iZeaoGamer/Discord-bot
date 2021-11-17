@@ -28,7 +28,7 @@ class RequestThreadList extends Packet{
     public function getThread(): ThreadChannel{
         return $this->thread;
     }
-    public function getChannelId(): string{
+    public function getChannelId(): ?string{
         return $this->thread->getID();
     }
 

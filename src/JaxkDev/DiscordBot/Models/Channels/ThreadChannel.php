@@ -37,17 +37,16 @@ class ThreadChannel extends ServerChannel{
     /**
      * TextChannel constructor.
      *
-     * @param string      $topic
      * @param string      $name
-     * @param int         $position
+     * @param int      $position
      * @param string      $server_id
-     * @param bool        $nsfw
+     * @param bool      $private
+     * @param int|null        $timestamp
      * @param int|null    $rate_limit
-     * @param string|null $category_id
+     * @param string|null $threadOwner
+     * @param string|null $parent_id
      * @param string|null $id
      */
- //   $thread->id, $thread->guild_id, $thread->name, $thread->last_message_id, $thread->last_pin_timestamp->getTimestamp(), $thread->rate_limit_per_user, $thread->owner_id, $thread->parent_id,
-   // $thread->message_count, $thread->member_count);
     public function __construct(string $name, int $position, string $server_id, bool $private, ?int $timestamp = null,
                                    ?int $rate_limit = null, ?string $threadOwner = null, ?string $parent_id = null, ?string $id = null){
         parent::__construct($name, $position, $server_id, null, $id);
@@ -60,9 +59,10 @@ class ThreadChannel extends ServerChannel{
     /** Creates a boolean for privating a thread. 
      * 
      * @param bool $private
+     * @return void
      * 
      */
-    public function setPrivate(bool $private){
+    public function setPrivate(bool $private): void{
         $this->private = $private;
     }
 
@@ -75,9 +75,9 @@ class ThreadChannel extends ServerChannel{
 
     /** Sets a Timestamp for the given thread.
      * @param null|int $timestamp
-     * 
+     * @return void
      */
-    public function setTimestamp(?int $timestamp){
+    public function setTimestamp(?int $timestamp): void{
         $this->timestamp = $timestamp;
     }
 
@@ -106,23 +106,32 @@ class ThreadChannel extends ServerChannel{
     }
 
     /** Sets a thread owner.
+     * @param string|null $threadOwner
+     * @return void
      */
-    public function setOwner(?string $threadOwner){
+    public function setOwner(?string $threadOwner): void{
         $this->threadOwner = $threadOwner;
     }
+
+    /** @return null|string */
     public function getOwner(): ?string{
         return $this->threadOwner;
     }
-    public function setParentID(?string $parent_id){
+    /**
+     * @param null|string $parent_id
+     * @return void
+     * */
+    public function setParentID(?string $parent_id): void{
         $this->parent_id = $parent_id;
     }
+    /** @return string|null */
     public function getParentID(): ?string{
         return $this->parent_id;
     }
 
 
     //----- Serialization -----//
-
+    
     public function serialize(): ?string{
         return serialize([
             $this->id,

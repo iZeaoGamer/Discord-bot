@@ -35,7 +35,7 @@ class RequestThreadCreate extends Packet{
         return $this->thread->isPrivate();
     }
     public function getDuration(): int{
-        return $this->thread->getTimestamp()();
+        return $this->thread->getTimestamp();
     }
     public function serialize(): ?string{
         return serialize([

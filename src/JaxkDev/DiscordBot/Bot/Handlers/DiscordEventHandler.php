@@ -319,23 +319,47 @@ array(5) {
         $this->client->getCommunicationHandler()->sendHeartbeat();
     }
     public function onThreadCreate(DiscordThread $thread, Discord $discord): void{
-        $this->client->getThread()->writeOutboundData(new ThreadCreatePacket(ModelConverter::genModelThread($thread->parent)));
+        $parent = $thread->parent;
+        if($parent === null){
+            throw new \AssertionError("Thread must belong in a channel.");
+        }
+        $this->client->getThread()->writeOutboundData(new ThreadCreatePacket(ModelConverter::genModelThread($parent)));
     }
     public function onThreadUpdate(DiscordThread $thread, Discord $discord): void{
-        $this->client->getThread()->writeOutboundData(new ThreadUpdatePacket(ModelConverter::genModelThread($thread->parent)));
+        $parent = $thread->parent;
+        if($parent === null){
+            throw new \AssertionError("Thread must belong in a channel.");
+        }
+        $this->client->getThread()->writeOutboundData(new ThreadUpdatePacket(ModelConverter::genModelThread($parent)));
     }
     public function onThreadDelete(DiscordThread $thread, Discord $discord): void{
-        $this->client->getThread()->writeOutboundData(new ThreadDeletePacket(ModelConverter::genModelThread($thread->parent)));
+        $parent = $thread->parent;
+        if($parent === null){
+            throw new \AssertionError("Thread must belong in a channel.");
+        }
+        $this->client->getThread()->writeOutboundData(new ThreadDeletePacket(ModelConverter::genModelThread($parent)));
 
     }
     public function onThreadList(DiscordThread $thread, Discord $discord){
-        $this->client->getThread()->writeOutboundData(new ThreadListPacket(ModelConverter::genModelThread($thread->parent)));
+        $parent = $thread->parent;
+        if($parent === null){
+            throw new \AssertionError("Thread must belong in a channel.");
+        }
+        $this->client->getThread()->writeOutboundData(new ThreadListPacket(ModelConverter::genModelThread($parent)));
     }
     public function onThreadMembersUpdate(DiscordThread $thread, Discord $discord){
-        $this->client->getThread()->writeOutboundData(new ThreadMembersUpdatePacket(ModelConverter::genModelThread($thread->parent)));
+        $parent = $thread->parent;
+        if($parent === null){
+            throw new \AssertionError("Thread must belong in a channel.");
+        }
+        $this->client->getThread()->writeOutboundData(new ThreadMembersUpdatePacket(ModelConverter::genModelThread($parent)));
     }
     public function onThreadMemberUpdate(DiscordThread $thread, Discord $discord){
-        $this->client->getThread()->writeOutboundData(new ThreadMemberUpdatePacket(ModelConverter::genModelThread($thread->parent)));
+        $parent = $thread->parent;
+        if($parent === null){
+            throw new \AssertionError("Thread must belong in a channel.");
+        }
+        $this->client->getThread()->writeOutboundData(new ThreadMemberUpdatePacket(ModelConverter::genModelThread($parent)));
     }
 
     public function onVoiceStateUpdate(DiscordVoiceStateUpdate $ds): void{

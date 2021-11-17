@@ -13,6 +13,7 @@
 
 namespace JaxkDev\DiscordBot\Bot\Handlers;
 
+use AssertionError;
 use Discord\Helpers\Collection;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
@@ -76,6 +77,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
 use JaxkDev\DiscordBot\Models\Channels\TextChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
+use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Messages\Reply;
 use JaxkDev\DiscordBot\Models\Role;
@@ -117,7 +119,7 @@ class CommunicationHandler{
         }
 
         //API Packets:
-        if($pk instanceof RequestThreadCreate) $this->handleThreadCreation($pk);
+    //    if($pk instanceof RequestThreadCreate) $this->handleThreadCreation($pk);
         if($pk instanceof RequestThreadUpdate) $this->handleUpdateThread($pk);
         if($pk instanceof RequestThreadDelete) $this->handleDeleteThread($pk);
         if($pk instanceof RequestThreadList) $this->handleThreadList($pk);
@@ -156,12 +158,13 @@ class CommunicationHandler{
         elseif($pk instanceof RequestDeleteWebhook) $this->handleDeleteWebhook($pk);
         elseif($pk instanceof RequestLeaveServer) $this->handleLeaveServer($pk);
     }
-    private function handleThreadCreation(RequestThreadCreate $pk){
-        $this->getChannel($pk, $pk->getThread()->getID(), function(DiscordChannel $channel) use($pk){
+   // private function handleThreadCreation(RequestThreadCreate $pk): void{
+     //   $this->getChannel($pk, $id, function(DiscordChannel $channel) use($pk){
           /*  $channel->threads->save($channel->threads->create([
                 'channel_id' => $pk->getThread()->getChannelID(),
                 'parent_id' => $pk->getThread()->getStartedChannelID(),
-            */
+            
+
             $channel->startThread($pk->getName(), $pk->isPrivate(), $pk->getDuration())->then(function(DiscordThread $webhook) use($pk){
                 $this->resolveRequest($pk->getUID(), true, "Successfully created Thread.", [ModelConverter::genModelThread($webhook->parent)]);
             }, function(\Throwable $e) use($pk){
@@ -169,13 +172,14 @@ class CommunicationHandler{
                 $this->logger->debug("Failed to create Thread ({$pk->getUID()}) - {$e->getMessage()}");
             });
         });
-    }
+    }*/
     private function handleDeleteThread(RequestThreadDelete $pk): void{
-        if($pk->getThread()->getId() === null){
+        $id = $pk->getThread()->getID();
+        if($id === null){
             throw new \AssertionError("Thread ID must be present.");
         }
-        $this->getChannel($pk, $pk->getChannelId(), function(DiscordChannel $channel) use($pk){
-            $channel->threads->fetch($pk->getThread()->getID())->then(function(DiscordThread $webhook) use($channel, $pk){
+        $this->getChannel($pk, $pk->getChannelId(), function(DiscordChannel $channel) use($pk, $id){
+            $channel->threads->fetch($id)->then(function(DiscordThread $webhook) use($channel, $pk){
                 $channel->threads->delete($webhook)->then(function() use($pk){
                     $this->resolveRequest($pk->getUID());
                 }, function(\Throwable $e) use($pk){
@@ -188,14 +192,18 @@ class CommunicationHandler{
             });
         });
     }
-    public function handleUpdateThread(RequestThreadUpdate $pk){
-    if($pk->getThread()->getId() === null){
+    public function handleUpdateThread(RequestThreadUpdate $pk): void{
+    //if($pk->getThread()->getId() === null){
+      $id = $pk->getThread()->getID();
+      if($id === null){
         throw new \AssertionError("Thread ID must be present.");
     }
-    $this->getChannel($pk, $pk->getThread()->getID(), function(DiscordChannel $channel) use($pk){
-        $channel->threads->fetch($pk->getThread()->getId())->then(function(DiscordThread $webhook) use($channel, $pk){
+    $this->getChannel($pk, $id, function(DiscordChannel $channel) use($pk, $id){
+        $channel->threads->fetch($id)->then(function(DiscordThread $webhook) use($channel, $pk){
             $webhook->name = $pk->getThread()->getName();
-            $webhook->parent_id = $pk->getThread()->getParentID(); /** @phpstan-ignore-line avatar can be null. */
+            $webhook->parent_id = $pk->getThread()->getParentID();
+            $webhook->is_private = $pk->getThread()->isPrivate();
+            $webhook->rate_limit_per_user = $pk->getThread()->getRateLimit() ?? 0;
             $channel->threads->save($webhook)->then(function(DiscordThread $webhook) use($pk){
                 $this->resolveRequest($pk->getUID(), true, "Successfully updated Thread.", [ModelConverter::genModelThread($webhook->parent)]);
             }, function(\Throwable $e) use($pk){
@@ -210,11 +218,14 @@ class CommunicationHandler{
 }
 private function handleThreadList(RequestThreadList $pk): void{
     $this->getChannel($pk, $pk->getChannelId(), function(DiscordChannel $channel) use($pk){
-        $channel->webhooks->freshen()->then(function(DiscordThreadRepository $repository) use($pk){
+        $channel->threads->freshen()->then(function(DiscordThreadRepository $repository) use($channel, $pk){
             $webhooks = [];
             /** @var DiscordThread $webhook */
             foreach($repository->toArray() as $webhook){
-                $webhooks[] = ModelConverter::genModelThread($webhook->parent);
+                $parent = $webhook->parent;
+                if($parent !== null){
+                $webhooks[] = ModelConverter::genModelThread($parent);
+                }
             }
             $this->resolveRequest($pk->getUID(), true, "Fetched Thread.", $webhooks);
         }, function(\Throwable $e) use($pk){
@@ -228,31 +239,42 @@ private function handleUpdateMemberThread(RequestThreadUpdateMember $pk): void{
         throw new \AssertionError("Thread ID must be present.");
     }
     $this->getChannel($pk, $pk->getThread()->getID(), function(DiscordChannel $channel) use($pk){
-        $channel->webhooks->fetch($pk->getThread()->getId())->then(function(DiscordWebhook $webhook) use($channel, $pk){
+        $channel->threads->fetch($pk->getThread()->getId())->then(function(DiscordThread $webhook) use($channel, $pk){
             $webhook->name = $pk->getThread()->getName();
             $webhook->parent_id = $pk->getThread()->getParentID(); /** @phpstan-ignore-line avatar can be null. */
-            $channel->webhooks->save($webhook)->then(function(DiscordWebhook $webhook) use($pk){
-                $this->resolveRequest($pk->getUID(), true, "Successfully updated webhook.", [ModelConverter::genModelWebhook($webhook)]);
+            $parent = $webhook->parent;
+            if($parent === null){
+                throw new AssertionError("Threads must belong in a channel.");
+            }
+            $channel->threads->save($webhook)->then(function(DiscordThread $webhook) use($parent, $pk){
+                
+                $this->resolveRequest($pk->getUID(), true, "Successfully updated thread.", [ModelConverter::genModelThread($parent)]);
             }, function(\Throwable $e) use($pk){
-                $this->resolveRequest($pk->getUID(), false, "Failed to update webhook.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to update webhook ({$pk->getUID()}) - {$e->getMessage()}");
+                $this->resolveRequest($pk->getUID(), false, "Failed to update thread.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to update thread ({$pk->getUID()}) - {$e->getMessage()}");
             });
         }, function(\Throwable $e) use($pk){
-            $this->resolveRequest($pk->getUID(), false, "Failed to update webhook.", [$e->getMessage(), $e->getTraceAsString()]);
-            $this->logger->debug("Failed to update webhook ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
+            $this->resolveRequest($pk->getUID(), false, "Failed to update thread.", [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->debug("Failed to update thread ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
         });
     });
 }
 private function handleUpdateMembersThread(RequestThreadUpdateMembers $pk): void{
-    if($pk->getThread()->getId() === null){
+    $id = $pk->getThread()->getID();
+    if($id === null){
         throw new \AssertionError("Thread ID must be present.");
     }
-    $this->getChannel($pk, $pk->getThread()->getID(), function(DiscordChannel $channel) use($pk){
-        $channel->webhooks->fetch($pk->getThread()->getId())->then(function(DiscordThread $webhook) use($channel, $pk){
+
+    $this->getChannel($pk, $id, function(DiscordChannel $channel) use($id, $pk){
+        $channel->threads->fetch($id)->then(function(DiscordThread $webhook) use($channel, $pk){
             $webhook->name = $pk->getThread()->getName();
-            $webhook->parent_id = $pk->getThread()->getParentID(); /** @phpstan-ignore-line avatar can be null. */
-            $channel->webhooks->save($webhook)->then(function(DiscordThread $webhook) use($pk){
-                $this->resolveRequest($pk->getUID(), true, "Successfully updated thread.", [ModelConverter::genModelThread($webhook->parent)]);
+            $webhook->parent_id = $pk->getThread()->getParentID();
+            $parent = $webhook->parent;
+            if($parent === null){
+                throw new AssertionError("Threads must belong in a channel.");
+            }
+            $channel->threads->save($webhook)->then(function(DiscordThread $webhook) use($parent, $pk){
+                $this->resolveRequest($pk->getUID(), true, "Successfully updated thread.", [ModelConverter::genModelThread($parent)]);
             }, function(\Throwable $e) use($pk){
                 $this->resolveRequest($pk->getUID(), false, "Failed to update thread.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to update thread ({$pk->getUID()}) - {$e->getMessage()}");
@@ -612,8 +634,18 @@ private function handleUpdateMembersThread(RequestThreadUpdateMembers $pk): void
                 $dc->type = DiscordChannel::TYPE_CATEGORY;
             }elseif($c instanceof VoiceChannel){
                 $dc->type = DiscordChannel::TYPE_VOICE;
+               
                 $dc->bitrate = $c->getBitrate();
                 $dc->user_limit = $c->getMemberLimit();
+            }elseif($c instanceof ThreadChannel){
+                $dc->type = DiscordChannel::TYPE_NEWS_THREAD;
+                $dc->id = $c->getID();
+                $dc->is_private = $c->isPrivate();
+                $dc->owner_id = $c->getOwner();
+                $dc->parent_id = $c->getParentID();
+                $dc->rate_limit_per_user = $c->getRateLimit() ?? 0;
+                $dc->startThread($dc->name, $dc->is_private, $dc->rate_limit_per_user);
+
             }elseif($c instanceof TextChannel){
                 $dc->topic = $c->getTopic();
                 $dc->nsfw = $c->isNsfw();
@@ -672,6 +704,16 @@ private function handleUpdateMembersThread(RequestThreadUpdateMembers $pk): void
                     }
                     $dc->bitrate = $channel->getBitrate();
                     $dc->user_limit = $channel->getMemberLimit();
+                }elseif($channel instanceof ThreadChannel){
+                    if($dc->type !== DiscordChannel::TYPE_NEWS_THREAD){
+                        $this->resolveRequest($pk->getUID(), false, "Failed to update channel.", ["Channel type change is not allowed!"]);
+                        return;
+                    }
+                    $dc->id = $channel->getID();
+                    $dc->is_private = $channel->isPrivate();
+                    $dc->owner_id = $channel->getOwner();
+                    $dc->parent_id = $channel->getParentID();
+                    $dc->rate_limit_per_user = $channel->getRateLimit() ?? 0;
                 }elseif($channel instanceof TextChannel){
                     if($dc->type !== DiscordChannel::TYPE_TEXT){
                         $this->resolveRequest($pk->getUID(), false, "Failed to update channel.", ["Channel type change is not allowed."]);

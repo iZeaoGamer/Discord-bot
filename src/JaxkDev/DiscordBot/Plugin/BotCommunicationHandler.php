@@ -311,12 +311,16 @@ class BotCommunicationHandler{
         Storage::updateChannel($packet->getThread());
     }
     private function handleThreadDelete(ThreadDeletePacket $packet): void{
-        $c = Storage::getChannel($packet->getThread()->getID());
+        $id = $packet->getThread()->getID();
+        if($id === null){
+            throw new \AssertionError("Channel ID must be present.");
+        }
+        $c = Storage::getChannel($id);
         if($c === null){
             throw new \AssertionError("Server Channel '{$packet->getThread()->getID()}' not found in storage.");
         }
         (new ThreadDeletedEvent($this->plugin, $c))->call();
-        Storage::removeChannel($packet->getThread()->getID());
+        Storage::removeChannel($id);
     }
     public function handleThreadList(ThreadListPacket $packet): void{
         $channels = Storage::getChannelsByServer($packet->getThread()->getServerID());
@@ -329,7 +333,11 @@ class BotCommunicationHandler{
                 $thread[$channel->getName()] = $channel;
             }
         }
-        $c = Storage::getChannel($packet->getThread()->getID());
+        $id = $packet->getThread()->getID();
+        if($id === null){
+            throw new \AssertionError("Channel ID must be present.");
+        }
+        $c = Storage::getChannel($id);
         if($c === null){
         //if(empty($thread)){
             throw new \AssertionError("Thread channel '{$packet->getThread()->getID()}' not found in storage.");

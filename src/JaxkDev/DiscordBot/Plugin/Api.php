@@ -569,12 +569,12 @@ class Api{
     public function createThread(ThreadChannel $channel): PromiseInterface{
         $pk = new RequestThreadCreate($channel);
         $this->plugin->writeOutBoundData($pk);
-        return APIResolver::create($pk->getUID());
+        return ApiResolver::create($pk->getUID());
     }
     public function updateThread(ThreadChannel $channel): PromiseInterface{
         $pk = new RequestThreadUpdate($channel);
         $this->plugin->writeOutBoundData($pk);
-        return APIResolver::create($pk->getUID());
+        return ApiResolver::create($pk->getUID());
     }
     public function deleteThread(ThreadChannel $channel): PromiseInterface{
         $server_id = $channel->getServerID();
@@ -582,15 +582,15 @@ class Api{
         if(!Utils::validDiscordSnowflake($server_id)){
             return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
         }
-        if($channel_id === null){
+     /*   if($channel_id === null){
             return rejectPromise(new APIRejection("Channel ID must be present."));
-        }
+        }*/
         if(!Utils::validDiscordSnowflake($channel_id)){
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
         }
         $pk = new RequestThreadDelete($channel);
         $this->plugin->writeOutBoundData($pk);
-        return APIResolver::create($pk->getUID());
+        return ApiResolver::create($pk->getUID());
     }
 
     /**
