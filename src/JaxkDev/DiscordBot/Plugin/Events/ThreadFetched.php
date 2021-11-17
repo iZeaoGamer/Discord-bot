@@ -16,7 +16,7 @@ use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use pocketmine\plugin\Plugin;
 
 /**
- * Emitted when a thread gets updated.
+ * Emitted when a thread gets fetched.
  * 
  * @see ChannelDeleted
  * @see ChannelUpdated
