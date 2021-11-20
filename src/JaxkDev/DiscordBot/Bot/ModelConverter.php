@@ -25,7 +25,6 @@ use Discord\Parts\Embed\Footer as DiscordFooter;
 use Discord\Parts\Embed\Image as DiscordImage;
 use Discord\Parts\Embed\Video as DiscordVideo;
 use Discord\Parts\Guild\Ban as DiscordBan;
-use Discord\Parts\Thread\Thread as DiscordThread;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\Permissions\RolePermission as DiscordRolePermission;
@@ -59,7 +58,6 @@ use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\VoiceState;
 use JaxkDev\DiscordBot\Models\Webhook;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 
 abstract class ModelConverter{
 
@@ -76,18 +74,7 @@ abstract class ModelConverter{
         return new Webhook($webhook->type, $webhook->channel_id, $webhook->name, $webhook->id, $webhook->user->id,
             $webhook->avatar, $webhook->token);
     }
-    static public function genModelThread(DiscordChannel $thread): ThreadChannel{
-        //if($thread->type !== DiscordChannel::TYPE_NEWS_THREAD or $thread->type !== DiscordChannel::TYPE_PUBLIC_THREAD || $thread->type !== DiscordChannel::TYPE_PRIVATE_THREAD){
-          if($thread->type < DiscordChannel::TYPE_NEWS_THREAD){
-            throw new AssertionError("Discord channel type must be `Public`, `Private` or `news` threads.");
-        }
-        if($thread->guild_id === null){
-            throw new AssertionError("Guild ID must be present.");
-        }
-        return new ThreadChannel($thread->name, $thread->position, $thread->guild_id, $thread->type === DiscordChannel::TYPE_PRIVATE_THREAD, $thread->last_pin_timestamp->getTimestamp(),
-        $thread->rate_limit_per_user, $thread->owner_id, $thread->parent_id, $thread->id);
 
-    }
     static public function genModelActivity(DiscordActivity $discordActivity): Activity{
         /** @var \stdClass{"end" => int|null, "start" => int|null} $timestamps */
         $timestamps = $discordActivity->timestamps;
@@ -145,7 +132,8 @@ abstract class ModelConverter{
     /**
      * @template T of ServerChannel
      * @param DiscordChannel $dc
-     * @param ServerChannel $c
+     * @param T $c
+     * @return T
      */
     static private function applyPermissionOverwrites(DiscordChannel $dc, $c){
         /** @var DiscordOverwrite $overwrite */
@@ -168,7 +156,7 @@ abstract class ModelConverter{
     /**
      * Generates a model based on whatever type $channel is. (Excludes game store/group type)
      * @param DiscordChannel $channel
-     * @return null|ServerChannel
+     * @return ?ServerChannel Null if type is invalid/unused.
      */
     static public function genModelChannel(DiscordChannel $channel): ?ServerChannel{
         switch($channel->type){
@@ -179,10 +167,6 @@ abstract class ModelConverter{
                 return self::genModelVoiceChannel($channel);
             case DiscordChannel::TYPE_CATEGORY:
                 return self::genModelCategoryChannel($channel);
-                case DiscordChannel::TYPE_NEWS_THREAD:
-                case DiscordChannel::TYPE_PUBLIC_THREAD:
-            case DiscordChannel::TYPE_PRIVATE_THREAD:
-                return self::genModelThread($channel);
             default:
                 return null;
         }

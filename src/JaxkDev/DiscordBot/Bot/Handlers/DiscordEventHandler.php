@@ -15,7 +15,6 @@ namespace JaxkDev\DiscordBot\Bot\Handlers;
 use Discord\Discord;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
-use Discord\Parts\Thread\Thread as DiscordThread;
 use Discord\Parts\Guild\Ban as DiscordBan;
 use Discord\Parts\Guild\Guild as DiscordGuild;
 use Discord\Parts\Guild\Invite as DiscordInvite;
@@ -26,17 +25,9 @@ use Discord\Parts\User\User as DiscordUser;
 use Discord\Parts\WebSockets\MessageReaction as DiscordMessageReaction;
 use Discord\Parts\WebSockets\PresenceUpdate as DiscordPresenceUpdate;
 use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
-use Discord\WebSockets\Events\ThreadMembersUpdate;
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadList as ThreadListPacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadMemberUpdate as ThreadMemberUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadMembersUpdate as ThreadMembersUpdatePacket;
-
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ChannelPinsUpdate as ChannelPinsUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordDataDump as DiscordDataDumpPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\BanAdd as BanAddPacket;
@@ -82,12 +73,6 @@ class DiscordEventHandler{
 
     public function registerEvents(): void{
         $discord = $this->client->getDiscordClient();
-        $discord->on("THREAD_CREATE", [$this, "onThreadCreate"]);
-        $discord->on("THREAD_UPDATE", [$this, "onThreadUpdate"]);
-        $discord->on("THREAD_DELETE", [$this, "onThreadDelete"]);
-        $discord->on("THREAD_LIST_SYNC", [$this, "onThreadList"]);
-        $discord->on("THREAD_MEMBER_UPDATE", [$this, "onThreadMemberUpdate"]);
-        $discord->on("THREAD_MEMBERS_UPDATE", [$this, "onThreadMembersUpdate"]);
         $discord->on("MESSAGE_CREATE", [$this, "onMessageCreate"]);
         $discord->on("MESSAGE_DELETE", [$this, "onMessageDelete"]);
         $discord->on("MESSAGE_UPDATE", [$this, "onMessageUpdate"]);  //AKA Edit
@@ -318,49 +303,6 @@ array(5) {
         $this->client->getThread()->writeOutboundData(new DiscordReadyPacket());
         $this->client->getCommunicationHandler()->sendHeartbeat();
     }
-    public function onThreadCreate(DiscordThread $thread, Discord $discord): void{
-        $parent = $thread->parent;
-        if($parent === null){
-            throw new \AssertionError("Thread must belong in a channel.");
-        }
-        $this->client->getThread()->writeOutboundData(new ThreadCreatePacket(ModelConverter::genModelThread($parent)));
-    }
-    public function onThreadUpdate(DiscordThread $thread, Discord $discord): void{
-        $parent = $thread->parent;
-        if($parent === null){
-            throw new \AssertionError("Thread must belong in a channel.");
-        }
-        $this->client->getThread()->writeOutboundData(new ThreadUpdatePacket(ModelConverter::genModelThread($parent)));
-    }
-    public function onThreadDelete(DiscordThread $thread, Discord $discord): void{
-        $parent = $thread->parent;
-        if($parent === null){
-            throw new \AssertionError("Thread must belong in a channel.");
-        }
-        $this->client->getThread()->writeOutboundData(new ThreadDeletePacket(ModelConverter::genModelThread($parent)));
-
-    }
-    public function onThreadList(DiscordThread $thread, Discord $discord): void{
-        $parent = $thread->parent;
-        if($parent === null){
-            throw new \AssertionError("Thread must belong in a channel.");
-        }
-        $this->client->getThread()->writeOutboundData(new ThreadListPacket(ModelConverter::genModelThread($parent)));
-    }
-    public function onThreadMembersUpdate(DiscordThread $thread, Discord $discord): void{
-        $parent = $thread->parent;
-        if($parent === null){
-            throw new \AssertionError("Thread must belong in a channel.");
-        }
-        $this->client->getThread()->writeOutboundData(new ThreadMembersUpdatePacket(ModelConverter::genModelThread($parent)));
-    }
-    public function onThreadMemberUpdate(DiscordThread $thread, Discord $discord): void{
-        $parent = $thread->parent;
-        if($parent === null){
-            throw new \AssertionError("Thread must belong in a channel.");
-        }
-        $this->client->getThread()->writeOutboundData(new ThreadMemberUpdatePacket(ModelConverter::genModelThread($parent)));
-    }
 
     public function onVoiceStateUpdate(DiscordVoiceStateUpdate $ds): void{
         if($ds->guild_id === null) return; //DM's
@@ -468,6 +410,9 @@ array(5) {
         foreach($guild->members as $member){
             $members[] = ModelConverter::genModelMember($member);
         }
+if($guild->region === null){
+return;
+}
 
         $packet = new ServerJoinPacket(ModelConverter::genModelServer($guild), $channels, $members, $roles);
         $this->client->getThread()->writeOutboundData($packet);

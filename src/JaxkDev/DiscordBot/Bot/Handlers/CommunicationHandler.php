@@ -13,7 +13,6 @@
 
 namespace JaxkDev\DiscordBot\Bot\Handlers;
 
-use AssertionError;
 use Discord\Helpers\Collection;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
@@ -26,10 +25,8 @@ use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\User\Activity as DiscordActivity;
 use Discord\Parts\User\Member as DiscordMember;
 use Discord\Parts\User\User as DiscordUser;
-use Discord\Parts\Thread\Thread as DiscordThread;
 use Discord\Repository\Channel\WebhookRepository as DiscordWebhookRepository;
 use Discord\Repository\Guild\InviteRepository as DiscordInviteRepository;
-use Discord\Repository\Channel\ThreadRepository as DiscordThreadRepository;
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;
@@ -65,19 +62,12 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateNickname;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateRole;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWebhook;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadCreate;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadDelete;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUpdate;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadList;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUpdateMember;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUpdateMembers;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
 use JaxkDev\DiscordBot\Models\Channels\TextChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Messages\Reply;
 use JaxkDev\DiscordBot\Models\Role;
@@ -119,12 +109,6 @@ class CommunicationHandler{
         }
 
         //API Packets:
-    //    if($pk instanceof RequestThreadCreate) $this->handleThreadCreation($pk);
-        if($pk instanceof RequestThreadUpdate) $this->handleUpdateThread($pk);
-        if($pk instanceof RequestThreadDelete) $this->handleDeleteThread($pk);
-        if($pk instanceof RequestThreadList) $this->handleThreadList($pk);
-        if($pk instanceof RequestThreadUpdateMember) $this->handleUpdateMemberThread($pk);
-        if($pk instanceof RequestThreadUpdateMembers) $this->handleUpdateMembersThread($pk);
         if($pk instanceof RequestUpdateNickname) $this->handleUpdateNickname($pk);
         elseif($pk instanceof RequestUpdatePresence) $this->handleUpdatePresence($pk);
         elseif($pk instanceof RequestBroadcastTyping) $this->handleBroadcastTyping($pk);
@@ -158,143 +142,6 @@ class CommunicationHandler{
         elseif($pk instanceof RequestDeleteWebhook) $this->handleDeleteWebhook($pk);
         elseif($pk instanceof RequestLeaveServer) $this->handleLeaveServer($pk);
     }
-   // private function handleThreadCreation(RequestThreadCreate $pk): void{
-     //   $this->getChannel($pk, $id, function(DiscordChannel $channel) use($pk){
-          /*  $channel->threads->save($channel->threads->create([
-                'channel_id' => $pk->getThread()->getChannelID(),
-                'parent_id' => $pk->getThread()->getStartedChannelID(),
-            
-
-            $channel->startThread($pk->getName(), $pk->isPrivate(), $pk->getDuration())->then(function(DiscordThread $webhook) use($pk){
-                $this->resolveRequest($pk->getUID(), true, "Successfully created Thread.", [ModelConverter::genModelThread($webhook->parent)]);
-            }, function(\Throwable $e) use($pk){
-                $this->resolveRequest($pk->getUID(), false, "Failed to create Thread.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to create Thread ({$pk->getUID()}) - {$e->getMessage()}");
-            });
-        });
-    }*/
-    private function handleDeleteThread(RequestThreadDelete $pk): void{
-        $id = $pk->getThread()->getID();
-        if($id === null){
-            throw new \AssertionError("Thread ID must be present.");
-        }
-        $this->getChannel($pk, $id, function(DiscordChannel $channel) use($pk, $id){
-            $channel->threads->fetch($id)->then(function(DiscordThread $webhook) use($channel, $pk){
-                $channel->threads->delete($webhook)->then(function() use($pk){
-                    $this->resolveRequest($pk->getUID());
-                }, function(\Throwable $e) use($pk){
-                    $this->resolveRequest($pk->getUID(), false, "Failed to delete Thread.", [$e->getMessage(), $e->getTraceAsString()]);
-                    $this->logger->debug("Failed to delete Thread ({$pk->getUID()}) - {$e->getMessage()}");
-                });
-            }, function(\Throwable $e) use($pk){
-                $this->resolveRequest($pk->getUID(), false, "Failed to delete Thread.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to delete Thread ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
-            });
-        });
-    }
-    public function handleUpdateThread(RequestThreadUpdate $pk): void{
-    //if($pk->getThread()->getId() === null){
-      $id = $pk->getThread()->getID();
-      if($id === null){
-        throw new \AssertionError("Thread ID must be present.");
-    }
-    $this->getChannel($pk, $id, function(DiscordChannel $channel) use($pk, $id){
-        $channel->threads->fetch($id)->then(function(DiscordThread $webhook) use($channel, $pk){
-            $webhook->name = $pk->getThread()->getName();
-            $webhook->parent_id = $pk->getThread()->getParentID();
-            $webhook->locked = $pk->getThread()->isPrivate();
-            $webhook->rate_limit_per_user = $pk->getThread()->getRateLimit() ?? 0;
-            $parent = $webhook->parent;
-            if($parent === null){
-                throw new AssertionError("Thread must belong to a channel.");
-            }
-            $channel->threads->save($webhook)->then(function(DiscordThread $webhook) use($parent, $pk){
-                $this->resolveRequest($pk->getUID(), true, "Successfully updated Thread.", [ModelConverter::genModelThread($parent)]);
-            }, function(\Throwable $e) use($pk){
-                $this->resolveRequest($pk->getUID(), false, "Failed to update Thread.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to update Thread ({$pk->getUID()}) - {$e->getMessage()}");
-            });
-        }, function(\Throwable $e) use($pk){
-            $this->resolveRequest($pk->getUID(), false, "Failed to update Thread.", [$e->getMessage(), $e->getTraceAsString()]);
-            $this->logger->debug("Failed to update Thread ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
-        });
-    });
-}
-private function handleThreadList(RequestThreadList $pk): void{
-    $id = $pk->getThread()->getID();
-    if($id === null){
-        throw new AssertionError("Thread ID must be present.");
-    }
-    $this->getChannel($pk, $id, function(DiscordChannel $channel) use($pk){
-        $channel->threads->freshen()->then(function(DiscordThreadRepository $repository) use($pk){
-            $webhooks = [];
-            /** @var DiscordThread $webhook */
-            foreach($repository->toArray() as $webhook){
-                $parent = $webhook->parent;
-                if($parent !== null){
-                $webhooks[] = ModelConverter::genModelThread($parent);
-                }
-            }
-            $this->resolveRequest($pk->getUID(), true, "Fetched Thread.", $webhooks);
-        }, function(\Throwable $e) use($pk){
-            $this->resolveRequest($pk->getUID(), false, "Failed to fetch Thread.", [$e->getMessage(), $e->getTraceAsString()]);
-            $this->logger->debug("Failed to fetch Thread ({$pk->getUID()}) - freshen error: {$e->getMessage()}");
-        });
-    });
-}
-private function handleUpdateMemberThread(RequestThreadUpdateMember $pk): void{
-    //if($pk->getThread()->getId() === null){
-      $id = $pk->getThread()->getID();
-      if($id === null){
-        throw new \AssertionError("Thread ID must be present.");
-    }
-    $this->getChannel($pk, $id, function(DiscordChannel $channel) use($pk){
-        $channel->threads->fetch($pk->getThread()->getId())->then(function(DiscordThread $webhook) use($channel, $pk){
-            $webhook->name = $pk->getThread()->getName();
-            $webhook->parent_id = $pk->getThread()->getParentID(); /** @phpstan-ignore-line avatar can be null. */
-            $parent = $webhook->parent;
-            if($parent === null){
-                throw new AssertionError("Threads must belong in a channel.");
-            }
-            $channel->threads->save($webhook)->then(function(DiscordThread $webhook) use($parent, $pk){
-                
-                $this->resolveRequest($pk->getUID(), true, "Successfully updated thread.", [ModelConverter::genModelThread($parent)]);
-            }, function(\Throwable $e) use($pk){
-                $this->resolveRequest($pk->getUID(), false, "Failed to update thread.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to update thread ({$pk->getUID()}) - {$e->getMessage()}");
-            });
-        }, function(\Throwable $e) use($pk){
-            $this->resolveRequest($pk->getUID(), false, "Failed to update thread.", [$e->getMessage(), $e->getTraceAsString()]);
-            $this->logger->debug("Failed to update thread ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
-        });
-    });
-}
-private function handleUpdateMembersThread(RequestThreadUpdateMembers $pk): void{
-    $id = $pk->getThread()->getID();
-    if($id === null){
-        throw new \AssertionError("Thread ID must be present.");
-    }
-
-    $this->getChannel($pk, $id, function(DiscordChannel $channel) use($id, $pk){
-        $channel->threads->fetch($id)->then(function(DiscordThread $webhook) use($channel, $pk){
-            $webhook->name = $pk->getThread()->getName();
-            $webhook->parent_id = $pk->getThread()->getParentID();
-            $parent = $webhook->parent;
-            if($parent === null){
-                throw new AssertionError("Threads must belong in a channel.");
-            }
-            $channel->threads->save($webhook)->then(function(DiscordThread $webhook) use($parent, $pk){
-                $this->resolveRequest($pk->getUID(), true, "Successfully updated thread.", [ModelConverter::genModelThread($parent)]);
-            }, function(\Throwable $e) use($pk){
-                $this->resolveRequest($pk->getUID(), false, "Failed to update thread.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to update thread ({$pk->getUID()}) - {$e->getMessage()}");
-            });
-        }, function(\Throwable $e) use($pk){
-            $this->resolveRequest($pk->getUID(), false, "Failed to update thread.", [$e->getMessage(), $e->getTraceAsString()]);
-            $this->logger->debug("Failed to update thread ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
-        });
-    });
-}
 
     private function handleDeleteWebhook(RequestDeleteWebhook $pk): void{
         $this->getChannel($pk, $pk->getChannelId(), function(DiscordChannel $channel) use($pk){
@@ -644,18 +491,8 @@ private function handleUpdateMembersThread(RequestThreadUpdateMembers $pk): void
                 $dc->type = DiscordChannel::TYPE_CATEGORY;
             }elseif($c instanceof VoiceChannel){
                 $dc->type = DiscordChannel::TYPE_VOICE;
-               
                 $dc->bitrate = $c->getBitrate();
                 $dc->user_limit = $c->getMemberLimit();
-            }elseif($c instanceof ThreadChannel){
-                $dc->type = DiscordChannel::TYPE_NEWS_THREAD;
-                $dc->id = $c->getID();
-                $dc->is_private = $c->isPrivate();
-                $dc->owner_id = $c->getOwner();
-                $dc->parent_id = $c->getParentID();
-                $dc->rate_limit_per_user = $c->getRateLimit() ?? 0;
-                $dc->startThread($dc->name, $dc->is_private, $dc->rate_limit_per_user);
-
             }elseif($c instanceof TextChannel){
                 $dc->topic = $c->getTopic();
                 $dc->nsfw = $c->isNsfw();
@@ -714,17 +551,6 @@ private function handleUpdateMembersThread(RequestThreadUpdateMembers $pk): void
                     }
                     $dc->bitrate = $channel->getBitrate();
                     $dc->user_limit = $channel->getMemberLimit();
-                }elseif($channel instanceof ThreadChannel){
-                   // if($dc->type !== DiscordChannel::TYPE_NEWS_THREAD){
-                    if($dc->type < DiscordChannel::TYPE_NEWS_THREAD){ 
-                    $this->resolveRequest($pk->getUID(), false, "Failed to update channel.", ["Channel type change is not allowed!"]);
-                        return;
-                    }
-                    $dc->id = $channel->getID();
-                    $dc->is_private = $channel->isPrivate();
-                    $dc->owner_id = $channel->getOwner();
-                    $dc->parent_id = $channel->getParentID();
-                    $dc->rate_limit_per_user = $channel->getRateLimit() ?? 0;
                 }elseif($channel instanceof TextChannel){
                     if($dc->type !== DiscordChannel::TYPE_TEXT){
                         $this->resolveRequest($pk->getUID(), false, "Failed to update channel.", ["Channel type change is not allowed."]);
@@ -897,7 +723,7 @@ private function handleUpdateMembersThread(RequestThreadUpdateMembers $pk): void
             }
             $dMessage->channel->messages->save($dMessage)->done(function(DiscordMessage $dMessage) use($pk){
                 $this->resolveRequest($pk->getUID(), true, "Message edited.", [ModelConverter::genModelMessage($dMessage)]);
-            }, function(\Throwable $e) use ($pk){
+            }, function(\ThreadException $e) use ($pk){
                 $this->resolveRequest($pk->getUID(), false, "Failed to edit message.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to edit message ({$pk->getUID()}) - {$e->getMessage()}");
             });
@@ -908,7 +734,7 @@ private function handleUpdateMembersThread(RequestThreadUpdateMembers $pk): void
         $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function(DiscordMessage $dMessage) use($pk){
             $dMessage->delete()->done(function() use ($pk){
                 $this->resolveRequest($pk->getUID());
-            }, function(\Throwable $e) use ($pk){
+            }, function(\ThreadException $e) use ($pk){
                 $this->resolveRequest($pk->getUID(), false, "Failed to delete message.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to delete message ({$pk->getUID()}) - {$e->getMessage()}");
             });
