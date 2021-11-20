@@ -30,15 +30,11 @@ class MessageSent extends DiscordBotEvent{
         parent::__construct($plugin);
         $this->message = $message;
     }
-    /**
-     * @return Message
-     */
+
     public function getMessage(): Message{
         return $this->message;
     }
-
-    /** @return void */
-    public function setMessage(Message $message): void{
+    public function setMessage(Message $message){
         $this->message = $message;
     }
 }

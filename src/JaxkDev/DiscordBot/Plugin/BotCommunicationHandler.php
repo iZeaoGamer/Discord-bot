@@ -42,17 +42,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerUpdate as ServerUpdat
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordReady as DiscordReadyPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\VoiceStateUpdate as VoiceStateUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat as HeartbeatPacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadList as ThreadListPacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadMembersUpdate as ThreadMembersUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadMemberUpdate as ThreadMemberUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Channels\TextChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Plugin\Events\BanCreated as BanCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\BanDeleted as BanDeletedEvent;
@@ -83,10 +76,6 @@ use JaxkDev\DiscordBot\Plugin\Events\VoiceChannelMemberJoined as VoiceChannelMem
 use JaxkDev\DiscordBot\Plugin\Events\VoiceChannelMemberLeft as VoiceChannelMemberLeftEvent;
 use JaxkDev\DiscordBot\Plugin\Events\VoiceChannelMemberMoved as VoiceChannelMemberMovedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\VoiceStateUpdated as VoiceStateUpdatedEvent;
-use JaxkDev\DiscordBot\Plugin\Events\ThreadCreated as ThreadCreatedEvent;
-use JaxkDev\DiscordBot\Plugin\Events\ThreadUpdated as ThreadUpdatedEvent;
-use JaxkDev\DiscordBot\Plugin\Events\ThreadDeleted as ThreadDeletedEvent;
-use JaxkDev\DiscordBot\Plugin\Events\ThreadFetched as ThreadFetchedEvent;
 
 class BotCommunicationHandler{
 
@@ -110,6 +99,7 @@ class BotCommunicationHandler{
             $this->lastHeartbeat = $packet->getHeartbeat();
             return;
         }
+
         if($packet instanceof PresenceUpdatePacket) $this->handlePresenceUpdate($packet);
         elseif($packet instanceof VoiceStateUpdatePacket) $this->handleVoiceStateUpdate($packet);
         elseif($packet instanceof MemberJoinPacket) $this->handleMemberJoin($packet);
@@ -122,12 +112,6 @@ class BotCommunicationHandler{
         elseif($packet instanceof MessageReactionRemovePacket) $this->handleMessageReactionRemove($packet);
         elseif($packet instanceof MessageReactionRemoveAllPacket) $this->handleMessageReactionRemoveAll($packet);
         elseif($packet instanceof MessageReactionRemoveEmojiPacket) $this->handleMessageReactionRemoveEmoji($packet);
-        elseif($packet instanceof ThreadCreatePacket) $this->handleThreadCreate($packet);
-        elseif($packet instanceof ThreadDeletePacket) $this->handleThreadDelete($packet);
-        elseif($packet instanceof ThreadUpdatePacket) $this->handleThreadUpdate($packet);
-        elseif($packet instanceof ThreadListPacket) $this->handleThreadList($packet);
-   //     elseif($packet instanceof ThreadMembersUpdatePacket) $this->handleThreadMembersUpdate($packet);
-     //   elseif($packet instanceof ThreadMemberUpdatePacket) $this->handleThreadMemberUpdate($packet);
         elseif($packet instanceof ChannelCreatePacket) $this->handleChannelCreate($packet);
         elseif($packet instanceof ChannelUpdatePacket) $this->handleChannelUpdate($packet);
         elseif($packet instanceof ChannelDeletePacket) $this->handleChannelDelete($packet);
@@ -301,55 +285,6 @@ class BotCommunicationHandler{
         (new ChannelDeletedEvent($this->plugin, $c))->call();
         Storage::removeChannel($packet->getChannelId());
     }
-    private function handleThreadCreate(ThreadCreatePacket $packet): void{
-        (new ThreadCreatedEvent($this->plugin, $packet->getThread()))->call();
-        Storage::addChannel($packet->getThread());
-    }
-
-    private function handleThreadUpdate(ThreadUpdatePacket $packet): void{
-        (new ThreadUpdatedEvent($this->plugin, $packet->getThread()))->call();
-        Storage::updateChannel($packet->getThread());
-    }
-    private function handleThreadDelete(ThreadDeletePacket $packet): void{
-        $id = $packet->getThread()->getID();
-        if($id === null){
-            throw new \AssertionError("Channel ID must be present.");
-        }
-        $c = Storage::getChannel($id);
-        if($c === null){
-            throw new \AssertionError("Server Channel '{$packet->getThread()->getID()}' not found in storage.");
-        }
-        (new ThreadDeletedEvent($this->plugin, $c))->call();
-        Storage::removeChannel($id);
-    }
-    public function handleThreadList(ThreadListPacket $packet): void{
-        $channels = Storage::getChannelsByServer($packet->getThread()->getServerID());
-
-        //$c = Storage::getChannel($packet->getChannelID());
-        /** @var ThreadChannel[] */
-        $thread = [];
-        foreach($channels as $channel){
-            if($channel instanceof ThreadChannel){
-                $thread[$channel->getName()] = $channel;
-            }
-        }
-        $id = $packet->getThread()->getID();
-        if($id === null){
-            throw new \AssertionError("Channel ID must be present.");
-        }
-        $c = Storage::getChannel($id);
-        if($c === null){
-        //if(empty($thread)){
-            throw new \AssertionError("Thread channel '{$packet->getThread()->getID()}' not found in storage.");
-        }
-
-        (new ThreadFetchedEvent($this->plugin, $thread))->call();
-    }
-   // public function handleThreadMemberUpdate(ThreadMemberUpdatePacket $packet){
-
-
-
-           // throw new \AssertionError("Thread channel '{$packet->getChannelID()}' not found in storage.");
 
     private function handleChannelPinsUpdate(ChannelPinsUpdatePacket $packet): void{
         $c = Storage::getChannel($packet->getChannelId());

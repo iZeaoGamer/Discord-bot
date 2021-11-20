@@ -44,10 +44,6 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateNickname;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateRole;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWebhook;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadCreate;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadDelete;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadList;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUpdate;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -56,7 +52,6 @@ use JaxkDev\DiscordBot\Models\Invite;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\Webhook;
 use JaxkDev\DiscordBot\Models\Role;
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
@@ -564,32 +559,6 @@ class Api{
         }
         $pk = new RequestDeleteMessage($message_id, $channel_id);
         $this->plugin->writeOutboundData($pk);
-        return ApiResolver::create($pk->getUID());
-    }
-    public function createThread(ThreadChannel $channel): PromiseInterface{
-        $pk = new RequestThreadCreate($channel);
-        $this->plugin->writeOutBoundData($pk);
-        return ApiResolver::create($pk->getUID());
-    }
-    public function updateThread(ThreadChannel $channel): PromiseInterface{
-        $pk = new RequestThreadUpdate($channel);
-        $this->plugin->writeOutBoundData($pk);
-        return ApiResolver::create($pk->getUID());
-    }
-    public function deleteThread(ThreadChannel $channel): PromiseInterface{
-        $server_id = $channel->getServerID();
-        $channel_id = $channel->getID();
-        if(!Utils::validDiscordSnowflake($server_id)){
-            return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
-        }
-        if($channel_id === null){
-            return rejectPromise(new APIRejection("Channel ID must be present."));
-        }
-        if(!Utils::validDiscordSnowflake($channel_id)){
-            return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
-        }
-        $pk = new RequestThreadDelete($channel);
-        $this->plugin->writeOutBoundData($pk);
         return ApiResolver::create($pk->getUID());
     }
 
