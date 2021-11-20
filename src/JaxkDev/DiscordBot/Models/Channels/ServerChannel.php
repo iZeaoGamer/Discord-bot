@@ -9,16 +9,6 @@
  * Discord :: JaxkDev#2698
  * Email   :: JaxkDev@gmail.com
  */
-/** 
- * CHANNEL CREATION/MODIFY CONTENTS.
- * Every channel that extends ServerChannel will bw able to create/modify their channels.
- * @see API::updateChannel()
- * @see API::createChannel()
- * @see API::deleteChannel()
- * Firstly, you can edit any of the contents in each channel which extends this channel.
- * 
- * 
- */
 
 namespace JaxkDev\DiscordBot\Models\Channels;
 
