@@ -76,6 +76,7 @@ use JaxkDev\DiscordBot\Plugin\Events\VoiceChannelMemberJoined as VoiceChannelMem
 use JaxkDev\DiscordBot\Plugin\Events\VoiceChannelMemberLeft as VoiceChannelMemberLeftEvent;
 use JaxkDev\DiscordBot\Plugin\Events\VoiceChannelMemberMoved as VoiceChannelMemberMovedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\VoiceStateUpdated as VoiceStateUpdatedEvent;
+use pocketmine\scheduler\ClosureTask;
 
 class BotCommunicationHandler{
 
@@ -371,8 +372,9 @@ class BotCommunicationHandler{
         }
 
         (new MemberLeftEvent($this->plugin, $member))->call();
-
+    $this->plugin->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($packet): void{
         Storage::removeMember($packet->getMemberID());
+    }), 20);
     }
 
     private function handleServerJoin(ServerJoinPacket $packet): void{
