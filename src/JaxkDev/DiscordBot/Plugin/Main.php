@@ -123,7 +123,7 @@ class Main extends PluginBase{
     }
 
     public function onDisable(){
-        $this->checkDisable(true);
+        $this->checkDisable(false);
     }
     public function checkDisable(bool $restart = false): void{
         (new DiscordClosed($this))->call();
