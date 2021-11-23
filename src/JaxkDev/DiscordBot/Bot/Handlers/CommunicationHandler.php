@@ -150,7 +150,7 @@ class CommunicationHandler{
         elseif($pk instanceof RequestUpdateWebhook) $this->handleUpdateWebhook($pk);
         elseif($pk instanceof RequestDeleteWebhook) $this->handleDeleteWebhook($pk);
         elseif($pk instanceof RequestLeaveServer) $this->handleLeaveServer($pk);
-        elseif($pk instanceof RequestMessageBulkDelete) $this->handleBulkDelete($pk);
+        elseif($pk instanceof RequestMessageBuilkDelete) $this->handleBuilkDelete($pk);
         elseif($pk instanceof RequestCrossPostMessage) $this->handleCrossPost($pk);
         elseif($pk instanceof RequestThreadCreate) $this->handleChannelStartThread($pk);
         elseif($pk instanceof RequestThreadUpdate) $this->handleThreadUpdate($pk);
@@ -526,7 +526,7 @@ class CommunicationHandler{
             });
         });
     }
-    private function handleBulkDelete(RequestMessageBuilkDelete $pk): void{
+    private function handleBuilkDelete(RequestMessageBuilkDelete $pk): void{
         if($pk->getChannel()->getID() === null){
             $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete.", ["Channel ID must be present!"]);
             return;

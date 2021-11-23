@@ -25,7 +25,7 @@ class ThreadChannel extends ServerChannel{
     private $rate_limit = null;
 
 
-    /** @var null|string*/
+    /** @var string*/
     private $threadOwner = null;
 
     /** @var null|string */

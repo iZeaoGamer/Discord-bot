@@ -321,9 +321,9 @@ array(5) {
 
     public function onPresenceUpdate(DiscordPresenceUpdate $presenceUpdate): void{
         $clientStatus = [
-            "desktop_status" => $presenceUpdate->client_status->desktop??null,
-            "mobile_status" => $presenceUpdate->client_status->mobile??null,
-            "web_status" => $presenceUpdate->client_status->web??null
+            "mobile" => $presenceUpdate->client_status->mobile??null,
+            "desktop" => $presenceUpdate->client_status->desktop??null,
+            "web" => $presenceUpdate->client_status->web??null
         ];
         $activities = [];
         foreach($presenceUpdate->activities as $activity){

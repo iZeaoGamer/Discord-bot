@@ -23,7 +23,7 @@ class MessageBuilkDelete extends Packet{
     private $message;
 
     /**
-     * @param Message
+     * @param Message $message
      */
     public function __construct(Message $message){
         parent::__construct();
@@ -33,7 +33,7 @@ class MessageBuilkDelete extends Packet{
     /**
      * @return Message
      */
-    public function getMessage(){
+    public function getMessage(): Message{
         return $this->message;
     }
 
