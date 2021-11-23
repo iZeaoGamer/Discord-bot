@@ -366,8 +366,13 @@ array(5) {
         $packet = new MessageDeletePacket($message);
         $this->client->getThread()->writeOutboundData($packet);
     }
+
+    /**
+     * @param DiscordMessage|\stdClass $data
+     * @param Discord                  $discord
+     * @return void
+     */
     public function onMessageBuilkDelete($data, Discord $discord): void{
-        //if($data instanceof DiscordMessage){
           if($data instanceof DiscordMessage){
             $message = ModelConverter::genModelMessage($data);
           }else{

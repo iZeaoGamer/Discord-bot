@@ -25,7 +25,7 @@ class MessageBuilkDelete extends Packet{
     /**
      * @param Message|array{"message_id": string, "channel_id": string, "server_id": string} $message
      */
-    public function __construct(Message $message){
+    public function __construct($message){
         parent::__construct();
         $this->message = $message;
     }
