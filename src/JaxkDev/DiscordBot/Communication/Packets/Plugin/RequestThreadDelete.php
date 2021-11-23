@@ -28,7 +28,7 @@ class RequestThreadDelete extends Packet{
     public function getChannel(): ThreadChannel{
         return $this->thread;
     }
-    public function getChannelID(): ?string{
+    public function getChannelID(): string{
         return $this->thread->getID();
     }
 
