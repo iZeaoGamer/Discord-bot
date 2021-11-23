@@ -28,7 +28,7 @@ class ThreadCreate extends Packet{
         $this->thread = $voice_state;
     }
 
-    public function getThread(): Thread{
+    public function getChannel(): Thread{
         return $this->thread;
     }
     

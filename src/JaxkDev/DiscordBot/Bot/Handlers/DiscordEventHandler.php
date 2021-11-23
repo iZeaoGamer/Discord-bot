@@ -28,6 +28,7 @@ use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;
+use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ChannelPinsUpdate as ChannelPinsUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordDataDump as DiscordDataDumpPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\BanAdd as BanAddPacket;
@@ -56,6 +57,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerLeave as ServerLeaveP
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerUpdate as ServerUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordReady as DiscordReadyPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\VoiceStateUpdate as VoiceStateUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBulkDelete as MessageBulkDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
 use Monolog\Logger;
 
 class DiscordEventHandler{
@@ -75,6 +80,7 @@ class DiscordEventHandler{
         $discord = $this->client->getDiscordClient();
         $discord->on("MESSAGE_CREATE", [$this, "onMessageCreate"]);
         $discord->on("MESSAGE_DELETE", [$this, "onMessageDelete"]);
+        $discord->on("MESSAGE_DELETE_BULK", [$this, "onMessageBuilkDelete"]);
         $discord->on("MESSAGE_UPDATE", [$this, "onMessageUpdate"]);  //AKA Edit
 
         $discord->on("GUILD_MEMBER_ADD", [$this, "onMemberJoin"]);
@@ -107,6 +113,9 @@ class DiscordEventHandler{
     
         $discord->on("PRESENCE_UPDATE", [$this, "onPresenceUpdate"]);
         $discord->on("VOICE_STATE_UPDATE", [$this, "onVoiceStateUpdate"]);
+        $discord->on("THREAD_CREATE", [$this, "onThreadCreate"]);
+        $discord->on("THREAD_UPDATE", [$this, "onThreadUpdate"]);
+        $discord->on("THREAD_DELETE", [$this, "onThreadDelete"]);
     }
 
     /*
@@ -352,9 +361,17 @@ array(5) {
                 "server_id" => $data->guild_id
             ];
         }
+      
         $packet = new MessageDeletePacket($message);
         $this->client->getThread()->writeOutboundData($packet);
     }
+    public function onMessageBulkDelete(DiscordMessage $message, Discord $discord){
+        //if($data instanceof DiscordMessage){
+            if(!$this->checkMessage($message)) return;
+            $message = ModelConverter::genModelMessage($message); 
+            $packet = new MessageBulkDeletePacket($message);
+            $this->client->getThread()->writeOutboundData($packet);
+        }
 
     public function onMessageReactionAdd(DiscordMessageReaction $reaction): void{
         $packet = new MessageReactionAddPacket($reaction->message_id, $reaction->emoji->name,
@@ -444,6 +461,30 @@ return;
 
     public function onChannelDelete(DiscordChannel $channel, Discord $discord): void{
         $packet = new ChannelDeletePacket($channel->id);
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onThreadCreate(DiscordChannel $channel, Discord $discord){
+        $c = ModelConverter::genModelChannel($channel);
+        if($c instanceof ThreadChannel === false){
+            return;
+        }
+        $packet = new ThreadCreatePacket($c);
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onThreadUpdate(DiscordChannel $channel, Discord $discord){
+        $c = ModelConverter::genModelChannel($channel);
+        if($c instanceof ThreadChannel === false){
+            return;
+        }
+        $packet = new ThreadUpdatePacket($c);
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onThreadDelete(DiscordChannel $channel, Discord $discord){
+        $c = ModelConverter::genModelChannel($channel);
+        if($c instanceof ThreadChannel === false){
+            return;
+        }
+        $packet = new ThreadDeletePacket($c);
         $this->client->getThread()->writeOutboundData($packet);
     }
 

@@ -25,7 +25,7 @@ class RequestThreadCreate extends Packet{
         $this->thread = $thread;
     }
 
-    public function getThread(): ThreadChannel{
+    public function getChannel(): ThreadChannel{
         return $this->thread;
     }
     public function getName(): string{
@@ -35,7 +35,7 @@ class RequestThreadCreate extends Packet{
         return $this->thread->isPrivate();
     }
     public function getDuration(): int{
-        return $this->thread->getTimestamp();
+        return $this->thread->getDuration();
     }
     public function serialize(): ?string{
         return serialize([

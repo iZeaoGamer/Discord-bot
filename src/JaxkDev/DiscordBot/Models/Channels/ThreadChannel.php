@@ -14,8 +14,9 @@ namespace JaxkDev\DiscordBot\Models\Channels;
 
 class ThreadChannel extends ServerChannel{
 
-    /** @var null|int */
-    private $timestamp;
+
+    /** @var int */
+    private $duration;
 
     /** @var bool */
     private $private;
@@ -28,7 +29,7 @@ class ThreadChannel extends ServerChannel{
     private $threadOwner = null;
 
     /** @var null|string */
-    private $parent_id = null;
+    private $user_id = null;
 
     //Pins can be found via API::fetchPinnedMessages();
 
@@ -41,20 +42,19 @@ class ThreadChannel extends ServerChannel{
      * @param int      $position
      * @param string      $server_id
      * @param bool      $private
-     * @param int|null        $timestamp
      * @param int|null    $rate_limit
      * @param string|null $threadOwner
-     * @param string|null $parent_id
+     * @param string|null $user_id
      * @param string|null $id
      */
-    public function __construct(string $name, int $position, string $server_id, bool $private, ?int $timestamp = null,
-                                   ?int $rate_limit = null, ?string $threadOwner = null, ?string $parent_id = null, ?string $id = null){
+    public function __construct(string $name, int $position, string $server_id, bool $private, int $duration,
+                                   ?int $rate_limit = null, ?string $threadOwner = null, ?string $userID = null, ?string $id = null){
         parent::__construct($name, $position, $server_id, null, $id);
         $this->setPrivate($private);
-        $this->setTimestamp($timestamp);
+        $this->setDuration($duration);
         $this->setRateLimit($rate_limit);
         $this->setOwner($threadOwner);
-        $this->setParentID($parent_id);
+        $this->setUserID($userID);
     }
     /** Creates a boolean for privating a thread. 
      * 
@@ -72,20 +72,13 @@ class ThreadChannel extends ServerChannel{
     public function isPrivate(): bool{
         return $this->private;
     }
-
-    /** Sets a Timestamp for the given thread.
-     * @param int|null $timestamp
-     * @return void
-     */
-    public function setTimestamp(?int $timestamp): void{
-        $this->timestamp = $timestamp;
+    /** @return void */
+    public function setDuration(int $duration): void{
+        $this->duration = $duration;
     }
-
-    /** Get's the current timestamp for the given thread.
-     * @return int|null
-     */
-    public function getTimestamp(): ?int{
-        return $this->timestamp;
+    /** @return int */
+    public function getDuration(): int{
+        return $this->duration;
     }
 
     /** Get's the rate limit (Slowmode) in seconds for the given thread.
@@ -121,12 +114,12 @@ class ThreadChannel extends ServerChannel{
      * @param string|null $parent_id
      * @return void
      * */
-    public function setParentID(?string $parent_id): void{
-        $this->parent_id = $parent_id;
+    public function setUserID(?string $user_id): void{
+        $this->user_id = $user_id;
     }
     /** @return string|null */
-    public function getParentID(): ?string{
-        return $this->parent_id;
+    public function getUserID(): ?string{
+        return $this->user_id;
     }
 
 
@@ -141,10 +134,10 @@ class ThreadChannel extends ServerChannel{
             $this->role_permissions,
             $this->server_id,
             $this->private,
-            $this->timestamp,
+            $this->duration,
             $this->rate_limit,
             $this->threadOwner,
-            $this->parent_id
+            $this->user_id
         ]);
     }
 
@@ -157,10 +150,10 @@ class ThreadChannel extends ServerChannel{
             $this->role_permissions,
             $this->server_id,
             $this->private,
-            $this->timestamp,
+            $this->duration,
             $this->rate_limit,
             $this->threadOwner,
-            $this->parent_id
+            $this->user_id
         ] = unserialize($data);
     }
 }
