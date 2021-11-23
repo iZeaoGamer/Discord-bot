@@ -376,11 +376,15 @@ array(5) {
         if($data instanceof DiscordMessage){
             $message = ModelConverter::genModelMessage($data);
         }else{
-            $message = [];
+            if(count($data->ids) === 0){
+                return;
+            }
             foreach($data->ids as $id){  
-          $message["message_id"] = $id;
-          $message["channel_id"] = $data->channel_id;
-          $message["server_id"] = $data->guild_id;
+          $message = [
+              "message_id" => $id,
+              "channel_id" => $data->channel_id,
+              "server_id" => $data->guild_id
+            ];
         }
     }
             $packet = new MessageBuilkDeletePacket($message);
