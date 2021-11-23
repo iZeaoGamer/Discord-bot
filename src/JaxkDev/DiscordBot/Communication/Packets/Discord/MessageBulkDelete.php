@@ -15,7 +15,7 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Messages\Message;
 
-class MessageBuilkDelete extends Packet{
+class MessageBulkDelete extends Packet{
 
     /**
      * @var Message|array{"message_id": string, "channel_id": string, "server_id": string}

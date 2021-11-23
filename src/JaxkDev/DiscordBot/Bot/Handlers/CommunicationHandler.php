@@ -63,7 +63,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateNickname;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateRole;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWebhook;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMessageBuilkDelete;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMessageBulkDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadDelete;
@@ -150,7 +150,7 @@ class CommunicationHandler{
         elseif($pk instanceof RequestUpdateWebhook) $this->handleUpdateWebhook($pk);
         elseif($pk instanceof RequestDeleteWebhook) $this->handleDeleteWebhook($pk);
         elseif($pk instanceof RequestLeaveServer) $this->handleLeaveServer($pk);
-        elseif($pk instanceof RequestMessageBuilkDelete) $this->handleBuilkDelete($pk);
+        elseif($pk instanceof RequestMessageBulkDelete) $this->handleBulkDelete($pk);
         elseif($pk instanceof RequestCrossPostMessage) $this->handleCrossPost($pk);
         elseif($pk instanceof RequestThreadCreate) $this->handleChannelStartThread($pk);
         elseif($pk instanceof RequestThreadUpdate) $this->handleThreadUpdate($pk);
@@ -526,9 +526,9 @@ class CommunicationHandler{
             });
         });
     }
-    private function handleBuilkDelete(RequestMessageBuilkDelete $pk): void{
+    private function handleBulkDelete(RequestMessageBulkDelete $pk): void{
         if($pk->getChannel()->getID() === null){
-            $this->resolveRequest($pk->getUID(), false, "Failed to builk delete.", ["Channel ID must be present!"]);
+            $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete.", ["Channel ID must be present!"]);
             return;
         }
         $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($pk){
@@ -536,32 +536,45 @@ class CommunicationHandler{
                 $discord->limitDelete($pk->getValue())->then(function () use ($pk){
                     $this->resolveRequest($pk->getUID());
                 }, function (\Throwable $e) use ($pk){
-                    $this->resolveRequest($pk->getUID(), false, "Failed to builk delete messages.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             });
         });
             }
     private function handleChannelStartThread(RequestThreadCreate $pk): void{
       
-        $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($pk){
-            $guild->channels->fetch($pk->getChannel()->getID())->then(function (DiscordChannel $discord) use ($pk){
-                $discord->startThread($pk->getChannel()->getName(), $pk->isPrivate(), $pk->getDuration())->then(function () use ($pk){
-                    $this->resolveRequest($pk->getUID());
+        $this->getServer($pk, $pk->getChannel()->getServerId(), function(DiscordGuild $guild) use($pk){
+            $c = $pk->getChannel();
+            /** @var DiscordChannel $dc */
+            $dc = $guild->channels->create([
+                'name' => $c->getName(),
+                'guild_id' => $guild->id
+            ]);
+
+            /** @var DiscordThread $thread */
+            $thread = $dc->threads->create([
+                'name' => $c->getName(),
+                'guild_id' => $guild->id
+                ]);
+
+            $c = $pk->getChannel();
+
+            $dc->startThread($pk->getChannel()->getName(), $pk->isPrivate(), $pk->getDuration())->then(function() use ($pk){
+            $this->resolveRequest($pk->getUID());
                 }, function (\Throwable $e) use ($pk){
-                    $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages.", [$e->getMessage(), $e->getTraceAsString()]);
+                 $this->resolveRequest($pk->getUID(), false, "Failed to create thread.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             });
-        });
     }
     private function handleThreadDelete(RequestThreadDelete $pk): void{
        
 
-        $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($pk){
+        $this->getServer($pk, $pk->getServerID(), function (DiscordGuild $guild) use ($pk){
             $guild->channels->fetch($pk->getChannelID())->then(function (DiscordChannel $discord) use ($pk){
             $discord->threads->delete($discord)->then(function() use($pk){
-                $this->resolveRequest($pk->getUID(), true, "Channel deleted.");
+                $this->resolveRequest($pk->getUID(), true, "Thread Channel deleted.");
             }, function(\Throwable $e) use($pk){
-                $this->resolveRequest($pk->getUID(), false, "Failed to delete channel.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->resolveRequest($pk->getUID(), false, "Failed to delete Thread channel.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to delete channel ({$pk->getUID()}) - {$e->getMessage()}");
             });
         });

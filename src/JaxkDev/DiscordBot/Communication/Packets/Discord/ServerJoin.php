@@ -16,12 +16,16 @@ use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
+use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class ServerJoin extends Packet{
 
     /** @var Server */
     private $server;
+
+    /** @var ThreadChannel[] */
+    private $threads;
 
     /** @var ServerChannel[] */
     private $channels;
@@ -36,13 +40,15 @@ class ServerJoin extends Packet{
      * ServerJoin constructor.
      *
      * @param Server          $server
+     * @param ThreadChannel[] $threads
      * @param ServerChannel[] $channels
      * @param Member[]        $members
      * @param Role[]          $roles
      */
-    public function __construct(Server $server, array $channels, array $members, array $roles){
+    public function __construct(Server $server, array $threads, array $channels, array $members, array $roles){
         parent::__construct();
         $this->server = $server;
+        $this->threads = $threads;
         $this->channels = $channels;
         $this->members = $members;
         $this->roles = $roles;
@@ -50,6 +56,11 @@ class ServerJoin extends Packet{
 
     public function getServer(): Server{
         return $this->server;
+    }
+
+    /** @return ThreadChannel */
+    public function getThreads(): array{
+        return $this->threads;
     }
 
     /** @return ServerChannel[] */
@@ -71,6 +82,7 @@ class ServerJoin extends Packet{
         return serialize([
             $this->UID,
             $this->server,
+            $this->threads,
             $this->roles,
             $this->channels,
             $this->members
@@ -81,6 +93,7 @@ class ServerJoin extends Packet{
         [
             $this->UID,
             $this->server,
+            $this->threads,
             $this->roles,
             $this->channels,
             $this->members

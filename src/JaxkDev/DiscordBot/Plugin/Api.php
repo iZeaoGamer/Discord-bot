@@ -45,7 +45,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateNickname;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateRole;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWebhook;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCrossPostMessage;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMessageBuilkDelete;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMessageBulkDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestJoinVoiceChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMoveVoiceChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadCreate;
@@ -578,7 +578,7 @@ class Api{
      * @param int $deleteLimit
      * @return PromiseInterface Resolves with no data.
      */
-    public function builkDelete(ServerChannel $channel, int $deleteLimit): PromiseInterface{
+    public function bulkDelete(ServerChannel $channel, int $deleteLimit): PromiseInterface{
         $channel_id = $channel->getID();
         if($channel_id === null){
             return rejectPromise(new ApiRejection("Channel ID cannot be null."));
@@ -587,7 +587,7 @@ class Api{
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
         }
 
-        $pk = new RequestMessageBuilkDelete($channel, $deleteLimit);
+        $pk = new RequestMessageBulkDelete($channel, $deleteLimit);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -669,6 +669,12 @@ class Api{
      * @return PromiseInterface Resolves with a Thread message creation.
      */
     public function startMessageThread(string $message_id, string $channel_id, string $name, int $duration): PromiseInterface{
+        if(!Utils::validDiscordSnowflake($message_id)){
+            return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
+        }
+        if(!Utils::validDiscordSnowflake($channel_id)){
+            return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
+        }
         $pk = new RequestThreadMessageCreate($message_id, $channel_id, $name, $duration);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -689,12 +695,18 @@ class Api{
     /** 
      * Deletes a thread.
      * 
-     * @param ThreadChannel $channel
+     * @param string $server_id
+     * @param string $channel_id
      * @return PromiseInterface Resolves with the deleted thread model.
      */
-    //todo see if we should be using class objectives when deleting a thread.
-    public function deleteThread(ThreadChannel $channel){
-        $pk = new RequestThreadDelete($channel);
+    public function deleteThread(string $server_id, string $channel_id){
+        if(!Utils::validDiscordSnowflake($server_id)){
+            return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
+        }
+        if(!Utils::validDiscordSnowflake($channel_id)){
+            return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
+        }
+        $pk = new RequestThreadDelete($channel_id, $server_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

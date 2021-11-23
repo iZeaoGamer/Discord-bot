@@ -15,7 +15,7 @@ namespace JaxkDev\DiscordBot\Models\Channels;
 class ThreadChannel{
 
 
-    /** @var string */
+    /** @var string|null */
     private $id;
 
     /** @var string */
@@ -56,10 +56,10 @@ class ThreadChannel{
      * @param int|null    $rate_limit
      * @param string|null $userID
      */
-    public function __construct(string $id, string $name, string $server_id, string $threadOwner, bool $private, int $duration,
-                                   ?int $rate_limit = null, ?string $userID = null){
+    public function __construct(string $name, string $server_id, string $threadOwner, bool $private, int $duration,
+                                   ?int $rate_limit = null, ?string $userID = null, ?string $id){
        // parent::__construct($name, $position, $server_id, null, $id);
-       $this->setID($id);
+      
        $this->setName($name);
        $this->setServerID($server_id);
         $this->setOwner($threadOwner);
@@ -68,20 +68,21 @@ class ThreadChannel{
         $this->setRateLimit($rate_limit);
     
         $this->setUserID($userID);
+        $this->setID($id);
     }
 
     /** 
-     * @param string $id
+     * @param string|null $id
      * @return void
      */
-    public function setID(string $id): void{
+    public function setID(?string $id): void{
         $this->id = $id;
     }
 
     /** 
-     * @return string
+     * @return string|null
      */
-    public function getID(): string{
+    public function getID(): ?string{
         return $this->id;
     }
     /** Sets a thread name.

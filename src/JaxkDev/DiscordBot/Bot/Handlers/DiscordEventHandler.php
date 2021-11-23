@@ -58,7 +58,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerLeave as ServerLeaveP
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerUpdate as ServerUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordReady as DiscordReadyPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\VoiceStateUpdate as VoiceStateUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBuilkDelete as MessageBuilkDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBulkDelete as MessageBulkDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
@@ -81,7 +81,7 @@ class DiscordEventHandler{
         $discord = $this->client->getDiscordClient();
         $discord->on("MESSAGE_CREATE", [$this, "onMessageCreate"]);
         $discord->on("MESSAGE_DELETE", [$this, "onMessageDelete"]);
-        $discord->on("MESSAGE_DELETE_BULK", [$this, "onMessageBuilkDelete"]);
+        $discord->on("MESSAGE_DELETE_BULK", [$this, "onMessageBulkDelete"]);
         $discord->on("MESSAGE_UPDATE", [$this, "onMessageUpdate"]);  //AKA Edit
 
         $discord->on("GUILD_MEMBER_ADD", [$this, "onMemberJoin"]);
@@ -255,6 +255,14 @@ array(5) {
                 $c = ModelConverter::genModelChannel($channel);
                 if($c !== null) $pk->addChannel($c);
             }
+            /** @var DiscordChannel $channel */
+            foreach($guild->channels as $channel){
+                /** @var DiscordThread $thread */
+                foreach($channel->threads as $thread){
+                    $c = ModelConverter::genModelThread($thread);
+                    $pk->addThread($c);
+                }
+            }
 
             /** @var DiscordRole $role */
             foreach($guild->roles as $role){
@@ -372,7 +380,7 @@ array(5) {
      * @param Discord                  $discord
      * @return void
      */
-    public function onMessageBuilkDelete($data, Discord $discord): void{
+    public function onMessageBulkDelete($data, Discord $discord): void{
         if($data instanceof DiscordMessage){
             $message = ModelConverter::genModelMessage($data);
         }else{
@@ -387,7 +395,7 @@ array(5) {
             ];
         }
     }
-            $packet = new MessageBuilkDeletePacket($message);
+            $packet = new MessageBulkDeletePacket($message);
             $this->client->getThread()->writeOutboundData($packet);
         }
 
@@ -435,6 +443,16 @@ array(5) {
             $c = ModelConverter::genModelChannel($channel);
             if($c !== null) $channels[] = $c;
         }
+        $threads = [];
+        /** @var DiscordChannel $channel */
+        foreach($guild->channels as $channel){
+        /** @var DiscordThread $thread */
+        foreach($channel->threads as $thread){
+            $c = ModelConverter::genModelThread($thread);
+            $threads[] = $c;
+            }
+        }
+
         $roles = [];
         /** @var DiscordRole $role */
         foreach($guild->roles as $role){
@@ -449,7 +467,7 @@ if($guild->region === null){
 return;
 }
 
-        $packet = new ServerJoinPacket(ModelConverter::genModelServer($guild), $channels, $members, $roles);
+        $packet = new ServerJoinPacket(ModelConverter::genModelServer($guild), $threads, $channels, $members, $roles);
         $this->client->getThread()->writeOutboundData($packet);
     }
 
@@ -493,7 +511,7 @@ return;
     }
     public function onThreadDelete(DiscordThread $channel, Discord $discord): void{
         $c = ModelConverter::genModelThread($channel);
-        $packet = new ThreadDeletePacket($c);
+        $packet = new ThreadDeletePacket($c->getID());
         $this->client->getThread()->writeOutboundData($packet);
     }
 

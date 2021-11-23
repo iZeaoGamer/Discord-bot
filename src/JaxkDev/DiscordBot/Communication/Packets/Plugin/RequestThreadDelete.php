@@ -12,37 +12,42 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestThreadDelete extends Packet{
 
-    /** @var ThreadChannel */
-    private $thread;
+    /** @var string */
+    private $channel_id;
 
-    public function __construct(ThreadChannel $thread){
+    /** @var string */
+    private $server_id;
+
+    public function __construct(string $channel_id, string $server_id){
         parent::__construct();
-        $this->thread = $thread;
+        $this->channel_id = $channel_id;
+        $this->server_id = $server_id;
     }
 
-    public function getChannel(): ThreadChannel{
-        return $this->thread;
-    }
     public function getChannelID(): string{
-        return $this->thread->getID();
+        return $this->channel_id;
+    }
+    public function getServerID(): string{
+        return $this->server_id;
     }
 
     public function serialize(): ?string{
         return serialize([
             $this->UID,
-            $this->thread
+            $this->channel_id,
+            $this->server_id
         ]);
     }
 
     public function unserialize($data): void{
         [
             $this->UID,
-            $this->thread
+            $this->channel_id,
+            $this->server_id
         ] = unserialize($data);
     }
 }

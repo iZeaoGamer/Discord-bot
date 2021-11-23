@@ -15,7 +15,7 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 
-class RequestMessageBuilkDelete extends Packet{
+class RequestMessageBulkDelete extends Packet{
 
     /** @var int */
     private $amount;

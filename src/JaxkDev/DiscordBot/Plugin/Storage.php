@@ -16,6 +16,7 @@ use JaxkDev\DiscordBot\Models\Ban;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
+use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\Invite;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Role;
@@ -37,6 +38,12 @@ class Storage{
 
     /** @var Array<string, string[]> */
     private static $channel_server_map = [];
+     /** @var Array<string, ThreadChannel> */
+     private static $thread_map = [];
+
+     /** @var Array<string, string[]> */
+     private static $thread_server_map = [];
+ 
 
     /** @var Array<string, string[]> */
     private static $channel_category_map = [];
@@ -148,8 +155,89 @@ class Storage{
         unset(self::$ban_server_map[$server_id]);
     }
 
-    public static function getChannel(string $id): ?ServerChannel{
-        return self::$channel_map[$id] ?? null;
+    /** @param string $id
+     * @return ThreadChannel[]
+     */
+    public static function getThread(string $id): ?ThreadChannel{
+        return self::$thread_map[$id] ?? null;
+    }
+
+    /**
+     * @param string $server_id
+     * @return ThreadChannel[]
+     */
+    public static function getThreadsByServer(string $server_id): array{
+        $channels = [];
+        foreach((self::$thread_server_map[$server_id] ?? []) as $id){
+            $c = self::getThread($id);
+            if($c !== null) $channels[] = $c;
+        }
+        return $channels;
+    }
+
+    /** 
+     * Checks if the given channel ID is a thread-type of channel.
+     * 
+     * @param string $id
+     * @return bool
+     */
+    public static function isThread(string $id): bool{
+        $channel = Storage::getChannel($id);
+        if($channel !== null){
+            return false;
+        }
+        $thread = Storage::getThread($id);
+        if($thread === null){
+            return false;
+        }
+        return true;
+    }
+    public static function addThread(ThreadChannel $channel): void{
+        if($channel->getId() === null){
+            throw new \AssertionError("Failed to add thread channel to storage, ID not found.");
+        }
+        if(isset(self::$thread_map[$channel->getId()])) return;
+            self::$thread_server_map[$channel->getServerId()][] = $channel->getId();
+        self::$thread_map[$channel->getId()] = $channel;
+    }
+
+    public static function updateThread(ThreadChannel $channel): void{
+        if($channel->getId() === null){
+            throw new \AssertionError("Failed to update thread channel in storage, ID not found.");
+        }
+        if(!isset(self::$thread_map[$channel->getId()])){
+            self::addThread($channel);
+        }else{
+            self::$thread_map[$channel->getId()] = $channel;
+        }
+    }
+
+    public static function removeThread(string $channel_id): void{
+        $channel = self::getThread($channel_id);
+        if($channel === null) return; //Already deleted or not added.
+        unset(self::$thread_map[$channel_id]);
+        $server_id = $channel->getServerId();
+       
+        //if($channel instanceof ServerChannel){
+            $i = array_search($channel_id, self::$thread_server_map[$server_id], true);
+            if($i === false || is_string($i)) return; //Not in this servers thread map.
+            array_splice(self::$thread_server_map[$server_id], $i, 1);
+      //  }
+    }
+
+
+    /** @param string $id
+     * @return ServerChannel|ThreadChannel|null
+     */
+    public static function getChannel(string $id): ?mixed
+   {
+        $serverChannel = self::$channel_map[$id] ?? null;
+        //if ($includeThreads) {
+            if (self::isThread($id)) {
+                return self::getThread($id);
+            }
+    //    }
+        return $serverChannel;
     }
 
     /**

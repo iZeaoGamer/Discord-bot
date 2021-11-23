@@ -20,16 +20,16 @@ class ThreadDelete extends Packet{
     /** @var string */
     private $member_id;
 
-    /** @var Thread */
+    /** @var string */
     private $thread;
 
-    public function __construct(Thread $voice_state){
+    public function __construct(string $channel_id){
         parent::__construct();
-        $this->thread = $voice_state;
+        $this->thread = $channel_id;
     }
 
 
-    public function getChannel(): Thread{
+    public function getChannelID(): string{
         return $this->thread;
     }
 

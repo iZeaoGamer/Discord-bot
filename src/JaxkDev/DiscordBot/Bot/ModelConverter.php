@@ -136,7 +136,7 @@ abstract class ModelConverter{
      * @param mixed $c
      * @return mixed
      */
-    static private function applyPermissionOverwrites(DiscordChannel $dc, $c): mixed{
+    static private function applyPermissionOverwrites(DiscordChannel $dc, mixed $c): mixed{
         /** @var DiscordOverwrite $overwrite */
         foreach($dc->overwrites as $overwrite){
             $allowed = new ChannelPermissions($overwrite->allow->bitwise);

@@ -24,7 +24,7 @@ use pocketmine\plugin\Plugin;
  * @see MessageUpdated
  * @see MessageSent
  */
-class MessageBuilkDeleted extends DiscordBotEvent{
+class MessageBulkDeleted extends DiscordBotEvent{
 
     /**
      * @var Message|array{"message_id": string, "channel_id": string, "server_id": string}

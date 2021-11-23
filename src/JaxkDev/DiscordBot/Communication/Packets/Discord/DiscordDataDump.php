@@ -19,12 +19,16 @@ use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
+use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class DiscordDataDump extends Packet{
 
     /** @var Server[] */
     private $servers = [];
+
+    /** @var ThreadChannel[] */
+    private $threads;
 
     /** @var ServerChannel[] */
     private $channels = [];
@@ -50,6 +54,7 @@ class DiscordDataDump extends Packet{
     /** @var int */
     private $timestamp;
 
+
     /**
      * @return Server[]
      */
@@ -59,6 +64,14 @@ class DiscordDataDump extends Packet{
 
     public function addServer(Server $server): void{
         $this->servers[] = $server;
+    }
+
+    /** @return ThreadChannel[] */
+    public function getThreads(): array{
+        return $this->threads;
+    }
+    public function addThread(ThreadChannel $channel): void{
+        $this->threads[] = $channel;
     }
 
     /**
