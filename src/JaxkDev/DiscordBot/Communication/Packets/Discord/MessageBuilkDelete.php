@@ -18,12 +18,12 @@ use JaxkDev\DiscordBot\Models\Messages\Message;
 class MessageBuilkDelete extends Packet{
 
     /**
-     * @var Message
+     * @var Message|array{"message_id": string, "channel_id": string, "server_id": string}
      */
     private $message;
 
     /**
-     * @param Message $message
+     * @param Message|array{"message_id": string, "channel_id": string, "server_id": string} $message
      */
     public function __construct(Message $message){
         parent::__construct();
@@ -31,9 +31,9 @@ class MessageBuilkDelete extends Packet{
     }
 
     /**
-     * @return Message
+     * @return Message|array{"message_id": string, "channel_id": string, "server_id": string}
      */
-    public function getMessage(): Message{
+    public function getMessage(){
         return $this->message;
     }
 

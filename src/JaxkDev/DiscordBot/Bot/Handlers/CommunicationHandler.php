@@ -528,7 +528,7 @@ class CommunicationHandler{
     }
     private function handleBuilkDelete(RequestMessageBuilkDelete $pk): void{
         if($pk->getChannel()->getID() === null){
-            $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete.", ["Channel ID must be present!"]);
+            $this->resolveRequest($pk->getUID(), false, "Failed to builk delete.", ["Channel ID must be present!"]);
             return;
         }
         $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($pk){
@@ -536,7 +536,7 @@ class CommunicationHandler{
                 $discord->limitDelete($pk->getValue())->then(function () use ($pk){
                     $this->resolveRequest($pk->getUID());
                 }, function (\Throwable $e) use ($pk){
-                    $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages..", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->resolveRequest($pk->getUID(), false, "Failed to builk delete messages..", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             });
         });
