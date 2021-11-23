@@ -536,7 +536,7 @@ class CommunicationHandler{
                 $discord->limitDelete($pk->getValue())->then(function () use ($pk){
                     $this->resolveRequest($pk->getUID());
                 }, function (\Throwable $e) use ($pk){
-                    $this->resolveRequest($pk->getUID(), false, "Failed to builk delete messages..", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->resolveRequest($pk->getUID(), false, "Failed to builk delete messages.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             });
         });
@@ -548,7 +548,7 @@ class CommunicationHandler{
                 $discord->startThread($pk->getChannel()->getName(), $pk->isPrivate(), $pk->getDuration())->then(function () use ($pk){
                     $this->resolveRequest($pk->getUID());
                 }, function (\Throwable $e) use ($pk){
-                    $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages..", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             });
         });

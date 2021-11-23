@@ -373,14 +373,18 @@ array(5) {
      * @return void
      */
     public function onMessageBuilkDelete($data, Discord $discord): void{
-          if($data instanceof DiscordMessage){
+        if($data instanceof DiscordMessage){
             $message = ModelConverter::genModelMessage($data);
-          }else{
-              $message = [
-                  "message_id" => $data->id,
-                  "channel_id" => $data->channel_id,
-                  "server_id" => $data->server_id];
-              } 
+        }else{
+          
+            foreach($data->ids as $id){  
+          $message = [
+                "message_id" => $id,
+                "channel_id" => $data->channel_id,
+                "server_id" => $data->guild_id
+            ];
+        }
+        }
             $packet = new MessageBuilkDeletePacket($message);
             $this->client->getThread()->writeOutboundData($packet);
         }
