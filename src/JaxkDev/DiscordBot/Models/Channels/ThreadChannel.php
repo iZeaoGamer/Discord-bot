@@ -41,19 +41,22 @@ class ThreadChannel extends ServerChannel{
      * @param string      $name
      * @param int      $position
      * @param string      $server_id
+     * @param string $threadOwner
      * @param bool      $private
+     * @param int $duration
      * @param int|null    $rate_limit
-     * @param string|null $threadOwner
-     * @param string|null $user_id
+  
+     * @param string|null $userID
      * @param string|null $id
      */
-    public function __construct(string $name, int $position, string $server_id, bool $private, int $duration,
-                                   ?int $rate_limit = null, ?string $threadOwner = null, ?string $userID = null, ?string $id = null){
+    public function __construct(string $name, int $position, string $server_id, string $threadOwner, bool $private, int $duration,
+                                   ?int $rate_limit = null, ?string $userID = null, ?string $id = null){
         parent::__construct($name, $position, $server_id, null, $id);
+        $this->setOwner($threadOwner);
         $this->setPrivate($private);
         $this->setDuration($duration);
         $this->setRateLimit($rate_limit);
-        $this->setOwner($threadOwner);
+    
         $this->setUserID($userID);
     }
     /** Creates a boolean for privating a thread. 
@@ -99,19 +102,19 @@ class ThreadChannel extends ServerChannel{
     }
 
     /** Sets a thread owner.
-     * @param string|null $threadOwner
+     * @param string $threadOwner
      * @return void
      */
-    public function setOwner(?string $threadOwner): void{
+    public function setOwner(string $threadOwner): void{
         $this->threadOwner = $threadOwner;
     }
 
-    /** @return string|null */
-    public function getOwner(): ?string{
+    /** @return string */
+    public function getOwner(): string{
         return $this->threadOwner;
     }
     /**
-     * @param string|null $parent_id
+     * @param string|null $user_id
      * @return void
      * */
     public function setUserID(?string $user_id): void{

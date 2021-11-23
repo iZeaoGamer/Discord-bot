@@ -15,23 +15,23 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Messages\Message;
 
-class MessageBulkDelete extends Packet{
+class MessageBuilkDelete extends Packet{
 
     /**
-     * @var Message|array{"message_id": string, "channel_id": string, "server_id": string}
+     * @var Message
      */
     private $message;
 
     /**
-     * @param Message|array{"message_id": string, "channel_id": string, "server_id": string} $message
+     * @param Message
      */
-    public function __construct($message){
+    public function __construct(Message $message){
         parent::__construct();
         $this->message = $message;
     }
 
     /**
-     * @return Message|array{"message_id": string, "channel_id": string, "server_id": string}
+     * @return Message
      */
     public function getMessage(){
         return $this->message;

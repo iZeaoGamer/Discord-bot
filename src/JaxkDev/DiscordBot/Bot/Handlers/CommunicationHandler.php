@@ -63,7 +63,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateNickname;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateRole;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWebhook;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMessageBulkDelete;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMessageBuilkDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadDelete;
@@ -526,7 +526,7 @@ class CommunicationHandler{
             });
         });
     }
-    private function handleBulkDelete(RequestMessageBulkDelete $pk): void{
+    private function handleBulkDelete(RequestMessageBuilkDelete $pk): void{
         if($pk->getChannel()->getID() === null){
             $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete.", ["Channel ID must be present!"]);
             return;
@@ -541,7 +541,7 @@ class CommunicationHandler{
             });
         });
             }
-    private function handleChannelStartThread(RequestThreadCreate $pk){
+    private function handleChannelStartThread(RequestThreadCreate $pk): void{
         if($pk->getChannel()->getID() === null){
             $this->resolveRequest($pk->getUID(), false, "Failed to start thread.", ["Channel ID must be present!"]);
             return;
@@ -556,14 +556,14 @@ class CommunicationHandler{
             });
         });
     }
-    private function handleThreadDelete(RequestThreadDelete $pk){
+    private function handleThreadDelete(RequestThreadDelete $pk): void{
         if($pk->getChannelID() === null){
             $this->resolveRequest($pk->getUID(), false, "Failed to join thread.", ["Channel ID must be present!"]);
             return;
         }
 
         $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($pk){
-            $guild->channels->fetch($pk->getChannel()->getID())->then(function (DiscordChannel $discord) use ($pk){
+            $guild->channels->fetch($pk->getChannelID())->then(function (DiscordChannel $discord) use ($pk){
             $discord->threads->delete($discord)->then(function() use($pk){
                 $this->resolveRequest($pk->getUID(), true, "Channel deleted.");
             }, function(\Throwable $e) use($pk){
@@ -603,15 +603,7 @@ class CommunicationHandler{
 });
             });
     }
-    private function handleMessageStartThread(RequestThreadMessageCreate $pk){
-        if($pk->getChannelID() === null){
-            $this->resolveRequest($pk->getUID(), false, "Failed to start message thread.", ["Channel ID must be present."]);
-            return;
-        }
-        if($pk->getMessageID() === null){
-            $this->resolveRequest($pk->getUID(), false, "Failed to start message thread.", ["Message ID must be present."]);
-            return;
-        }
+    private function handleMessageStartThread(RequestThreadMessageCreate $pk): void{
         $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), function (DiscordMessage $message) use ($pk){
        //     $guild->channels->fetch($pk->getChannel()->getID())->then(function (DiscordChannel $discord) use ($pk){
                 $message->startThread($pk->getName(), $pk->getDuration())->then(function () use ($pk){
@@ -622,7 +614,7 @@ class CommunicationHandler{
             });
       //  });
     }
-    private function handleCrossPost(RequestCrossPostMessage $pk){
+    private function handleCrossPost(RequestCrossPostMessage $pk): void{
         if($pk->getChannelID() === null){
             $this->resolveRequest($pk->getUID(), false, "Failed to create cross post.", ["Channel ID must be present!"]);
             return;
@@ -763,7 +755,7 @@ class CommunicationHandler{
             $this->resolveRequest($pk->getUID(), false, $e->getMessage());
         }
     }
-    public function handleVoiceChannelJoin(RequestJoinVoiceChannel $pk){
+    public function handleVoiceChannelJoin(RequestJoinVoiceChannel $pk): void{
         $channel = $pk->getChannel();
         $voiceChannel = new DiscordChannel($this->client->getDiscordClient(), [
             'name' => $channel->getName(),
@@ -776,14 +768,14 @@ class CommunicationHandler{
             $this->resolveRequest($pk->getUID(), false, $e->getMessage());
         }
     }
-    public function handleVoiceChannelMove(RequestMoveVoiceChannel $pk){
+    public function handleVoiceChannelMove(RequestMoveVoiceChannel $pk): void{
         $channel = $pk->getChannel();
         $voiceChannel = new DiscordChannel($this->client->getDiscordClient(), [
             'name' => $channel->getName(),
             'id' => $channel->getID()
         ]);
         try {
-            $voiceClient = $this->client->getDiscordClient()->getVoiceChat();
+            $voiceClient = $this->client->getDiscordClient()->getVoiceClient($channel->getServerID());
             if($voiceClient === null){
                 $this->resolveRequest($pk->getUID(), false, "Bot isn't in a voice channel.");
                 return;
@@ -1031,8 +1023,8 @@ class CommunicationHandler{
             });
         });
     }
-    private function getThread(Packet $pk, string $channel_id, string $thread_id, callable $cb){
-        $this->getChannel($pk, $channel_id, function (DiscordChannel $channel) use ($pk, $channel_id, $thread_id, $cb){
+    private function getThread(Packet $pk, string $channel_id, string $thread_id, callable $cb): void{
+        $this->getChannel($pk, $channel_id, function (DiscordChannel $channel) use ($pk, $thread_id, $cb){
             $channel->threads->fetch($thread_id)->then(function (DiscordThread $thread) use ($cb){
                 $cb($thread);
             }, function (\Throwable $e) use ($pk){

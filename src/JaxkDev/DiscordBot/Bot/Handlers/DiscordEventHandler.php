@@ -57,7 +57,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerLeave as ServerLeaveP
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerUpdate as ServerUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordReady as DiscordReadyPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\VoiceStateUpdate as VoiceStateUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBulkDelete as MessageBulkDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBuilkDelete as MessageBuilkDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
@@ -321,9 +321,9 @@ array(5) {
 
     public function onPresenceUpdate(DiscordPresenceUpdate $presenceUpdate): void{
         $clientStatus = [
-            "desktop" => $presenceUpdate->client_status->desktop??null,
-            "mobile" => $presenceUpdate->client_status->mobile??null,
-            "web" => $presenceUpdate->client_status->web??null
+            "desktop_status" => $presenceUpdate->client_status->desktop??null,
+            "mobile_status" => $presenceUpdate->client_status->mobile??null,
+            "web_status" => $presenceUpdate->client_status->web??null
         ];
         $activities = [];
         foreach($presenceUpdate->activities as $activity){
@@ -365,11 +365,11 @@ array(5) {
         $packet = new MessageDeletePacket($message);
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onMessageBulkDelete(DiscordMessage $message, Discord $discord){
+    public function onMessageBuilkDelete(DiscordMessage $message, Discord $discord): void{
         //if($data instanceof DiscordMessage){
             if(!$this->checkMessage($message)) return;
             $message = ModelConverter::genModelMessage($message); 
-            $packet = new MessageBulkDeletePacket($message);
+            $packet = new MessageBuilkDeletePacket($message);
             $this->client->getThread()->writeOutboundData($packet);
         }
 
@@ -463,7 +463,7 @@ return;
         $packet = new ChannelDeletePacket($channel->id);
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onThreadCreate(DiscordChannel $channel, Discord $discord){
+    public function onThreadCreate(DiscordChannel $channel, Discord $discord): void{
         $c = ModelConverter::genModelChannel($channel);
         if($c instanceof ThreadChannel === false){
             return;
@@ -471,7 +471,7 @@ return;
         $packet = new ThreadCreatePacket($c);
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onThreadUpdate(DiscordChannel $channel, Discord $discord){
+    public function onThreadUpdate(DiscordChannel $channel, Discord $discord): void{
         $c = ModelConverter::genModelChannel($channel);
         if($c instanceof ThreadChannel === false){
             return;
@@ -479,7 +479,7 @@ return;
         $packet = new ThreadUpdatePacket($c);
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onThreadDelete(DiscordChannel $channel, Discord $discord){
+    public function onThreadDelete(DiscordChannel $channel, Discord $discord): void{
         $c = ModelConverter::genModelChannel($channel);
         if($c instanceof ThreadChannel === false){
             return;

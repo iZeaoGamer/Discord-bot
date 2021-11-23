@@ -45,7 +45,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateNickname;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateRole;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWebhook;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCrossPostMessage;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMessageBulkDelete;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMessageBuilkDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestJoinVoiceChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMoveVoiceChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadCreate;
@@ -578,16 +578,16 @@ class Api{
      * @param int $deleteLimit
      * @return PromiseInterface Resolves with no data.
      */
-    public function bulkDelete(ServerChannel $channel, int $deleteLimit): PromiseInterface{
+    public function builkDelete(ServerChannel $channel, int $deleteLimit): PromiseInterface{
         $channel_id = $channel->getID();
         if($channel_id === null){
-            return rejectPromise(new APIRejection("Channel ID cannot be null."));
+            return rejectPromise(new ApiRejection("Channel ID cannot be null."));
         }
         if(!Utils::validDiscordSnowflake($channel_id)){
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
         }
-        
-        $pk = new RequestMessageBulkDelete($channel, $deleteLimit);
+
+        $pk = new RequestMessageBuilkDelete($channel, $deleteLimit);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -630,7 +630,7 @@ class Api{
     public function joinVoiceChannel(VoiceChannel $channel, bool $isDeafened, bool $isMuted): PromiseInterface{
         $pk = new RequestJoinVoiceChannel($channel, $isDeafened, $isMuted);
         $this->plugin->writeOutboundData($pk);
-        return APIResolver::create($pk->getUID());
+        return ApiResolver::create($pk->getUID());
     }
 
     /**
@@ -642,7 +642,7 @@ class Api{
     public function moveVoiceChannel(VoiceChannel $channel): PromiseInterface{
         $pk = new RequestMoveVoiceChannel($channel);
         $this->plugin->writeOutboundData($pk);
-        return APIResolver::create($pk->getUID());
+        return ApiResolver::create($pk->getUID());
     }
     //todo implement some advanced voice channel methods (e.g, moveMember, removeMember, addMember, etc)
 
@@ -656,7 +656,7 @@ class Api{
     public function startChannelThread(ThreadChannel $channel): PromiseInterface{
         $pk = new RequestThreadCreate($channel);
         $this->plugin->writeOutboundData($pk);
-        return APIResolver::create($pk->getUID());
+        return ApiResolver::create($pk->getUID());
     }
 
     /**
@@ -671,7 +671,7 @@ class Api{
     public function startMessageThread(string $message_id, string $channel_id, string $name, int $duration): PromiseInterface{
         $pk = new RequestThreadMessageCreate($message_id, $channel_id, $name, $duration);
         $this->plugin->writeOutboundData($pk);
-        return APIResolver::create($pk->getUID());
+        return ApiResolver::create($pk->getUID());
     }
 
     /** 
@@ -683,7 +683,7 @@ class Api{
     public function updateThread(ThreadChannel $channel){
         $pk = new RequestThreadUpdate($channel);
         $this->plugin->writeOutboundData($pk);
-        return APIResolver::create($pk->getUID());
+        return ApiResolver::create($pk->getUID());
     }
 
     /** 
@@ -696,7 +696,7 @@ class Api{
     public function deleteThread(ThreadChannel $channel){
         $pk = new RequestThreadDelete($channel);
         $this->plugin->writeOutboundData($pk);
-        return APIResolver::create($pk->getUID());
+        return ApiResolver::create($pk->getUID());
     }
 
     /**
