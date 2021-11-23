@@ -376,10 +376,7 @@ array(5) {
         if($data instanceof DiscordMessage){
             $message = ModelConverter::genModelMessage($data);
         }else{
-            if(count($data->ids) === 0){
-                return;
-            }
-            foreach($data->ids as $id){  
+             foreach($data->ids as $id){
           $message = [
               "message_id" => $id,
               "channel_id" => $data->channel_id,
