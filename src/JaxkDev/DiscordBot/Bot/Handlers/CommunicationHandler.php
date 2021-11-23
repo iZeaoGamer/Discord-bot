@@ -542,10 +542,7 @@ class CommunicationHandler{
         });
             }
     private function handleChannelStartThread(RequestThreadCreate $pk): void{
-        if($pk->getChannel()->getID() === null){
-            $this->resolveRequest($pk->getUID(), false, "Failed to start thread.", ["Channel ID must be present!"]);
-            return;
-        }
+      
         $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($pk){
             $guild->channels->fetch($pk->getChannel()->getID())->then(function (DiscordChannel $discord) use ($pk){
                 $discord->startThread($pk->getChannel()->getName(), $pk->isPrivate(), $pk->getDuration())->then(function () use ($pk){
@@ -557,10 +554,7 @@ class CommunicationHandler{
         });
     }
     private function handleThreadDelete(RequestThreadDelete $pk): void{
-        if($pk->getChannelID() === null){
-            $this->resolveRequest($pk->getUID(), false, "Failed to join thread.", ["Channel ID must be present!"]);
-            return;
-        }
+       
 
         $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($pk){
             $guild->channels->fetch($pk->getChannelID())->then(function (DiscordChannel $discord) use ($pk){
@@ -574,10 +568,7 @@ class CommunicationHandler{
     });
     }
     private function handleThreadUpdate(RequestThreadUpdate $pk): void{
-        if($pk->getChannel()->getID() === null){
-            $this->resolveRequest($pk->getUID(), false, "Failed to start thread.", ["Channel ID must be present!"]);
-            return;
-        }
+       
    
                 $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($pk){
                     $guild->channels->fetch($pk->getChannel()->getID())->then(function (DiscordChannel $discord) use ($pk){
