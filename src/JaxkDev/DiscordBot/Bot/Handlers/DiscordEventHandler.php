@@ -466,25 +466,16 @@ return;
     }
     public function onThreadCreate(DiscordThread $channel, Discord $discord): void{
         $c = ModelConverter::genModelThread($channel);
-        if($c instanceof ThreadChannel === false){
-            return;
-        }
         $packet = new ThreadCreatePacket($c);
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onThreadUpdate(DiscordThread $channel, Discord $discord): void{
         $c = ModelConverter::genModelThread($channel);
-        if($c instanceof ThreadChannel === false){
-            return;
-        }
         $packet = new ThreadUpdatePacket($c);
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onThreadDelete(DiscordThread $channel, Discord $discord): void{
         $c = ModelConverter::genModelThread($channel);
-        if($c instanceof ThreadChannel === false){
-            return;
-        }
         $packet = new ThreadDeletePacket($c);
         $this->client->getThread()->writeOutboundData($packet);
     }
