@@ -12,8 +12,17 @@
 
 namespace JaxkDev\DiscordBot\Models\Channels;
 
-class ThreadChannel extends ServerChannel{
+class ThreadChannel{
 
+
+    /** @var string */
+    private $id;
+
+    /** @var string */
+    private $name;
+
+    /** @var string */
+    private $server_id;
 
     /** @var int */
     private $duration;
@@ -38,20 +47,21 @@ class ThreadChannel extends ServerChannel{
     /**
      * TextChannel constructor.
      *
+     * @param string      $id
      * @param string      $name
-     * @param int      $position
      * @param string      $server_id
-     * @param string $threadOwner
-     * @param bool      $private
-     * @param int $duration
+     * @param string      $threadOwner
+     * @param bool        $private
+     * @param int         $duration
      * @param int|null    $rate_limit
-  
      * @param string|null $userID
-     * @param string|null $id
      */
-    public function __construct(string $name, int $position, string $server_id, string $threadOwner, bool $private, int $duration,
-                                   ?int $rate_limit = null, ?string $userID = null, ?string $id = null){
-        parent::__construct($name, $position, $server_id, null, $id);
+    public function __construct(string $id, string $name, string $server_id, string $threadOwner, bool $private, int $duration,
+                                   ?int $rate_limit = null, ?string $userID = null){
+       // parent::__construct($name, $position, $server_id, null, $id);
+       $this->setID($id);
+       $this->setName($name);
+       $this->setServerID($server_id);
         $this->setOwner($threadOwner);
         $this->setPrivate($private);
         $this->setDuration($duration);
@@ -59,6 +69,52 @@ class ThreadChannel extends ServerChannel{
     
         $this->setUserID($userID);
     }
+
+    /** 
+     * @param string $id
+     * @return void
+     */
+    public function setID(string $id): void{
+        $this->id = $id;
+    }
+
+    /** 
+     * @return string
+     */
+    public function getID(): string{
+        return $this->id;
+    }
+    /** Sets a thread name.
+     * 
+     * @param string $name
+     * @return void
+     */
+    public function setName(string $name): void{
+        $this->name = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string{
+        return $this->name;
+    }
+
+    /** 
+     * @param string $server_id
+     * @return void
+     */
+    public function setServerID(string $server_id): void{
+        $this->server_id = $server_id;
+    }
+
+    /** 
+     * @return string
+     */
+    public function getServerID(): string{
+        return $this->server_id;
+    }
+
     /** Creates a boolean for privating a thread. 
      * 
      * @param bool $private
@@ -123,40 +179,5 @@ class ThreadChannel extends ServerChannel{
     /** @return string|null */
     public function getUserID(): ?string{
         return $this->user_id;
-    }
-
-
-    //----- Serialization -----//
-
-    public function serialize(): ?string{
-        return serialize([
-            $this->id,
-            $this->name,
-            $this->position,
-            $this->member_permissions,
-            $this->role_permissions,
-            $this->server_id,
-            $this->private,
-            $this->duration,
-            $this->rate_limit,
-            $this->threadOwner,
-            $this->user_id
-        ]);
-    }
-
-    public function unserialize($data): void{
-        [
-            $this->id,
-            $this->name,
-            $this->position,
-            $this->member_permissions,
-            $this->role_permissions,
-            $this->server_id,
-            $this->private,
-            $this->duration,
-            $this->rate_limit,
-            $this->threadOwner,
-            $this->user_id
-        ] = unserialize($data);
     }
 }

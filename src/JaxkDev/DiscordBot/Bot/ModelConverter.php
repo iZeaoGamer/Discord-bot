@@ -16,6 +16,7 @@ use AssertionError;
 use Carbon\Carbon;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
+use Discord\Parts\Thread\Thread as DiscordThread;
 use Discord\Parts\Channel\Overwrite as DiscordOverwrite;
 use Discord\Parts\Channel\Webhook as DiscordWebhook;
 use Discord\Parts\Embed\Author as DiscordAuthor;
@@ -53,6 +54,7 @@ use JaxkDev\DiscordBot\Models\Messages\Reply as ReplyMessage;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Models\Permissions\ChannelPermissions;
 use JaxkDev\DiscordBot\Models\Permissions\RolePermissions;
+use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
@@ -132,8 +134,7 @@ abstract class ModelConverter{
     /**
      * @template T of ServerChannel
      * @param DiscordChannel $dc
-     * @param T $c
-     * @return T
+     * @param $c
      */
     static private function applyPermissionOverwrites(DiscordChannel $dc, $c){
         /** @var DiscordOverwrite $overwrite */
@@ -170,6 +171,9 @@ abstract class ModelConverter{
             default:
                 return null;
         }
+    }
+    static public function genModelThread(DiscordThread $thread): ThreadChannel{
+        return new ThreadChannel($thread->id, $thread->name, $thread->guild_id, $thread->owner_id, $thread->locked, $thread->auto_archive_duration, $thread->rate_limit_per_user, $thread->archiver_id);
     }
 
     static public function genModelCategoryChannel(DiscordChannel $discordChannel): CategoryChannel{

@@ -15,6 +15,7 @@ namespace JaxkDev\DiscordBot\Bot\Handlers;
 use Discord\Discord;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
+use Discord\Parts\Thread\Thread as DiscordThread;
 use Discord\Parts\Guild\Ban as DiscordBan;
 use Discord\Parts\Guild\Guild as DiscordGuild;
 use Discord\Parts\Guild\Invite as DiscordInvite;
@@ -463,24 +464,24 @@ return;
         $packet = new ChannelDeletePacket($channel->id);
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onThreadCreate(DiscordChannel $channel, Discord $discord): void{
-        $c = ModelConverter::genModelChannel($channel);
+    public function onThreadCreate(DiscordThread $channel, Discord $discord): void{
+        $c = ModelConverter::genModelThread($channel);
         if($c instanceof ThreadChannel === false){
             return;
         }
         $packet = new ThreadCreatePacket($c);
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onThreadUpdate(DiscordChannel $channel, Discord $discord): void{
-        $c = ModelConverter::genModelChannel($channel);
+    public function onThreadUpdate(DiscordThread $channel, Discord $discord): void{
+        $c = ModelConverter::genModelThread($channel);
         if($c instanceof ThreadChannel === false){
             return;
         }
         $packet = new ThreadUpdatePacket($c);
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onThreadDelete(DiscordChannel $channel, Discord $discord): void{
-        $c = ModelConverter::genModelChannel($channel);
+    public function onThreadDelete(DiscordThread $channel, Discord $discord): void{
+        $c = ModelConverter::genModelThread($channel);
         if($c instanceof ThreadChannel === false){
             return;
         }
