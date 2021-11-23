@@ -881,7 +881,11 @@ class CommunicationHandler{
                 $dMessage->embeds->clear();
                 $dMessage->addEmbed($de);
             }
-            $dMessage->channel->messages->save($dMessage)->done(function(DiscordMessage $dMessage) use($pk){
+            $channel = $dMessage->channel;
+            if($channel === null){
+                return;
+            }
+            $channel->messages->save($dMessage)->done(function(DiscordMessage $dMessage) use($pk){
                 $this->resolveRequest($pk->getUID(), true, "Message edited.", [ModelConverter::genModelMessage($dMessage)]);
             }, function(\Throwable $e) use ($pk){
                 $this->resolveRequest($pk->getUID(), false, "Failed to edit message.", [$e->getMessage(), $e->getTraceAsString()]);
