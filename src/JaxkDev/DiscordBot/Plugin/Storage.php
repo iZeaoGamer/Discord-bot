@@ -214,7 +214,7 @@ class Storage{
 
     public static function removeThread(string $channel_id): void{
         $channel = self::getThread($channel_id);
-        if($channel === null) return; //Already deleted or not added.
+        if(!$channel instanceof ThreadChannel) return; //Already deleted or not added.
         unset(self::$thread_map[$channel_id]);
         $server_id = $channel->getServerId();
        
@@ -227,18 +227,12 @@ class Storage{
 
 
     /** @param string $id
-     * @return ServerChannel|ThreadChannel|null
+     * @return ServerChannel|null
      */
-    public static function getChannel(string $id, bool $includeThreads = true): mixed
+    public static function getChannel(string $id, bool $includeThreads = true): ?ServerChannel
    {
-        $serverChannel = self::$channel_map[$id] ?? null;
-        if($includeThreads){
-        //if ($includeThreads) {
-            if (self::isThread($id)) {
-                return self::getThread($id);
-            }
-        }
-        return $serverChannel;
+        return self::$channel_map[$id] ?? null;
+       
     }
 
     /**
