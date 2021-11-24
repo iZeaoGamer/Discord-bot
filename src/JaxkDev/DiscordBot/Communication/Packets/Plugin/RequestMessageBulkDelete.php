@@ -34,7 +34,7 @@ class RequestMessageBulkDelete extends Packet{
     }
 
     public function getChannelID(): string{
-        return $this->channel;
+        return $this->channelID;
     }
 
     public function serialize(): ?string{
