@@ -386,9 +386,9 @@ array(5) {
             $packet = new MessageBulkDeletePacket($message);
             $this->client->getThread()->writeOutboundData($packet);
         }else{
-            $id = (string)$data["id"];
-            $channel_id = (string)$data["channel_id"];
-            $server_id = (string)$data["guild_id"];
+            $id = (string)$data[0];
+            $channel_id = (string)$data[1];
+            $server_id = (string)$data[2];
             $message = [
                 "message_id" => $id,
                 "channel_id" => $channel_id,
