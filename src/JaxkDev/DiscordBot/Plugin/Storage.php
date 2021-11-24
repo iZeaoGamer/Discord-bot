@@ -182,7 +182,7 @@ class Storage{
      * @return bool
      */
     public static function isThread(string $id): bool{
-        $channel = Storage::getChannel($id);
+        $channel = Storage::getChannel($id, false);
         if($channel instanceof ServerChannel){
             return false;
         }
@@ -229,12 +229,14 @@ class Storage{
     /** @param string $id
      * @return ServerChannel|ThreadChannel|null
      */
-    public static function getChannel(string $id): mixed
+    public static function getChannel(string $id, bool $includeThreads = true): mixed
    {
         $serverChannel = self::$channel_map[$id] ?? null;
+        if($includeThreads){
         //if ($includeThreads) {
             if (self::isThread($id)) {
                 return self::getThread($id);
+            }
             }
     //    }
         return $serverChannel;
