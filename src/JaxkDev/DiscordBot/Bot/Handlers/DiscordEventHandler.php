@@ -392,7 +392,7 @@ array(5) {
               "channel_id" => $data->channel_id,
               "server_id" => $data->guild_id
             ];
-            $packet = new MessageBulkDeletePacket($message);
+            $packet = new MessageBulkDeletePacket((object)$message);
             $this->client->getThread()->writeOutboundData($packet);
             }
         }
