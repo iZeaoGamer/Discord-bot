@@ -157,7 +157,7 @@ class DiscordDataDump extends Packet{
     }
 
     public function getSize(): int{
-        return sizeof($this->threads)+sizeof($this->servers)+sizeof($this->channels)+sizeof($this->roles)+sizeof($this->members)
+        return sizeof($this->servers)+sizeof($this->threads)+sizeof($this->channels)+sizeof($this->roles)+sizeof($this->members)
             +sizeof($this->users)+sizeof($this->bans)+sizeof($this->invites);
     }
 
