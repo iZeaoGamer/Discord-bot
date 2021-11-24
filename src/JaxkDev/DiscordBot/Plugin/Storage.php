@@ -183,11 +183,11 @@ class Storage{
      */
     public static function isThread(string $id): bool{
         $channel = Storage::getChannel($id);
-        if($channel !== null){
+        if($channel instanceof ServerChannel){
             return false;
         }
         $thread = Storage::getThread($id);
-        if($thread === null){
+        if(!$thread instanceof ThreadChannel){
             return false;
         }
         return true;

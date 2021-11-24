@@ -179,7 +179,7 @@ class BotCommunicationHandler{
             Storage::unsetMembersVoiceChannel($packet->getMemberId());
         }else{
             $channel = Storage::getChannel($state->getChannelId());
-            if($channel === null){
+            if(!$channel instanceof ServerChannel){
                 throw new \AssertionError("Channel '{$state->getChannelId()}' not found in storage.");
             }
             if(!$channel instanceof VoiceChannel){
@@ -322,7 +322,7 @@ class BotCommunicationHandler{
 
     private function handleChannelPinsUpdate(ChannelPinsUpdatePacket $packet): void{
         $c = Storage::getChannel($packet->getChannelId());
-        if($c === null or !$c instanceof TextChannel){
+        if(!$c instanceof ServerChannel or !$c instanceof TextChannel){
             throw new \AssertionError("Text Channel '{$packet->getChannelId()}' not found in storage.");
         }
         (new ChannelPinsUpdatedEvent($this->plugin, $c))->call();
