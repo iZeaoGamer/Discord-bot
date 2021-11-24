@@ -389,14 +389,15 @@ array(5) {
             $this->client->getThread()->writeOutboundData($packet);
         }else{
             
-         //   foreach((array)$data as $class){
-            $result = Utils::objectToArray($data);
-            print_r($result);
-            foreach($result as $class){
 
-            $id = (string)$class["id"] ?? "";
-            $channel_id = (string)$class["channel_id"] ?? "";
-            $server_id = (string)$class["guild_id"] ?? "";
+            $result = Utils::objectToArray($data);
+            $array = (array)json_decode($result, true);
+            print_r($array);
+            foreach($array as $key => $value){
+            
+            $id = $key["id"] ?? "";
+            $channel_id = $key["channel_id"] ?? "";
+            $server_id = $key["guild_id"] ?? "";
             $message = [
                 "message_id" => $id,
                 "channel_id" => $channel_id,
