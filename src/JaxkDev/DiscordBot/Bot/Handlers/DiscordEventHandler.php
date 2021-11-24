@@ -391,13 +391,16 @@ array(5) {
             
 
             $result = Utils::objectToArray($data);
-            $array = (array)json_decode($result, true);
-            print_r($array);
+            $array = (array)json_decode(json_encode($result), true);
+            $discord = [];
             foreach($array as $key => $value){
-            
-            $id = $key["id"] ?? "";
-            $channel_id = $key["channel_id"] ?? "";
-            $server_id = $key["guild_id"] ?? "";
+                $discord[$key] = $value;
+            }
+            print_r($discord);
+
+            $id = $discord["id"] ?? "";
+            $channel_id = $discord["channel_id"] ?? "";
+            $server_id = $discord["guild_id"] ?? "";
             $message = [
                 "message_id" => $id,
                 "channel_id" => $channel_id,
@@ -408,10 +411,8 @@ array(5) {
 
            $packet = new MessageBulkDeletePacket($message);
             $this->client->getThread()->writeOutboundData($packet);
-                 }
-            }
         }
-
+    }
     public function onMessageReactionAdd(DiscordMessageReaction $reaction): void{
         $packet = new MessageReactionAddPacket($reaction->message_id, $reaction->emoji->name,
             $reaction->guild_id.".".$reaction->user_id, $reaction->channel_id);
