@@ -386,15 +386,20 @@ array(5) {
             $packet = new MessageBulkDeletePacket($message);
             $this->client->getThread()->writeOutboundData($packet);
         }else{
-            // foreach($data->ids as $id){
-          /*$message = [
-              "message_id" => $id,
-              "channel_id" => $data->channel_id,
-              "server_id" => $data->guild_id
-            ];*/
+            $id = (string)$data["id"];
+            $channel_id = (string)$data["channel_id"];
+            $server_id = (string)$data["guild_id"];
+            $message = [
+                "message_id" => $id,
+                "channel_id" => $channel_id,
+                "server_id" => $server_id
+            ];
             var_dump($data);
-      //      $packet = new MessageBulkDeletePacket((object)$message);
-        //    $this->client->getThread()->writeOutboundData($packet);
+            var_dump($id);
+            var_dump($channel_id);
+            var_dump($server_id);
+           $packet = new MessageBulkDeletePacket($message);
+            $this->client->getThread()->writeOutboundData($packet);
             }
         }
 
