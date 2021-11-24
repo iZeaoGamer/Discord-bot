@@ -298,8 +298,8 @@ class BotCommunicationHandler{
         Storage::updateThread($packet->getChannel());
     }
     private function handleThreadDelete(ThreadDeletePacket $packet): void{
-        $c = Storage::getChannel($packet->getChannelID());
-        if(!$channel instanceof ThreadChannel){
+        $c = Storage::getThread($packet->getChannelID());
+        if(!$c instanceof ThreadChannel){
             throw new \AssertionError("Server Channel '{$packet->getChannelID()}' not found in storage.");
         }
         (new ThreadDeletedEvent($this->plugin, $c))->call();
