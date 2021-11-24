@@ -393,14 +393,17 @@ array(5) {
             $result = Utils::objectToArray($data);
             var_dump($result);
             foreach($result as $class){
-            $id = (string)$class['id'];
-            $channel_id = (string)$class['channel_id'];
-            $server_id = (string)$class['guild_id'];
+
+            $id = (string)$class["id"] ?? "";
+            $channel_id = (string)$class["channel_id"] ?? "";
+            $server_id = (string)$class["guild_id"] ?? "";
             $message = [
                 "message_id" => $id,
                 "channel_id" => $channel_id,
                 "server_id" => $server_id
             ];
+            var_dump($message);
+
 
            $packet = new MessageBulkDeletePacket($message);
             $this->client->getThread()->writeOutboundData($packet);
