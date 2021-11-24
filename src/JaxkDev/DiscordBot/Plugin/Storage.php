@@ -237,7 +237,7 @@ class Storage{
             if (self::isThread($id)) {
                 return self::getThread($id);
             }
-            }
+        }
     //    }
         return $serverChannel;
     }
