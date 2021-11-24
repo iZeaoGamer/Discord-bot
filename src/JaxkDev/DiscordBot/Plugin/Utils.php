@@ -26,17 +26,6 @@ abstract class Utils{
         if($timestamp > time()+86400 or $timestamp <= 1420070400) return false; //+86400 (24h for any timezone problems)
         return true;
     }
-
-    /** 
-     * Logs a message to the console.
-     * 
-     * @param string $message
-     * @return void
-     */
-    public static function log(string $message): void{
-
-        Main::get()->getLogger()->info($message);
-    }
     /**
      * Converts objects to arrays.
      * @param mixed $d

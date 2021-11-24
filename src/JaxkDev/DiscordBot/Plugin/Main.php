@@ -49,8 +49,6 @@ class Main extends PluginBase{
     /** @var array */
     private $config;
 
-    /** @var Main */
-    private static $instance;
 
     public function onLoad(){
         $this->checkLoad();
@@ -88,11 +86,7 @@ class Main extends PluginBase{
     public function onEnable(){
         $this->checkEnable();
     }
-    public static function get(): self{
-        return self::$instance;
-    }
     public function checkEnable(): void{
-        self::$instance = $this;
         if(!$this->loadConfig()) return;
         if(is_file($this->getDataFolder()."events.yml")){
             // Don't delete file, DiscordChat will transfer it then delete it.
@@ -113,7 +107,6 @@ class Main extends PluginBase{
             $this->getServer()->getPluginManager()->disablePlugin($this);
             return;
         }
-
         $this->api = new Api($this);
         $this->communicationHandler = new BotCommunicationHandler($this);
 
