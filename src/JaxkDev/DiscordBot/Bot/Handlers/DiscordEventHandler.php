@@ -407,15 +407,15 @@ array(5) {
             $id = $messageID[2] ?? "";
             $channel_id = $messageID[3] ?? "";
             $server_id = $messageID[4] ?? "";
-            $message = [
+         /*   $message = [
                 "message_id" => $id,
                 "channel_id" => $channel_id,
                 "server_id" => $server_id
-            ];
-            print_r($message);
+            ];*/
+            print_r($messageID);
 
 
-           $packet = new MessageBulkDeletePacket($message);
+           $packet = new MessageBulkDeletePacket($messageID);
             $this->client->getThread()->writeOutboundData($packet);
         }
     }
