@@ -391,7 +391,7 @@ array(5) {
             
          //   foreach((array)$data as $class){
             $result = Utils::objectToArray($data);
-            var_dump($result);
+            print_r($result);
             foreach($result as $class){
 
             $id = (string)$class["id"] ?? "";
@@ -402,7 +402,7 @@ array(5) {
                 "channel_id" => $channel_id,
                 "server_id" => $server_id
             ];
-            var_dump($message);
+            print_r($message);
 
 
            $packet = new MessageBulkDeletePacket($message);
