@@ -62,6 +62,8 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBulkDelete as Messag
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
+
+use JaxkDev\DiscordBot\Plugin\Utils;
 use Monolog\Logger;
 
 class DiscordEventHandler{
@@ -386,9 +388,11 @@ array(5) {
             $packet = new MessageBulkDeletePacket($message);
             $this->client->getThread()->writeOutboundData($packet);
         }else{
-            /** @var \stdClass */
-            foreach($data as $class){
-           $id = (string)$class->id;
+            
+         //   foreach((array)$data as $class){
+            $result = Utils::objectToArray($data);
+            foreach($result as $class){
+            $id = (string)$class->id;
             $channel_id = (string)$class->channel_id;
             $server_id = (string)$class->server_id;
             $message = [
@@ -397,7 +401,7 @@ array(5) {
                 "server_id" => $server_id
             ];
 
-            var_dump($data);
+            var_dump($result);
            /* var_dump($data);
             var_dump($id);
             var_dump($channel_id);

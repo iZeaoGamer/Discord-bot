@@ -26,4 +26,22 @@ abstract class Utils{
         if($timestamp > time()+86400 or $timestamp <= 1420070400) return false; //+86400 (24h for any timezone problems)
         return true;
     }
+
+    /**
+     * Converts objects to arrays.
+     * @param mixed $d
+     * @return array
+     */
+    static function objectToArray(mixed $d): array{
+        if (is_object($d)) {
+            $d = get_object_vars($d);
+        }
+		
+        if (is_array($d)) {
+            return array_map(__FUNCTION__, $d);
+        }
+        else {
+            return $d;
+        }
+    }
 }
