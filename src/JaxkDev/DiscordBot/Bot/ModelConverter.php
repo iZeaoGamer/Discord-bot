@@ -173,7 +173,7 @@ abstract class ModelConverter{
         }
     }
     static public function genModelThread(DiscordThread $thread): ThreadChannel{
-        return new ThreadChannel($thread->id, $thread->name, $thread->guild_id, $thread->owner_id, $thread->locked, $thread->auto_archive_duration, $thread->rate_limit_per_user, $thread->archiver_id);
+        return new ThreadChannel($thread->name, $thread->guild_id, $thread->owner_id, $thread->locked, $thread->auto_archive_duration, $thread->rate_limit_per_user, $thread->archiver_id, $thread->id);
     }
 
     static public function genModelCategoryChannel(DiscordChannel $discordChannel): CategoryChannel{

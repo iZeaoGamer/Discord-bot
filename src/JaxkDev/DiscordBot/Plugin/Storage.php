@@ -156,7 +156,7 @@ class Storage{
     }
 
     /** @param string $id
-     * @return ThreadChannel[]
+     * @return ThreadChannel|null
      */
     public static function getThread(string $id): ?ThreadChannel{
         return self::$thread_map[$id] ?? null;
@@ -248,7 +248,7 @@ class Storage{
         $channels = [];
         foreach((self::$channel_server_map[$server_id] ?? []) as $id){
             $c = self::getChannel($id);
-            if($c !== null) $channels[] = $c;
+            if($c instanceof ServerChannel) $channels[] = $c;
         }
         return $channels;
     }
@@ -261,7 +261,7 @@ class Storage{
         $channels = [];
         foreach((self::$channel_category_map[$category_id] ?? []) as $id){
             $c = self::getChannel($id);
-            if($c !== null){
+            if($c instanceof ServerChannel){
                 if($c instanceof CategoryChannel){
                     throw new \AssertionError("Channel '".$c->getId()."' error 0x0002 (Report this on github if you see this)");
                 }else{
@@ -280,7 +280,7 @@ class Storage{
         $channels = [];
         foreach((self::$category_server_map[$server_id] ?? []) as $id){
             $c = self::getChannel($id);
-            if($c !== null){
+            if($c instanceof ServerChannel){
                 if(!$c instanceof CategoryChannel){
                     throw new \AssertionError("Channel '".$c->getId()."' error 0x0001 (Report this on github if you see this)");
                 }else{
@@ -318,7 +318,7 @@ class Storage{
 
     public static function removeChannel(string $channel_id): void{
         $channel = self::getChannel($channel_id);
-        if($channel === null) return; //Already deleted or not added.
+        if(!$channel instanceof ServerChannel) return; //Already deleted or not added.
         unset(self::$channel_map[$channel_id]);
         $server_id = $channel->getServerId();
         if($channel instanceof CategoryChannel){

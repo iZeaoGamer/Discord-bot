@@ -16,6 +16,7 @@ use JaxkDev\DiscordBot\Models\Channels\Channel;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
+use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use pocketmine\plugin\Plugin;
 
 /**
@@ -32,6 +33,9 @@ class ServerJoined extends DiscordBotEvent{
     /** @var Role[] */
     private $roles;
 
+    /** @var ThreadChannel[] */
+    private $threads;
+
     /** @var Channel[] */
     private $channels;
 
@@ -41,13 +45,15 @@ class ServerJoined extends DiscordBotEvent{
     /**
      * @param Plugin    $plugin
      * @param Server    $server
+     * @param ThreadChannel[] $threads
      * @param Role[]    $roles
      * @param Channel[] $channels
      * @param Member[]  $members
      */
-    public function __construct(Plugin $plugin, Server $server, array $roles, array $channels, array $members){
+    public function __construct(Plugin $plugin, Server $server, array $threads, array $roles, array $channels, array $members){
         parent::__construct($plugin);
         $this->server = $server;
+        $this->threads = $threads;
         $this->roles = $roles;
         $this->channels = $channels;
         $this->members = $members;

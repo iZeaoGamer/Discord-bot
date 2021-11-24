@@ -511,7 +511,7 @@ return;
     }
     public function onThreadDelete(DiscordThread $channel, Discord $discord): void{
         $c = ModelConverter::genModelThread($channel);
-        $packet = new ThreadDeletePacket($c->getID());
+        $packet = new ThreadDeletePacket($channel->id);
         $this->client->getThread()->writeOutboundData($packet);
     }
 

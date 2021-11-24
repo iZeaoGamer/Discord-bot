@@ -581,12 +581,15 @@ class CommunicationHandler{
     });
     }
     private function handleThreadUpdate(RequestThreadUpdate $pk): void{
-       
+       $id = $pk->getChannel()->getID();
+       if($id === null){
+           return;
+       }
    
-                $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($pk){
-                    $guild->channels->fetch($pk->getChannel()->getID())->then(function (DiscordChannel $discord) use ($pk){
-            $discord->threads->fetch($pk->getChannel()->getID())->then(function (DiscordThread $thread) use ($discord, $pk){
-        $thread->id = $pk->getChannel()->getID();
+                $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($id, $pk){
+                    $guild->channels->fetch($id)->then(function (DiscordChannel $discord) use ($id, $pk){
+            $discord->threads->fetch($id)->then(function (DiscordThread $thread) use ($id, $discord, $pk){
+        $thread->id = $id;
         $thread->guild_id = $pk->getChannel()->getServerID();
         $thread->name = $pk->getChannel()->getName();
         $thread->owner_id = $pk->getChannel()->getOwner();

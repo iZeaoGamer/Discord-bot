@@ -85,6 +85,8 @@ use JaxkDev\DiscordBot\Plugin\Events\ThreadUpdated as ThreadUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ThreadDeleted as ThreadDeletedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ChannelCreated as ChannelCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\MessageBulkDeleted as MessageBulkDeletedEvent;
+use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
+use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 
 class BotCommunicationHandler{
 
@@ -245,7 +247,7 @@ class BotCommunicationHandler{
 
     private function handleMessageReactionAdd(MessageReactionAddPacket $packet): void{
         $channel = Storage::getChannel($packet->getChannelId());
-        if($channel === null){
+        if(!$channel instanceof ServerChannel){
             throw new \AssertionError("Channel '{$packet->getChannelId()}' does not exist in storage.");
         }
         $member = Storage::getMember($packet->getMemberId());
@@ -257,7 +259,7 @@ class BotCommunicationHandler{
 
     private function handleMessageReactionRemove(MessageReactionRemovePacket $packet): void{
         $channel = Storage::getChannel($packet->getChannelId());
-        if($channel === null){
+        if(!$channel instanceof ServerChannel){
             throw new \AssertionError("Channel '{$packet->getChannelId()}' does not exist in storage.");
         }
         $member = Storage::getMember($packet->getMemberId());
@@ -269,7 +271,7 @@ class BotCommunicationHandler{
 
     private function handleMessageReactionRemoveAll(MessageReactionRemoveAllPacket $packet): void{
         $channel = Storage::getChannel($packet->getChannelId());
-        if($channel === null){
+        if(!$channel instanceof ServerChannel){
             throw new \AssertionError("Channel '{$packet->getChannelId()}' does not exist in storage.");
         }
         (new MessageReactionRemoveAllEvent($this->plugin, $packet->getMessageId(), $channel))->call();
@@ -277,7 +279,7 @@ class BotCommunicationHandler{
 
     private function handleMessageReactionRemoveEmoji(MessageReactionRemoveEmojiPacket $packet): void{
         $channel = Storage::getChannel($packet->getChannelId());
-        if($channel === null){
+        if(!$channel instanceof ServerChannel){
             throw new \AssertionError("Channel '{$packet->getChannelId()}' does not exist in storage.");
         }
         (new MessageReactionRemoveEmojiEvent($this->plugin, $packet->getEmoji(), $packet->getMessageId(), $channel))->call();
@@ -296,11 +298,8 @@ class BotCommunicationHandler{
         Storage::updateThread($packet->getChannel());
     }
     private function handleThreadDelete(ThreadDeletePacket $packet): void{
-        if($packet->getChannelID() === null){
-            return;
-        }
         $c = Storage::getChannel($packet->getChannelID());
-        if($c === null){
+        if(!$channel instanceof ThreadChannel){
             throw new \AssertionError("Server Channel '{$packet->getChannelID()}' not found in storage.");
         }
         (new ThreadDeletedEvent($this->plugin, $c))->call();
@@ -314,7 +313,7 @@ class BotCommunicationHandler{
 
     private function handleChannelDelete(ChannelDeletePacket $packet): void{
         $c = Storage::getChannel($packet->getChannelId());
-        if($c === null){
+        if(!$c instanceof ServerChannel){
             throw new \AssertionError("Server Channel '{$packet->getChannelId()}' not found in storage.");
         }
         (new ChannelDeletedEvent($this->plugin, $c))->call();
@@ -424,7 +423,7 @@ class BotCommunicationHandler{
             Storage::addChannel($channel);
         }
         foreach($packet->getThreads() as $thread){
-            Storage::addChannel($thread);
+            Storage::addThread($thread);
         }
     }
 

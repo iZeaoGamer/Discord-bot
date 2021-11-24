@@ -58,7 +58,7 @@ class ServerJoin extends Packet{
         return $this->server;
     }
 
-    /** @return ThreadChannel */
+    /** @return ThreadChannel[] */
     public function getThreads(): array{
         return $this->threads;
     }
