@@ -28,7 +28,7 @@ class DiscordDataDump extends Packet{
     private $servers = [];
 
     /** @var ThreadChannel[] */
-    private $threads;
+    private $threads = [];
 
     /** @var ServerChannel[] */
     private $channels = [];
@@ -157,7 +157,7 @@ class DiscordDataDump extends Packet{
     }
 
     public function getSize(): int{
-        return sizeof($this->servers)+sizeof($this->channels)+sizeof($this->roles)+sizeof($this->members)
+        return sizeof($this->threads)+sizeof($this->servers)+sizeof($this->channels)+sizeof($this->roles)+sizeof($this->members)
             +sizeof($this->users)+sizeof($this->bans)+sizeof($this->invites);
     }
 
@@ -165,6 +165,7 @@ class DiscordDataDump extends Packet{
         return serialize([
             $this->UID,
             $this->servers,
+            $this->threads,
             $this->channels,
             $this->roles,
             $this->invites,
@@ -180,6 +181,7 @@ class DiscordDataDump extends Packet{
         [
             $this->UID,
             $this->servers,
+            $this->threads,
             $this->channels,
             $this->roles,
             $this->invites,
