@@ -18,8 +18,9 @@ use pocketmine\plugin\Plugin;
 /**
  * Emitted when a message has been updated.
  *
- * @see MessageDeleted
  * @see MessageSent
+ * @see MessageBulkDeleted
+ * @see MessageDeleted
  */
 class MessageUpdated extends DiscordBotEvent{
 

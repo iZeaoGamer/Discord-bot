@@ -54,7 +54,7 @@ class PresenceUpdate extends Packet{
     }
 
     /** @return array{"mobile": string|null, "desktop": string|null, "web": string|null} */
-    public function getClientStatus(): array{
+    public function getClientStatus(){
         return $this->client_status;
     }
 

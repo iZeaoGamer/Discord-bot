@@ -23,6 +23,7 @@ use pocketmine\plugin\Plugin;
  *
  * @see MessageUpdated
  * @see MessageSent
+ * @see MessageDeleted
  */
 class MessageBulkDeleted extends DiscordBotEvent{
 

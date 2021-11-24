@@ -18,8 +18,8 @@ use pocketmine\plugin\Plugin;
 /**
  * Emitted when a thread gets deleted.
  * 
- * @see ChannelDeleted
- * @see ChannelUpdated
+ * @see ThreadCreated
+ * @see ThreadUpdated
  */
 class ThreadDeleted extends DiscordBotEvent{
 

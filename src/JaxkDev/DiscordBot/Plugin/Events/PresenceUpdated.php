@@ -57,7 +57,7 @@ class PresenceUpdated extends DiscordBotEvent{
     }
 
     /** @return array{"mobile": string|null, "desktop": string|null, "web": string|null} */
-    public function getNewClientStatus(): array{
+    public function getNewClientStatus(){
         return $this->new_client_status;
     }
 

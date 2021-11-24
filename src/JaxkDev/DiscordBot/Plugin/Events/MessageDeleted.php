@@ -16,13 +16,14 @@ use JaxkDev\DiscordBot\Models\Messages\Message;
 use pocketmine\plugin\Plugin;
 
 /**
- * Emitted when a message has been deleted.
+ * Emitted when multiple messages have been deleted.
  *
  * If message was made/updated before bot started it will only have message id, channel id and server id.
  * If it was made/updated after bot started it will have the full message model.
  *
  * @see MessageUpdated
  * @see MessageSent
+ * @see MessageBulkDeleted
  */
 class MessageDeleted extends DiscordBotEvent{
 

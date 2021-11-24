@@ -18,8 +18,8 @@ use pocketmine\plugin\Plugin;
 /**
  * Emitted when a thread gets created.
  * 
- * @see ChannelDeleted
- * @see ChannelUpdated
+ * @see ThreadUpdated
+ * @see ThreadDeleted
  */
 class ThreadCreated extends DiscordBotEvent{
 

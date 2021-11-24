@@ -383,6 +383,8 @@ array(5) {
     public function onMessageBulkDelete($data, Discord $discord): void{
         if($data instanceof DiscordMessage){
             $message = ModelConverter::genModelMessage($data);
+            $packet = new MessageBulkDeletePacket($message);
+            $this->client->getThread()->writeOutboundData($packet);
         }else{
             if(is_array($data)){
                 return;
@@ -393,11 +395,11 @@ array(5) {
               "channel_id" => $data->channel_id,
               "server_id" => $data->guild_id
             ];
-        }
-    }
             $packet = new MessageBulkDeletePacket($message);
             $this->client->getThread()->writeOutboundData($packet);
+            }
         }
+    }
 
     public function onMessageReactionAdd(DiscordMessageReaction $reaction): void{
         $packet = new MessageReactionAddPacket($reaction->message_id, $reaction->emoji->name,
