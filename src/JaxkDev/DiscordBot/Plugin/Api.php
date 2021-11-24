@@ -574,20 +574,16 @@ class Api{
       /**
      * Deletes a mass amount of messages, from order of time sent.
      *
-     * @param ServerChannel $channel
+     * @param string $channel_id
      * @param int $deleteLimit
      * @return PromiseInterface Resolves with no data.
      */
-    public function bulkDelete(ServerChannel $channel, int $deleteLimit): PromiseInterface{
-        $channel_id = $channel->getID();
-        if($channel_id === null){
-            return rejectPromise(new ApiRejection("Channel ID cannot be null."));
-        }
+    public function bulkDelete(string $channel_id, int $deleteLimit): PromiseInterface{
         if(!Utils::validDiscordSnowflake($channel_id)){
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
         }
 
-        $pk = new RequestMessageBulkDelete($channel, $deleteLimit);
+        $pk = new RequestMessageBulkDelete($channel_id, $deleteLimit);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

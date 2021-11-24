@@ -527,17 +527,13 @@ class CommunicationHandler{
         });
     }
     private function handleBulkDelete(RequestMessageBulkDelete $pk): void{
-        if($pk->getChannel()->getID() === null){
-            $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete.", ["Channel ID must be present!"]);
-            return;
-        }
-        $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($pk){
-            $guild->channels->fetch($pk->getChannel()->getID())->then(function (DiscordChannel $discord) use ($pk){
-                $discord->limitDelete($pk->getValue())->then(function () use ($pk){
-                    $this->resolveRequest($pk->getUID());
-                }, function (\Throwable $e) use ($pk){
-                    $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages.", [$e->getMessage(), $e->getTraceAsString()]);
-                });
+        $this->getChannel($pk, $pk->getChannelID(), function(DiscordChannel $channel) use($pk){
+            $channel->limitDelete($pk->getValue())->done(function() use($pk){
+                $this->resolveRequest($pk->getUID());
+                $this->logger->debug("Message Bulk - success ({$pk->getUID()})");
+            }, function(\Throwable $e) use($pk){
+                $this->resolveRequest($pk->getUID(), false, "Failed to Bulk message.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to Bulk Message. ({$pk->getUID()}) - {$e->getMessage()}");
             });
         });
             }

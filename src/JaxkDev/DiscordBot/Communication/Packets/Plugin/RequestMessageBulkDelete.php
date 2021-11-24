@@ -13,19 +13,18 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 
 class RequestMessageBulkDelete extends Packet{
 
     /** @var int */
     private $amount;
 
-    /** @var ServerChannel */
-    private $channel;
+    /** @var string */
+    private $channelID;
 
-    public function __construct(ServerChannel $channel, int $amount){
+    public function __construct(string $channelID, int $amount){
         parent::__construct();
-        $this->channel = $channel;
+        $this->channelID = $channelID;
         $this->amount = $amount;
        
     }
@@ -34,14 +33,14 @@ class RequestMessageBulkDelete extends Packet{
         return $this->amount;
     }
 
-    public function getChannel(): ServerChannel{
+    public function getChannelID(): string{
         return $this->channel;
     }
 
     public function serialize(): ?string{
         return serialize([
             $this->UID,
-            $this->channel,
+            $this->channelID,
             $this->amount
         ]);
     }
@@ -49,7 +48,7 @@ class RequestMessageBulkDelete extends Packet{
     public function unserialize($data): void{
         [
             $this->UID,
-            $this->channel,
+            $this->channelID,
             $this->amount
         ] = unserialize($data);
     }
