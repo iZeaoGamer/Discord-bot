@@ -391,7 +391,11 @@ array(5) {
             
 
             $result = Utils::objectToArray($data);
-            $array = (array)json_decode(json_encode($result), true);
+            $json = json_encode($result);
+            if($json === false){
+                return;
+            }
+            $array = (array)json_decode($json, true);
             $discord = [];
             foreach($array as $key => $value){
                 $discord[$key] = $value;
