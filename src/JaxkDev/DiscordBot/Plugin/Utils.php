@@ -27,12 +27,22 @@ abstract class Utils{
         return true;
     }
 
+    /** 
+     * Logs a message to the console.
+     * 
+     * @param string $message
+     * @return void
+     */
+    public static function log(string $message): void{
+
+        Main::get()->getLogger()->info($message);
+    }
     /**
      * Converts objects to arrays.
      * @param mixed $d
      * @return mixed
      */
-    static function objectToArray(mixed $d): mixed{
+    public static function objectToArray(mixed $d): mixed{
         if (is_object($d)) {
             $d = get_object_vars($d);
         }

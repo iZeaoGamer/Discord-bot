@@ -391,20 +391,22 @@ array(5) {
             
 
             $result = Utils::objectToArray($data);
-            $json = json_encode($result);
+            
+          $json = json_encode($result);
             if($json === false){
                 return;
             }
             $array = (array)json_decode($json, true);
-            $discord = [];
+            $messageID = [];
             foreach($array as $key => $value){
-                $discord[$key] = $value;
+                Utils::log("Key: " . $key . " with value: {$value}!");
+                $messageID[$key] = $value;
             }
-            print_r($discord);
+            print_r($messageID);
 
-            $id = $discord["id"] ?? "";
-            $channel_id = $discord["channel_id"] ?? "";
-            $server_id = $discord["guild_id"] ?? "";
+            $id = $messageID["id"] ?? "";
+            $channel_id = $messageID["channel_id"] ?? "";
+            $server_id = $messageID["guild_id"] ?? "";
             $message = [
                 "message_id" => $id,
                 "channel_id" => $channel_id,
