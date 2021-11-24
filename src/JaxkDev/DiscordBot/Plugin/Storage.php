@@ -238,7 +238,6 @@ class Storage{
                 return self::getThread($id);
             }
         }
-    //    }
         return $serverChannel;
     }
 
