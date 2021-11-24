@@ -229,7 +229,7 @@ class Storage{
     /** @param string $id
      * @return ServerChannel|null
      */
-    public static function getChannel(string $id, bool $includeThreads = true): ?ServerChannel
+    public static function getChannel(string $id): ?ServerChannel
    {
         return self::$channel_map[$id] ?? null;
        
