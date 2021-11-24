@@ -399,7 +399,7 @@ array(5) {
             $array = (array)json_decode($json, true);
             $messageID = [];
             foreach($array as $key => $value){
-                Utils::log("Key: " . $key . " with value: {$value}!");
+                Utils::log("Key: " . $key . " with value: " . implode(", ", $value));
                 $messageID[$key] = $value;
             }
             print_r($messageID);
