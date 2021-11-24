@@ -386,7 +386,7 @@ array(5) {
             $packet = new MessageBulkDeletePacket($message);
             $this->client->getThread()->writeOutboundData($packet);
         }else{
-             foreach($data as $id){
+             foreach($data->ids as $id){
           $message = [
               "message_id" => $id,
               "channel_id" => $data->channel_id,
