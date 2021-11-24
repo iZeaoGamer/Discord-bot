@@ -20,7 +20,7 @@ use pocketmine\plugin\Plugin;
  *
  * @see MessageUpdated
  * @see MessageBulkDeleted
-* @see MessageDeleted
+ * @see MessageDeleted
  */
 class MessageSent extends DiscordBotEvent{
 

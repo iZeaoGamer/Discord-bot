@@ -21,12 +21,13 @@
         "react/http": "^1.1",
         "ext-json": "*",
         "ext-zlib": "*",
-        "discord-php/http": "^8",
-        "react/child-process": "^0.6.2"
+        "discord-php/http": "^9.0.5",
+        "react/child-process": "^0.6.2",
+        "discord/interactions": "^2"
     },
     "require-dev": {
         "symfony/var-dumper": "*",
-        "friendsofphp/php-cs-fixer": "^2.16",
+        "friendsofphp/php-cs-fixer": "^3",
         "phpunit/phpunit": "^9.4",
         "davidcole1340/reactsh": "dev-master"
     },

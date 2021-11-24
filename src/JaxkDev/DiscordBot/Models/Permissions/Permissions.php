@@ -23,6 +23,8 @@ abstract class Permissions implements \Serializable{
         "deafen_members" => 8388608,
         "move_members" => 16777216,
         "use_vad" => 33554432,
+        "request_to_speak" => 4294967296,
+        "start_embedded_activities" => 549755813888,
     ];
 
     const TEXT_PERMISSIONS = [
@@ -35,6 +37,13 @@ abstract class Permissions implements \Serializable{
         "read_message_history" => 65536,
         "mention_everyone" => 131072,
         "use_external_emojis" => 262144,
+        "use_slash_commands" => 2147483648,
+        "manage_threads" => 17179869184,
+        "use_public_thread" => 34359738368,
+        "use_private_threads" => 68719476736,
+        "use_external_stickers" => 137438953472,
+        "manage_events" => 8589934592,
+        "send_messages_in_threads" => 274877906944,
     ];
 
     const ROLE_PERMISSIONS = [

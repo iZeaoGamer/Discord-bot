@@ -22,6 +22,7 @@ class User implements \Serializable{
         "PARTNER" => 2,
         "HYPESQUAD" => 4,
         "BUG_HUNTER_LEVEL_1" => 8,
+        "MFA_SMS" => 16,
         "PREMIUM_PROMO_DISMISSED" => 32,
         "HYPESQUAD_ONLINE_HOUSE_1" => 64, //Bravery
         "HYPESQUAD_ONLINE_HOUSE_2" => 128, //Brilliance
@@ -29,11 +30,14 @@ class User implements \Serializable{
         "PREMIUM_EARLY_SUPPORTER" => 512,
         "TEAM_USER" => 1024,
         "SYSTEM" => 4096,
+        "HAS_UNREAD_URGENT_MESSAGES" => 8192,
         "BUG_HUNTER_LEVEL_2" => 16384,
         "UNDERAGE_DELETED" => 32768,
         "VERIFIED_BOT" => 65536,
         "VERIFIED_DEVELOPER" => 131072,
-        "CERTIFIED_MODERATOR" => 262144
+        "CERTIFIED_MODERATOR" => 262144,
+        "BOT_HTTP_INTERACTIONS" => 524288,
+        "SPAMMER" => 1048576,
     ];
 
     /** @var string */

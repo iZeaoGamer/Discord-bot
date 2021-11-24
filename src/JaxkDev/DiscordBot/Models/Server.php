@@ -16,6 +16,13 @@ use JaxkDev\DiscordBot\Plugin\Utils;
 
 class Server implements \Serializable{
 
+    
+    const FLAGS = [
+        "SUPPRESS_JOIN_NOTIFICATIONS" => 1,
+        "SUPPRESS_PREMIUM_SUBSCRIPTION" => 2,
+        "SUPPRESS_GUILD_REMINDER_NOTIFICATIONS" => 4,
+        "SUPPRESS_JOIN_NOTIFICATION_REPLIES" => 8
+    ];
     /** @var string */
     private $id;
 
