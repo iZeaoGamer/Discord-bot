@@ -404,9 +404,9 @@ array(5) {
             }
             print_r($messageID);
 
-            $id = $messageID["id"] ?? "";
-            $channel_id = $messageID["channel_id"] ?? "";
-            $server_id = $messageID["guild_id"] ?? "";
+            $id = $messageID[2] ?? "";
+            $channel_id = $messageID[3] ?? "";
+            $server_id = $messageID[4] ?? "";
             $message = [
                 "message_id" => $id,
                 "channel_id" => $channel_id,
