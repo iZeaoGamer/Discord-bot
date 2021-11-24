@@ -30,15 +30,15 @@ abstract class Utils{
     /**
      * Converts objects to arrays.
      * @param mixed $d
-     * @return array
+     * @return mixed
      */
-    static function objectToArray(mixed $d): array{
+    static function objectToArray(mixed $d): mixed{
         if (is_object($d)) {
             $d = get_object_vars($d);
         }
 		
         if (is_array($d)) {
-            return array_map(__FUNCTION__, $d);
+            return array_map([Utils::class, "objectToArray"], $d);
         }
         else {
             return $d;

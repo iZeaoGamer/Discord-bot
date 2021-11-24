@@ -394,7 +394,7 @@ array(5) {
             foreach($result as $class){
             $id = (string)$class->id;
             $channel_id = (string)$class->channel_id;
-            $server_id = (string)$class->server_id;
+            $server_id = (string)$class->guild_id;
             $message = [
                 "message_id" => $id,
                 "channel_id" => $channel_id,
