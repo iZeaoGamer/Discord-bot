@@ -391,18 +391,9 @@ array(5) {
             
 
             $result = Utils::objectToArray($data);
-            
-          $json = json_encode($result);
-            if($json === false){
-                return;
-            }
-            $array = (array)json_decode($json, true);
+        
             $messageID = [];
-            foreach($array as $key => $value){
-               $value = json_encode($value);
-               if($value === false){
-                   return;
-               }
+            foreach($result as $key => $value){
                echo("Key: " . $key . " with value: " . $value);
                 $messageID[$key] = $value;
                 }
