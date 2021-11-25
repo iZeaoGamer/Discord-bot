@@ -399,19 +399,11 @@ array(5) {
             $array = (array)json_decode($json, true);
             $messageID = [];
             foreach($array as $key => $value){
-                echo("Key: " . $key . " with value: " . implode(", ", $value));
-                $messageID[$key] = $value;
+                foreach($value as $valueKey){
+                echo("Key: " . $key . " with value: " . $valueKey);
+                $messageID[$key] = $valueKey;
+                }
             }
-            print_r($messageID);
-
-            $id = $messageID[2] ?? "";
-            $channel_id = $messageID[3] ?? "";
-            $server_id = $messageID[4] ?? "";
-         /*   $message = [
-                "message_id" => $id,
-                "channel_id" => $channel_id,
-                "server_id" => $server_id
-            ];*/
             print_r($messageID);
 
 
