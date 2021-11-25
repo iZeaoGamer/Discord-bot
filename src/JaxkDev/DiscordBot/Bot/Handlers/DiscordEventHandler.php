@@ -399,9 +399,9 @@ array(5) {
             $array = (array)json_decode($json, true);
             $messageID = [];
             foreach($array as $key => $value){
-                foreach($value as $valueKey){
-                echo("Key: " . $key . " with value: " . $valueKey);
-                $messageID[$key] = $valueKey;
+            //    foreach($value as $valueKey){
+                echo("Key: " . $key . " with value: " . $value[$key]);
+                $messageID[$key] = $value[$key];
                 }
             }
             print_r($messageID);
