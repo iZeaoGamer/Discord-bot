@@ -394,8 +394,8 @@ array(5) {
         
             $messageID = [];
             foreach($result as $key => $value){
-               echo("Key: " . $key . " with value: " .$value[$key]);
-                $messageID[$key] = $value;
+               echo("Key: " . $key . " with value: " . implode(", ", $value));
+                $messageID[$key] = implode(", ", $value);
                 }
             print_r($messageID);
 
