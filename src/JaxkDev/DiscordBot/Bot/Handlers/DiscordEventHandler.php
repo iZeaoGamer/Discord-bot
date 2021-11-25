@@ -403,7 +403,6 @@ array(5) {
                 echo("Key: " . $key . " with value: " . $value[$key]);
                 $messageID[$key] = $value[$key];
                 }
-            }
             print_r($messageID);
 
 
