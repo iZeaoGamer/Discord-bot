@@ -45,6 +45,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBulkDelete as Messag
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\TypingStart as TypingStartPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat as HeartbeatPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Activity;
@@ -85,6 +86,7 @@ use JaxkDev\DiscordBot\Plugin\Events\ThreadUpdated as ThreadUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ThreadDeleted as ThreadDeletedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ChannelCreated as ChannelCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\MessageBulkDeleted as MessageBulkDeletedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\TypingStart as TypingStartEvent;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 
@@ -141,6 +143,7 @@ class BotCommunicationHandler{
         elseif($packet instanceof ServerJoinPacket) $this->handleServerJoin($packet);
         elseif($packet instanceof ServerLeavePacket) $this->handleServerLeave($packet);
         elseif($packet instanceof ServerUpdatePacket) $this->handleServerUpdate($packet);
+        elseif($packet instanceof TypingStartPacket) $this->handleTypingStart($packet);
         elseif($packet instanceof DiscordDataDumpPacket) $this->handleDataDump($packet);
         elseif($packet instanceof DiscordReadyPacket) $this->handleReady();
     }
@@ -244,6 +247,9 @@ class BotCommunicationHandler{
     private function handleMessageDelete(MessageDeletePacket $packet): void{
         (new MessageDeletedEvent($this->plugin, $packet->getMessage()))->call();
     }
+    private function handleTypingStart(TypingStartPacket $packet){
+        (new TypingStartEvent($this->plugin, $packet->getUserId(), $packet->getChannelId(), $packet->getServerId()))->call();
+    }
 
     private function handleMessageReactionAdd(MessageReactionAddPacket $packet): void{
         $channel = Storage::getChannel($packet->getChannelId());
@@ -298,10 +304,10 @@ class BotCommunicationHandler{
         Storage::updateThread($packet->getChannel());
     }
     private function handleThreadDelete(ThreadDeletePacket $packet): void{
-        $c = Storage::getThread($packet->getChannelID());
-        if(!$c instanceof ThreadChannel){
-            throw new \AssertionError("Server Channel '{$packet->getChannelID()}' not found in storage.");
-        }
+       $c = Storage::getThread($packet->getChannelId());
+       if(!$c instanceof ThreadChannel){
+           throw new \AssertionError("Thread Channel '{$packet->getChannelId()} not found in storage.");
+       }
         (new ThreadDeletedEvent($this->plugin, $c))->call();
         Storage::removeThread($packet->getChannelID());
     }

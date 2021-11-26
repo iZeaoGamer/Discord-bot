@@ -12,37 +12,44 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
+use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 
-class RequestThreadList extends Packet{
+class RequestMuteMember extends Packet{
 
-    /** @var ThreadChannel */
-    private $thread;
+    /** @var VoiceChannel */
+    private $channel;
 
-    public function __construct(ThreadChannel $thread){
+    /** @var string */
+    private $userId;
+
+    public function __construct(string $user_id, VoiceChannel $channel){
         parent::__construct();
-        $this->thread = $thread;
+        $this->userId = $user_id;
+        $this->channel = $channel;
+    }
+    public function getUserId(): string{
+        return $this->userId;
     }
 
-    public function getThread(): ThreadChannel{
-        return $this->thread;
+    public function getChannel(): VoiceChannel{
+        return $this->channel;
     }
-    public function getChannelId(): ?string{
-        return $this->thread->getID();
-    }
+
 
     public function serialize(): ?string{
         return serialize([
             $this->UID,
-            $this->thread
+            $this->userId,
+            $this->channel
         ]);
     }
 
     public function unserialize($data): void{
         [
             $this->UID,
-            $this->thread
+            $this->userId,
+            $this->channel
         ] = unserialize($data);
     }
 }

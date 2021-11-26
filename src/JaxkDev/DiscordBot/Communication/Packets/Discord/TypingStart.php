@@ -13,35 +13,50 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\VoiceState;
 
-class ThreadDelete extends Packet{
+class TypingStart extends Packet{
 
+    /** @var string */
+    private $userId;
 
     /** @var string */
     private $channelId;
 
-    public function __construct(string $channelId){
+    /** @var string|null */
+    private $serverId;
+
+    public function __construct(string $user_id, string $channel_id, ?string $server_id){
         parent::__construct();
-        $this->channelId = $channelId;
+        $this->userId = $user_id;
+        $this->channelId = $channel_id;
+        $this->serverId = $server_id;
     }
 
-
+    public function getUserId(): string{
+        return $this->userId;
+    }
     public function getChannelId(): string{
         return $this->channelId;
     }
-
+    public function getServerId(): ?string{
+        return $this->serverId;
+    }
     public function serialize(): ?string{
         return serialize([
             $this->UID,
-            $this->channelId
+            $this->userId,
+            $this->channelId,
+            $this->serverId
         ]);
     }
 
     public function unserialize($data): void{
         [
             $this->UID,
-            $this->channelId
+            $this->userId,
+            $this->channelId,
+            $this->serverId
         ] = unserialize($data);
     }
 }

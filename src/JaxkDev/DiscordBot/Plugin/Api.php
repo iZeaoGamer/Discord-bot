@@ -52,6 +52,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadMessageCreate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestLeaveVoiceChannel;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMoveMember;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMuteMember;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUnmuteMember;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -628,6 +632,11 @@ class Api{
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+    public function leaveVoiceChannel(VoiceChannel $channel): PromiseInterface{
+        $pk = new RequestLeaveVoiceChannel($channel);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
 
     /**
      * Moves to another voice channel. Moved Voice Channel ID must be present.
@@ -640,7 +649,22 @@ class Api{
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
-    //todo implement some advanced voice channel methods (e.g, moveMember, removeMember, addMember, etc)
+    public function moveMember(string $userID, VoiceChannel $channel){
+        if(!Utils::validDiscordSnowflake($userID)){
+            return rejectPromise(new ApiRejection("Invalid Member ID '$userID'."));
+        }
+        $pk = new RequestMoveMember($userID, $channel);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    public function muteMember(string $userID, VoiceChannel $channel){
+        if(!Utils::validDiscordSnowflake($userID)){
+            return rejectPromise(new ApiRejection("Invalid Member ID '$userID'."));
+        }
+        $pk = new RequestMuteMember($userID, $channel);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
 
 
     /** 

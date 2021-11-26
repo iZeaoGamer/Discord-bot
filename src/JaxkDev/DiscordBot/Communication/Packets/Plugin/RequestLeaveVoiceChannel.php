@@ -10,38 +10,37 @@
  * Email   :: JaxkDev@gmail.com
  */
 
-namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
+namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 
-class ThreadDelete extends Packet{
+class RequestLeaveVoiceChannel extends Packet{
 
+    /** @var VoiceChannel */
+    private $channel;
 
-    /** @var string */
-    private $channelId;
-
-    public function __construct(string $channelId){
+    public function __construct(VoiceChannel $channel){
         parent::__construct();
-        $this->channelId = $channelId;
+        $this->channel = $channel;
     }
 
-
-    public function getChannelId(): string{
-        return $this->channelId;
+    public function getChannel(): VoiceChannel{
+        return $this->channel;
     }
+
 
     public function serialize(): ?string{
         return serialize([
             $this->UID,
-            $this->channelId
+            $this->channel
         ]);
     }
 
     public function unserialize($data): void{
         [
             $this->UID,
-            $this->channelId
+            $this->channel
         ] = unserialize($data);
     }
 }

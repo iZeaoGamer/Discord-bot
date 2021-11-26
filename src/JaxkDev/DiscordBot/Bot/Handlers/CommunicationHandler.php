@@ -71,6 +71,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCrossPostMessage;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadMessageCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestJoinVoiceChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMoveVoiceChannel;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestLeaveVoiceChannel;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMoveMember;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMuteMember;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUnmuteMember;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
@@ -158,6 +162,10 @@ class CommunicationHandler{
         elseif($pk instanceof RequestThreadMessageCreate) $this->handleMessageStartThread($pk);
         elseif($pk instanceof RequestJoinVoiceChannel) $this->handleVoiceChannelJoin($pk);
         elseif($pk instanceof RequestMoveVoiceChannel) $this->handleVoiceChannelMove($pk);
+        elseif($pk instanceof RequestLeaveVoiceChannel) $this->handleVoiceChannelLeave($pk);
+        elseif($pk instanceof RequestMoveMember) $this->handleMoveMember($pk);
+        elseif($pk instanceof RequestMuteMember) $this->handleMuteMember($pk);
+        elseif($pk instanceof RequestUnmuteMember) $this->handleUnmuteMember($pk);
 
     }
 
@@ -758,7 +766,7 @@ class CommunicationHandler{
             $this->resolveRequest($pk->getUID(), false, $e->getMessage());
         }
     }
-    public function handleVoiceChannelJoin(RequestJoinVoiceChannel $pk): void{
+    private function handleVoiceChannelJoin(RequestJoinVoiceChannel $pk): void{
         $channel = $pk->getChannel();
         $voiceChannel = new DiscordChannel($this->client->getDiscordClient(), [
             'name' => $channel->getName(),
@@ -771,7 +779,20 @@ class CommunicationHandler{
             $this->resolveRequest($pk->getUID(), false, $e->getMessage());
         }
     }
-    public function handleVoiceChannelMove(RequestMoveVoiceChannel $pk): void{
+    private function handleVoiceChannelLeave(RequestLeaveVoiceChannel $pk): void{
+        $channel = $pk->getChannel();
+        try{    
+        $voiceClient = $this->client->getDiscordClient()->getVoiceClient($channel->getServerID());
+            if($voiceClient === null){
+                $this->resolveRequest($pk->getUID(), false, "Bot isn't in a voice channel.");
+                return;
+            }
+            $voiceClient->close();
+        }catch(\Throwable $e){
+            $this->resolveRequest($pk->getUID(), false, $e->getMessage());
+        }
+    }
+    private function handleVoiceChannelMove(RequestMoveVoiceChannel $pk): void{
         $channel = $pk->getChannel();
         $voiceChannel = new DiscordChannel($this->client->getDiscordClient(), [
             'name' => $channel->getName(),
@@ -789,6 +810,52 @@ class CommunicationHandler{
             $this->resolveRequest($pk->getUID(), false, $e->getMessage());
         }
     }
+    private function handleMoveMember(RequestMoveMember $pk){
+        $channel = $pk->getChannel();
+        if($channel->getID() === null){
+            $this->resolveRequest($pk->getUID(), false, "Channel ID must be present.");
+            return;
+        }
+        $this->getChannel($pk, $channel->getID(), function(DiscordChannel $discordChannel) use($channel, $pk){
+           
+                    $discordChannel->moveMember($pk->getUserId())->then(function() use ($pk, $channel){
+                        $this->resolveRequest($pk->getUID(), true, "Succcessfully moved member to {$channel->getID()}!");
+                    }, function (\Throwable $e) use ($pk){
+                        $this->resolveRequest($pk->getUID(), false, "Failed to move member.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
+                });
+    }
+    private function handleMuteMember(RequestMuteMember $pk){
+        $channel = $pk->getChannel();
+        if($channel->getID() === null){
+            $this->resolveRequest($pk->getUID(), false, "Channel ID must be present.");
+            return;
+        }
+        $this->getChannel($pk, $channel->getID(), function(DiscordChannel $discordChannel) use($channel, $pk){
+    
+            $discordChannel->muteMember($pk->getUserId())->then(function() use ($pk, $channel){
+                $this->resolveRequest($pk->getUID(), true, "Succcessfully moved member to {$channel->getID()}!");
+            }, function (\Throwable $e) use ($pk){
+                $this->resolveRequest($pk->getUID(), false, "Failed to move member.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }
+    private function handleUnmuteMember(RequestUnmuteMember $pk){
+        $channel = $pk->getChannel();
+        if($channel->getID() === null){
+            $this->resolveRequest($pk->getUID(), false, "Channel ID must be present.");
+            return;
+        }
+        $this->getChannel($pk, $channel->getID(), function(DiscordChannel $discordChannel) use($channel, $pk){
+   
+            $discordChannel->unmuteMember($pk->getUserId())->then(function() use ($pk, $channel){
+                $this->resolveRequest($pk->getUID(), true, "Succcessfully unmuted member in {$channel->getID()}!");
+            }, function (\Throwable $e) use ($pk){
+                $this->resolveRequest($pk->getUID(), false, "Failed to unmute member.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }
+
 
     private function handleSendFile(RequestSendFile $pk): void{
         $this->getChannel($pk, $pk->getChannelId(), function(DiscordChannel $channel) use($pk){

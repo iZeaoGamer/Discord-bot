@@ -26,10 +26,10 @@ use Discord\Parts\User\User as DiscordUser;
 use Discord\Parts\WebSockets\MessageReaction as DiscordMessageReaction;
 use Discord\Parts\WebSockets\PresenceUpdate as DiscordPresenceUpdate;
 use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
+use Discord\Parts\WebSockets\TypingStart as DiscordTypingStart;
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ChannelPinsUpdate as ChannelPinsUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordDataDump as DiscordDataDumpPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\BanAdd as BanAddPacket;
@@ -62,7 +62,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBulkDelete as Messag
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
-
+use JaxkDev\DiscordBot\Communication\Packets\Discord\TypingStart as TypingStartPacket;
 use JaxkDev\DiscordBot\Plugin\Utils;
 use Monolog\Logger;
 
@@ -119,6 +119,7 @@ class DiscordEventHandler{
         $discord->on("THREAD_CREATE", [$this, "onThreadCreate"]);
         $discord->on("THREAD_UPDATE", [$this, "onThreadUpdate"]);
         $discord->on("THREAD_DELETE", [$this, "onThreadDelete"]);
+        $discord->on("TYPING_START", [$this, "onTypingStart"]);
     }
 
     /*
@@ -415,6 +416,10 @@ array(5) {
             $reaction->guild_id.".".$reaction->user_id, $reaction->channel_id);
         $this->client->getThread()->writeOutboundData($packet);
     }
+    public function onTypingStart(DiscordTypingStart $typing): void{
+        $packet = new TypingStartPacket($typing->user_id, $typing->channel_id, $typing->guild_id);
+        $this->client->getThread()->writeOutboundData($packet);
+    }
 
     public function onMessageReactionRemoveAll(DiscordMessageReaction $reaction): void{
         $packet = new MessageReactionRemoveAllPacket($reaction->message_id, $reaction->channel_id);
@@ -515,7 +520,6 @@ return;
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onThreadDelete(DiscordThread $channel, Discord $discord): void{
-        $c = ModelConverter::genModelThread($channel);
         $packet = new ThreadDeletePacket($channel->id);
         $this->client->getThread()->writeOutboundData($packet);
     }
