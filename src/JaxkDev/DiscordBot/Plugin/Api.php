@@ -649,7 +649,7 @@ class Api{
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
-    public function moveMember(string $userID, VoiceChannel $channel){
+    public function moveMember(string $userID, VoiceChannel $channel): PromiseInterface{
         if(!Utils::validDiscordSnowflake($userID)){
             return rejectPromise(new ApiRejection("Invalid Member ID '$userID'."));
         }
@@ -657,7 +657,7 @@ class Api{
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
-    public function muteMember(string $userID, VoiceChannel $channel){
+    public function muteMember(string $userID, VoiceChannel $channel): PromiseInterface{
         if(!Utils::validDiscordSnowflake($userID)){
             return rejectPromise(new ApiRejection("Invalid Member ID '$userID'."));
         }

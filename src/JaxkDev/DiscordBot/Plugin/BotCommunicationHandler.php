@@ -247,7 +247,7 @@ class BotCommunicationHandler{
     private function handleMessageDelete(MessageDeletePacket $packet): void{
         (new MessageDeletedEvent($this->plugin, $packet->getMessage()))->call();
     }
-    private function handleTypingStart(TypingStartPacket $packet){
+    private function handleTypingStart(TypingStartPacket $packet): void{
         (new TypingStartEvent($this->plugin, $packet->getUserId(), $packet->getChannelId(), $packet->getServerId()))->call();
     }
 

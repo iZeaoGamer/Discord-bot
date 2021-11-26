@@ -810,7 +810,7 @@ class CommunicationHandler{
             $this->resolveRequest($pk->getUID(), false, $e->getMessage());
         }
     }
-    private function handleMoveMember(RequestMoveMember $pk){
+    private function handleMoveMember(RequestMoveMember $pk): void{
         $channel = $pk->getChannel();
         if($channel->getID() === null){
             $this->resolveRequest($pk->getUID(), false, "Channel ID must be present.");
@@ -825,7 +825,7 @@ class CommunicationHandler{
                     });
                 });
     }
-    private function handleMuteMember(RequestMuteMember $pk){
+    private function handleMuteMember(RequestMuteMember $pk): void{
         $channel = $pk->getChannel();
         if($channel->getID() === null){
             $this->resolveRequest($pk->getUID(), false, "Channel ID must be present.");
@@ -840,7 +840,7 @@ class CommunicationHandler{
             });
         });
     }
-    private function handleUnmuteMember(RequestUnmuteMember $pk){
+    private function handleUnmuteMember(RequestUnmuteMember $pk): void{
         $channel = $pk->getChannel();
         if($channel->getID() === null){
             $this->resolveRequest($pk->getUID(), false, "Channel ID must be present.");
