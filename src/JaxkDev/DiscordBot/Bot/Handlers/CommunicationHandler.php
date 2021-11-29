@@ -30,6 +30,9 @@ use Discord\Parts\User\Member as DiscordMember;
 use Discord\Parts\User\User as DiscordUser;
 use Discord\Repository\Channel\WebhookRepository as DiscordWebhookRepository;
 use Discord\Repository\Guild\InviteRepository as DiscordInviteRepository;
+
+use Discord\Builders\MessageBuilder;
+
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;
@@ -952,7 +955,11 @@ class CommunicationHandler
                 $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
                 return;
             }
-            $channel->sendFile($pk->getFilePath(), $pk->getFileName(), $pk->getMessage())->then(function (DiscordMessage $message) use ($pk) {
+            $builder = MessageBuilder::new();
+            $builder->addFile($pk->getFilePath(), $pk->getFileName());
+            $builder->setContent($pk->getMessage());
+            $channel->sendMessage($builder)->then(function (DiscordMessage $message) use ($pk) {
+
                 $this->resolveRequest($pk->getUID(), true, "Successfully sent file.", [ModelConverter::genModelMessage($message)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to send file.", [$e->getMessage(), $e->getTraceAsString()]);
