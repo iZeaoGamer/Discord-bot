@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Models;
 
 use JaxkDev\DiscordBot\Plugin\Utils;
 
-class User implements \Serializable{
+class User implements \Serializable
+{
 
     //https://github.com/Delitefully/DiscordLists/blob/master/flags.md
     const FLAGS = [
@@ -61,8 +62,14 @@ class User implements \Serializable{
     /** @var Array<string, bool> */
     private $flags = [];
 
-    public function __construct(string $id, string $username, string $discriminator, string $avatar_url,
-                                bool $bot = false, int $flags_bitwise = 0){
+    public function __construct(
+        string $id,
+        string $username,
+        string $discriminator,
+        string $avatar_url,
+        bool $bot = false,
+        int $flags_bitwise = 0
+    ) {
         $this->setId($id);
         $this->setUsername($username);
         $this->setDiscriminator($discriminator);
@@ -71,61 +78,74 @@ class User implements \Serializable{
         $this->setFlagsBitwise($flags_bitwise);
     }
 
-    public function getId(): string{
+    public function getId(): string
+    {
         return $this->id;
     }
 
-    public function setId(string $id): void{
-        if(!Utils::validDiscordSnowflake($id)){
+    public function setId(string $id): void
+    {
+        if (!Utils::validDiscordSnowflake($id)) {
             throw new \AssertionError("User ID '$id' is invalid.");
         }
         $this->id = $id;
     }
 
-    public function getUsername(): string{
+    public function getUsername(): string
+    {
         return $this->username;
     }
 
-    public function setUsername(string $username): void{
+    public function setUsername(string $username): void
+    {
         $this->username = $username;
     }
 
-    public function getDiscriminator(): string{
+    public function getDiscriminator(): string
+    {
         return $this->discriminator;
     }
 
-    public function setDiscriminator(string $discriminator): void{
-        if(strlen($discriminator) !== 4){
+    public function setDiscriminator(string $discriminator): void
+    {
+        if (strlen($discriminator) !== 4) {
             throw new \AssertionError("Discriminator '$discriminator' is invalid.");
         }
         $this->discriminator = $discriminator;
     }
 
-    public function getAvatarUrl(): string{
+    public function getAvatarUrl(): string
+    {
         return $this->avatar_url;
     }
 
-    public function setAvatarUrl(string $avatar_url): void{
+    public function setAvatarUrl(string $avatar_url): void
+    {
         $this->avatar_url = $avatar_url;
     }
 
-    public function getCreationTimestamp(): int{
+    public function getCreationTimestamp(): int
+    {
         return Utils::getDiscordSnowflakeTimestamp($this->id);
     }
 
-    public function isBot(): bool{
+    public function isBot(): bool
+    {
         return $this->bot;
     }
 
-    public function setBot(bool $bot): void{
+    public function setBot(bool $bot): void
+    {
         $this->bot = $bot;
     }
 
-    public function getFlagsBitwise(): int{
+    public function getFlagsBitwise(): int
+    {
         return $this->flags_bitwise;
     }
 
-    public function setFlagsBitwise(int $flags_bitwise): void{
+    public function setFlagsBitwise(int $flags_bitwise): void
+    {
         $this->flags_bitwise = $flags_bitwise;
     }
 
@@ -133,29 +153,32 @@ class User implements \Serializable{
      * Returns all the flags possible and the current state, or an empty array if not initialised.
      * @return Array<string, bool>
      */
-    public function getFlags(): array{
-        if(sizeof($this->flags) === 0 and $this->flags_bitwise > 0){
+    public function getFlags(): array
+    {
+        if (sizeof($this->flags) === 0 and $this->flags_bitwise > 0) {
             $this->recalculateFlags();
         }
         return $this->flags;
     }
 
-    public function getFlag(string $flag): ?bool{
-        if(sizeof($this->flags) === 0 and $this->flags_bitwise > 0){
+    public function getFlag(string $flag): ?bool
+    {
+        if (sizeof($this->flags) === 0 and $this->flags_bitwise > 0) {
             $this->recalculateFlags();
         }
         return $this->flags[$flag] ?? null;
     }
 
-    public function setFlag(string $flag, bool $state = true): void{
-        if(sizeof($this->flags) === 0 and $this->flags_bitwise > 0){
+    public function setFlag(string $flag, bool $state = true): void
+    {
+        if (sizeof($this->flags) === 0 and $this->flags_bitwise > 0) {
             $this->recalculateFlags();
         }
-        if(!in_array($flag, array_keys(self::FLAGS))){
+        if (!in_array($flag, array_keys(self::FLAGS))) {
             throw new \AssertionError("Invalid flag '{$flag}' for a 'user'");
         }
 
-        if($this->flags[$flag] === $state) return;
+        if ($this->flags[$flag] === $state) return;
         $this->flags[$flag] = $state;
         $this->flags_bitwise ^= self::FLAGS[$flag];
         return;
@@ -164,16 +187,18 @@ class User implements \Serializable{
     /**
      * @internal Using current flags_bitwise recalculate flags.
      */
-    private function recalculateFlags(): void{
+    private function recalculateFlags(): void
+    {
         $this->flags = [];
-        foreach(self::FLAGS as $name => $v){
+        foreach (self::FLAGS as $name => $v) {
             $this->flags[$name] = (($this->flags_bitwise & $v) !== 0);
         }
     }
 
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->id,
             $this->username,
@@ -184,7 +209,8 @@ class User implements \Serializable{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->id,
             $this->username,

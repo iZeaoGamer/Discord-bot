@@ -15,7 +15,8 @@ namespace JaxkDev\DiscordBot\Models;
 use JaxkDev\DiscordBot\Models\Permissions\RolePermissions;
 use JaxkDev\DiscordBot\Plugin\Utils;
 
-class Role implements \Serializable{
+class Role implements \Serializable
+{
 
     /** @var null|string */
     private $id;
@@ -41,89 +42,113 @@ class Role implements \Serializable{
     /** @var string */
     private $server_id;
 
-    public function __construct(string $name, int $colour, bool $hoisted, int $hoisted_position, bool $mentionable,
-                                string $server_id, RolePermissions $permissions = null, ?string $id = null){
+    public function __construct(
+        string $name,
+        int $colour,
+        bool $hoisted,
+        int $hoisted_position,
+        bool $mentionable,
+        string $server_id,
+        RolePermissions $permissions = null,
+        ?string $id = null
+    ) {
         $this->setName($name);
         $this->setColour($colour);
         $this->setHoisted($hoisted);
         $this->setHoistedPosition($hoisted_position);
         $this->setMentionable($mentionable);
         $this->setServerId($server_id);
-        $this->setPermissions($permissions??new RolePermissions(0));
+        $this->setPermissions($permissions ?? new RolePermissions(0));
         $this->setId($id);
     }
 
-    public function getId(): ?string{
+    public function getId(): ?string
+    {
         return $this->id;
     }
 
-    public function setId(?string $id): void{
-        if($id !== null and !Utils::validDiscordSnowflake($id)){
+    public function setId(?string $id): void
+    {
+        if ($id !== null and !Utils::validDiscordSnowflake($id)) {
             throw new \AssertionError("Role ID '$id' is invalid.");
         }
         $this->id = $id;
     }
 
-    public function getName(): string{
+    public function getName(): string
+    {
         return $this->name;
     }
 
-    public function setName(string $name): void{
+    public function setName(string $name): void
+    {
         $this->name = $name;
     }
 
-    public function getPermissions(): RolePermissions{
+    public function getPermissions(): RolePermissions
+    {
         return $this->permissions;
     }
 
-    public function setPermissions(RolePermissions $permissions): void{
+    public function setPermissions(RolePermissions $permissions): void
+    {
         $this->permissions = $permissions;
     }
 
-    public function getColour(): int{
+    public function getColour(): int
+    {
         return $this->colour;
     }
 
     /**
      * @param int $colour Hex [0x000000 - 0xFFFFFF]
      */
-    public function setColour(int $colour): void{
-        if($colour < 0 or $colour > 0xFFFFFF){
+    public function setColour(int $colour): void
+    {
+        if ($colour < 0 or $colour > 0xFFFFFF) {
             throw new \AssertionError("Colour '$colour' is outside the bounds 0x000000-0xFFFFFF.");
         }
         $this->colour = $colour;
     }
 
-    public function isHoisted(): bool{
+    public function isHoisted(): bool
+    {
         return $this->hoisted;
     }
 
-    public function setHoisted(bool $hoisted): void{
+    public function setHoisted(bool $hoisted): void
+    {
         $this->hoisted = $hoisted;
     }
 
-    public function getHoistedPosition(): int{
+    public function getHoistedPosition(): int
+    {
         return $this->hoisted_position;
     }
 
-    public function setHoistedPosition(int $hoisted_position): void{
+    public function setHoistedPosition(int $hoisted_position): void
+    {
         $this->hoisted_position = $hoisted_position;
     }
 
-    public function isMentionable(): bool{
+    public function isMentionable(): bool
+    {
         return $this->mentionable;
     }
 
-    public function setMentionable(bool $mentionable): void{
+    public function setMentionable(bool $mentionable): void
+    {
         $this->mentionable = $mentionable;
     }
 
-    public function getServerId(): string{
+    public function getServerId(): string
+    {
         return $this->server_id;
     }
 
-    public function setServerId(string $server_id): void{
-        if(!Utils::validDiscordSnowflake($server_id)){
+    public function setServerId(string $server_id): void
+    {
+        if (!Utils::validDiscordSnowflake($server_id)) {
             throw new \AssertionError("Server ID '$server_id' is invalid.");
         }
         $this->server_id = $server_id;
@@ -131,7 +156,8 @@ class Role implements \Serializable{
 
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->id,
             $this->name,
@@ -144,7 +170,8 @@ class Role implements \Serializable{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->id,
             $this->name,

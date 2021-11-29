@@ -14,28 +14,33 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class MemberLeave extends Packet{
+class MemberLeave extends Packet
+{
 
     /** @var string */
     private $member_id;
 
-    public function __construct(string $member_id){
+    public function __construct(string $member_id)
+    {
         parent::__construct();
         $this->member_id = $member_id;
     }
 
-    public function getMemberID(): string{
+    public function getMemberID(): string
+    {
         return $this->member_id;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->member_id
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->member_id

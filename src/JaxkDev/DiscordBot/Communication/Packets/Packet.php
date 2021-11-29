@@ -12,7 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets;
 
-abstract class Packet implements \Serializable{
+abstract class Packet implements \Serializable
+{
 
     // Used for responses.
     /** @var int */
@@ -21,12 +22,14 @@ abstract class Packet implements \Serializable{
     /** @var int */
     protected $UID;
 
-    public function __construct(){
+    public function __construct()
+    {
         Packet::$UID_COUNT += 2;  //BotThread = Odd, PluginThread = Even. (Keeps them unique, *shrugs*)
         $this->UID = Packet::$UID_COUNT;
     }
 
-    public function getUID(): int{
+    public function getUID(): int
+    {
         return $this->UID;
     }
 

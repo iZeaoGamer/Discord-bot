@@ -15,7 +15,8 @@ namespace JaxkDev\DiscordBot\Models;
 use JaxkDev\DiscordBot\Models\Permissions\RolePermissions;
 use JaxkDev\DiscordBot\Plugin\Utils;
 
-class Member implements \Serializable{
+class Member implements \Serializable
+{
 
     const STATUS_ONLINE = "online",
         STATUS_IDLE = "idle",
@@ -68,9 +69,17 @@ class Member implements \Serializable{
      * @param Activity[]|null      $activities
      * @param VoiceState|null      $voice_state
      */
-    public function __construct(string $user_id, int $join_timestamp, string $server_id, array $roles = [],
-                                ?string $nickname = null, ?int $boost_timestamp = null, RolePermissions $permissions = null,
-                                ?array $activities = null, ?VoiceState $voice_state = null){
+    public function __construct(
+        string $user_id,
+        int $join_timestamp,
+        string $server_id,
+        array $roles = [],
+        ?string $nickname = null,
+        ?int $boost_timestamp = null,
+        RolePermissions $permissions = null,
+        ?array $activities = null,
+        ?VoiceState $voice_state = null
+    ) {
         $this->setUserId($user_id);
         $this->setJoinTimestamp($join_timestamp);
         $this->setServerId($server_id);
@@ -87,126 +96,150 @@ class Member implements \Serializable{
      * @see Member::getServerId()
      * @see Member::getUserId()
      */
-    public function getId(): string{
-        return $this->server_id.".".$this->user_id;
+    public function getId(): string
+    {
+        return $this->server_id . "." . $this->user_id;
     }
 
-    public function getUserId(): string{
+    public function getUserId(): string
+    {
         return $this->user_id;
     }
 
-    public function setUserId(string $id): void{
-        if(!Utils::validDiscordSnowflake($id)){
+    public function setUserId(string $id): void
+    {
+        if (!Utils::validDiscordSnowflake($id)) {
             throw new \AssertionError("User ID '$id' is invalid.");
         }
         $this->user_id = $id;
     }
 
-    public function getNickname(): ?string{
+    public function getNickname(): ?string
+    {
         return $this->nickname;
     }
 
-    public function setNickname(?string $nickname): void{
+    public function setNickname(?string $nickname): void
+    {
         $this->nickname = $nickname;
     }
 
-    public function getJoinTimestamp(): int{
+    public function getJoinTimestamp(): int
+    {
         return $this->join_timestamp;
     }
 
-    public function setJoinTimestamp(int $join_timestamp): void{
+    public function setJoinTimestamp(int $join_timestamp): void
+    {
         $this->join_timestamp = $join_timestamp;
     }
 
-    public function getBoostTimestamp(): ?int{
+    public function getBoostTimestamp(): ?int
+    {
         return $this->boost_timestamp;
     }
 
-    public function setBoostTimestamp(?int $boost_timestamp): void{
+    public function setBoostTimestamp(?int $boost_timestamp): void
+    {
         $this->boost_timestamp = $boost_timestamp;
     }
 
-    public function getPermissions(): RolePermissions{
+    public function getPermissions(): RolePermissions
+    {
         return $this->permissions;
     }
 
-    public function setPermissions(RolePermissions $permissions): void{
+    public function setPermissions(RolePermissions $permissions): void
+    {
         $this->permissions = $permissions;
     }
 
     /**
      * @return string[]
      */
-    public function getRoles(): array{
+    public function getRoles(): array
+    {
         return $this->roles;
     }
 
     /**
      * @param string[] $roles
      */
-    public function setRoles(array $roles): void{
-        foreach($roles as $id){
-            if(!Utils::validDiscordSnowflake($id)){
+    public function setRoles(array $roles): void
+    {
+        foreach ($roles as $id) {
+            if (!Utils::validDiscordSnowflake($id)) {
                 throw new \AssertionError("Role ID '$id' is invalid.");
             }
         }
         $this->roles = $roles;
     }
 
-    public function getServerId(): string{
+    public function getServerId(): string
+    {
         return $this->server_id;
     }
 
-    public function setServerId(string $server_id): void{
-        if(!Utils::validDiscordSnowflake($server_id)){
+    public function setServerId(string $server_id): void
+    {
+        if (!Utils::validDiscordSnowflake($server_id)) {
             throw new \AssertionError("Server ID '$server_id' is invalid.");
         }
         $this->server_id = $server_id;
     }
 
-    public function getStatus(): ?string{
+    public function getStatus(): ?string
+    {
         return $this->status;
     }
 
-    public function setStatus(?string $status): void{
+    public function setStatus(?string $status): void
+    {
         $this->status = $status;
     }
 
     /** @return null|array{"mobile": string|null, "desktop": string|null, "web": string|null} */
-    public function getClientStatus(): ?array{
+    public function getClientStatus(): ?array
+    {
         return $this->client_status;
     }
 
     /** @param null|array{"mobile": string|null, "desktop": string|null, "web": string|null} $client_status*/
-    public function setClientStatus(?array $client_status): void{
+    public function setClientStatus(?array $client_status): void
+    {
         $this->client_status = $client_status;
     }
 
     /** @return null|Activity[] */
-    public function getActivities(): ?array{
+    public function getActivities(): ?array
+    {
         return $this->activities;
     }
 
     /** @param null|Activity[] $activities */
-    public function setActivities(?array $activities): void{
-        foreach($activities??[] as $activity){
-            if(!$activity instanceof Activity){
+    public function setActivities(?array $activities): void
+    {
+        foreach ($activities ?? [] as $activity) {
+            if (!$activity instanceof Activity) {
                 throw new \AssertionError("Activity not valid.");
             }
         }
         $this->activities = $activities;
     }
 
-    public function getVoiceState(): ?VoiceState{
+    public function getVoiceState(): ?VoiceState
+    {
         return $this->voice_state;
     }
 
-    public function setVoiceState(?VoiceState $voice_state): void{
+    public function setVoiceState(?VoiceState $voice_state): void
+    {
         $this->voice_state = $voice_state;
     }
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->user_id,
             $this->nickname,
@@ -222,7 +255,8 @@ class Member implements \Serializable{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->user_id,
             $this->nickname,

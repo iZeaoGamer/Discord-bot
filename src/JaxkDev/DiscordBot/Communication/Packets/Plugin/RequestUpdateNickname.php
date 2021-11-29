@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestUpdateNickname extends Packet{
+class RequestUpdateNickname extends Packet
+{
 
     /** @var string */
     private $server_id;
@@ -25,26 +26,31 @@ class RequestUpdateNickname extends Packet{
     /** @var string|null */
     private $nickname;
 
-    public function __construct(string $server_id, string $user_id, ?string $nickname = null){
+    public function __construct(string $server_id, string $user_id, ?string $nickname = null)
+    {
         parent::__construct();
         $this->server_id = $server_id;
         $this->user_id = $user_id;
         $this->nickname = $nickname;
     }
 
-    public function getServerId(): string{
+    public function getServerId(): string
+    {
         return $this->server_id;
     }
 
-    public function getUserId(): string{
+    public function getUserId(): string
+    {
         return $this->user_id;
     }
 
-    public function getNickname(): ?string{
+    public function getNickname(): ?string
+    {
         return $this->nickname;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->server_id,
@@ -53,7 +59,8 @@ class RequestUpdateNickname extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->server_id,

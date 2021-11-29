@@ -61,23 +61,42 @@ use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\VoiceState;
 use JaxkDev\DiscordBot\Models\Webhook;
 
-abstract class ModelConverter{
+abstract class ModelConverter
+{
 
-    static public function genModelVoiceState(DiscordVoiceStateUpdate $stateUpdate): VoiceState{
-        if($stateUpdate->guild_id === null){
+    static public function genModelVoiceState(DiscordVoiceStateUpdate $stateUpdate): VoiceState
+    {
+        if ($stateUpdate->guild_id === null) {
             throw new AssertionError("Not handling DM Voice states.");
         }
-        return new VoiceState($stateUpdate->session_id, $stateUpdate->channel_id, $stateUpdate->deaf, $stateUpdate->mute,
-            $stateUpdate->self_deaf, $stateUpdate->self_mute, $stateUpdate->self_stream??false, $stateUpdate->self_video,
-            $stateUpdate->suppress);
+        return new VoiceState(
+            $stateUpdate->session_id,
+            $stateUpdate->channel_id,
+            $stateUpdate->deaf,
+            $stateUpdate->mute,
+            $stateUpdate->self_deaf,
+            $stateUpdate->self_mute,
+            $stateUpdate->self_stream ?? false,
+            $stateUpdate->self_video,
+            $stateUpdate->suppress
+        );
     }
 
-    static public function genModelWebhook(DiscordWebhook $webhook): Webhook{
-        return new Webhook($webhook->type, $webhook->channel_id, $webhook->name, $webhook->id, $webhook->user->id,
-            $webhook->avatar, $webhook->token);
+    static public function genModelWebhook(DiscordWebhook $webhook): Webhook
+    {
+        return new Webhook(
+            $webhook->type,
+            $webhook->channel_id,
+            $webhook->name,
+            $webhook->id,
+            $webhook->user->id,
+            $webhook->avatar,
+            $webhook->token
+        );
     }
 
-    static public function genModelActivity(DiscordActivity $discordActivity): Activity{
+    static public function genModelActivity(DiscordActivity $discordActivity): Activity
+    {
         /** @var \stdClass{"end" => int|null, "start" => int|null} $timestamps */
         $timestamps = $discordActivity->timestamps;
         /** @var \stdClass{"id" => string|null, "size" => int[]|null} $party */
@@ -86,31 +105,53 @@ abstract class ModelConverter{
         $assets = $discordActivity->assets;
         //** @var \stdClass{"join" => string|null, "spectate" => string|null, "match" => string|null} $secrets  TODO, Cant confirm this. no one has any secrets so I cant see any valid data. */
         //$secrets = $discordActivity->secrets;
-        return new Activity($discordActivity->name, $discordActivity->type, $discordActivity->created_at->getTimestamp(),
-            $discordActivity->url, $timestamps->start??null, $timestamps->end??null,
-            $discordActivity->application_id, $discordActivity->details, $discordActivity->state, $discordActivity->emoji,
-            $party->id??null, ($party->size??[])[0]??null,($party->size??[])[1]??null,
-            $assets->large_image??null, $assets->large_text??null, $assets->small_image??null,
-            $assets->small_text??null, /*$secrets->join??null, $secrets->spectate??null,
-            $secrets->match??null,*/ $discordActivity->instance, $discordActivity->flags);
+        return new Activity(
+            $discordActivity->name,
+            $discordActivity->type,
+            $discordActivity->created_at->getTimestamp(),
+            $discordActivity->url,
+            $timestamps->start ?? null,
+            $timestamps->end ?? null,
+            $discordActivity->application_id,
+            $discordActivity->details,
+            $discordActivity->state,
+            $discordActivity->emoji,
+            $party->id ?? null,
+            ($party->size ?? [])[0] ?? null,
+            ($party->size ?? [])[1] ?? null,
+            $assets->large_image ?? null,
+            $assets->large_text ?? null,
+            $assets->small_image ?? null,
+            $assets->small_text ?? null, /*$secrets->join??null, $secrets->spectate??null,
+            $secrets->match??null,*/
+            $discordActivity->instance,
+            $discordActivity->flags
+        );
     }
 
-    static public function genModelMember(DiscordMember $discordMember): Member{
-        $m = new Member($discordMember->id, $discordMember->joined_at === null ? 0 : $discordMember->joined_at->getTimestamp(),
-            $discordMember->guild_id, [], $discordMember->nick, $discordMember->premium_since === null ? null : $discordMember->premium_since->getTimestamp());
+    static public function genModelMember(DiscordMember $discordMember): Member
+    {
+        $m = new Member(
+            $discordMember->id,
+            $discordMember->joined_at === null ? 0 : $discordMember->joined_at->getTimestamp(),
+            $discordMember->guild_id,
+            [],
+            $discordMember->nick,
+            $discordMember->premium_since === null ? null : $discordMember->premium_since->getTimestamp()
+        );
 
         $bitwise = $discordMember->guild->roles->offsetGet($discordMember->guild_id)->permissions->bitwise; //Everyone perms.
         $roles = [];
 
         //O(2n) -> O(n) by using same loop for permissions to add roles.
-        if($discordMember->guild->owner_id === $discordMember->id){
+        if ($discordMember->guild->owner_id === $discordMember->id) {
             $bitwise |= 0x8; // Add administrator permission
-            foreach($discordMember->roles ?? [] as $role){
+            foreach ($discordMember->roles ?? [] as $role) {
                 $roles[] = $role->id;
             }
-        }else{
+        } else {
             /* @var DiscordRole */
-            foreach($discordMember->roles ?? [] as $role){
+            foreach ($discordMember->roles ?? [] as $role) {
                 $roles[] = $role->id;
                 $bitwise |= $role->permissions->bitwise;
             }
@@ -121,14 +162,29 @@ abstract class ModelConverter{
         return $m;
     }
 
-    static public function genModelUser(DiscordUser $user): User{
-        return new User($user->id, $user->username, $user->discriminator, $user->avatar, $user->bot??false,
-            $user->public_flags??0);
+    static public function genModelUser(DiscordUser $user): User
+    {
+        return new User(
+            $user->id,
+            $user->username,
+            $user->discriminator,
+            $user->avatar,
+            $user->bot ?? false,
+            $user->public_flags ?? 0
+        );
     }
 
-    static public function genModelServer(DiscordServer $discordServer): Server{
-        return new Server($discordServer->id, $discordServer->name, $discordServer->region, $discordServer->owner_id,
-            $discordServer->large, $discordServer->member_count, $discordServer->icon);
+    static public function genModelServer(DiscordServer $discordServer): Server
+    {
+        return new Server(
+            $discordServer->id,
+            $discordServer->name,
+            $discordServer->region,
+            $discordServer->owner_id,
+            $discordServer->large,
+            $discordServer->member_count,
+            $discordServer->icon
+        );
     }
 
     /**
@@ -136,18 +192,19 @@ abstract class ModelConverter{
      * @param mixed $c
      * @return mixed
      */
-    static private function applyPermissionOverwrites(DiscordChannel $dc, mixed $c): mixed{
+    static private function applyPermissionOverwrites(DiscordChannel $dc, mixed $c): mixed
+    {
         /** @var DiscordOverwrite $overwrite */
-        foreach($dc->overwrites as $overwrite){
+        foreach ($dc->overwrites as $overwrite) {
             $allowed = new ChannelPermissions($overwrite->allow->bitwise);
             $denied = new ChannelPermissions($overwrite->deny->bitwise);
-            if($overwrite->type === DiscordOverwrite::TYPE_MEMBER){
+            if ($overwrite->type === DiscordOverwrite::TYPE_MEMBER) {
                 $c->setAllowedMemberPermissions($overwrite->id, $allowed);
                 $c->setDeniedMemberPermissions($overwrite->id, $denied);
-            }elseif($overwrite->type === DiscordOverwrite::TYPE_ROLE){
+            } elseif ($overwrite->type === DiscordOverwrite::TYPE_ROLE) {
                 $c->setAllowedRolePermissions($overwrite->id, $allowed);
                 $c->setDeniedRolePermissions($overwrite->id, $denied);
-            }else{
+            } else {
                 throw new AssertionError("Overwrite type unknown ? ({$overwrite->type})");
             }
         }
@@ -159,8 +216,9 @@ abstract class ModelConverter{
      * @param DiscordChannel $channel
      * @return ?ServerChannel Null if type is invalid/unused.
      */
-    static public function genModelChannel(DiscordChannel $channel): ?ServerChannel{
-        switch($channel->type){
+    static public function genModelChannel(DiscordChannel $channel): ?ServerChannel
+    {
+        switch ($channel->type) {
             case DiscordChannel::TYPE_TEXT:
             case DiscordChannel::TYPE_NEWS:
                 return self::genModelTextChannel($channel);
@@ -172,151 +230,247 @@ abstract class ModelConverter{
                 return null;
         }
     }
-    static public function genModelThread(DiscordThread $thread): ThreadChannel{
+    static public function genModelThread(DiscordThread $thread): ThreadChannel
+    {
         return new ThreadChannel($thread->name, $thread->guild_id, $thread->owner_id, $thread->locked, $thread->auto_archive_duration, $thread->rate_limit_per_user, $thread->archiver_id, $thread->id);
     }
 
-    static public function genModelCategoryChannel(DiscordChannel $discordChannel): CategoryChannel{
-        if($discordChannel->type !== DiscordChannel::TYPE_CATEGORY){
+    static public function genModelCategoryChannel(DiscordChannel $discordChannel): CategoryChannel
+    {
+        if ($discordChannel->type !== DiscordChannel::TYPE_CATEGORY) {
             throw new AssertionError("Discord channel type must be `category` to generate model category channel.");
         }
-        if($discordChannel->guild_id === null){
+        if ($discordChannel->guild_id === null) {
             throw new AssertionError("Guild ID must be present.");
         }
-        return self::applyPermissionOverwrites($discordChannel, new CategoryChannel($discordChannel->name, $discordChannel->position,
-            $discordChannel->guild_id, $discordChannel->id));
+        return self::applyPermissionOverwrites($discordChannel, new CategoryChannel(
+            $discordChannel->name,
+            $discordChannel->position,
+            $discordChannel->guild_id,
+            $discordChannel->id
+        ));
     }
 
-    static public function genModelVoiceChannel(DiscordChannel $discordChannel): VoiceChannel{
-        if($discordChannel->type !== DiscordChannel::TYPE_VOICE){
+    static public function genModelVoiceChannel(DiscordChannel $discordChannel): VoiceChannel
+    {
+        if ($discordChannel->type !== DiscordChannel::TYPE_VOICE) {
             throw new AssertionError("Discord channel type must be `voice` to generate model voice channel.");
         }
-        if($discordChannel->guild_id === null){
+        if ($discordChannel->guild_id === null) {
             throw new AssertionError("Guild ID must be present.");
         }
-        $ids = array_map(function($id) use($discordChannel){
-            return $discordChannel->guild->id.".$id";
+        $ids = array_map(function ($id) use ($discordChannel) {
+            return $discordChannel->guild->id . ".$id";
         }, array_keys($discordChannel->members->toArray()));
-        return self::applyPermissionOverwrites($discordChannel, new VoiceChannel($discordChannel->bitrate, $discordChannel->user_limit,
-            $discordChannel->name, $discordChannel->position, $discordChannel->guild_id, $ids,
-            $discordChannel->parent_id, $discordChannel->id));
+        return self::applyPermissionOverwrites($discordChannel, new VoiceChannel(
+            $discordChannel->bitrate,
+            $discordChannel->user_limit,
+            $discordChannel->name,
+            $discordChannel->position,
+            $discordChannel->guild_id,
+            $ids,
+            $discordChannel->parent_id,
+            $discordChannel->id
+        ));
     }
 
-    static public function genModelTextChannel(DiscordChannel $discordChannel): TextChannel{
-        if($discordChannel->type !== DiscordChannel::TYPE_TEXT and $discordChannel->type !== DiscordChannel::TYPE_NEWS){
+    static public function genModelTextChannel(DiscordChannel $discordChannel): TextChannel
+    {
+        if ($discordChannel->type !== DiscordChannel::TYPE_TEXT and $discordChannel->type !== DiscordChannel::TYPE_NEWS) {
             throw new AssertionError("Discord channel type must be `text|news` to generate model text channel.");
         }
-        if($discordChannel->guild_id === null){
+        if ($discordChannel->guild_id === null) {
             throw new AssertionError("Guild ID must be present.");
         }
-        return self::applyPermissionOverwrites($discordChannel, new TextChannel($discordChannel->topic??"", $discordChannel->name,
-            $discordChannel->position, $discordChannel->guild_id, $discordChannel->nsfw??false, $discordChannel->rate_limit_per_user,
-            $discordChannel->parent_id, $discordChannel->id));
+        return self::applyPermissionOverwrites($discordChannel, new TextChannel(
+            $discordChannel->topic ?? "",
+            $discordChannel->name,
+            $discordChannel->position,
+            $discordChannel->guild_id,
+            $discordChannel->nsfw ?? false,
+            $discordChannel->rate_limit_per_user,
+            $discordChannel->parent_id,
+            $discordChannel->id
+        ));
     }
 
-    static public function genModelMessage(DiscordMessage $discordMessage): Message{
-        if($discordMessage->author === null){
+    static public function genModelMessage(DiscordMessage $discordMessage): Message
+    {
+        if ($discordMessage->author === null) {
             throw new AssertionError("Discord message does not have a author, cannot generate model message.");
         }
         $attachments = [];
-        foreach($discordMessage->attachments as $attachment){
+        foreach ($discordMessage->attachments as $attachment) {
             $attachments[] = self::genModelAttachment($attachment);
         }
-        $guild_id = $discordMessage->guild_id??($discordMessage->author instanceof DiscordMember ? $discordMessage->author->guild_id : null);
-        if($discordMessage->type === DiscordMessage::TYPE_NORMAL){
-            if($discordMessage->webhook_id === null){
+        $guild_id = $discordMessage->guild_id ?? ($discordMessage->author instanceof DiscordMember ? $discordMessage->author->guild_id : null);
+        if ($discordMessage->type === DiscordMessage::TYPE_NORMAL) {
+            if ($discordMessage->webhook_id === null) {
                 $e = $discordMessage->embeds->first();
-                if($e !== null){
+                if ($e !== null) {
                     $e = self::genModelEmbed($e);
                 }
-                $author = $guild_id === null ? $discordMessage->author->id : $guild_id.".".$discordMessage->author->id;
-                return new Message($discordMessage->channel_id, $discordMessage->id, $discordMessage->content, $e,
-                    $author, $guild_id, $discordMessage->timestamp->getTimestamp(), $attachments, $discordMessage->mention_everyone,
-                    array_keys($discordMessage->mentions->toArray()), array_keys($discordMessage->mention_roles->toArray()),
-                    array_keys($discordMessage->mention_channels->toArray()));
-            }else{
+                $author = $guild_id === null ? $discordMessage->author->id : $guild_id . "." . $discordMessage->author->id;
+                return new Message(
+                    $discordMessage->channel_id,
+                    $discordMessage->id,
+                    $discordMessage->content,
+                    $e,
+                    $author,
+                    $guild_id,
+                    $discordMessage->timestamp->getTimestamp(),
+                    $attachments,
+                    $discordMessage->mention_everyone,
+                    array_keys($discordMessage->mentions->toArray()),
+                    array_keys($discordMessage->mention_roles->toArray()),
+                    array_keys($discordMessage->mention_channels->toArray())
+                );
+            } else {
                 $embeds = [];
-                foreach($discordMessage->embeds as $embed){
+                foreach ($discordMessage->embeds as $embed) {
                     $embeds[] = self::genModelEmbed($embed);
                 }
-                $author = $guild_id === null ? $discordMessage->author->id : $guild_id.".".$discordMessage->author->id;
-                return new WebhookMessage($discordMessage->channel_id, $discordMessage->webhook_id, $embeds, $discordMessage->id,
-                    $discordMessage->content, $author, $guild_id, $discordMessage->timestamp->getTimestamp(), $attachments,
-                    $discordMessage->mention_everyone, array_keys($discordMessage->mentions->toArray()),
-                    array_keys($discordMessage->mention_roles->toArray()), array_keys($discordMessage->mention_channels->toArray()));
+                $author = $guild_id === null ? $discordMessage->author->id : $guild_id . "." . $discordMessage->author->id;
+                return new WebhookMessage(
+                    $discordMessage->channel_id,
+                    $discordMessage->webhook_id,
+                    $embeds,
+                    $discordMessage->id,
+                    $discordMessage->content,
+                    $author,
+                    $guild_id,
+                    $discordMessage->timestamp->getTimestamp(),
+                    $attachments,
+                    $discordMessage->mention_everyone,
+                    array_keys($discordMessage->mentions->toArray()),
+                    array_keys($discordMessage->mention_roles->toArray()),
+                    array_keys($discordMessage->mention_channels->toArray())
+                );
             }
-        }elseif($discordMessage->type === DiscordMessage::TYPE_REPLY){
-            if($discordMessage->referenced_message === null){
+        } elseif ($discordMessage->type === DiscordMessage::TYPE_REPLY) {
+            if ($discordMessage->referenced_message === null) {
                 throw new AssertionError("No referenced message on a REPLY message.");
             }
             $e = $discordMessage->embeds->first();
-            if($e !== null){
+            if ($e !== null) {
                 $e = self::genModelEmbed($e);
             }
-            $author = $guild_id === null ? $discordMessage->author->id : $guild_id.".".$discordMessage->author->id;
-            return new ReplyMessage($discordMessage->channel_id, $discordMessage->referenced_message->id, $discordMessage->id,
-                $discordMessage->content, $e, $author, $guild_id, $discordMessage->timestamp->getTimestamp(), $attachments,
-                $discordMessage->mention_everyone, array_keys($discordMessage->mentions->toArray()),
-                array_keys($discordMessage->mention_roles->toArray()), array_keys($discordMessage->mention_channels->toArray()));
+            $author = $guild_id === null ? $discordMessage->author->id : $guild_id . "." . $discordMessage->author->id;
+            return new ReplyMessage(
+                $discordMessage->channel_id,
+                $discordMessage->referenced_message->id,
+                $discordMessage->id,
+                $discordMessage->content,
+                $e,
+                $author,
+                $guild_id,
+                $discordMessage->timestamp->getTimestamp(),
+                $attachments,
+                $discordMessage->mention_everyone,
+                array_keys($discordMessage->mentions->toArray()),
+                array_keys($discordMessage->mention_roles->toArray()),
+                array_keys($discordMessage->mention_channels->toArray())
+            );
         }
         throw new AssertionError("Discord message type not supported.");
     }
 
-    static public function genModelAttachment(\stdClass $attachment): Attachment{
-        return new Attachment($attachment->id, $attachment->filename, $attachment->content_type, $attachment->size,
-            $attachment->url, $attachment->width??null, $attachment->height??null);
+    static public function genModelAttachment(\stdClass $attachment): Attachment
+    {
+        return new Attachment(
+            $attachment->id,
+            $attachment->filename,
+            $attachment->content_type,
+            $attachment->size,
+            $attachment->url,
+            $attachment->width ?? null,
+            $attachment->height ?? null
+        );
     }
 
-    static public function genModelEmbed(DiscordEmbed $discordEmbed): Embed{
+    static public function genModelEmbed(DiscordEmbed $discordEmbed): Embed
+    {
         $fields = [];
-        foreach(array_values($discordEmbed->fields->toArray()) as $field){
+        foreach (array_values($discordEmbed->fields->toArray()) as $field) {
             $fields[] = self::genModelEmbedField($field);
         }
-        return new Embed($discordEmbed->title, $discordEmbed->type, $discordEmbed->description, $discordEmbed->url,
+        return new Embed(
+            $discordEmbed->title,
+            $discordEmbed->type,
+            $discordEmbed->description,
+            $discordEmbed->url,
             $discordEmbed->timestamp instanceof Carbon ? $discordEmbed->timestamp->getTimestamp() : (int)$discordEmbed->timestamp,
-            $discordEmbed->color, $discordEmbed->footer === null ? new Footer() : self::genModelEmbedFooter($discordEmbed->footer),
+            $discordEmbed->color,
+            $discordEmbed->footer === null ? new Footer() : self::genModelEmbedFooter($discordEmbed->footer),
             $discordEmbed->image === null ? new Image() : self::genModelEmbedImage($discordEmbed->image),
             $discordEmbed->thumbnail === null ? new Image() : self::genModelEmbedImage($discordEmbed->thumbnail),
             $discordEmbed->video === null ? new Video() : self::genModelEmbedVideo($discordEmbed->video),
             $discordEmbed->author === null ? new Author() : self::genModelEmbedAuthor($discordEmbed->author),
-            $fields);
+            $fields
+        );
     }
 
-    static public function genModelEmbedFooter(DiscordFooter $footer): Footer{
+    static public function genModelEmbedFooter(DiscordFooter $footer): Footer
+    {
         return new Footer($footer->text, $footer->icon_url);
     }
 
-    static public function genModelEmbedImage(DiscordImage $image): Image{
+    static public function genModelEmbedImage(DiscordImage $image): Image
+    {
         return new Image($image->url, $image->width, $image->height);
     }
 
-    static public function genModelEmbedVideo(DiscordVideo $video): Video{
+    static public function genModelEmbedVideo(DiscordVideo $video): Video
+    {
         return new Video($video->url, $video->width, $video->height);
     }
 
-    static public function genModelEmbedAuthor(DiscordAuthor $author): Author{
+    static public function genModelEmbedAuthor(DiscordAuthor $author): Author
+    {
         return new Author($author->name, $author->url, $author->icon_url);
     }
 
-    static public function genModelEmbedField(DiscordField $field): Field{
+    static public function genModelEmbedField(DiscordField $field): Field
+    {
         return new Field($field->name, $field->value, $field->inline);
     }
 
-    static public function genModelRolePermission(DiscordRolePermission $rolePermission): RolePermissions{
+    static public function genModelRolePermission(DiscordRolePermission $rolePermission): RolePermissions
+    {
         return new RolePermissions($rolePermission->bitwise);
     }
 
-    static public function genModelRole(DiscordRole $discordRole): Role{
-        return new Role($discordRole->name, $discordRole->color, $discordRole->hoist, $discordRole->position, $discordRole->mentionable,
-            $discordRole->guild_id, self::genModelRolePermission($discordRole->permissions), $discordRole->id);
+    static public function genModelRole(DiscordRole $discordRole): Role
+    {
+        return new Role(
+            $discordRole->name,
+            $discordRole->color,
+            $discordRole->hoist,
+            $discordRole->position,
+            $discordRole->mentionable,
+            $discordRole->guild_id,
+            self::genModelRolePermission($discordRole->permissions),
+            $discordRole->id
+        );
     }
 
-    static public function genModelInvite(DiscordInvite $invite): Invite{
-        return new Invite($invite->guild_id, $invite->channel_id, $invite->max_age, $invite->max_uses, $invite->temporary,
-        $invite->code, $invite->created_at->getTimestamp(), $invite->guild_id.".".$invite->inviter->id, $invite->uses);
+    static public function genModelInvite(DiscordInvite $invite): Invite
+    {
+        return new Invite(
+            $invite->guild_id,
+            $invite->channel_id,
+            $invite->max_age,
+            $invite->max_uses,
+            $invite->temporary,
+            $invite->code,
+            $invite->created_at->getTimestamp(),
+            $invite->guild_id . "." . $invite->inviter->id,
+            $invite->uses
+        );
     }
 
-    static public function genModelBan(DiscordBan $ban): Ban{
+    static public function genModelBan(DiscordBan $ban): Ban
+    {
         return new Ban($ban->guild_id, $ban->user_id, $ban->reason);
     }
 }

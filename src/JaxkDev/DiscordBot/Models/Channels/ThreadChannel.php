@@ -12,7 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Models\Channels;
 
-class ThreadChannel{
+class ThreadChannel
+{
 
 
     /** @var string|null */
@@ -56,17 +57,25 @@ class ThreadChannel{
      * @param int|null    $rate_limit
      * @param string|null $userID
      */
-    public function __construct(string $name, string $server_id, string $threadOwner, bool $private, int $duration,
-                                   ?int $rate_limit = null, ?string $userID = null, ?string $id){
-       // parent::__construct($name, $position, $server_id, null, $id);
-      
-       $this->setName($name);
-       $this->setServerID($server_id);
+    public function __construct(
+        string $name,
+        string $server_id,
+        string $threadOwner,
+        bool $private,
+        int $duration,
+        ?int $rate_limit = null,
+        ?string $userID = null,
+        ?string $id
+    ) {
+        // parent::__construct($name, $position, $server_id, null, $id);
+
+        $this->setName($name);
+        $this->setServerID($server_id);
         $this->setOwner($threadOwner);
         $this->setPrivate($private);
         $this->setDuration($duration);
         $this->setRateLimit($rate_limit);
-    
+
         $this->setUserID($userID);
         $this->setID($id);
     }
@@ -75,14 +84,16 @@ class ThreadChannel{
      * @param string|null $id
      * @return void
      */
-    public function setID(?string $id): void{
+    public function setID(?string $id): void
+    {
         $this->id = $id;
     }
 
     /** 
      * @return string|null
      */
-    public function getID(): ?string{
+    public function getID(): ?string
+    {
         return $this->id;
     }
     /** Sets a thread name.
@@ -90,14 +101,16 @@ class ThreadChannel{
      * @param string $name
      * @return void
      */
-    public function setName(string $name): void{
+    public function setName(string $name): void
+    {
         $this->name = $name;
     }
 
     /**
      * @return string
      */
-    public function getName(): string{
+    public function getName(): string
+    {
         return $this->name;
     }
 
@@ -105,14 +118,16 @@ class ThreadChannel{
      * @param string $server_id
      * @return void
      */
-    public function setServerID(string $server_id): void{
+    public function setServerID(string $server_id): void
+    {
         $this->server_id = $server_id;
     }
 
     /** 
      * @return string
      */
-    public function getServerID(): string{
+    public function getServerID(): string
+    {
         return $this->server_id;
     }
 
@@ -122,37 +137,43 @@ class ThreadChannel{
      * @return void
      * 
      */
-    public function setPrivate(bool $private): void{
+    public function setPrivate(bool $private): void
+    {
         $this->private = $private;
     }
 
     /** Checks if the given thread is private.
      * @return bool
      */
-    public function isPrivate(): bool{
+    public function isPrivate(): bool
+    {
         return $this->private;
     }
     /** @return void */
-    public function setDuration(int $duration): void{
+    public function setDuration(int $duration): void
+    {
         $this->duration = $duration;
     }
     /** @return int */
-    public function getDuration(): int{
+    public function getDuration(): int
+    {
         return $this->duration;
     }
 
     /** Get's the rate limit (Slowmode) in seconds for the given thread.
      * @return int|null
-    */
-    public function getRateLimit(): ?int{
+     */
+    public function getRateLimit(): ?int
+    {
         return $this->rate_limit;
     }
 
     /**
      * @param int|null $rate_limit 0-21600 seconds.
      */
-    public function setRateLimit(?int $rate_limit): void{
-        if($rate_limit !== null and ($rate_limit < 0 or $rate_limit > 21600)){
+    public function setRateLimit(?int $rate_limit): void
+    {
+        if ($rate_limit !== null and ($rate_limit < 0 or $rate_limit > 21600)) {
             throw new \AssertionError("Rate limit '$rate_limit' is outside the bounds 0-21600.");
         }
         $this->rate_limit = $rate_limit;
@@ -162,23 +183,27 @@ class ThreadChannel{
      * @param string $threadOwner
      * @return void
      */
-    public function setOwner(string $threadOwner): void{
+    public function setOwner(string $threadOwner): void
+    {
         $this->threadOwner = $threadOwner;
     }
 
     /** @return string */
-    public function getOwner(): string{
+    public function getOwner(): string
+    {
         return $this->threadOwner;
     }
     /**
      * @param string|null $user_id
      * @return void
      * */
-    public function setUserID(?string $user_id): void{
+    public function setUserID(?string $user_id): void
+    {
         $this->user_id = $user_id;
     }
     /** @return string|null */
-    public function getUserID(): ?string{
+    public function getUserID(): ?string
+    {
         return $this->user_id;
     }
 }

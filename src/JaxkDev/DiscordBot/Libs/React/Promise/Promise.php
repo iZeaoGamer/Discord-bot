@@ -217,7 +217,7 @@ final class Promise implements PromiseInterface
                 // garbage cycles if any callback creates an Exception.
                 // These assumptions are covered by the test suite, so if you ever feel like
                 // refactoring this, go ahead, any alternative suggestions are welcome!
-                $target =& $this;
+                $target = &$this;
 
                 $callback(
                     static function ($value = null) use (&$target) {

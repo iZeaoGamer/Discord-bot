@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestGuildTransfer extends Packet{
+class RequestGuildTransfer extends Packet
+{
 
     /** @var string */
     private $server_id;
@@ -22,20 +23,24 @@ class RequestGuildTransfer extends Packet{
     /** @var string */
     private $user_id;
 
-    public function __construct(string $server_id, string $user_id){
+    public function __construct(string $server_id, string $user_id)
+    {
         parent::__construct();
         $this->server_id = $server_id;
         $this->user_id = $user_id;
     }
 
-    public function getServerId(): string{
+    public function getServerId(): string
+    {
         return $this->server_id;
     }
-    public function getUserId(): string{
+    public function getUserId(): string
+    {
         return $this->user_id;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->server_id,
@@ -43,7 +48,8 @@ class RequestGuildTransfer extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->server_id,

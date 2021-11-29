@@ -21,17 +21,20 @@ use pocketmine\plugin\Plugin;
  * @see ServerDeleted Emitted when the bot leaves a server
  * @see ServerJoined Emitted when the bot joins a server.
  */
-class ServerUpdated extends DiscordBotEvent{
+class ServerUpdated extends DiscordBotEvent
+{
 
     /** @var Server */
     private $server;
 
-    public function __construct(Plugin $plugin, Server $server){
+    public function __construct(Plugin $plugin, Server $server)
+    {
         parent::__construct($plugin);
         $this->server = $server;
     }
 
-    public function getServer(): Server{
+    public function getServer(): Server
+    {
         return $this->server;
     }
 }

@@ -22,17 +22,20 @@ use pocketmine\plugin\Plugin;
  * @see MessageBulkDeleted
  * @see MessageDeleted
  */
-class MessageSent extends DiscordBotEvent{
+class MessageSent extends DiscordBotEvent
+{
 
     /** @var Message */
     private $message;
 
-    public function __construct(Plugin $plugin, Message $message){
+    public function __construct(Plugin $plugin, Message $message)
+    {
         parent::__construct($plugin);
         $this->message = $message;
     }
     /** @return Message */
-    public function getMessage(): Message{
+    public function getMessage(): Message
+    {
         return $this->message;
     }
 
@@ -40,7 +43,8 @@ class MessageSent extends DiscordBotEvent{
      * @param Message $message
      * @return void
      */
-    public function setMessage(Message $message): void{
+    public function setMessage(Message $message): void
+    {
         $this->message = $message;
     }
 }

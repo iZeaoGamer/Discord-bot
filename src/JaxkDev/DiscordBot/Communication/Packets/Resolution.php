@@ -12,7 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets;
 
-class Resolution extends Packet{
+class Resolution extends Packet
+{
 
     /** @var int */
     private $pid;
@@ -26,7 +27,8 @@ class Resolution extends Packet{
     /** @var array */
     private $data;
 
-    public function __construct(int $pid, bool $successful, string $response, array $data = []){
+    public function __construct(int $pid, bool $successful, string $response, array $data = [])
+    {
         parent::__construct();
         $this->pid = $pid;
         $this->successful = $successful;
@@ -34,23 +36,28 @@ class Resolution extends Packet{
         $this->data = $data;
     }
 
-    public function getPid(): int{
+    public function getPid(): int
+    {
         return $this->pid;
     }
 
-    public function wasSuccessful(): bool{
+    public function wasSuccessful(): bool
+    {
         return $this->successful;
     }
 
-    public function getResponse(): string{
+    public function getResponse(): string
+    {
         return $this->response;
     }
 
-    public function getData(): array{
+    public function getData(): array
+    {
         return $this->data;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->pid,
             $this->successful,
@@ -59,7 +66,8 @@ class Resolution extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->pid,
             $this->successful,

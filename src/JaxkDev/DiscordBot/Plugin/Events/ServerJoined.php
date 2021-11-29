@@ -25,7 +25,8 @@ use pocketmine\plugin\Plugin;
  * @see ServerDeleted Emitted when the bot leaves a server
  * @see ServerUpdated Emitted when a server the bot is in has been updated.
  */
-class ServerJoined extends DiscordBotEvent{
+class ServerJoined extends DiscordBotEvent
+{
 
     /** @var Server */
     private $server;
@@ -50,7 +51,8 @@ class ServerJoined extends DiscordBotEvent{
      * @param Channel[] $channels
      * @param Member[]  $members
      */
-    public function __construct(Plugin $plugin, Server $server, array $threads, array $roles, array $channels, array $members){
+    public function __construct(Plugin $plugin, Server $server, array $threads, array $roles, array $channels, array $members)
+    {
         parent::__construct($plugin);
         $this->server = $server;
         $this->threads = $threads;
@@ -59,28 +61,32 @@ class ServerJoined extends DiscordBotEvent{
         $this->members = $members;
     }
 
-    public function getServer(): Server{
+    public function getServer(): Server
+    {
         return $this->server;
     }
 
     /**
      * @return Role[]
      */
-    public function getRoles(): array{
+    public function getRoles(): array
+    {
         return $this->roles;
     }
 
     /**
      * @return Channel[]
      */
-    public function getChannels(): array{
+    public function getChannels(): array
+    {
         return $this->channels;
     }
 
     /**
      * @return Member[]
      */
-    public function getMembers(): array{
+    public function getMembers(): array
+    {
         return $this->members;
     }
 }

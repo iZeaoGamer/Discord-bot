@@ -21,17 +21,20 @@ use pocketmine\plugin\Plugin;
  * @see MemberLeft
  * @see MemberUpdated
  */
-class MemberJoined extends DiscordBotEvent{
+class MemberJoined extends DiscordBotEvent
+{
 
     /** @var Member */
     private $member;
 
-    public function __construct(Plugin $plugin, Member $member){
+    public function __construct(Plugin $plugin, Member $member)
+    {
         parent::__construct($plugin);
         $this->member = $member;
     }
 
-    public function getMember(): Member{
+    public function getMember(): Member
+    {
         return $this->member;
     }
 }

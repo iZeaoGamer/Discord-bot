@@ -15,7 +15,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 
-class RequestUnmuteMember extends Packet{
+class RequestUnmuteMember extends Packet
+{
 
     /** @var VoiceChannel */
     private $channel;
@@ -23,21 +24,25 @@ class RequestUnmuteMember extends Packet{
     /** @var string */
     private $userId;
 
-    public function __construct(string $user_id, VoiceChannel $channel){
+    public function __construct(string $user_id, VoiceChannel $channel)
+    {
         parent::__construct();
         $this->userId = $user_id;
         $this->channel = $channel;
     }
-    public function getUserId(): string{
+    public function getUserId(): string
+    {
         return $this->userId;
     }
 
-    public function getChannel(): VoiceChannel{
+    public function getChannel(): VoiceChannel
+    {
         return $this->channel;
     }
 
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->userId,
@@ -45,7 +50,8 @@ class RequestUnmuteMember extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->userId,

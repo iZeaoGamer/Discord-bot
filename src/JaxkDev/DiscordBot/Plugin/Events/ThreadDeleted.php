@@ -14,23 +14,27 @@ namespace JaxkDev\DiscordBot\Plugin\Events;
 
 use pocketmine\plugin\Plugin;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+
 /**
  * Emitted when a thread gets deleted.
  * 
  * @see ThreadCreated
  * @see ThreadUpdated
  */
-class ThreadDeleted extends DiscordBotEvent{
+class ThreadDeleted extends DiscordBotEvent
+{
 
     /** @var ThreadChannel */
     private $channel;
 
-    public function __construct(Plugin $plugin, ThreadChannel $channel){
+    public function __construct(Plugin $plugin, ThreadChannel $channel)
+    {
         parent::__construct($plugin);
         $this->channel = $channel;
     }
 
-    public function getChannel(): ThreadChannel{
+    public function getChannel(): ThreadChannel
+    {
         return $this->channel;
     }
 }

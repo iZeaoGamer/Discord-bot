@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestThreadMessageCreate extends Packet{
+class RequestThreadMessageCreate extends Packet
+{
 
     /** @var string */
     private $message_id;
@@ -28,7 +29,8 @@ class RequestThreadMessageCreate extends Packet{
     /** @var int */
     private $duration;
 
-    public function __construct(string $message_id, string $channel_id, string $name, int $duration){
+    public function __construct(string $message_id, string $channel_id, string $name, int $duration)
+    {
         parent::__construct();
         $this->message_id = $message_id;
         $this->channel_id = $channel_id;
@@ -36,21 +38,26 @@ class RequestThreadMessageCreate extends Packet{
         $this->duration = $duration;
     }
 
-    public function getMessageId(): string{
+    public function getMessageId(): string
+    {
         return $this->message_id;
     }
 
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channel_id;
     }
-    public function getName(): string{
+    public function getName(): string
+    {
         return $this->threadName;
     }
-    public function getDuration(): int{
+    public function getDuration(): int
+    {
         return $this->duration;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->message_id,
@@ -60,7 +67,8 @@ class RequestThreadMessageCreate extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->message_id,

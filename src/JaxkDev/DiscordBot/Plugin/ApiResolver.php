@@ -20,13 +20,15 @@ use pocketmine\utils\MainLogger;
 /**
  * @internal
  */
-abstract class ApiResolver{
+abstract class ApiResolver
+{
 
     /** @var Array<int, Deferred> */
     static private $map = [];
 
-    static public function create(int $uid): PromiseInterface{
-        if(isset(self::$map[$uid])){
+    static public function create(int $uid): PromiseInterface
+    {
+        if (isset(self::$map[$uid])) {
             throw new \AssertionError("Packet {$uid} already linked to a promise resolver.");
         }
         $d = new Deferred();
@@ -34,20 +36,22 @@ abstract class ApiResolver{
         return $d->promise();
     }
 
-    static public function getPromise(int $uid): ?PromiseInterface{
+    static public function getPromise(int $uid): ?PromiseInterface
+    {
         return isset(self::$map[$uid]) ? self::$map[$uid]->promise() : null;
     }
 
-    static public function handleResolution(Resolution $packet): void{
-        if(isset(self::$map[$packet->getPid()])){
+    static public function handleResolution(Resolution $packet): void
+    {
+        if (isset(self::$map[$packet->getPid()])) {
             $d = self::$map[$packet->getPid()];
-            if($packet->wasSuccessful()){
+            if ($packet->wasSuccessful()) {
                 $d->resolve(new ApiResolution([$packet->getResponse(), ...$packet->getData()]));
-            }else{
+            } else {
                 $d->reject(new ApiRejection($packet->getResponse(), $packet->getData()));
             }
             unset(self::$map[$packet->getPid()]);
-        }else{
+        } else {
             MainLogger::getLogger()->debug("A unidentified resolution has been received, ID: {$packet->getPid()}, Successful: {$packet->wasSuccessful()}, Message: {$packet->getResponse()}");
         }
     }

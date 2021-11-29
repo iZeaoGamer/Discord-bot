@@ -12,19 +12,22 @@
 
 namespace JaxkDev\DiscordBot\Plugin;
 
-class ApiResolution{
+class ApiResolution
+{
 
     /** @var string[] */
     private $data;
 
-    public function __construct(array $data = []){
-        if(sizeof($data) === 0){
+    public function __construct(array $data = [])
+    {
+        if (sizeof($data) === 0) {
             throw new \AssertionError("Expected data for ApiResolution to contain at least a message.");
         }
         $this->data = $data;
     }
 
-    public function getMessage(): string{
+    public function getMessage(): string
+    {
         return $this->data[0];
     }
 
@@ -33,7 +36,8 @@ class ApiResolution{
      *
      * @return array
      */
-    public function getData(): array{
+    public function getData(): array
+    {
         return array_slice($this->data, 1);
     }
 }

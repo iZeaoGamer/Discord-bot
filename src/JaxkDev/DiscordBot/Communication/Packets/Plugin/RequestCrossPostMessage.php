@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestCrossPostMessage extends Packet{
+class RequestCrossPostMessage extends Packet
+{
 
     /** @var null|string */
     private $message_id;
@@ -22,30 +23,35 @@ class RequestCrossPostMessage extends Packet{
     /** @var null|string */
     private $channel_id;
 
-    public function __construct(?string $message_id, ?string $channel_id){
+    public function __construct(?string $message_id, ?string $channel_id)
+    {
         parent::__construct();
         $this->message_id = $message_id;
         $this->channel_id = $channel_id;
     }
-    public function getMessageID(): ?string{
+    public function getMessageID(): ?string
+    {
         return $this->message_id;
     }
-    public function getChannelID(): ?string{
+    public function getChannelID(): ?string
+    {
         return $this->channel_id;
     }
-        public function serialize(): ?string{
-            return serialize([
-                $this->UID,
-                $this->message_id,
-                $this->channel_id
-            ]);
-        }
-    
-        public function unserialize($data): void{
-            [
-                $this->UID,
-                $this->message_id,
-                $this->channel_id
-            ] = unserialize($data);
-        }
+    public function serialize(): ?string
+    {
+        return serialize([
+            $this->UID,
+            $this->message_id,
+            $this->channel_id
+        ]);
     }
+
+    public function unserialize($data): void
+    {
+        [
+            $this->UID,
+            $this->message_id,
+            $this->channel_id
+        ] = unserialize($data);
+    }
+}

@@ -15,7 +15,8 @@ namespace JaxkDev\DiscordBot\Models\Channels;
 use JaxkDev\DiscordBot\Models\Permissions\ChannelPermissions;
 use JaxkDev\DiscordBot\Plugin\Utils;
 
-abstract class ServerChannel extends Channel{
+abstract class ServerChannel extends Channel
+{
 
     /** @var string */
     protected $name;
@@ -42,7 +43,8 @@ abstract class ServerChannel extends Channel{
     /** @var ?string Category ID | null when not categorised. */
     protected $category_id;
 
-    public function __construct(string $name, int $position, string $server_id, ?string $category_id = null, ?string $id = null){
+    public function __construct(string $name, int $position, string $server_id, ?string $category_id = null, ?string $id = null)
+    {
         parent::__construct($id);
         $this->setName($name);
         $this->setPosition($position);
@@ -51,26 +53,31 @@ abstract class ServerChannel extends Channel{
         //Note permissions are not in constructor.
     }
 
-    public function getName(): string{
+    public function getName(): string
+    {
         return $this->name;
     }
 
-    public function setName(string $name): void{
+    public function setName(string $name): void
+    {
         $this->name = $name;
     }
 
-    public function getPosition(): int{
+    public function getPosition(): int
+    {
         return $this->position;
     }
 
-    public function setPosition(int $position): void{
+    public function setPosition(int $position): void
+    {
         $this->position = $position;
     }
 
     /**
      * @return Array<string, Array<null|ChannelPermissions>>
      */
-    public function getAllMemberPermissions(): array{
+    public function getAllMemberPermissions(): array
+    {
         return $this->member_permissions;
     }
 
@@ -78,20 +85,23 @@ abstract class ServerChannel extends Channel{
      * @param string $id
      * @return Array<null|ChannelPermissions>  [AllowedPerms|null, DeniedPerms|null]
      */
-    public function getMemberPermissions(string $id): array{
-        return $this->member_permissions[$id]??[null,null];
+    public function getMemberPermissions(string $id): array
+    {
+        return $this->member_permissions[$id] ?? [null, null];
     }
 
-    public function setAllowedMemberPermissions(string $id, ChannelPermissions $allowedPermissions): void{
-        if(isset($this->member_permissions[$id])){
+    public function setAllowedMemberPermissions(string $id, ChannelPermissions $allowedPermissions): void
+    {
+        if (isset($this->member_permissions[$id])) {
             $this->member_permissions[$id][0] = $allowedPermissions;
         } else {
             $this->member_permissions[$id] = [$allowedPermissions, null];
         }
     }
 
-    public function setDeniedMemberPermissions(string $id, ChannelPermissions $deniedPermissions): void{
-        if(isset($this->member_permissions[$id])){
+    public function setDeniedMemberPermissions(string $id, ChannelPermissions $deniedPermissions): void
+    {
+        if (isset($this->member_permissions[$id])) {
             $this->member_permissions[$id][1] = $deniedPermissions;
         } else {
             $this->member_permissions[$id] = [null, $deniedPermissions];
@@ -101,7 +111,8 @@ abstract class ServerChannel extends Channel{
     /**
      * @return Array<string, Array<null|ChannelPermissions>>
      */
-    public function getAllRolePermissions(): array{
+    public function getAllRolePermissions(): array
+    {
         return $this->role_permissions;
     }
 
@@ -109,43 +120,50 @@ abstract class ServerChannel extends Channel{
      * @param string $id
      * @return Array<null|ChannelPermissions>  [AllowedPerms|null, DeniedPerms|null]
      */
-    public function getRolePermissions(string $id): array{
-        return $this->role_permissions[$id]??[null,null];
+    public function getRolePermissions(string $id): array
+    {
+        return $this->role_permissions[$id] ?? [null, null];
     }
 
-    public function setAllowedRolePermissions(string $id, ChannelPermissions $allowedPermissions): void{
-        if(isset($this->role_permissions[$id])){
+    public function setAllowedRolePermissions(string $id, ChannelPermissions $allowedPermissions): void
+    {
+        if (isset($this->role_permissions[$id])) {
             $this->role_permissions[$id][0] = $allowedPermissions;
         } else {
             $this->role_permissions[$id] = [$allowedPermissions, null];
         }
     }
 
-    public function setDeniedRolePermissions(string $id, ChannelPermissions $deniedPermissions): void{
-        if(isset($this->role_permissions[$id])){
+    public function setDeniedRolePermissions(string $id, ChannelPermissions $deniedPermissions): void
+    {
+        if (isset($this->role_permissions[$id])) {
             $this->role_permissions[$id][1] = $deniedPermissions;
         } else {
             $this->role_permissions[$id] = [null, $deniedPermissions];
         }
     }
 
-    public function getServerId(): string{
+    public function getServerId(): string
+    {
         return $this->server_id;
     }
 
-    public function setServerId(string $server_id): void{
-        if(!Utils::validDiscordSnowflake($server_id)){
+    public function setServerId(string $server_id): void
+    {
+        if (!Utils::validDiscordSnowflake($server_id)) {
             throw new \AssertionError("Server ID '$server_id' is invalid.");
         }
         $this->server_id = $server_id;
     }
 
-    public function getCategoryId(): ?string{
+    public function getCategoryId(): ?string
+    {
         return $this->category_id;
     }
 
-    public function setCategoryId(?string $category_id): void{
-        if($category_id !== null and !Utils::validDiscordSnowflake($category_id)){
+    public function setCategoryId(?string $category_id): void
+    {
+        if ($category_id !== null and !Utils::validDiscordSnowflake($category_id)) {
             throw new \AssertionError("Category ID '$category_id' is invalid.");
         }
         $this->category_id = $category_id;

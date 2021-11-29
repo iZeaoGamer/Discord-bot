@@ -28,7 +28,8 @@ use pocketmine\utils\Utils;
 use React\EventLoop\TimerInterface;
 use Throwable;
 
-class Client{
+class Client
+{
 
     /** @var BotThread */
     private $thread;
@@ -59,7 +60,8 @@ class Client{
     /** @var array */
     private $config;
 
-    public function __construct(BotThread $thread, array $config){
+    public function __construct(BotThread $thread, array $config)
+    {
         $this->thread = $thread;
         $this->config = $config;
 
@@ -77,20 +79,20 @@ class Client{
         Packet::$UID_COUNT = 1;
 
         $this->logger = new Logger('DiscordThread');
-        $handler = new RotatingFileHandler(\JaxkDev\DiscordBot\DATA_PATH.$config['logging']['directory'].DIRECTORY_SEPARATOR."DiscordBot.log", $config['logging']['max_files'], Logger::DEBUG);
+        $handler = new RotatingFileHandler(\JaxkDev\DiscordBot\DATA_PATH . $config['logging']['directory'] . DIRECTORY_SEPARATOR . "DiscordBot.log", $config['logging']['max_files'], Logger::DEBUG);
         $handler->setFilenameFormat('{filename}-{date}', 'Y-m-d');
         $this->logger->setHandlers(array($handler));
         $this->logger->pushHandler(new LogStreamHandler($this->thread->getLogger(), $config["logging"]["debug"]));
 
         $socket_opts = [];
-        if($config["discord"]["use_plugin_cacert"]){
-            $this->logger->debug("TLS cafile set to '".\JaxkDev\DiscordBot\DATA_PATH."cacert.pem"."'");
+        if ($config["discord"]["use_plugin_cacert"]) {
+            $this->logger->debug("TLS cafile set to '" . \JaxkDev\DiscordBot\DATA_PATH . "cacert.pem" . "'");
             $socket_opts["tls"] = [
-                "cafile" => \JaxkDev\DiscordBot\DATA_PATH."cacert.pem"
+                "cafile" => \JaxkDev\DiscordBot\DATA_PATH . "cacert.pem"
             ];
         }
 
-        try{
+        try {
             $this->client = new Discord([
                 'token' => $config['discord']['token'],
                 'logger' => $this->logger,
@@ -99,7 +101,7 @@ class Client{
                 'storeMessages' => true,
                 'intents' => Intents::getAllIntents()
             ]);
-        }catch(IntentException $e){
+        } catch (IntentException $e) {
             $this->close($e);
         }
 
@@ -111,54 +113,56 @@ class Client{
         $this->registerHandlers();
         $this->registerTimers();
 
-        if($this->thread->getStatus() === BotThread::STATUS_STARTING){
+        if ($this->thread->getStatus() === BotThread::STATUS_STARTING) {
             $this->thread->setStatus(BotThread::STATUS_STARTED);
             $this->client->run();
-        }else{
+        } else {
             $this->logger->warning("Closing thread, unexpected state change.");
             $this->close();
         }
     }
 
-    private function registerTimers(): void{
+    private function registerTimers(): void
+    {
         // Handles shutdown, rather than a SHUTDOWN const to send through internal communication, set flag to closed.
         // Saves time & will guarantee closure ASAP rather then waiting in line through ^
-        $this->client->getLoop()->addPeriodicTimer(1, function(){
-            if($this->thread->getStatus() === BotThread::STATUS_CLOSING){
+        $this->client->getLoop()->addPeriodicTimer(1, function () {
+            if ($this->thread->getStatus() === BotThread::STATUS_CLOSING) {
                 $this->close();
             }
         });
 
         // Handles any problems pre-ready.
-        $this->readyTimer = $this->client->getLoop()->addTimer(30, function(){
-            if($this->client->id !== null){
+        $this->readyTimer = $this->client->getLoop()->addTimer(30, function () {
+            if ($this->client->id !== null) {
                 $this->logger->warning("Client has taken >30s to get ready, How large is your discord server !?  [Create an issue on github is this persists]");
-                $this->client->getLoop()->addTimer(30, function(){
-                    if($this->thread->getStatus() !== BotThread::STATUS_READY){
+                $this->client->getLoop()->addTimer(30, function () {
+                    if ($this->thread->getStatus() !== BotThread::STATUS_READY) {
                         $this->logger->critical("Client has taken too long to become ready, shutting down.");
                         $this->close();
                     }
                 });
-            }else{
+            } else {
                 //Should never happen unless your internet speed is like <10kb/s
                 $this->logger->critical("Client failed to login/connect within 30 seconds, See log file for details.");
                 $this->close();
             }
         });
 
-        $this->tickTimer = $this->client->getLoop()->addPeriodicTimer(1/20, function(){
+        $this->tickTimer = $this->client->getLoop()->addPeriodicTimer(1 / 20, function () {
             // Note this is not accurate/fixed dynamically to 1/20th of a second.
             $this->tick();
         });
     }
 
     /** @noinspection PhpUnusedParameterInspection */
-    private function registerHandlers(): void{
+    private function registerHandlers(): void
+    {
         // https://github.com/teamreflex/DiscordPHP/issues/433
         // Note ready is emitted after successful connection + all servers/users loaded, so only register events
         // After this event.
-        $this->client->on('ready', function(Discord $discord){
-            if($this->readyTimer !== null){
+        $this->client->on('ready', function (Discord $discord) {
+            if ($this->readyTimer !== null) {
                 $this->client->getLoop()->cancelTimer($this->readyTimer);
                 $this->readyTimer = null;
             }
@@ -170,23 +174,24 @@ class Client{
         $this->client->on('closed', [$this, 'close']);
     }
 
-    public function tick(): void{
+    public function tick(): void
+    {
         $data = $this->thread->readInboundData($this->config["protocol"]["packets_per_tick"]);
 
-        foreach($data as $d){
+        foreach ($data as $d) {
             $this->communicationHandler->handle($d);
         }
 
-        if(($this->tickCount % 20) === 0){
-            if($this->thread->getStatus() === BotThread::STATUS_READY){
+        if (($this->tickCount % 20) === 0) {
+            if ($this->thread->getStatus() === BotThread::STATUS_READY) {
                 $this->communicationHandler->checkHeartbeat();
                 $this->communicationHandler->sendHeartbeat();
             }
 
             //GC Tests.
-            if(microtime(true)-$this->lastGCCollection >= 6000){
+            if (microtime(true) - $this->lastGCCollection >= 6000) {
                 $cycles = gc_collect_cycles();
-                $mem = round(gc_mem_caches()/1024, 3);
+                $mem = round(gc_mem_caches() / 1024, 3);
                 $this->logger->debug("[GC] Claimed {$mem}kb and {$cycles} cycles.");
                 $this->lastGCCollection = time();
             }
@@ -195,57 +200,67 @@ class Client{
         $this->tickCount++;
     }
 
-    public function getConfig(): array{
+    public function getConfig(): array
+    {
         return $this->config;
     }
 
-    public function getLogger(): Logger{
+    public function getLogger(): Logger
+    {
         return $this->logger;
     }
 
-    public function getThread(): BotThread{
+    public function getThread(): BotThread
+    {
         return $this->thread;
     }
 
-    public function getDiscordClient(): Discord{
+    public function getDiscordClient(): Discord
+    {
         return $this->client;
     }
 
-    public function getCommunicationHandler(): CommunicationHandler{
+    public function getCommunicationHandler(): CommunicationHandler
+    {
         return $this->communicationHandler;
     }
 
-    public function sysErrorHandler(int $severity, string $message, string $file, int $line): bool{
+    public function sysErrorHandler(int $severity, string $message, string $file, int $line): bool
+    {
         $this->close(new ErrorException($message, 0, $severity, $file, $line));
         return true;
     }
 
-    public function websocketHandler(int $op, string $reason): void{
-        switch($op){
+    public function websocketHandler(int $op, string $reason): void
+    {
+        switch ($op) {
             case 4014:
-                $this->thread->getLogger()->emergency("Disallowed intents detected, Please follow the wiki provided ".
+                $this->thread->getLogger()->emergency("Disallowed intents detected, Please follow the wiki provided " .
                     "(https://github.com/DiscordBot-PMMP/DiscordBot/wiki/Creating-your-discord-bot) and ensure both privileged intents are enabled.");
                 break;
             case 4013:
                 //Should never happen considering were set to a specific version of the gateway
-                $this->thread->getLogger()->emergency("Invalid intents specified, Please create a new issue on github ".
+                $this->thread->getLogger()->emergency("Invalid intents specified, Please create a new issue on github " .
                     "(https://github.com/DiscordBot-PMMP/DiscordBot/issues/new) quoting the text `op:4013 - {$reason}`.");
                 break;
         }
-        if(in_array($op, Op::getCriticalCloseCodes())) {
+        if (in_array($op, Op::getCriticalCloseCodes())) {
             $this->close($reason);
         }
     }
 
     /** @var array $data */
-    public function discordErrorHandler(array $data): void{
-        $this->close($data[0]??null);
+    public function discordErrorHandler(array $data): void
+    {
+        $this->close($data[0] ?? null);
     }
 
-    public function close($error = null): void{ /** @phpstan-ignore-line  */
-        if($this->thread->getStatus() === BotThread::STATUS_CLOSED) return;
+    public function close($error = null): void
+    {
+        /** @phpstan-ignore-line  */
+        if ($this->thread->getStatus() === BotThread::STATUS_CLOSED) return;
         $this->thread->setStatus(BotThread::STATUS_CLOSED);
-        if($error instanceof Throwable){
+        if ($error instanceof Throwable) {
             $errorConversion = [
                 0 => "EXCEPTION",
                 E_ERROR => "E_ERROR",
@@ -264,16 +279,16 @@ class Client{
                 E_DEPRECATED => "E_DEPRECATED",
                 E_USER_DEPRECATED => "E_USER_DEPRECATED"
             ];
-            $errno = $errorConversion[$error->getCode()]??$error->getCode();
+            $errno = $errorConversion[$error->getCode()] ?? $error->getCode();
             $this->logger->critical(get_class($error) . ": \"{$error->getMessage()}\" ({$errno}) in \"{$error->getFile()}\" at line {$error->getLine()}");
-            foreach(Utils::printableTrace($error->getTrace()) as $line){
+            foreach (Utils::printableTrace($error->getTrace()) as $line) {
                 $this->logger->critical($line);
             }
         }
-        if($this->client instanceof Discord){
-            try{
+        if ($this->client instanceof Discord) {
+            try {
                 $this->client->close(true);
-            }catch (Error $e){
+            } catch (Error $e) {
                 $this->logger->debug("Failed to close client, probably not started.");
             }
         }

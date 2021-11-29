@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class MessageReactionRemoveEmoji extends Packet{
+class MessageReactionRemoveEmoji extends Packet
+{
 
     /** @var string */
     private $message_id;
@@ -25,26 +26,31 @@ class MessageReactionRemoveEmoji extends Packet{
     /** @var string */
     private $emoji;
 
-    public function __construct(string $message_id, string $channel_id, string $emoji){
+    public function __construct(string $message_id, string $channel_id, string $emoji)
+    {
         parent::__construct();
         $this->message_id = $message_id;
         $this->channel_id = $channel_id;
         $this->emoji = $emoji;
     }
 
-    public function getMessageId(): string{
+    public function getMessageId(): string
+    {
         return $this->message_id;
     }
 
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channel_id;
     }
 
-    public function getEmoji(): string{
+    public function getEmoji(): string
+    {
         return $this->emoji;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->message_id,
@@ -53,7 +59,8 @@ class MessageReactionRemoveEmoji extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->message_id,

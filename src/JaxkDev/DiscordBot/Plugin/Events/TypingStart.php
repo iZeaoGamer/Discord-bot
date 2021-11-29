@@ -13,34 +13,40 @@
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
 use pocketmine\plugin\Plugin;
+
 /**
  * Emitted when a user starts typing. Only works with Text channels.
  * 
  */
-class TypingStart extends DiscordBotEvent{
+class TypingStart extends DiscordBotEvent
+{
 
     /** @var string */
-private $userId;
+    private $userId;
 
-/** @var string */
-private $channelId;
+    /** @var string */
+    private $channelId;
 
-/** @var string|null */
-private $serverId;
+    /** @var string|null */
+    private $serverId;
 
-    public function __construct(Plugin $plugin, string $userId, string $channelId, ?string $serverId){
+    public function __construct(Plugin $plugin, string $userId, string $channelId, ?string $serverId)
+    {
         parent::__construct($plugin);
         $this->userId = $userId;
         $this->channelId = $channelId;
         $this->serverId = $serverId;
     }
-    public function getUserId(): string{
+    public function getUserId(): string
+    {
         return $this->userId;
     }
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channelId;
     }
-    public function getServerId(): ?string{
+    public function getServerId(): ?string
+    {
         return $this->serverId;
     }
 }

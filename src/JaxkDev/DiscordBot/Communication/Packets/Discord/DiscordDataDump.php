@@ -22,7 +22,8 @@ use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class DiscordDataDump extends Packet{
+class DiscordDataDump extends Packet
+{
 
     /** @var Server[] */
     private $servers = [];
@@ -58,110 +59,132 @@ class DiscordDataDump extends Packet{
     /**
      * @return Server[]
      */
-    public function getServers(): array{
+    public function getServers(): array
+    {
         return $this->servers;
     }
 
-    public function addServer(Server $server): void{
+    public function addServer(Server $server): void
+    {
         $this->servers[] = $server;
     }
 
     /** @return ThreadChannel[] */
-    public function getThreads(): array{
+    public function getThreads(): array
+    {
         return $this->threads;
     }
-    public function addThread(ThreadChannel $channel): void{
+    public function addThread(ThreadChannel $channel): void
+    {
         $this->threads[] = $channel;
     }
 
     /**
      * @return ServerChannel[]
      */
-    public function getChannels(): array{
+    public function getChannels(): array
+    {
         return $this->channels;
     }
 
-    public function addChannel(ServerChannel $channel): void{
+    public function addChannel(ServerChannel $channel): void
+    {
         $this->channels[] = $channel;
     }
 
     /**
      * @return Role[]
      */
-    public function getRoles(): array{
+    public function getRoles(): array
+    {
         return $this->roles;
     }
 
-    public function addRole(Role $role): void{
+    public function addRole(Role $role): void
+    {
         $this->roles[] = $role;
     }
 
     /**
      * @return Invite[]
      */
-    public function getInvites(): array{
+    public function getInvites(): array
+    {
         return $this->invites;
     }
 
-    public function addInvite(Invite $invite): void{
+    public function addInvite(Invite $invite): void
+    {
         $this->invites[] = $invite;
     }
 
     /**
      * @return Ban[]
      */
-    public function getBans(): array{
+    public function getBans(): array
+    {
         return $this->bans;
     }
 
-    public function addBan(Ban $ban): void{
+    public function addBan(Ban $ban): void
+    {
         $this->bans[] = $ban;
     }
 
     /**
      * @return Member[]
      */
-    public function getMembers(): array{
+    public function getMembers(): array
+    {
         return $this->members;
     }
 
-    public function addMember(Member $member): void{
+    public function addMember(Member $member): void
+    {
         $this->members[] = $member;
     }
 
     /**
      * @return User[]
      */
-    public function getUsers(): array{
+    public function getUsers(): array
+    {
         return $this->users;
     }
 
-    public function addUser(User $user): void{
+    public function addUser(User $user): void
+    {
         $this->users[] = $user;
     }
 
-    public function getBotUser(): ?User{
+    public function getBotUser(): ?User
+    {
         return $this->bot_user;
     }
 
-    public function setBotUser(User $bot): void{
+    public function setBotUser(User $bot): void
+    {
         $this->bot_user = $bot;
     }
 
-    public function getTimestamp(): int{
+    public function getTimestamp(): int
+    {
         return $this->timestamp;
     }
 
-    public function setTimestamp(int $timestamp): void{
+    public function setTimestamp(int $timestamp): void
+    {
         $this->timestamp = $timestamp;
     }
 
-    public function getSize(): int{
-        return sizeof($this->servers)+sizeof($this->threads)+sizeof($this->channels)+sizeof($this->roles)+sizeof($this->members)
-            +sizeof($this->users)+sizeof($this->bans)+sizeof($this->invites);
+    public function getSize(): int
+    {
+        return sizeof($this->servers) + sizeof($this->threads) + sizeof($this->channels) + sizeof($this->roles) + sizeof($this->members)
+            + sizeof($this->users) + sizeof($this->bans) + sizeof($this->invites);
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->servers,
@@ -177,7 +200,8 @@ class DiscordDataDump extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->servers,

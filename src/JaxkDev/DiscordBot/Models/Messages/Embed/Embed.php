@@ -13,7 +13,8 @@
 namespace JaxkDev\DiscordBot\Models\Messages\Embed;
 
 //Yes quite a lot of nullables... (https://discord.com/developers/docs/resources/channel#embed-object)
-class Embed implements \Serializable{
+class Embed implements \Serializable
+{
 
     // https://discord.com/developers/docs/resources/channel#embed-object-embed-types
     const
@@ -78,9 +79,20 @@ class Embed implements \Serializable{
      * @param Author|null $author
      * @param Field[]     $fields
      */
-    public function __construct(?string $title = null, ?string $type = null, ?string $description = null, ?string $url = null,
-                                   ?int $timestamp = null, ?int $colour = null, Footer $footer = null, Image $image = null,
-                                   Image $thumbnail = null, Video $video = null, Author $author = null, array $fields = []){
+    public function __construct(
+        ?string $title = null,
+        ?string $type = null,
+        ?string $description = null,
+        ?string $url = null,
+        ?int $timestamp = null,
+        ?int $colour = null,
+        Footer $footer = null,
+        Image $image = null,
+        Image $thumbnail = null,
+        Video $video = null,
+        Author $author = null,
+        array $fields = []
+    ) {
         $this->setTitle($title);
         $this->setType($type);
         $this->setDescription($description);
@@ -95,111 +107,135 @@ class Embed implements \Serializable{
         $this->setFields($fields);
     }
 
-    public function getTitle(): ?string{
+    public function getTitle(): ?string
+    {
         return $this->title;
     }
 
-    public function setTitle(?string $title): void{
-        if($title !== null and strlen($title) > 2048){
+    public function setTitle(?string $title): void
+    {
+        if ($title !== null and strlen($title) > 2048) {
             throw new \AssertionError("Embed title can only have up to 2048 characters.");
         }
         $this->title = $title;
     }
 
-    public function getType(): ?string{
+    public function getType(): ?string
+    {
         return $this->type;
     }
 
-    public function setType(?string $type): void{
-        if($type !== null and (!in_array($type, [self::TYPE_LINK, self::TYPE_ARTICLE, self::TYPE_GIFV, self::TYPE_VIDEO, self::TYPE_IMAGE, self::TYPE_RICH]))){
+    public function setType(?string $type): void
+    {
+        if ($type !== null and (!in_array($type, [self::TYPE_LINK, self::TYPE_ARTICLE, self::TYPE_GIFV, self::TYPE_VIDEO, self::TYPE_IMAGE, self::TYPE_RICH]))) {
             throw new \AssertionError("Invalid embed type '{$type}' provided.");
         }
         $this->type = $type;
     }
 
-    public function getDescription(): ?string{
+    public function getDescription(): ?string
+    {
         return $this->description;
     }
 
-    public function setDescription(?string $description): void{
-        if($description !== null and strlen($description) > 4096){
+    public function setDescription(?string $description): void
+    {
+        if ($description !== null and strlen($description) > 4096) {
             throw new \AssertionError("Embed description can only have up to 4096 characters.");
         }
         $this->description = $description;
     }
 
-    public function getUrl(): ?string{
+    public function getUrl(): ?string
+    {
         return $this->url;
     }
 
-    public function setUrl(?string $url): void{
+    public function setUrl(?string $url): void
+    {
         $this->url = $url;
     }
 
-    public function getTimestamp(): ?int{
+    public function getTimestamp(): ?int
+    {
         return $this->timestamp;
     }
 
-    public function setTimestamp(?int $timestamp): void{
+    public function setTimestamp(?int $timestamp): void
+    {
         $this->timestamp = $timestamp;
     }
 
-    public function getColour(): ?int{
+    public function getColour(): ?int
+    {
         return $this->colour;
     }
 
-    public function setColour(?int $colour): void{
+    public function setColour(?int $colour): void
+    {
         $this->colour = $colour;
     }
 
-    public function getFooter(): Footer{
+    public function getFooter(): Footer
+    {
         return $this->footer;
     }
 
-    public function setFooter(Footer $footer): void{
+    public function setFooter(Footer $footer): void
+    {
         $this->footer = $footer;
     }
 
-    public function getImage(): Image{
+    public function getImage(): Image
+    {
         return $this->image;
     }
 
-    public function setImage(Image $image): void{
+    public function setImage(Image $image): void
+    {
         $this->image = $image;
     }
 
-    public function getThumbnail(): Image{
+    public function getThumbnail(): Image
+    {
         return $this->thumbnail;
     }
 
-    public function setThumbnail(Image $thumbnail): void{
+    public function setThumbnail(Image $thumbnail): void
+    {
         $this->thumbnail = $thumbnail;
     }
 
-    public function getVideo(): Video{
+    public function getVideo(): Video
+    {
         return $this->video;
     }
 
-    public function setVideo(Video $video): void{
+    public function setVideo(Video $video): void
+    {
         $this->video = $video;
     }
 
-    public function getAuthor(): Author{
+    public function getAuthor(): Author
+    {
         return $this->author;
     }
 
-    public function setAuthor(Author $author): void{
+    public function setAuthor(Author $author): void
+    {
         $this->author = $author;
     }
 
     /** @return Field[] */
-    public function getFields(): array{
+    public function getFields(): array
+    {
         return $this->fields;
     }
 
     /** @param Field[] $fields */
-    public function setFields(array $fields): void{
-        if(sizeof($fields) > 25){
+    public function setFields(array $fields): void
+    {
+        if (sizeof($fields) > 25) {
             throw new \AssertionError("Embed can only have up to 25 fields.");
         }
         $this->fields = $fields;
@@ -207,7 +243,8 @@ class Embed implements \Serializable{
 
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->title,
             $this->type,
@@ -224,7 +261,8 @@ class Embed implements \Serializable{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->title,
             $this->type,

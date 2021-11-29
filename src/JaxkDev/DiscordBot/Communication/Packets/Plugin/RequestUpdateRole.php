@@ -15,28 +15,33 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Role;
 
-class RequestUpdateRole extends Packet{
+class RequestUpdateRole extends Packet
+{
 
     /** @var Role */
     private $role;
 
-    public function __construct(Role $role){
+    public function __construct(Role $role)
+    {
         parent::__construct();
         $this->role = $role;
     }
 
-    public function getRole(): Role{
+    public function getRole(): Role
+    {
         return $this->role;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->role
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->role

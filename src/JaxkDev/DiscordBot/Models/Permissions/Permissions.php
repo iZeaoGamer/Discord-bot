@@ -12,7 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Models\Permissions;
 
-abstract class Permissions implements \Serializable{
+abstract class Permissions implements \Serializable
+{
 
     const VOICE_PERMISSIONS = [
         "priority_speaker" => 256,
@@ -72,15 +73,18 @@ abstract class Permissions implements \Serializable{
     /** @var Array<string, bool> */
     private $permissions = [];
 
-    public function __construct(int $bitwise = 0){
+    public function __construct(int $bitwise = 0)
+    {
         $this->setBitwise($bitwise);
     }
 
-    public function getBitwise(): int{
+    public function getBitwise(): int
+    {
         return $this->bitwise;
     }
 
-    public function setBitwise(int $bitwise): void{
+    public function setBitwise(int $bitwise): void
+    {
         $this->bitwise = $bitwise;
     }
 
@@ -88,32 +92,35 @@ abstract class Permissions implements \Serializable{
      * Returns all the permissions possible and the current state, or an empty array if not initialised.
      * @return Array<string, bool>
      */
-    public function getPermissions(): array{
-        if(sizeof($this->permissions) === 0 and $this->bitwise > 0){
+    public function getPermissions(): array
+    {
+        if (sizeof($this->permissions) === 0 and $this->bitwise > 0) {
             $this->recalculatePermissions();
         }
         return $this->permissions;
     }
 
-    public function getPermission(string $permission): ?bool{
-        if(sizeof($this->permissions) === 0 and $this->bitwise > 0){
+    public function getPermission(string $permission): ?bool
+    {
+        if (sizeof($this->permissions) === 0 and $this->bitwise > 0) {
             $this->recalculatePermissions();
         }
         return $this->permissions[$permission] ?? null;
     }
 
-    public function setPermission(string $permission, bool $state = true): Permissions{
-        if(sizeof($this->permissions) === 0 and $this->bitwise > 0){
+    public function setPermission(string $permission, bool $state = true): Permissions
+    {
+        if (sizeof($this->permissions) === 0 and $this->bitwise > 0) {
             $this->recalculatePermissions();
         }
         $permission = strtolower($permission);
         $posPermissions = $this->getPossiblePermissions();
 
-        if(!in_array($permission, array_keys($posPermissions))){
-            throw new \AssertionError("Invalid permission '{$permission}' for a '".get_parent_class($this)."'");
+        if (!in_array($permission, array_keys($posPermissions))) {
+            throw new \AssertionError("Invalid permission '{$permission}' for a '" . get_parent_class($this) . "'");
         }
 
-        if($this->permissions[$permission] === $state) return $this;
+        if ($this->permissions[$permission] === $state) return $this;
         $this->permissions[$permission] = $state;
         $this->bitwise ^= $posPermissions[$permission];
         return $this;
@@ -122,10 +129,11 @@ abstract class Permissions implements \Serializable{
     /**
      * @internal Using current bitwise recalculate permissions.
      */
-    private function recalculatePermissions(): void{
+    private function recalculatePermissions(): void
+    {
         $this->permissions = [];
         $possiblePerms = $this->getPossiblePermissions();
-        foreach($possiblePerms as $name => $v){
+        foreach ($possiblePerms as $name => $v) {
             $this->permissions[$name] = (($this->bitwise & $v) !== 0);
         }
     }
@@ -137,11 +145,13 @@ abstract class Permissions implements \Serializable{
 
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize($this->bitwise);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         $this->bitwise = unserialize($data);
     }
 }

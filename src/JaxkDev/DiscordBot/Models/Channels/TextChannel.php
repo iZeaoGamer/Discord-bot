@@ -12,7 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Models\Channels;
 
-class TextChannel extends ServerChannel{
+class TextChannel extends ServerChannel
+{
 
     /** @var string AKA Description. */
     private $topic;
@@ -39,39 +40,53 @@ class TextChannel extends ServerChannel{
      * @param string|null $category_id
      * @param string|null $id
      */
-    public function __construct(string $topic, string $name, int $position, string $server_id, bool $nsfw = false,
-                                   ?int $rate_limit = null, ?string $category_id = null, ?string $id = null){
+    public function __construct(
+        string $topic,
+        string $name,
+        int $position,
+        string $server_id,
+        bool $nsfw = false,
+        ?int $rate_limit = null,
+        ?string $category_id = null,
+        ?string $id = null
+    ) {
         parent::__construct($name, $position, $server_id, $category_id, $id);
         $this->setTopic($topic);
         $this->setNsfw($nsfw);
         $this->setRateLimit($rate_limit);
     }
 
-    public function getTopic(): string{
+    public function getTopic(): string
+    {
         return $this->topic;
     }
 
-    public function setTopic(string $topic): void{
+    public function setTopic(string $topic): void
+    {
         $this->topic = $topic;
     }
 
-    public function isNsfw(): bool{
+    public function isNsfw(): bool
+    {
         return $this->nsfw;
     }
 
-    public function setNsfw(bool $nsfw): void{
+    public function setNsfw(bool $nsfw): void
+    {
         $this->nsfw = $nsfw;
     }
 
-    public function getRateLimit(): ?int{
+    public function getRateLimit(): ?int
+    {
         return $this->rate_limit;
     }
 
     /**
      * @param int|null $rate_limit 0-21600 seconds.
      */
-    public function setRateLimit(?int $rate_limit): void{
-        if($rate_limit !== null and ($rate_limit < 0 or $rate_limit > 21600)){
+    public function setRateLimit(?int $rate_limit): void
+    {
+        if ($rate_limit !== null and ($rate_limit < 0 or $rate_limit > 21600)) {
             throw new \AssertionError("Rate limit '$rate_limit' is outside the bounds 0-21600.");
         }
         $this->rate_limit = $rate_limit;
@@ -79,7 +94,8 @@ class TextChannel extends ServerChannel{
 
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->id,
             $this->name,
@@ -94,7 +110,8 @@ class TextChannel extends ServerChannel{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->id,
             $this->name,

@@ -21,17 +21,20 @@ use pocketmine\plugin\Plugin;
  * @see ThreadCreated
  * @see ThreadDeleted
  */
-class ThreadUpdated extends DiscordBotEvent{
+class ThreadUpdated extends DiscordBotEvent
+{
 
     /** @var ThreadChannel */
     private $channel;
 
-    public function __construct(Plugin $plugin, ThreadChannel $channel){
+    public function __construct(Plugin $plugin, ThreadChannel $channel)
+    {
         parent::__construct($plugin);
         $this->channel = $channel;
     }
 
-    public function getChannel(): ThreadChannel{
+    public function getChannel(): ThreadChannel
+    {
         return $this->channel;
     }
 }

@@ -18,17 +18,20 @@ use pocketmine\plugin\Plugin;
 /**
  * Emitted when a message is pinned or unpinned, note we dont know what message was pinned or unpinned only the channel ID.
  */
-class ChannelPinsUpdated extends DiscordBotEvent{
+class ChannelPinsUpdated extends DiscordBotEvent
+{
 
     /** @var TextChannel */
     private $channel;
 
-    public function __construct(Plugin $plugin, TextChannel $channel){
+    public function __construct(Plugin $plugin, TextChannel $channel)
+    {
         parent::__construct($plugin);
         $this->channel = $channel;
     }
 
-    public function getChannel(): TextChannel{
+    public function getChannel(): TextChannel
+    {
         return $this->channel;
     }
 }

@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestDeleteWebhook extends Packet{
+class RequestDeleteWebhook extends Packet
+{
 
     /** @var string */
     private $webhook_id;
@@ -22,21 +23,25 @@ class RequestDeleteWebhook extends Packet{
     /** @var string */
     private $channel_id;
 
-    public function __construct(string $channel_id, string $webhook_id){
+    public function __construct(string $channel_id, string $webhook_id)
+    {
         parent::__construct();
         $this->webhook_id = $webhook_id;
         $this->channel_id = $channel_id;
     }
 
-    public function getWebhookId(): string{
+    public function getWebhookId(): string
+    {
         return $this->webhook_id;
     }
 
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channel_id;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->webhook_id,
@@ -44,7 +49,8 @@ class RequestDeleteWebhook extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->webhook_id,

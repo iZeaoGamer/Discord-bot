@@ -13,4 +13,6 @@
 namespace JaxkDev\DiscordBot\Models\Messages\Embed;
 
 // https://discord.com/developers/docs/resources/channel#embed-object-embed-video-structure
-class Video extends Image{}
+class Video extends Image
+{
+}

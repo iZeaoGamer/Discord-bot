@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Models\Channels;
 
 use JaxkDev\DiscordBot\Plugin\Utils;
 
-class VoiceChannel extends ServerChannel{
+class VoiceChannel extends ServerChannel
+{
 
     /** @var int */
     private $bitrate;
@@ -37,40 +38,54 @@ class VoiceChannel extends ServerChannel{
      * @param string|null $category_id
      * @param string|null $id
      */
-    public function __construct(int $bitrate, int $member_limit, string $name, int $position, string $server_id,
-                                   array $members, ?string $category_id = null, ?string $id = null){
+    public function __construct(
+        int $bitrate,
+        int $member_limit,
+        string $name,
+        int $position,
+        string $server_id,
+        array $members,
+        ?string $category_id = null,
+        ?string $id = null
+    ) {
         parent::__construct($name, $position, $server_id, $category_id, $id);
         $this->setBitrate($bitrate);
         $this->setMemberLimit($member_limit);
         $this->setMembers($members);
     }
 
-    public function getBitrate(): int{
+    public function getBitrate(): int
+    {
         return $this->bitrate;
     }
 
-    public function setBitrate(int $bitrate): void{
+    public function setBitrate(int $bitrate): void
+    {
         $this->bitrate = $bitrate;
     }
 
-    public function getMemberLimit(): int{
+    public function getMemberLimit(): int
+    {
         return $this->member_limit;
     }
 
-    public function setMemberLimit(int $member_limit): void{
+    public function setMemberLimit(int $member_limit): void
+    {
         $this->member_limit = $member_limit;
     }
 
     /** @return string[] Member ID's */
-    public function getMembers(): array{
+    public function getMembers(): array
+    {
         return $this->members;
     }
 
     /** @param string[] $members Member ID's */
-    public function setMembers(array $members): void{
-        foreach($members as $member){
+    public function setMembers(array $members): void
+    {
+        foreach ($members as $member) {
             [$sid, $uid] = explode(".", $member);
-            if(!Utils::validDiscordSnowflake($sid) or !Utils::validDiscordSnowflake($uid)){
+            if (!Utils::validDiscordSnowflake($sid) or !Utils::validDiscordSnowflake($uid)) {
                 throw new \AssertionError("Member ID '$member' is invalid.");
             }
         }
@@ -79,7 +94,8 @@ class VoiceChannel extends ServerChannel{
 
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->id,
             $this->name,
@@ -94,7 +110,8 @@ class VoiceChannel extends ServerChannel{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->id,
             $this->name,

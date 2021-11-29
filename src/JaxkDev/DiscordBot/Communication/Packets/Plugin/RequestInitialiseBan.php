@@ -15,27 +15,32 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Models\Ban;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestInitialiseBan extends Packet{
+class RequestInitialiseBan extends Packet
+{
 
     /** @var Ban */
     private $ban;
 
-    public function __construct(Ban $ban){
+    public function __construct(Ban $ban)
+    {
         parent::__construct();
         $this->ban = $ban;
     }
 
-    public function getBan(): Ban{
+    public function getBan(): Ban
+    {
         return $this->ban;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID, $this->ban
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID, $this->ban
         ] = unserialize($data);

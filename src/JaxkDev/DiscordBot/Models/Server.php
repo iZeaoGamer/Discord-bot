@@ -14,9 +14,10 @@ namespace JaxkDev\DiscordBot\Models;
 
 use JaxkDev\DiscordBot\Plugin\Utils;
 
-class Server implements \Serializable{
+class Server implements \Serializable
+{
 
-    
+
     const FLAGS = [
         "SUPPRESS_JOIN_NOTIFICATIONS" => 1,
         "SUPPRESS_PREMIUM_SUBSCRIPTION" => 2,
@@ -44,8 +45,15 @@ class Server implements \Serializable{
     /** @var int */
     private $member_count;
 
-    public function __construct(string $id, string $name, string $region, string $owner_id,
-                                bool $large, int $member_count, ?string $icon_url = null){
+    public function __construct(
+        string $id,
+        string $name,
+        string $region,
+        string $owner_id,
+        bool $large,
+        int $member_count,
+        ?string $icon_url = null
+    ) {
         $this->setId($id);
         $this->setName($name);
         $this->setRegion($region);
@@ -55,75 +63,91 @@ class Server implements \Serializable{
         $this->setIconUrl($icon_url);
     }
 
-    public function getId(): string{
+    public function getId(): string
+    {
         return $this->id;
     }
 
-    public function setId(string $id): void{
-        if(!Utils::validDiscordSnowflake($id)){
+    public function setId(string $id): void
+    {
+        if (!Utils::validDiscordSnowflake($id)) {
             throw new \AssertionError("Server ID '$id' is invalid.");
         }
         $this->id = $id;
     }
 
-    public function getName(): string{
+    public function getName(): string
+    {
         return $this->name;
     }
 
-    public function setName(string $name): void{
+    public function setName(string $name): void
+    {
         $this->name = $name;
     }
 
-    public function getIconUrl(): ?string{
+    public function getIconUrl(): ?string
+    {
         return $this->icon_url;
     }
 
-    public function setIconUrl(?string $icon_url): void{
+    public function setIconUrl(?string $icon_url): void
+    {
         $this->icon_url = $icon_url;
     }
 
-    public function getRegion(): string{
+    public function getRegion(): string
+    {
         return $this->region;
     }
 
-    public function setRegion(string $region): void{
+    public function setRegion(string $region): void
+    {
         $this->region = $region;
     }
 
-    public function getOwnerId(): string{
+    public function getOwnerId(): string
+    {
         return $this->owner_id;
     }
 
-    public function setOwnerId(string $owner_id): void{
-        if(!Utils::validDiscordSnowflake($owner_id)){
+    public function setOwnerId(string $owner_id): void
+    {
+        if (!Utils::validDiscordSnowflake($owner_id)) {
             throw new \AssertionError("Owner ID '$owner_id' is invalid.");
         }
         $this->owner_id = $owner_id;
     }
 
-    public function getCreationTimestamp(): float{
+    public function getCreationTimestamp(): float
+    {
         return Utils::getDiscordSnowflakeTimestamp($this->id);
     }
 
-    public function isLarge(): bool{
+    public function isLarge(): bool
+    {
         return $this->large;
     }
 
-    public function setLarge(bool $large): void{
+    public function setLarge(bool $large): void
+    {
         $this->large = $large;
     }
 
-    public function getMemberCount(): int{
+    public function getMemberCount(): int
+    {
         return $this->member_count;
     }
 
-    public function setMemberCount(int $member_count): void{
+    public function setMemberCount(int $member_count): void
+    {
         $this->member_count = $member_count;
     }
 
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->id,
             $this->name,
@@ -135,7 +159,8 @@ class Server implements \Serializable{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->id,
             $this->name,

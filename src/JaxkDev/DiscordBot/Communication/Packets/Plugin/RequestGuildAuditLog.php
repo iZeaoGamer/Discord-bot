@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestGuildAuditLog extends Packet{
+class RequestGuildAuditLog extends Packet
+{
 
     /** @var string */
     private $server_id;
@@ -31,7 +32,8 @@ class RequestGuildAuditLog extends Packet{
     /** @var int */
     private $limit;
 
-    public function __construct(string $server_id, string $user_id, int $action_type, string $before, int $limit){
+    public function __construct(string $server_id, string $user_id, int $action_type, string $before, int $limit)
+    {
         parent::__construct();
         $this->server_id = $server_id;
         $this->user_id = $user_id;
@@ -40,23 +42,29 @@ class RequestGuildAuditLog extends Packet{
         $this->limit = $limit;
     }
 
-    public function getServerId(): string{
+    public function getServerId(): string
+    {
         return $this->server_id;
     }
-    public function getUserId(): string{
+    public function getUserId(): string
+    {
         return $this->user_id;
     }
-    public function getActionType(): int{
+    public function getActionType(): int
+    {
         return $this->action_type;
     }
-    public function getBefore(): string{
+    public function getBefore(): string
+    {
         return $this->before;
     }
-    public function getLimit(): int{
+    public function getLimit(): int
+    {
         return $this->limit;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->server_id,
@@ -67,7 +75,8 @@ class RequestGuildAuditLog extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->server_id,

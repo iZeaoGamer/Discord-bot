@@ -22,7 +22,8 @@ use pocketmine\plugin\Plugin;
  * @see MessageReactionRemove
  * @see MessageReactionRemoveAll
  */
-class MessageReactionRemoveEmoji extends DiscordBotEvent{
+class MessageReactionRemoveEmoji extends DiscordBotEvent
+{
 
     /** @var string */
     private $emoji;
@@ -33,22 +34,26 @@ class MessageReactionRemoveEmoji extends DiscordBotEvent{
     /** @var Channel */
     private $channel;
 
-    public function __construct(Plugin $plugin, string $emoji, string $message_id, Channel $channel){
+    public function __construct(Plugin $plugin, string $emoji, string $message_id, Channel $channel)
+    {
         parent::__construct($plugin);
         $this->emoji = $emoji;
         $this->message_id = $message_id;
         $this->channel = $channel;
     }
 
-    public function getEmoji(): string{
+    public function getEmoji(): string
+    {
         return $this->emoji;
     }
 
-    public function getMessageId(): string{
+    public function getMessageId(): string
+    {
         return $this->message_id;
     }
 
-    public function getChannel(): Channel{
+    public function getChannel(): Channel
+    {
         return $this->channel;
     }
 }

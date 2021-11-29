@@ -21,4 +21,6 @@ use pocketmine\event\plugin\PluginEvent;
  * for example the storage will still have the full member/user model.
  * But once you and all other plugins have finished handling the event the member will be deleted from storage
  */
-class DiscordBotEvent extends PluginEvent{}
+class DiscordBotEvent extends PluginEvent
+{
+}

@@ -15,7 +15,8 @@ namespace JaxkDev\DiscordBot\Models\Messages;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 use JaxkDev\DiscordBot\Plugin\Utils;
 
-class Message implements \Serializable{
+class Message implements \Serializable
+{
 
     /** @var ?string Null when sending message. */
     protected $id;
@@ -69,10 +70,20 @@ class Message implements \Serializable{
      * @param string[]     $roles_mentioned
      * @param string[]     $channels_mentioned
      */
-    public function __construct(string $channel_id, ?string $id = null, string $content = "", ?Embed $embed = null,
-                                ?string $author_id = null, ?string $server_id = null, ?float $timestamp = null,
-                                array $attachments = [], bool $everyone_mentioned = false, array $users_mentioned = [],
-                                array $roles_mentioned = [], array $channels_mentioned = []){
+    public function __construct(
+        string $channel_id,
+        ?string $id = null,
+        string $content = "",
+        ?Embed $embed = null,
+        ?string $author_id = null,
+        ?string $server_id = null,
+        ?float $timestamp = null,
+        array $attachments = [],
+        bool $everyone_mentioned = false,
+        array $users_mentioned = [],
+        array $roles_mentioned = [],
+        array $channels_mentioned = []
+    ) {
         $this->setChannelId($channel_id);
         $this->setId($id);
         $this->setContent($content);
@@ -87,86 +98,101 @@ class Message implements \Serializable{
         $this->setChannelsMentioned($channels_mentioned);
     }
 
-    public function getId(): ?string{
+    public function getId(): ?string
+    {
         return $this->id;
     }
 
-    public function setId(?string $id): void{
+    public function setId(?string $id): void
+    {
         $this->id = $id;
     }
 
-    public function getContent(): string{
+    public function getContent(): string
+    {
         return $this->content;
     }
 
-    public function setContent(string $content): void{
-        if(strlen($content) > 4000){
+    public function setContent(string $content): void
+    {
+        if (strlen($content) > 4000) {
             throw new \AssertionError("Message content cannot exceed 4000 characters.");
         }
         $this->content = $content;
     }
 
-    public function getEmbed(): ?Embed{
+    public function getEmbed(): ?Embed
+    {
         return $this->embed;
     }
 
-    public function setEmbed(?Embed $embed): void{
+    public function setEmbed(?Embed $embed): void
+    {
         $this->embed = $embed;
     }
 
-    public function getAuthorId(): ?string{
+    public function getAuthorId(): ?string
+    {
         return $this->author_id;
     }
 
-    public function setAuthorId(?string $author_id): void{
-        if($author_id !== null and stripos($author_id, ".") !== false){
+    public function setAuthorId(?string $author_id): void
+    {
+        if ($author_id !== null and stripos($author_id, ".") !== false) {
             [$sid, $uid] = explode(".", $author_id);
-            if(!Utils::validDiscordSnowflake($sid) or !Utils::validDiscordSnowflake($uid)){
+            if (!Utils::validDiscordSnowflake($sid) or !Utils::validDiscordSnowflake($uid)) {
                 throw new \AssertionError("Author ID '$author_id' is invalid.");
             }
-        }elseif($author_id !== null){
+        } elseif ($author_id !== null) {
             //Webhooks and DM's
-            if(!Utils::validDiscordSnowflake($author_id)){
+            if (!Utils::validDiscordSnowflake($author_id)) {
                 throw new \AssertionError("Author ID '$author_id' is invalid.");
             }
         }
         $this->author_id = $author_id;
     }
 
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channel_id;
     }
 
-    public function setChannelId(string $channel_id): void{
-        if(!Utils::validDiscordSnowflake($channel_id)){
+    public function setChannelId(string $channel_id): void
+    {
+        if (!Utils::validDiscordSnowflake($channel_id)) {
             throw new \AssertionError("Channel ID '$channel_id' is invalid.");
         }
         $this->channel_id = $channel_id;
     }
 
-    public function getServerId(): ?string{
+    public function getServerId(): ?string
+    {
         return $this->server_id;
     }
 
-    public function setServerId(?string $server_id): void{
-        if($server_id !== null and !Utils::validDiscordSnowflake($server_id)){
+    public function setServerId(?string $server_id): void
+    {
+        if ($server_id !== null and !Utils::validDiscordSnowflake($server_id)) {
             throw new \AssertionError("Server ID '$server_id' is invalid.");
         }
         $this->server_id = $server_id;
     }
 
-    public function getTimestamp(): ?float{
+    public function getTimestamp(): ?float
+    {
         return $this->timestamp;
     }
 
-    public function setTimestamp(?float $timestamp): void{
+    public function setTimestamp(?float $timestamp): void
+    {
         $this->timestamp = $timestamp;
     }
 
     /**
      * @return Attachment[]
      */
-    public function getAttachments(): array{
+    public function getAttachments(): array
+    {
         return $this->attachments;
     }
 
@@ -175,36 +201,41 @@ class Message implements \Serializable{
      *
      * @var Attachment[] $attachments
      */
-    public function setAttachments(array $attachments): void{
-        foreach($attachments as $attachment){
-            if(!$attachment instanceof Attachment){
+    public function setAttachments(array $attachments): void
+    {
+        foreach ($attachments as $attachment) {
+            if (!$attachment instanceof Attachment) {
                 throw new \AssertionError("Attachments must be an Attachment instance.");
             }
         }
         $this->attachments = $attachments;
     }
 
-    public function isEveryoneMentioned(): bool{
+    public function isEveryoneMentioned(): bool
+    {
         return $this->everyone_mentioned;
     }
 
-    public function setEveryoneMentioned(bool $everyone_mentioned): void{
+    public function setEveryoneMentioned(bool $everyone_mentioned): void
+    {
         $this->everyone_mentioned = $everyone_mentioned;
     }
 
     /**
      * @return string[]
      */
-    public function getUsersMentioned(): array{
+    public function getUsersMentioned(): array
+    {
         return $this->users_mentioned;
     }
 
     /**
      * @param string[] $users_mentioned
      */
-    public function setUsersMentioned(array $users_mentioned): void{
-        foreach($users_mentioned as $id){
-            if(!Utils::validDiscordSnowflake($id)){
+    public function setUsersMentioned(array $users_mentioned): void
+    {
+        foreach ($users_mentioned as $id) {
+            if (!Utils::validDiscordSnowflake($id)) {
                 throw new \AssertionError("User ID '$id' is invalid.");
             }
         }
@@ -214,16 +245,18 @@ class Message implements \Serializable{
     /**
      * @return string[]
      */
-    public function getRolesMentioned(): array{
+    public function getRolesMentioned(): array
+    {
         return $this->roles_mentioned;
     }
 
     /**
      * @param string[] $roles_mentioned
      */
-    public function setRolesMentioned(array $roles_mentioned): void{
-        foreach($roles_mentioned as $id){
-            if(!Utils::validDiscordSnowflake($id)){
+    public function setRolesMentioned(array $roles_mentioned): void
+    {
+        foreach ($roles_mentioned as $id) {
+            if (!Utils::validDiscordSnowflake($id)) {
                 throw new \AssertionError("Role ID '$id' is invalid.");
             }
         }
@@ -233,16 +266,18 @@ class Message implements \Serializable{
     /**
      * @return string[]
      */
-    public function getChannelsMentioned(): array{
+    public function getChannelsMentioned(): array
+    {
         return $this->channels_mentioned;
     }
 
     /**
      * @param string[] $channels_mentioned
      */
-    public function setChannelsMentioned(array $channels_mentioned): void{
-        foreach($channels_mentioned as $id){
-            if(!Utils::validDiscordSnowflake($id)){
+    public function setChannelsMentioned(array $channels_mentioned): void
+    {
+        foreach ($channels_mentioned as $id) {
+            if (!Utils::validDiscordSnowflake($id)) {
                 throw new \AssertionError("Channel ID '$id' is invalid.");
             }
         }
@@ -251,7 +286,8 @@ class Message implements \Serializable{
 
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->id,
             $this->content,
@@ -268,7 +304,8 @@ class Message implements \Serializable{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->id,
             $this->content,

@@ -15,28 +15,33 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 
-class RequestUpdateChannel extends Packet{
+class RequestUpdateChannel extends Packet
+{
 
     /** @var ServerChannel */
     private $channel;
 
-    public function __construct(ServerChannel $channel){
+    public function __construct(ServerChannel $channel)
+    {
         parent::__construct();
         $this->channel = $channel;
     }
 
-    public function getChannel(): ServerChannel{
+    public function getChannel(): ServerChannel
+    {
         return $this->channel;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->channel
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->channel

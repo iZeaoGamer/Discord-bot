@@ -12,18 +12,21 @@
 
 namespace JaxkDev\DiscordBot\Plugin;
 
-abstract class Utils{
+abstract class Utils
+{
 
-    public static function getDiscordSnowflakeTimestamp(string $snowflake): int{
+    public static function getDiscordSnowflakeTimestamp(string $snowflake): int
+    {
         return intval(floor(((intval($snowflake) >> 22) + 1420070400000) / 1000));
     }
 
     /** Checks a discord snowflake by verifying the timestamp at when it was created. */
-    public static function validDiscordSnowflake(string $snowflake): bool{
+    public static function validDiscordSnowflake(string $snowflake): bool
+    {
         $len = strlen($snowflake);
-        if($len < 17 or $len > 18) return false;
+        if ($len < 17 or $len > 18) return false;
         $timestamp = self::getDiscordSnowflakeTimestamp($snowflake);
-        if($timestamp > time()+86400 or $timestamp <= 1420070400) return false; //+86400 (24h for any timezone problems)
+        if ($timestamp > time() + 86400 or $timestamp <= 1420070400) return false; //+86400 (24h for any timezone problems)
         return true;
     }
     /**
@@ -31,15 +34,15 @@ abstract class Utils{
      * @param mixed $d
      * @return mixed
      */
-    public static function objectToArray(mixed $d): mixed{
+    public static function objectToArray(mixed $d): mixed
+    {
         if (is_object($d)) {
             $d = get_object_vars($d);
         }
-		
+
         if (is_array($d)) {
             return array_map([Utils::class, "objectToArray"], $d);
-        }
-        else {
+        } else {
             return $d;
         }
     }

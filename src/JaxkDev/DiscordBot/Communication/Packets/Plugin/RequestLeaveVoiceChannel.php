@@ -15,29 +15,34 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 
-class RequestLeaveVoiceChannel extends Packet{
+class RequestLeaveVoiceChannel extends Packet
+{
 
     /** @var VoiceChannel */
     private $channel;
 
-    public function __construct(VoiceChannel $channel){
+    public function __construct(VoiceChannel $channel)
+    {
         parent::__construct();
         $this->channel = $channel;
     }
 
-    public function getChannel(): VoiceChannel{
+    public function getChannel(): VoiceChannel
+    {
         return $this->channel;
     }
 
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->channel
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->channel

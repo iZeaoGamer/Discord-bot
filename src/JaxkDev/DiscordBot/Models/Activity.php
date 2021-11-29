@@ -13,7 +13,8 @@
 namespace JaxkDev\DiscordBot\Models;
 
 //https://github.com/discord/discord-api-docs/blob/master/docs/topics/Gateway.md#activity-object
-class Activity implements \Serializable{
+class Activity implements \Serializable
+{
 
     const
         TYPE_PLAYING = 0,
@@ -91,16 +92,31 @@ class Activity implements \Serializable{
 
     //Buttons (max 2) https://github.com/discord-php/DiscordPHP/issues/561
 
-    public function __construct(string $name, int $type, int $created_at = null, ?string $url = null, ?int $start_timestamp = null,
-                                ?int $end_timestamp = null, ?string $application_id = null, ?string $details = null,
-                                ?string $state = null, ?string $emoji = null, ?string $party_id = null, ?int $party_size = null,
-                                ?int $party_max_size = null, ?string $large_image = null, ?string $large_text = null,
-                                ?string $small_image = null, ?string $small_text = null, /*?string $join_secret = null,
-                                ?string $spectate_secret = null, ?string $match_secret = null,*/ ?bool $instance = null,
-                                ?int $flags = null){
+    public function __construct(
+        string $name,
+        int $type,
+        int $created_at = null,
+        ?string $url = null,
+        ?int $start_timestamp = null,
+        ?int $end_timestamp = null,
+        ?string $application_id = null,
+        ?string $details = null,
+        ?string $state = null,
+        ?string $emoji = null,
+        ?string $party_id = null,
+        ?int $party_size = null,
+        ?int $party_max_size = null,
+        ?string $large_image = null,
+        ?string $large_text = null,
+        ?string $small_image = null,
+        ?string $small_text = null, /*?string $join_secret = null,
+                                ?string $spectate_secret = null, ?string $match_secret = null,*/
+        ?bool $instance = null,
+        ?int $flags = null
+    ) {
         $this->setName($name);
         $this->setType($type);
-        $this->setCreatedAt($created_at??time());
+        $this->setCreatedAt($created_at ?? time());
         $this->setUrl($url);
         $this->setStartTimestamp($start_timestamp);
         $this->setEndTimestamp($end_timestamp);
@@ -122,162 +138,196 @@ class Activity implements \Serializable{
         $this->setFlags($flags);
     }
 
-    public function getName(): string{
+    public function getName(): string
+    {
         return $this->name;
     }
 
-    public function setName(string $name): void{
+    public function setName(string $name): void
+    {
         $this->name = $name;
     }
 
-    public function getType(): int{
+    public function getType(): int
+    {
         return $this->type;
     }
 
-    public function setType(int $type): void{
-        if($type < self::TYPE_PLAYING or $type > self::TYPE_COMPETING){
+    public function setType(int $type): void
+    {
+        if ($type < self::TYPE_PLAYING or $type > self::TYPE_COMPETING) {
             throw new \AssertionError("Invalid type '{$type}'");
         }
         $this->type = $type;
     }
 
-    public function getCreatedAt(): int{
+    public function getCreatedAt(): int
+    {
         return $this->created_at;
     }
 
-    public function setCreatedAt(int $timestamp): void{
-        if($timestamp < 0){
+    public function setCreatedAt(int $timestamp): void
+    {
+        if ($timestamp < 0) {
             throw new \AssertionError("Invalid created_at timestamp '$timestamp'.");
         }
         $this->created_at = $timestamp;
     }
 
-    public function getUrl(): ?string{
+    public function getUrl(): ?string
+    {
         return $this->url;
     }
 
-    public function setUrl(?string $url): void{
-        if($url !== null){
-            if(strpos($url, "https://twitch.tv/") !== 0 and strpos($url, "https://youtube.com/") !== 0){
+    public function setUrl(?string $url): void
+    {
+        if ($url !== null) {
+            if (strpos($url, "https://twitch.tv/") !== 0 and strpos($url, "https://youtube.com/") !== 0) {
                 throw new \AssertionError("Invalid url '$url'.");
             }
         }
         $this->url = $url;
     }
 
-    public function getStartTimestamp(): ?int{
+    public function getStartTimestamp(): ?int
+    {
         return $this->start_timestamp;
     }
 
-    public function setStartTimestamp(?int $timestamp): void{
-        if($timestamp !== null and $timestamp < 0){
+    public function setStartTimestamp(?int $timestamp): void
+    {
+        if ($timestamp !== null and $timestamp < 0) {
             throw new \AssertionError("Invalid start timestamp '$timestamp'.");
         }
         $this->start_timestamp = $timestamp;
     }
 
-    public function getEndTimestamp(): ?int{
+    public function getEndTimestamp(): ?int
+    {
         return $this->end_timestamp;
     }
 
-    public function setEndTimestamp(?int $timestamp): void{
-        if($timestamp !== null and $timestamp < 0){
+    public function setEndTimestamp(?int $timestamp): void
+    {
+        if ($timestamp !== null and $timestamp < 0) {
             throw new \AssertionError("Invalid end timestamp '$timestamp'.");
         }
         $this->end_timestamp = $timestamp;
     }
 
-    public function getApplicationId(): ?string{
+    public function getApplicationId(): ?string
+    {
         return $this->application_id;
     }
 
-    public function setApplicationId(?string $application_id): void{
+    public function setApplicationId(?string $application_id): void
+    {
         $this->application_id = $application_id;
     }
 
-    public function getDetails(): ?string{
+    public function getDetails(): ?string
+    {
         return $this->details;
     }
 
-    public function setDetails(?string $details): void{
+    public function setDetails(?string $details): void
+    {
         $this->details = $details;
     }
 
-    public function getState(): ?string{
+    public function getState(): ?string
+    {
         return $this->state;
     }
 
-    public function setState(?string $state): void{
+    public function setState(?string $state): void
+    {
         $this->state = $state;
     }
 
-    public function getEmoji(): ?string{
+    public function getEmoji(): ?string
+    {
         return $this->emoji;
     }
 
-    public function setEmoji(?string $emoji): void{
+    public function setEmoji(?string $emoji): void
+    {
         $this->emoji = $emoji;
     }
 
-    public function getPartyId(): ?string{
+    public function getPartyId(): ?string
+    {
         return $this->party_id;
     }
 
-    public function setPartyId(?string $party_id): void{
+    public function setPartyId(?string $party_id): void
+    {
         $this->party_id = $party_id;
     }
 
-    public function getPartySize(): ?int{
+    public function getPartySize(): ?int
+    {
         return $this->party_size;
     }
 
-    public function setPartySize(?int $party_size): void{
-        if($party_size !== null and $party_size < 0){
+    public function setPartySize(?int $party_size): void
+    {
+        if ($party_size !== null and $party_size < 0) {
             throw new \AssertionError("Invalid party size '$party_size'.");
         }
         $this->party_size = $party_size;
     }
 
-    public function getPartyMaxSize(): ?int{
+    public function getPartyMaxSize(): ?int
+    {
         return $this->party_max_size;
     }
 
-    public function setPartyMaxSize(?int $party_max_size): void{
-        if($party_max_size !== null and $party_max_size < 0){
+    public function setPartyMaxSize(?int $party_max_size): void
+    {
+        if ($party_max_size !== null and $party_max_size < 0) {
             throw new \AssertionError("Invalid party max size '$party_max_size'.");
         }
         $this->party_max_size = $party_max_size;
     }
 
-    public function getLargeImage(): ?string{
+    public function getLargeImage(): ?string
+    {
         return $this->large_image;
     }
 
-    public function setLargeImage(?string $large_image): void{
+    public function setLargeImage(?string $large_image): void
+    {
         $this->large_image = $large_image;
     }
 
-    public function getLargeText(): ?string{
+    public function getLargeText(): ?string
+    {
         return $this->large_text;
     }
 
-    public function setLargeText(?string $large_text): void{
+    public function setLargeText(?string $large_text): void
+    {
         $this->large_text = $large_text;
     }
 
-    public function getSmallImage(): ?string{
+    public function getSmallImage(): ?string
+    {
         return $this->small_image;
     }
 
-    public function setSmallImage(?string $small_image): void{
+    public function setSmallImage(?string $small_image): void
+    {
         $this->small_image = $small_image;
     }
 
-    public function getSmallText(): ?string{
+    public function getSmallText(): ?string
+    {
         return $this->small_text;
     }
 
-    public function setSmallText(?string $small_text): void{
+    public function setSmallText(?string $small_text): void
+    {
         $this->small_text = $small_text;
     }
 
@@ -305,25 +355,30 @@ class Activity implements \Serializable{
         $this->match_secret = $match_secret;
     }*/
 
-    public function getInstance(): ?bool{
+    public function getInstance(): ?bool
+    {
         return $this->instance;
     }
 
-    public function setInstance(?bool $instance): void{
+    public function setInstance(?bool $instance): void
+    {
         $this->instance = $instance;
     }
 
-    public function getFlags(): ?int{
+    public function getFlags(): ?int
+    {
         return $this->flags;
     }
 
-    public function setFlags(?int $flags): void{
+    public function setFlags(?int $flags): void
+    {
         $this->flags = $flags;
     }
 
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->name,
             $this->type,
@@ -350,7 +405,8 @@ class Activity implements \Serializable{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->name,
             $this->type,

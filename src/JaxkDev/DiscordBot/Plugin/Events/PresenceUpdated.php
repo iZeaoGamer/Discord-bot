@@ -19,7 +19,8 @@ use pocketmine\plugin\Plugin;
 /**
  * Emitted when a members presence is updated.
  */
-class PresenceUpdated extends DiscordBotEvent{
+class PresenceUpdated extends DiscordBotEvent
+{
 
     /** @var Member */
     private $member;
@@ -40,7 +41,8 @@ class PresenceUpdated extends DiscordBotEvent{
      * @param array{"mobile": string|null, "desktop": string|null, "web": string|null}  $new_client_status
      * @param Activity[]                                                                $new_activities
      */
-    public function __construct(Plugin $plugin, Member $member, string $new_status, array $new_client_status, array $new_activities){
+    public function __construct(Plugin $plugin, Member $member, string $new_status, array $new_client_status, array $new_activities)
+    {
         parent::__construct($plugin);
         $this->member = $member;
         $this->new_status = $new_status;
@@ -48,21 +50,25 @@ class PresenceUpdated extends DiscordBotEvent{
         $this->new_activities = $new_activities;
     }
 
-    public function getMember(): Member{
+    public function getMember(): Member
+    {
         return $this->member;
     }
 
-    public function getNewStatus(): string{
+    public function getNewStatus(): string
+    {
         return $this->new_status;
     }
 
     /** @return array{"mobile": string|null, "desktop": string|null, "web": string|null} */
-    public function getNewClientStatus(){
+    public function getNewClientStatus()
+    {
         return $this->new_client_status;
     }
 
     /** @return Activity[] */
-    public function getNewActivities(): array{
+    public function getNewActivities(): array
+    {
         return $this->new_activities;
     }
 }

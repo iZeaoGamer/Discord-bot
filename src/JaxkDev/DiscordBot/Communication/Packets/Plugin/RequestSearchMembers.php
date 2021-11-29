@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestSearchMembers extends Packet{
+class RequestSearchMembers extends Packet
+{
 
     /** @var string */
     private $server_id;
@@ -25,24 +26,29 @@ class RequestSearchMembers extends Packet{
     /** @var int */
     private $limit;
 
-    public function __construct(string $server_id, string $user_id, int $limit){
+    public function __construct(string $server_id, string $user_id, int $limit)
+    {
         parent::__construct();
         $this->server_id = $server_id;
         $this->user_id = $user_id;
         $this->limit = $limit;
     }
 
-    public function getServerId(): string{
+    public function getServerId(): string
+    {
         return $this->server_id;
     }
-    public function getSearchedUserId(): string{
+    public function getSearchedUserId(): string
+    {
         return $this->user_id;
     }
-    public function getLimit(): int{
+    public function getLimit(): int
+    {
         return $this->limit;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->server_id,
@@ -51,7 +57,8 @@ class RequestSearchMembers extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->server_id,

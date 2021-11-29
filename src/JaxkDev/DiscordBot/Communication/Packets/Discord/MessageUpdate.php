@@ -15,28 +15,33 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class MessageUpdate extends Packet{
+class MessageUpdate extends Packet
+{
 
     /** @var Message */
     private $message;
 
-    public function __construct(Message $message){
+    public function __construct(Message $message)
+    {
         parent::__construct();
         $this->message = $message;
     }
 
-    public function getMessage(): Message{
+    public function getMessage(): Message
+    {
         return $this->message;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->message
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->message

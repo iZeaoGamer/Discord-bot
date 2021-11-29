@@ -15,28 +15,33 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class MemberUpdate extends Packet{
+class MemberUpdate extends Packet
+{
 
     /** @var Member */
     private $member;
 
-    public function __construct(Member $member){
+    public function __construct(Member $member)
+    {
         parent::__construct();
         $this->member = $member;
     }
 
-    public function getMember(): Member{
+    public function getMember(): Member
+    {
         return $this->member;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->member
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->member

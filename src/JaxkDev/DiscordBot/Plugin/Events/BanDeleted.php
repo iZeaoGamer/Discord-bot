@@ -20,17 +20,20 @@ use pocketmine\plugin\Plugin;
  * 
  * @see BanCreated (AKA Initialised)
  */
-class BanDeleted extends DiscordBotEvent{
+class BanDeleted extends DiscordBotEvent
+{
 
     /** @var Ban */
     private $ban;
 
-    public function __construct(Plugin $plugin, Ban $ban){
+    public function __construct(Plugin $plugin, Ban $ban)
+    {
         parent::__construct($plugin);
         $this->ban = $ban;
     }
 
-    public function getBan(): Ban{
+    public function getBan(): Ban
+    {
         return $this->ban;
     }
 }

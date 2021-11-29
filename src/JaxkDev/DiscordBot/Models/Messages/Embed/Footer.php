@@ -12,7 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Models\Messages\Embed;
 
-class Footer implements \Serializable{
+class Footer implements \Serializable
+{
 
     /** @var null|string 2048 characters */
     private $text;
@@ -20,28 +21,33 @@ class Footer implements \Serializable{
     /** @var null|string Must be prefixed with `https` */
     private $icon_url;
 
-    public function __construct(?string $text = null, ?string $icon_url = null){
+    public function __construct(?string $text = null, ?string $icon_url = null)
+    {
         $this->setText($text);
         $this->setIconUrl($icon_url);
     }
 
-    public function getText(): ?string{
+    public function getText(): ?string
+    {
         return $this->text;
     }
 
-    public function setText(?string $text): void{
-        if($text !== null and strlen($text) > 2048){
+    public function setText(?string $text): void
+    {
+        if ($text !== null and strlen($text) > 2048) {
             throw new \AssertionError("Embed footer text can only have up to 2048 characters.");
         }
         $this->text = $text;
     }
 
-    public function getIconUrl(): ?string{
+    public function getIconUrl(): ?string
+    {
         return $this->icon_url;
     }
 
-    public function setIconUrl(?string $icon_url): void{
-        if($icon_url !== null and strpos($icon_url , "https" ) !== 0){
+    public function setIconUrl(?string $icon_url): void
+    {
+        if ($icon_url !== null and strpos($icon_url, "https") !== 0) {
             throw new \AssertionError("Embed footer icon URL '$icon_url' must start with https.");
         }
         $this->icon_url = $icon_url;
@@ -49,14 +55,16 @@ class Footer implements \Serializable{
 
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->text,
             $this->icon_url
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->text,
             $this->icon_url

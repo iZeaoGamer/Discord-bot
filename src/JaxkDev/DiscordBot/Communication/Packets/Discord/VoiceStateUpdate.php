@@ -15,7 +15,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\VoiceState;
 
-class VoiceStateUpdate extends Packet{
+class VoiceStateUpdate extends Packet
+{
 
     /** @var string */
     private $member_id;
@@ -23,21 +24,25 @@ class VoiceStateUpdate extends Packet{
     /** @var VoiceState */
     private $voice_state;
 
-    public function __construct(string $member_id, VoiceState $voice_state){
+    public function __construct(string $member_id, VoiceState $voice_state)
+    {
         parent::__construct();
         $this->member_id = $member_id;
         $this->voice_state = $voice_state;
     }
 
-    public function getMemberId(): string{
+    public function getMemberId(): string
+    {
         return $this->member_id;
     }
 
-    public function getVoiceState(): VoiceState{
+    public function getVoiceState(): VoiceState
+    {
         return $this->voice_state;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->member_id,
@@ -45,7 +50,8 @@ class VoiceStateUpdate extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->member_id,

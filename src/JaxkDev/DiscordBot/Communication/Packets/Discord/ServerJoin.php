@@ -19,7 +19,8 @@ use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class ServerJoin extends Packet{
+class ServerJoin extends Packet
+{
 
     /** @var Server */
     private $server;
@@ -45,7 +46,8 @@ class ServerJoin extends Packet{
      * @param Member[]        $members
      * @param Role[]          $roles
      */
-    public function __construct(Server $server, array $threads, array $channels, array $members, array $roles){
+    public function __construct(Server $server, array $threads, array $channels, array $members, array $roles)
+    {
         parent::__construct();
         $this->server = $server;
         $this->threads = $threads;
@@ -54,31 +56,37 @@ class ServerJoin extends Packet{
         $this->roles = $roles;
     }
 
-    public function getServer(): Server{
+    public function getServer(): Server
+    {
         return $this->server;
     }
 
     /** @return ThreadChannel[] */
-    public function getThreads(): array{
+    public function getThreads(): array
+    {
         return $this->threads;
     }
 
     /** @return ServerChannel[] */
-    public function getChannels(): array{
+    public function getChannels(): array
+    {
         return $this->channels;
     }
 
     /** @return Role[] */
-    public function getRoles(): array{
+    public function getRoles(): array
+    {
         return $this->roles;
     }
 
     /** @return Member[] */
-    public function getMembers(): array{
+    public function getMembers(): array
+    {
         return $this->members;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->server,
@@ -89,7 +97,8 @@ class ServerJoin extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->server,

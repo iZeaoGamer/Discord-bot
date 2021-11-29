@@ -98,7 +98,7 @@ class Storage
      */
     public static function getServers(): array
     {
-        return self::$server_map;
+        return array_values(self::$server_map);
     }
 
     public static function addServer(Server $server): void
@@ -173,7 +173,7 @@ class Storage
     /** @return ThreadChannel[] */
     public static function getThreads(): array
     {
-        return self::$thread_map;
+        return array_values(self::$thread_map);
     }
 
     /**
@@ -255,7 +255,7 @@ class Storage
     /** @return ServerChannel[] */
     public static function getChannels(): array
     {
-        return self::$channel_map;
+        return array_values(self::$channel_map);
     }
 
     /**
@@ -361,6 +361,10 @@ class Storage
     {
         return self::$member_map[$id] ?? null;
     }
+    /** @return Member[] */
+    public static function getMembers(): array{
+        return array_values(self::$member_map);
+    }
 
     /**
      * @param string $server_id
@@ -417,7 +421,7 @@ class Storage
      */
     public static function getUsers(): array
     {
-        return self::$user_map;
+        return array_values(self::$user_map);
     }
     /**
      * @internal
@@ -469,6 +473,10 @@ class Storage
     public static function getRole(string $id): ?Role
     {
         return self::$role_map[$id] ?? null;
+    }
+    /** @return Role[] */
+    public static function getRoles(): array{
+        return array_values(self::$role_map);
     }
 
     /**
@@ -524,12 +532,15 @@ class Storage
     {
         return self::$ban_map[$id] ?? null;
     }
-
+    /** @return Ban[] */
+    public static function getBans(): array{
+        return array_values(self::$ban_map);
+    }
     /**
      * @param string $server_id
      * @return Ban[]
      */
-    public static function getServerBans(string $server_id): array
+    public static function getBansByServer(string $server_id): array
     {
         $bans = [];
         foreach ((self::$ban_server_map[$server_id] ?? []) as $member) {
@@ -561,7 +572,10 @@ class Storage
     {
         return self::$invite_map[$code] ?? null;
     }
-
+    /** @return Invite[] */
+    public static function getInvites(): array{
+        return array_values(self::$invite_map);
+    }
     /**
      * @param string $server_id
      * @return Invite[]

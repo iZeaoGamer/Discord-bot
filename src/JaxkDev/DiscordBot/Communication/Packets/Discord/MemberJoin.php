@@ -16,7 +16,8 @@ use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class MemberJoin extends Packet{
+class MemberJoin extends Packet
+{
 
     /** @var Member */
     private $member;
@@ -24,21 +25,25 @@ class MemberJoin extends Packet{
     /** @var User */
     private $user;
 
-    public function __construct(Member $member, User $user){
+    public function __construct(Member $member, User $user)
+    {
         parent::__construct();
         $this->member = $member;
         $this->user = $user;
     }
 
-    public function getMember(): Member{
+    public function getMember(): Member
+    {
         return $this->member;
     }
 
-    public function getUser(): User{
+    public function getUser(): User
+    {
         return $this->user;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->member,
@@ -46,7 +51,8 @@ class MemberJoin extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->member,

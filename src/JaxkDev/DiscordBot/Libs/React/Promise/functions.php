@@ -92,7 +92,8 @@ function all(array $promisesOrValues): PromiseInterface
 function race(array $promisesOrValues): PromiseInterface
 {
     if (!$promisesOrValues) {
-        return new Promise(function (): void {});
+        return new Promise(function (): void {
+        });
     }
 
     $cancellationQueue = new Internal\CancellationQueue();

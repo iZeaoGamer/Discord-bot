@@ -90,7 +90,8 @@ use JaxkDev\DiscordBot\Plugin\Events\TypingStart as TypingStartEvent;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 
-class BotCommunicationHandler{
+class BotCommunicationHandler
+{
 
     /** @var Main */
     private $plugin;
@@ -98,60 +99,63 @@ class BotCommunicationHandler{
     /** @var float|null */
     private $lastHeartbeat = null;
 
-    public function __construct(Main $plugin){
+    public function __construct(Main $plugin)
+    {
         $this->plugin = $plugin;
     }
 
-    public function handle(Packet $packet): void{
+    public function handle(Packet $packet): void
+    {
         // If's instances instead of ID switching due to phpstan/types.
-        if($packet instanceof ResolutionPacket){
+        if ($packet instanceof ResolutionPacket) {
             ApiResolver::handleResolution($packet);
             return;
         }
-        if($packet instanceof HeartbeatPacket){
+        if ($packet instanceof HeartbeatPacket) {
             $this->lastHeartbeat = $packet->getHeartbeat();
             return;
         }
 
-        if($packet instanceof PresenceUpdatePacket) $this->handlePresenceUpdate($packet);
-        elseif($packet instanceof ThreadCreatePacket) $this->handleThreadCreate($packet);
-        elseif($packet instanceof ThreadUpdatePacket) $this->handleThreadUpdate($packet);
-        elseif($packet instanceof ThreadDeletePacket) $this->handleThreadDelete($packet);
-        elseif($packet instanceof MessageBulkDeletePacket) $this->handleMessageBulkDelete($packet);
-        elseif($packet instanceof VoiceStateUpdatePacket) $this->handleVoiceStateUpdate($packet);
-        elseif($packet instanceof MemberJoinPacket) $this->handleMemberJoin($packet);
-        elseif($packet instanceof MemberLeavePacket) $this->handleMemberLeave($packet);
-        elseif($packet instanceof MemberUpdatePacket) $this->handleMemberUpdate($packet);
-        elseif($packet instanceof MessageSentPacket) $this->handleMessageSent($packet);
-        elseif($packet instanceof MessageUpdatePacket) $this->handleMessageUpdate($packet);
-        elseif($packet instanceof MessageDeletePacket) $this->handleMessageDelete($packet);
-        elseif($packet instanceof MessageReactionAddPacket) $this->handleMessageReactionAdd($packet);
-        elseif($packet instanceof MessageReactionRemovePacket) $this->handleMessageReactionRemove($packet);
-        elseif($packet instanceof MessageReactionRemoveAllPacket) $this->handleMessageReactionRemoveAll($packet);
-        elseif($packet instanceof MessageReactionRemoveEmojiPacket) $this->handleMessageReactionRemoveEmoji($packet);
-        elseif($packet instanceof ChannelCreatePacket) $this->handleChannelCreate($packet);
-        elseif($packet instanceof ChannelUpdatePacket) $this->handleChannelUpdate($packet);
-        elseif($packet instanceof ChannelDeletePacket) $this->handleChannelDelete($packet);
-        elseif($packet instanceof ChannelPinsUpdatePacket) $this->handleChannelPinsUpdate($packet);
-        elseif($packet instanceof RoleCreatePacket) $this->handleRoleCreate($packet);
-        elseif($packet instanceof RoleUpdatePacket) $this->handleRoleUpdate($packet);
-        elseif($packet instanceof RoleDeletePacket) $this->handleRoleDelete($packet);
-        elseif($packet instanceof InviteCreatePacket) $this->handleInviteCreate($packet);
-        elseif($packet instanceof InviteDeletePacket) $this->handleInviteDelete($packet);
-        elseif($packet instanceof BanAddPacket) $this->handleBanAdd($packet);
-        elseif($packet instanceof BanRemovePacket) $this->handleBanRemove($packet);
-        elseif($packet instanceof ServerJoinPacket) $this->handleServerJoin($packet);
-        elseif($packet instanceof ServerLeavePacket) $this->handleServerLeave($packet);
-        elseif($packet instanceof ServerUpdatePacket) $this->handleServerUpdate($packet);
-        elseif($packet instanceof TypingStartPacket) $this->handleTypingStart($packet);
-        elseif($packet instanceof DiscordDataDumpPacket) $this->handleDataDump($packet);
-        elseif($packet instanceof DiscordReadyPacket) $this->handleReady();
+        if ($packet instanceof PresenceUpdatePacket) $this->handlePresenceUpdate($packet);
+        elseif ($packet instanceof ThreadCreatePacket) $this->handleThreadCreate($packet);
+        elseif ($packet instanceof ThreadUpdatePacket) $this->handleThreadUpdate($packet);
+        elseif ($packet instanceof ThreadDeletePacket) $this->handleThreadDelete($packet);
+        elseif ($packet instanceof MessageBulkDeletePacket) $this->handleMessageBulkDelete($packet);
+        elseif ($packet instanceof VoiceStateUpdatePacket) $this->handleVoiceStateUpdate($packet);
+        elseif ($packet instanceof MemberJoinPacket) $this->handleMemberJoin($packet);
+        elseif ($packet instanceof MemberLeavePacket) $this->handleMemberLeave($packet);
+        elseif ($packet instanceof MemberUpdatePacket) $this->handleMemberUpdate($packet);
+        elseif ($packet instanceof MessageSentPacket) $this->handleMessageSent($packet);
+        elseif ($packet instanceof MessageUpdatePacket) $this->handleMessageUpdate($packet);
+        elseif ($packet instanceof MessageDeletePacket) $this->handleMessageDelete($packet);
+        elseif ($packet instanceof MessageReactionAddPacket) $this->handleMessageReactionAdd($packet);
+        elseif ($packet instanceof MessageReactionRemovePacket) $this->handleMessageReactionRemove($packet);
+        elseif ($packet instanceof MessageReactionRemoveAllPacket) $this->handleMessageReactionRemoveAll($packet);
+        elseif ($packet instanceof MessageReactionRemoveEmojiPacket) $this->handleMessageReactionRemoveEmoji($packet);
+        elseif ($packet instanceof ChannelCreatePacket) $this->handleChannelCreate($packet);
+        elseif ($packet instanceof ChannelUpdatePacket) $this->handleChannelUpdate($packet);
+        elseif ($packet instanceof ChannelDeletePacket) $this->handleChannelDelete($packet);
+        elseif ($packet instanceof ChannelPinsUpdatePacket) $this->handleChannelPinsUpdate($packet);
+        elseif ($packet instanceof RoleCreatePacket) $this->handleRoleCreate($packet);
+        elseif ($packet instanceof RoleUpdatePacket) $this->handleRoleUpdate($packet);
+        elseif ($packet instanceof RoleDeletePacket) $this->handleRoleDelete($packet);
+        elseif ($packet instanceof InviteCreatePacket) $this->handleInviteCreate($packet);
+        elseif ($packet instanceof InviteDeletePacket) $this->handleInviteDelete($packet);
+        elseif ($packet instanceof BanAddPacket) $this->handleBanAdd($packet);
+        elseif ($packet instanceof BanRemovePacket) $this->handleBanRemove($packet);
+        elseif ($packet instanceof ServerJoinPacket) $this->handleServerJoin($packet);
+        elseif ($packet instanceof ServerLeavePacket) $this->handleServerLeave($packet);
+        elseif ($packet instanceof ServerUpdatePacket) $this->handleServerUpdate($packet);
+        elseif ($packet instanceof TypingStartPacket) $this->handleTypingStart($packet);
+        elseif ($packet instanceof DiscordDataDumpPacket) $this->handleDataDump($packet);
+        elseif ($packet instanceof DiscordReadyPacket) $this->handleReady();
     }
 
-    private function handleReady(): void{
+    private function handleReady(): void
+    {
         //Default activity, Feel free to change activity after ReadyEvent.
         $ac = new Activity("Bot is loading.. Please stand by!", Activity::TYPE_PLAYING);
-        $this->plugin->getApi()->updateBotPresence($ac, Member::STATUS_DND)->otherwise(function(ApiRejection $a){
+        $this->plugin->getApi()->updateBotPresence($ac, Member::STATUS_DND)->otherwise(function (ApiRejection $a) {
             $this->plugin->getLogger()->logException($a);
         });
 
@@ -159,55 +163,56 @@ class BotCommunicationHandler{
     }
 
     //Uses the storage (aka cache)
-    private function handleVoiceStateUpdate(VoiceStateUpdatePacket $packet): void{
+    private function handleVoiceStateUpdate(VoiceStateUpdatePacket $packet): void
+    {
         $member = Storage::getMember($packet->getMemberId());
-        if($member === null){
+        if ($member === null) {
             throw new \AssertionError("Member '{$packet->getMemberId()}' not found in storage.");
         }
         $state = $packet->getVoiceState();
-        if($state->getChannelId() === null){
+        if ($state->getChannelId() === null) {
             $channel = Storage::getMembersVoiceChannel($packet->getMemberId());
-            if($channel === null){
+            if ($channel === null) {
                 throw new \AssertionError("Voice Channel '{$state->getChannelId()}' not found in storage.");
             }
             (new VoiceChannelMemberLeftEvent($this->plugin, $member, $channel))->call();
             $member->setVoiceState(null);
             $members = $channel->getMembers();
-            if(($key = array_search($packet->getMemberId(), $members)) !== false) {
+            if (($key = array_search($packet->getMemberId(), $members)) !== false) {
                 unset($members[$key]);
             }
             $channel->setMembers($members);
             Storage::updateMember($member);
             Storage::updateChannel($channel);
             Storage::unsetMembersVoiceChannel($packet->getMemberId());
-        }else{
+        } else {
             $channel = Storage::getChannel($state->getChannelId());
-            if(!$channel instanceof ServerChannel){
+            if (!$channel instanceof ServerChannel) {
                 throw new \AssertionError("Channel '{$state->getChannelId()}' not found in storage.");
             }
-            if(!$channel instanceof VoiceChannel){
+            if (!$channel instanceof VoiceChannel) {
                 throw new \AssertionError("Channel '{$state->getChannelId()}' not a voice channel.");
             }
-            if(in_array($packet->getMemberId(), $channel->getMembers())){
+            if (in_array($packet->getMemberId(), $channel->getMembers())) {
                 //Member did not leave/join/transfer voice channel but muted/deaf/self_muted/self_deafen etc.
                 (new VoiceStateUpdatedEvent($this->plugin, $member, $state))->call();
                 $member->setVoiceState($packet->getVoiceState());
                 Storage::updateMember($member);
-            }else{
-                if($channel->getMemberLimit() !== 0 and sizeof($channel->getMembers()) >= $channel->getMemberLimit()){
+            } else {
+                if ($channel->getMemberLimit() !== 0 and sizeof($channel->getMembers()) >= $channel->getMemberLimit()) {
                     //Shouldn't ever happen.
                     throw new \AssertionError("Channel '{$state->getChannelId()}' shouldn't have room for this member.");
                 }
                 $previous = Storage::getMembersVoiceChannel($packet->getMemberId());
-                if($previous !== null and $previous->getId() !== $state->getChannelId()){
+                if ($previous !== null and $previous->getId() !== $state->getChannelId()) {
                     (new VoiceChannelMemberMovedEvent($this->plugin, $member, $previous, $channel, $state))->call();
                     $members = $previous->getMembers();
-                    if(($key = array_search($packet->getMemberId(), $members)) !== false) {
+                    if (($key = array_search($packet->getMemberId(), $members)) !== false) {
                         unset($members[$key]);
                     }
                     $previous->setMembers($members);
                     Storage::updateChannel($previous);
-                }else{
+                } else {
                     (new VoiceChannelMemberJoinedEvent($this->plugin, $member, $channel, $state))->call();
                 }
                 $member->setVoiceState($packet->getVoiceState());
@@ -221,9 +226,10 @@ class BotCommunicationHandler{
         }
     }
 
-    private function handlePresenceUpdate(PresenceUpdatePacket $packet): void{
+    private function handlePresenceUpdate(PresenceUpdatePacket $packet): void
+    {
         $member = Storage::getMember($packet->getMemberId());
-        if($member === null){
+        if ($member === null) {
             throw new \AssertionError("Member '{$packet->getMemberID()}' not found in storage.");
         }
         (new PresenceUpdatedEvent($this->plugin, $member, $packet->getStatus(), $packet->getClientStatus(), $packet->getActivities()))->call();
@@ -232,158 +238,182 @@ class BotCommunicationHandler{
         $member->setActivities($packet->getActivities());
         Storage::updateMember($member);
     }
-    private function handleMessageBulkDelete(MessageBulkDeletePacket $packet): void{
+    private function handleMessageBulkDelete(MessageBulkDeletePacket $packet): void
+    {
         (new MessageBulkDeletedEvent($this->plugin, $packet->getMessage()))->call();
     }
 
-    private function handleMessageSent(MessageSentPacket $packet): void{
+    private function handleMessageSent(MessageSentPacket $packet): void
+    {
         (new MessageSentEvent($this->plugin, $packet->getMessage()))->call();
     }
 
-    private function handleMessageUpdate(MessageUpdatePacket $packet): void{
+    private function handleMessageUpdate(MessageUpdatePacket $packet): void
+    {
         (new MessageUpdatedEvent($this->plugin, $packet->getMessage()))->call();
     }
 
-    private function handleMessageDelete(MessageDeletePacket $packet): void{
+    private function handleMessageDelete(MessageDeletePacket $packet): void
+    {
         (new MessageDeletedEvent($this->plugin, $packet->getMessage()))->call();
     }
-    private function handleTypingStart(TypingStartPacket $packet): void{
+    private function handleTypingStart(TypingStartPacket $packet): void
+    {
         (new TypingStartEvent($this->plugin, $packet->getUserId(), $packet->getChannelId(), $packet->getServerId()))->call();
     }
 
-    private function handleMessageReactionAdd(MessageReactionAddPacket $packet): void{
+    private function handleMessageReactionAdd(MessageReactionAddPacket $packet): void
+    {
         $channel = Storage::getChannel($packet->getChannelId());
-        if(!$channel instanceof ServerChannel){
+        if (!$channel instanceof ServerChannel) {
             throw new \AssertionError("Channel '{$packet->getChannelId()}' does not exist in storage.");
         }
         $member = Storage::getMember($packet->getMemberId());
-        if($member === null){
+        if ($member === null) {
             throw new \AssertionError("Member '{$packet->getMemberId()}' does not exist in storage.");
         }
         (new MessageReactionAddEvent($this->plugin, $packet->getEmoji(), $packet->getMessageId(), $channel, $member))->call();
     }
 
-    private function handleMessageReactionRemove(MessageReactionRemovePacket $packet): void{
+    private function handleMessageReactionRemove(MessageReactionRemovePacket $packet): void
+    {
         $channel = Storage::getChannel($packet->getChannelId());
-        if(!$channel instanceof ServerChannel){
+        if (!$channel instanceof ServerChannel) {
             throw new \AssertionError("Channel '{$packet->getChannelId()}' does not exist in storage.");
         }
         $member = Storage::getMember($packet->getMemberId());
-        if($member === null){
+        if ($member === null) {
             throw new \AssertionError("Member '{$packet->getMemberId()}' does not exist in storage.");
         }
         (new MessageReactionRemoveEvent($this->plugin, $packet->getEmoji(), $packet->getMessageId(), $channel, $member))->call();
     }
 
-    private function handleMessageReactionRemoveAll(MessageReactionRemoveAllPacket $packet): void{
+    private function handleMessageReactionRemoveAll(MessageReactionRemoveAllPacket $packet): void
+    {
         $channel = Storage::getChannel($packet->getChannelId());
-        if(!$channel instanceof ServerChannel){
+        if (!$channel instanceof ServerChannel) {
             throw new \AssertionError("Channel '{$packet->getChannelId()}' does not exist in storage.");
         }
         (new MessageReactionRemoveAllEvent($this->plugin, $packet->getMessageId(), $channel))->call();
     }
 
-    private function handleMessageReactionRemoveEmoji(MessageReactionRemoveEmojiPacket $packet): void{
+    private function handleMessageReactionRemoveEmoji(MessageReactionRemoveEmojiPacket $packet): void
+    {
         $channel = Storage::getChannel($packet->getChannelId());
-        if(!$channel instanceof ServerChannel){
+        if (!$channel instanceof ServerChannel) {
             throw new \AssertionError("Channel '{$packet->getChannelId()}' does not exist in storage.");
         }
         (new MessageReactionRemoveEmojiEvent($this->plugin, $packet->getEmoji(), $packet->getMessageId(), $channel))->call();
     }
 
-    private function handleChannelCreate(ChannelCreatePacket $packet): void{
+    private function handleChannelCreate(ChannelCreatePacket $packet): void
+    {
         (new ChannelCreatedEvent($this->plugin, $packet->getChannel()))->call();
         Storage::addChannel($packet->getChannel());
     }
-    private function handleThreadCreate(ThreadCreatePacket $packet): void{
+    private function handleThreadCreate(ThreadCreatePacket $packet): void
+    {
         (new ThreadCreatedEvent($this->plugin, $packet->getChannel()))->call();
         Storage::addThread($packet->getChannel());
     }
-    private function handleThreadUpdate(ThreadUpdatePacket $packet): void{
+    private function handleThreadUpdate(ThreadUpdatePacket $packet): void
+    {
         (new ThreadUpdatedEvent($this->plugin, $packet->getChannel()))->call();
         Storage::updateThread($packet->getChannel());
     }
-    private function handleThreadDelete(ThreadDeletePacket $packet): void{
-       $c = Storage::getThread($packet->getChannelId());
-       if(!$c instanceof ThreadChannel){
-           throw new \AssertionError("Thread Channel '{$packet->getChannelId()} not found in storage.");
-       }
+    private function handleThreadDelete(ThreadDeletePacket $packet): void
+    {
+        $c = Storage::getThread($packet->getChannelId());
+        if (!$c instanceof ThreadChannel) {
+            throw new \AssertionError("Thread Channel '{$packet->getChannelId()} not found in storage.");
+        }
         (new ThreadDeletedEvent($this->plugin, $c))->call();
         Storage::removeThread($packet->getChannelID());
     }
 
-    private function handleChannelUpdate(ChannelUpdatePacket $packet): void{
+    private function handleChannelUpdate(ChannelUpdatePacket $packet): void
+    {
         (new ChannelUpdatedEvent($this->plugin, $packet->getChannel()))->call();
         Storage::updateChannel($packet->getChannel());
     }
 
-    private function handleChannelDelete(ChannelDeletePacket $packet): void{
+    private function handleChannelDelete(ChannelDeletePacket $packet): void
+    {
         $c = Storage::getChannel($packet->getChannelId());
-        if(!$c instanceof ServerChannel){
+        if (!$c instanceof ServerChannel) {
             throw new \AssertionError("Server Channel '{$packet->getChannelId()}' not found in storage.");
         }
         (new ChannelDeletedEvent($this->plugin, $c))->call();
         Storage::removeChannel($packet->getChannelId());
     }
 
-    private function handleChannelPinsUpdate(ChannelPinsUpdatePacket $packet): void{
+    private function handleChannelPinsUpdate(ChannelPinsUpdatePacket $packet): void
+    {
         $c = Storage::getChannel($packet->getChannelId());
-        if(!$c instanceof ServerChannel or !$c instanceof TextChannel){
+        if (!$c instanceof ServerChannel or !$c instanceof TextChannel) {
             throw new \AssertionError("Text Channel '{$packet->getChannelId()}' not found in storage.");
         }
         (new ChannelPinsUpdatedEvent($this->plugin, $c))->call();
     }
 
-    private function handleRoleCreate(RoleCreatePacket $packet): void{
+    private function handleRoleCreate(RoleCreatePacket $packet): void
+    {
         (new RoleCreatedEvent($this->plugin, $packet->getRole()))->call();
         Storage::addRole($packet->getRole());
     }
 
-    private function handleRoleUpdate(RoleUpdatePacket $packet): void{
+    private function handleRoleUpdate(RoleUpdatePacket $packet): void
+    {
         (new RoleUpdatedEvent($this->plugin, $packet->getRole()))->call();
         Storage::updateRole($packet->getRole());
     }
 
-    private function handleRoleDelete(RoleDeletePacket $packet): void{
+    private function handleRoleDelete(RoleDeletePacket $packet): void
+    {
         $r = Storage::getRole($packet->getRoleId());
-        if($r === null){
+        if ($r === null) {
             throw new \AssertionError("Role '{$packet->getRoleId()}' not found in storage.");
         }
         (new RoleDeletedEvent($this->plugin, $r))->call();
         Storage::removeRole($packet->getRoleId());
     }
 
-    private function handleInviteCreate(InviteCreatePacket $packet): void{
+    private function handleInviteCreate(InviteCreatePacket $packet): void
+    {
         (new InviteCreatedEvent($this->plugin, $packet->getInvite()))->call();
         Storage::addInvite($packet->getInvite());
     }
 
-    private function handleInviteDelete(InviteDeletePacket $packet): void{
+    private function handleInviteDelete(InviteDeletePacket $packet): void
+    {
         $i = Storage::getInvite($packet->getInviteCode());
-        if($i === null){
+        if ($i === null) {
             throw new \AssertionError("Invite '{$packet->getInviteCode()}' not found in storage.");
         }
         (new InviteDeletedEvent($this->plugin, $i))->call();
         Storage::removeInvite($packet->getInviteCode());
     }
 
-    private function handleBanAdd(BanAddPacket $packet): void{
+    private function handleBanAdd(BanAddPacket $packet): void
+    {
         (new BanCreatedEvent($this->plugin, $packet->getBan()))->call();
         Storage::addBan($packet->getBan());
     }
 
-    private function handleBanRemove(BanRemovePacket $packet): void{
+    private function handleBanRemove(BanRemovePacket $packet): void
+    {
         $ban = Storage::getBan($packet->getBanId());
-        if($ban === null){
+        if ($ban === null) {
             throw new \AssertionError("Ban '{$packet->getBanId()}' not found in storage.");
         }
         (new BanDeletedEvent($this->plugin, $ban))->call();
         Storage::removeBan($packet->getBanId());
     }
 
-    private function handleMemberJoin(MemberJoinPacket $packet): void{
+    private function handleMemberJoin(MemberJoinPacket $packet): void
+    {
         $server = Storage::getServer($packet->getMember()->getServerId());
-        if($server === null){
+        if ($server === null) {
             throw new \AssertionError("Server '{$packet->getMember()->getServerId()}' not found for member '{$packet->getMember()->getId()}'");
         }
         (new MemberJoinedEvent($this->plugin, $packet->getMember()))->call();
@@ -391,22 +421,24 @@ class BotCommunicationHandler{
         Storage::addUser($packet->getUser());
     }
 
-    private function handleMemberUpdate(MemberUpdatePacket $packet): void{
+    private function handleMemberUpdate(MemberUpdatePacket $packet): void
+    {
         (new MemberUpdatedEvent($this->plugin, $packet->getMember()))->call();
         Storage::updateMember($packet->getMember());
     }
 
-    private function handleMemberLeave(MemberLeavePacket $packet): void{
+    private function handleMemberLeave(MemberLeavePacket $packet): void
+    {
         //When leaving server this is emitted.
-        if(($u = Storage::getBotUser()) !== null and $u->getId() === explode(".", $packet->getMemberID())[1]) return;
+        if (($u = Storage::getBotUser()) !== null and $u->getId() === explode(".", $packet->getMemberID())[1]) return;
 
         $member = Storage::getMember($packet->getMemberID());
-        if($member === null){
+        if ($member === null) {
             throw new \AssertionError("Member '{$packet->getMemberID()}' not found in storage.");
         }
 
         $server = Storage::getServer($member->getServerId());
-        if($server === null){
+        if ($server === null) {
             throw new \AssertionError("Server '{$member->getServerId()}' not found for member '{$member->getId()}'");
         }
 
@@ -414,87 +446,100 @@ class BotCommunicationHandler{
         Storage::removeMember($packet->getMemberID());
     }
 
-    private function handleServerJoin(ServerJoinPacket $packet): void{
-        (new ServerJoinedEvent($this->plugin, $packet->getServer(),$packet->getThreads(), $packet->getRoles(),
-            $packet->getChannels(), $packet->getMembers()))->call();
+    private function handleServerJoin(ServerJoinPacket $packet): void
+    {
+        (new ServerJoinedEvent(
+            $this->plugin,
+            $packet->getServer(),
+            $packet->getThreads(),
+            $packet->getRoles(),
+            $packet->getChannels(),
+            $packet->getMembers()
+        ))->call();
 
         Storage::addServer($packet->getServer());
-        foreach($packet->getMembers() as $member){
+        foreach ($packet->getMembers() as $member) {
             Storage::addMember($member);
         }
-        foreach($packet->getRoles() as $role){
+        foreach ($packet->getRoles() as $role) {
             Storage::addRole($role);
         }
-        foreach($packet->getChannels() as $channel){
+        foreach ($packet->getChannels() as $channel) {
             Storage::addChannel($channel);
         }
-        foreach($packet->getThreads() as $thread){
+        foreach ($packet->getThreads() as $thread) {
             Storage::addThread($thread);
         }
     }
 
-    private function handleServerUpdate(ServerUpdatePacket $packet): void{
+    private function handleServerUpdate(ServerUpdatePacket $packet): void
+    {
         (new ServerUpdatedEvent($this->plugin, $packet->getServer()))->call();
         Storage::updateServer($packet->getServer());
     }
 
-    private function handleServerLeave(ServerLeavePacket $packet): void{
+    private function handleServerLeave(ServerLeavePacket $packet): void
+    {
         $server = Storage::getServer($packet->getServerId());
-        if($server === null){
+        if ($server === null) {
             throw new \AssertionError("Server '{$packet->getServerId()}' not found in storage.");
         }
         (new ServerDeletedEvent($this->plugin, $server))->call();
         Storage::removeServer($packet->getServerId());
     }
 
-    private function handleDataDump(DiscordDataDumpPacket $packet): void{
-        foreach($packet->getServers() as $server){
+    private function handleDataDump(DiscordDataDumpPacket $packet): void
+    {
+        foreach ($packet->getServers() as $server) {
             Storage::addServer($server);
         }
-        foreach($packet->getThreads() as $thread){
+        foreach ($packet->getThreads() as $thread) {
             Storage::addThread($thread);
         }
-        foreach($packet->getChannels() as $channel){
+        foreach ($packet->getChannels() as $channel) {
             Storage::addChannel($channel);
         }
-        foreach($packet->getRoles() as $role){
+        foreach ($packet->getRoles() as $role) {
             Storage::addRole($role);
         }
-        foreach($packet->getBans() as $ban){
+        foreach ($packet->getBans() as $ban) {
             Storage::addBan($ban);
         }
-        foreach($packet->getInvites() as $invite){
+        foreach ($packet->getInvites() as $invite) {
             Storage::addInvite($invite);
         }
-        foreach($packet->getMembers() as $member){
+        foreach ($packet->getMembers() as $member) {
             Storage::addMember($member);
         }
-        foreach($packet->getUsers() as $user){
+        foreach ($packet->getUsers() as $user) {
             Storage::addUser($user);
         }
-        if($packet->getBotUser() !== null){
+        if ($packet->getBotUser() !== null) {
             Storage::setBotUser($packet->getBotUser());
         }
         Storage::setTimestamp($packet->getTimestamp());
-        $this->plugin->getLogger()->debug("Handled data dump (".$packet->getTimestamp().") (".$packet->getSize().")");
+        $this->plugin->getLogger()->debug("Handled data dump (" . $packet->getTimestamp() . ") (" . $packet->getSize() . ")");
     }
 
     /**
      * Checks last KNOWN Heartbeat timestamp with current time, does not check pre-start condition.
      */
-    public function checkHeartbeat(): void{
-        if($this->lastHeartbeat === null) return;
-        if(($diff = microtime(true) - $this->lastHeartbeat) > $this->plugin->getPluginConfig()["protocol"]["heartbeat_allowance"]){
+    public function checkHeartbeat(): void
+    {
+        if ($this->lastHeartbeat === null) return;
+        if (($diff = microtime(true) - $this->lastHeartbeat) > $this->plugin->getPluginConfig()["protocol"]["heartbeat_allowance"]) {
             $this->plugin->getLogger()->emergency("DiscordBot has not responded for {$diff} seconds, disabling plugin.");
             $this->plugin->getServer()->getPluginManager()->disablePlugin($this->plugin);
         }
     }
 
-    public function sendHeartbeat(): void{
+    public function sendHeartbeat(): void
+    {
         $this->plugin->writeOutboundData(new HeartbeatPacket(microtime(true)));
     }
 
-    public function getLastHeartbeat(): ?float{
+    public function getLastHeartbeat(): ?float
+    {
         return $this->lastHeartbeat;
     }
 }

@@ -14,13 +14,16 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class DiscordReady extends Packet{
+class DiscordReady extends Packet
+{
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize($this->UID);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         $this->UID = unserialize($data);
     }
 }

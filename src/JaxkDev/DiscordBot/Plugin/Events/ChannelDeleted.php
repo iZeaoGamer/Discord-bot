@@ -21,17 +21,20 @@ use pocketmine\plugin\Plugin;
  * @see ChannelUpdated
  * @see ChannelCreated
  */
-class ChannelDeleted extends DiscordBotEvent{
+class ChannelDeleted extends DiscordBotEvent
+{
 
     /** @var ServerChannel */
     private $channel;
 
-    public function __construct(Plugin $plugin, ServerChannel $channel){
+    public function __construct(Plugin $plugin, ServerChannel $channel)
+    {
         parent::__construct($plugin);
         $this->channel = $channel;
     }
 
-    public function getChannel(): ServerChannel{
+    public function getChannel(): ServerChannel
+    {
         return $this->channel;
     }
 }

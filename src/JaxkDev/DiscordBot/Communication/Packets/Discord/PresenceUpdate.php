@@ -15,7 +15,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Activity;
 
-class PresenceUpdate extends Packet{
+class PresenceUpdate extends Packet
+{
 
     /** @var string */
     private $member_id;
@@ -37,7 +38,8 @@ class PresenceUpdate extends Packet{
      * @param array{"mobile": string|null, "desktop": string|null, "web": string|null} $client_status
      * @param Activity[]                                                               $activities
      */
-    public function __construct(string $member_id, string $status, array $client_status, array $activities){
+    public function __construct(string $member_id, string $status, array $client_status, array $activities)
+    {
         parent::__construct();
         $this->member_id = $member_id;
         $this->status = $status;
@@ -45,25 +47,30 @@ class PresenceUpdate extends Packet{
         $this->activities = $activities;
     }
 
-    public function getMemberId(): string{
+    public function getMemberId(): string
+    {
         return $this->member_id;
     }
 
-    public function getStatus(): string{
+    public function getStatus(): string
+    {
         return $this->status;
     }
 
     /** @return array{"mobile": string|null, "desktop": string|null, "web": string|null} */
-    public function getClientStatus(){
+    public function getClientStatus()
+    {
         return $this->client_status;
     }
 
     /** @return Activity[] */
-    public function getActivities(): array{
+    public function getActivities(): array
+    {
         return $this->activities;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->member_id,
@@ -73,7 +80,8 @@ class PresenceUpdate extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->member_id,

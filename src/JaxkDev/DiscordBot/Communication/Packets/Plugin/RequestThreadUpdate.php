@@ -15,28 +15,33 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestThreadUpdate extends Packet{
+class RequestThreadUpdate extends Packet
+{
 
     /** @var ThreadChannel */
     private $thread;
 
-    public function __construct(ThreadChannel $thread){
+    public function __construct(ThreadChannel $thread)
+    {
         parent::__construct();
         $this->thread = $thread;
     }
 
-    public function getChannel(): ThreadChannel{
+    public function getChannel(): ThreadChannel
+    {
         return $this->thread;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->thread
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->thread

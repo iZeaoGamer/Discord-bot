@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestSendFile extends Packet{
+class RequestSendFile extends Packet
+{
 
     /** @var string */
     private $channel_id;
@@ -28,7 +29,8 @@ class RequestSendFile extends Packet{
     /** @var string */
     private $message;
 
-    public function __construct(string $channel_id, string $file_name, string $file_path, string $message){
+    public function __construct(string $channel_id, string $file_name, string $file_path, string $message)
+    {
         parent::__construct();
         $this->channel_id = $channel_id;
         $this->file_name = $file_name;
@@ -36,23 +38,28 @@ class RequestSendFile extends Packet{
         $this->message = $message;
     }
 
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channel_id;
     }
 
-    public function getFileName(): string{
+    public function getFileName(): string
+    {
         return $this->file_name;
     }
 
-    public function getFilePath(): string{
+    public function getFilePath(): string
+    {
         return $this->file_path;
     }
 
-    public function getMessage(): string{
+    public function getMessage(): string
+    {
         return $this->message;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->channel_id,
@@ -62,7 +69,8 @@ class RequestSendFile extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->channel_id,

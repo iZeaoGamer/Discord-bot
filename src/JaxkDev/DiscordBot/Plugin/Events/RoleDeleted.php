@@ -21,17 +21,20 @@ use pocketmine\plugin\Plugin;
  * @see RoleCreated
  * @see RoleUpdated
  */
-class RoleDeleted extends DiscordBotEvent{
+class RoleDeleted extends DiscordBotEvent
+{
 
     /** @var Role */
     private $role;
 
-    public function __construct(Plugin $plugin, Role $role){
+    public function __construct(Plugin $plugin, Role $role)
+    {
         parent::__construct($plugin);
         $this->role = $role;
     }
 
-    public function getRole(): Role{
+    public function getRole(): Role
+    {
         return $this->role;
     }
 }

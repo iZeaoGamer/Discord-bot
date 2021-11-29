@@ -15,7 +15,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\VoiceState;
 
-class TypingStart extends Packet{
+class TypingStart extends Packet
+{
 
     /** @var string */
     private $userId;
@@ -26,23 +27,28 @@ class TypingStart extends Packet{
     /** @var string|null */
     private $serverId;
 
-    public function __construct(string $user_id, string $channel_id, ?string $server_id){
+    public function __construct(string $user_id, string $channel_id, ?string $server_id)
+    {
         parent::__construct();
         $this->userId = $user_id;
         $this->channelId = $channel_id;
         $this->serverId = $server_id;
     }
 
-    public function getUserId(): string{
+    public function getUserId(): string
+    {
         return $this->userId;
     }
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channelId;
     }
-    public function getServerId(): ?string{
+    public function getServerId(): ?string
+    {
         return $this->serverId;
     }
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->userId,
@@ -51,7 +57,8 @@ class TypingStart extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->userId,

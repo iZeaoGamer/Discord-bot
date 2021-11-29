@@ -24,7 +24,8 @@ use pocketmine\plugin\Plugin;
  * @see VoiceChannelMemberJoined
  * @see VoiceChannelMemberLeft
  */
-class VoiceChannelMemberMoved extends DiscordBotEvent{
+class VoiceChannelMemberMoved extends DiscordBotEvent
+{
 
     /** @var Member Member, note it contains old voice state. */
     private $member;
@@ -38,8 +39,13 @@ class VoiceChannelMemberMoved extends DiscordBotEvent{
     /** @var VoiceState */
     private $voice_state;
 
-    public function __construct(Plugin $plugin, Member $member, VoiceChannel $previous_channel, VoiceChannel $new_channel,
-                                VoiceState $voice_state){
+    public function __construct(
+        Plugin $plugin,
+        Member $member,
+        VoiceChannel $previous_channel,
+        VoiceChannel $new_channel,
+        VoiceState $voice_state
+    ) {
         parent::__construct($plugin);
         $this->member = $member;
         $this->previous_channel = $previous_channel;
@@ -47,19 +53,23 @@ class VoiceChannelMemberMoved extends DiscordBotEvent{
         $this->voice_state = $voice_state;
     }
 
-    public function getMember(): Member{
+    public function getMember(): Member
+    {
         return $this->member;
     }
 
-    public function getPreviousChannel(): VoiceChannel{
+    public function getPreviousChannel(): VoiceChannel
+    {
         return $this->previous_channel;
     }
 
-    public function getNewChannel(): VoiceChannel{
+    public function getNewChannel(): VoiceChannel
+    {
         return $this->new_channel;
     }
 
-    public function getVoiceState(): VoiceState{
+    public function getVoiceState(): VoiceState
+    {
         return $this->voice_state;
     }
 }

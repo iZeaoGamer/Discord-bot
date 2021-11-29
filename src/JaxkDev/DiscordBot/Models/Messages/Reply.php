@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Models\Messages;
 
 use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 
-class Reply extends Message{
+class Reply extends Message
+{
 
     /** @var ?string ID of message replying to. */
     private $referenced_message_id;
@@ -36,26 +37,52 @@ class Reply extends Message{
      * @param string[]     $roles_mentioned
      * @param string[]     $channels_mentioned
      */
-    public function __construct(string $channel_id, ?string $referenced_message_id = null, ?string $id = null, string $content = "",
-                                ?Embed $embed = null, ?string $author_id = null, ?string $server_id = null, ?float $timestamp = null,
-                                array $attachments = [], bool $everyone_mentioned = false, array $users_mentioned = [],
-                                array $roles_mentioned = [], array $channels_mentioned = []){
-        parent::__construct($channel_id, $id, $content, $embed, $author_id, $server_id, $timestamp, $attachments,
-            $everyone_mentioned, $users_mentioned, $roles_mentioned, $channels_mentioned);
+    public function __construct(
+        string $channel_id,
+        ?string $referenced_message_id = null,
+        ?string $id = null,
+        string $content = "",
+        ?Embed $embed = null,
+        ?string $author_id = null,
+        ?string $server_id = null,
+        ?float $timestamp = null,
+        array $attachments = [],
+        bool $everyone_mentioned = false,
+        array $users_mentioned = [],
+        array $roles_mentioned = [],
+        array $channels_mentioned = []
+    ) {
+        parent::__construct(
+            $channel_id,
+            $id,
+            $content,
+            $embed,
+            $author_id,
+            $server_id,
+            $timestamp,
+            $attachments,
+            $everyone_mentioned,
+            $users_mentioned,
+            $roles_mentioned,
+            $channels_mentioned
+        );
         $this->setReferencedMessageId($referenced_message_id);
     }
 
-    public function getReferencedMessageId(): ?string{
+    public function getReferencedMessageId(): ?string
+    {
         return $this->referenced_message_id;
     }
 
-    public function setReferencedMessageId(?string $referenced_message_id): void{
+    public function setReferencedMessageId(?string $referenced_message_id): void
+    {
         $this->referenced_message_id = $referenced_message_id;
     }
 
     //----- Serialization -----//
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->id,
             $this->content,
@@ -73,7 +100,8 @@ class Reply extends Message{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->id,
             $this->content,

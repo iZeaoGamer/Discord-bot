@@ -14,7 +14,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestDeleteRole extends Packet{
+class RequestDeleteRole extends Packet
+{
 
     /** @var string */
     private $server_id;
@@ -22,21 +23,25 @@ class RequestDeleteRole extends Packet{
     /** @var string */
     private $role_id;
 
-    public function __construct(string $server_id, string $role_id){
+    public function __construct(string $server_id, string $role_id)
+    {
         parent::__construct();
         $this->server_id = $server_id;
         $this->role_id = $role_id;
     }
 
-    public function getServerId(): string{
+    public function getServerId(): string
+    {
         return $this->server_id;
     }
 
-    public function getRoleId(): string{
+    public function getRoleId(): string
+    {
         return $this->role_id;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->server_id,
@@ -44,7 +49,8 @@ class RequestDeleteRole extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->server_id,

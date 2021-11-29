@@ -15,28 +15,33 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Webhook;
 
-class RequestUpdateWebhook extends Packet{
+class RequestUpdateWebhook extends Packet
+{
 
     /** @var Webhook */
     private $webhook;
 
-    public function __construct(Webhook $webhook){
+    public function __construct(Webhook $webhook)
+    {
         parent::__construct();
         $this->webhook = $webhook;
     }
 
-    public function getWebhook(): Webhook{
+    public function getWebhook(): Webhook
+    {
         return $this->webhook;
     }
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->webhook
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->webhook

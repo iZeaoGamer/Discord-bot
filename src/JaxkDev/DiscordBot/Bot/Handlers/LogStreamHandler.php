@@ -21,7 +21,8 @@ use pocketmine\utils\TextFormat;
 /**
  * Sends all messages(aka records) from monolog logger to PocketMines log if running in debug mode.
  */
-class LogStreamHandler extends AbstractHandler{
+class LogStreamHandler extends AbstractHandler
+{
 
     const FORMAT = TextFormat::AQUA . "[%s] " . TextFormat::RESET . "%s[%s/%s]: %s" . TextFormat::RESET;
 
@@ -34,20 +35,24 @@ class LogStreamHandler extends AbstractHandler{
     /** @var bool */
     private $debug;
 
-    public function __construct(MainLogger $logger, bool $debug, $level = Logger::DEBUG, bool $bubble = true){
+    public function __construct(MainLogger $logger, bool $debug, $level = Logger::DEBUG, bool $bubble = true)
+    {
         $this->debug = $debug;
         $this->logger = $logger;
         $this->formatter = new LineFormatter("%message% %context%");
         parent::__construct($level, $bubble);
     }
 
-    public function close(): void{}
+    public function close(): void
+    {
+    }
 
-    public function handle(array $record): bool{
-        if($this->logger === null) return false;
-        $record['message'] = str_replace(" []\X1","",$this->formatter->format($record)."\X1");
+    public function handle(array $record): bool
+    {
+        if ($this->logger === null) return false;
+        $record['message'] = str_replace(" []\X1", "", $this->formatter->format($record) . "\X1");
 
-        if($this->debug or in_array(strtolower($record['level_name']), ["error", "critical", "emergency", "alert"])){
+        if ($this->debug or in_array(strtolower($record['level_name']), ["error", "critical", "emergency", "alert"])) {
             $this->logger->log(strtolower($record['level_name']), trim($record['message']));
         }
 

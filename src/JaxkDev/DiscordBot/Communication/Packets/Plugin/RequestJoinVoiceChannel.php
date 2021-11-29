@@ -15,7 +15,8 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 
-class RequestJoinVoiceChannel extends Packet{
+class RequestJoinVoiceChannel extends Packet
+{
 
     /** @var VoiceChannel */
     private $channel;
@@ -26,25 +27,30 @@ class RequestJoinVoiceChannel extends Packet{
     /** @var bool */
     private $muted;
 
-    public function __construct(VoiceChannel $channel, bool $deafened, bool $muted){
+    public function __construct(VoiceChannel $channel, bool $deafened, bool $muted)
+    {
         parent::__construct();
         $this->channel = $channel;
         $this->deaf = $deafened;
         $this->muted = $muted;
     }
 
-    public function getChannel(): VoiceChannel{
+    public function getChannel(): VoiceChannel
+    {
         return $this->channel;
     }
-    public function isDeafend(): bool{
+    public function isDeafend(): bool
+    {
         return $this->deaf;
     }
-    public function isMuted(): bool{
+    public function isMuted(): bool
+    {
         return $this->muted;
     }
 
 
-    public function serialize(): ?string{
+    public function serialize(): ?string
+    {
         return serialize([
             $this->UID,
             $this->channel,
@@ -53,7 +59,8 @@ class RequestJoinVoiceChannel extends Packet{
         ]);
     }
 
-    public function unserialize($data): void{
+    public function unserialize($data): void
+    {
         [
             $this->UID,
             $this->channel,
