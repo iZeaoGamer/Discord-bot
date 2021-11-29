@@ -56,6 +56,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestLeaveVoiceChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMoveMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMuteMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUnmuteMember;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildAuditLog;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildTransfer;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestSearchMembers;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -620,6 +623,39 @@ class Api{
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+    public function transferOwnership(string $server_id, string $user_id): PromiseInterface{
+        if(!Utils::validDiscordSnowflake($server_id)){
+            return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
+        }
+        if(!Utils::validDiscordSnowflake($user_id)){
+            return rejectPromise(new ApiRejection("Invalid user ID '$user_id'."));
+        }
+        $pk = new RequestGuildTransfer($server_id, $user_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    public function searchMembers(string $server_id, string $user_id, int $limit): PromiseInterface{
+        if(!Utils::validDiscordSnowflake($server_id)){
+            return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
+        }
+
+        $pk = new RequestSearchMembers($server_id, $user_id, $limit);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    public function searchAuditLog(string $server_id, string $user_id, int $action_type, string $before, int $limit): PromiseInterface{
+        if(!Utils::validDiscordSnowflake($server_id)){
+            return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
+        }
+        if(!Utils::validDiscordSnowflake($user_id)){
+            return rejectPromise(new ApiRejection("Invalid user ID '$user_id'."));
+        }
+        $pk = new RequestGuildAuditLog($server_id, $user_id, $action_type, $before, $limit);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+
 
     /**
      * Joins a voice channel. ID must be present!

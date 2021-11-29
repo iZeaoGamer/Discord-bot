@@ -18,14 +18,18 @@ class Endpoint
     // GET
     public const GATEWAY_BOT = self::GATEWAY.'/bot';
 
-    // GET, POST
+    // GET, POST, PUT
     public const GLOBAL_APPLICATION_COMMANDS = 'applications/:application_id/commands';
     // GET, PATCH, DELETE
-    public const GLOBAL_APPLICATION_COMMAND = 'application/:application_id/commands/:command_id';
-    // GET, POST
-    public const GUILD_APPLICATION_COMMANDS = 'application/:application_id/guilds/:guild_id/commands';
+    public const GLOBAL_APPLICATION_COMMAND = 'applications/:application_id/commands/:command_id';
+    // GET, POST, PUT
+    public const GUILD_APPLICATION_COMMANDS = 'applications/:application_id/guilds/:guild_id/commands';
+    // GET, PUT
+    public const GUILD_APPLICATION_COMMANDS_PERMISSIONS = 'applications/:application_id/guilds/:guild_id/commands/permissions';
     // GET, PATCH, DELETE
-    public const GUILD_APPLICATION_COMMAND = 'application/:application_id/guilds/:guild_id/commands/:command_id';
+    public const GUILD_APPLICATION_COMMAND = 'applications/:application_id/guilds/:guild_id/commands/:command_id';
+    // GET, PUT
+    public const GUILD_APPLICATION_COMMAND_PERMISSIONS = 'applications/:application_id/guilds/:guild_id/commands/:command_id/permissions';
     // POST
     public const INTERACTION_RESPONSE = 'interactions/:interaction_id/:interaction_token/callback';
     // PATCH, DELETE
@@ -77,7 +81,7 @@ class Endpoint
     public const THREAD = 'channels/:thread_id';
     // GET
     public const THREAD_MEMBERS = self::THREAD.'/thread-members';
-    // PUT, DELETE
+    // GET, PUT, DELETE
     public const THREAD_MEMBER = self::THREAD_MEMBERS.'/:user_id';
     // PUT, DELETE
     public const THREAD_MEMBER_ME = self::THREAD_MEMBERS.'/@me';
@@ -103,6 +107,8 @@ class Endpoint
 
     // GET
     public const GUILD_MEMBERS = self::GUILD.'/members';
+    // GET
+    public const GUILD_MEMBERS_SEARCH = self::GUILD.'/members/search';
     // GET, PATCH, PUT, DELETE
     public const GUILD_MEMBER = self::GUILD.'/members/:user_id';
     // PATCH
@@ -153,6 +159,13 @@ class Endpoint
     public const GUILD_MEMBERSHIP_SCREENING = self::GUILD.'/member-verification';
     // GET
     public const GUILD_WEBHOOKS = self::GUILD.'/webhooks';
+
+    // GET, POST
+    public const GUILD_SCHEDULED_EVENTS = self::GUILD.'/scheduled-events';
+    // GET, PATCH, DELETE
+    public const GUILD_SCHEDULED_EVENT = self::GUILD.'/scheduled-events/:guild_scheduled_event_id';
+    // GET
+    public const GUILD_SCHEDULED_EVENT_USERS = self::GUILD.'/scheduled-events/:guild_scheduled_event_id/users';
 
     // GET, DELETE
     public const INVITE = 'invites/:code';

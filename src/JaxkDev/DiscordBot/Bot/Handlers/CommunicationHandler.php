@@ -75,6 +75,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestLeaveVoiceChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMoveMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMuteMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUnmuteMember;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildTransfer;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildAuditLog;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestSearchMembers;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
@@ -89,6 +92,7 @@ use Monolog\Logger;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function React\Promise\reject;
+
 
 class CommunicationHandler{
 
@@ -166,6 +170,9 @@ class CommunicationHandler{
         elseif($pk instanceof RequestMoveMember) $this->handleMoveMember($pk);
         elseif($pk instanceof RequestMuteMember) $this->handleMuteMember($pk);
         elseif($pk instanceof RequestUnmuteMember) $this->handleUnmuteMember($pk);
+        elseif($pk instanceof RequestGuildTransfer) $this->handleGuildTransfer($pk);
+        elseif($pk instanceof RequestGuildAuditLog) $this->handleAuditLog($pk);
+        elseif($pk instanceof RequestSearchMembers) $this->handleSearchMembers($pk);
 
     }
 
@@ -751,6 +758,42 @@ class CommunicationHandler{
             });
         });
     }
+    private function handleGuildTransfer(RequestGuildTransfer $pk){
+        $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk){
+            $guild->transferOwnership($pk->getUserId())->then(function () use ($pk){
+                $this->resolveRequest($pk->getUID(), true, "Transferred guild.");
+            }, function (\Throwable $e) use ($pk){
+                $this->resolveRequest($pk->getUID(), false, "Failed to transfer guild.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }
+    private function handleAuditLog(RequestGuildAuditLog $pk){
+        $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk){
+            $guild->getAuditLog([
+                "user_id" => $pk->getUserId(),
+                "action_type" => $pk->getActionType(),
+                "before" => $pk->getBefore(),
+                "limit" => $pk->getLimit()
+            ])->then(function () use ($pk){
+                $this->resolveRequest($pk->getUID(), true, "Searched AuditLog with success!.");
+            }, function (\Throwable $e) use ($pk){
+                $this->resolveRequest($pk->getUID(), false, "Failed to search audit log.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }
+    private function handleSearchMembers(RequestSearchMembers $pk){
+        $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk){
+            $guild->searchMembers([
+                "query" => $pk->getSearchedUserId(),
+                "limit" => $pk->getLimit()
+            ])->then(function () use ($pk){
+                $this->resolveRequest($pk->getUID(), true, "Searched with success!.");
+            }, function (\Throwable $e) use ($pk){
+                $this->resolveRequest($pk->getUID(), false, "Failed to search audit log.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }
+
 
     private function handleUpdatePresence(RequestUpdatePresence $pk): void{
         $activity = $pk->getActivity();
