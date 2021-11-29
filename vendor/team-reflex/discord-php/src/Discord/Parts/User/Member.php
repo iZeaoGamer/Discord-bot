@@ -174,7 +174,7 @@ class Member extends Part
 
         return \React\Promise\reject(new \Exception('User does not have role.'));
     }
-    
+
     /**
      * Sends a message to the member.
      *
@@ -247,7 +247,7 @@ class Member extends Part
 
             /* @var Overwrite */
             foreach ($channel->overwrites as $overwrite) {
-                if ($overwrite->type !== Overwrite::TYPE_ROLE || ! in_array($overwrite->id, $roles)) {
+                if ($overwrite->type !== Overwrite::TYPE_ROLE || !in_array($overwrite->id, $roles)) {
                     continue;
                 }
 
@@ -384,7 +384,7 @@ class Member extends Part
      */
     protected function getJoinedAtAttribute(): ?Carbon
     {
-        if (! isset($this->attributes['joined_at'])) {
+        if (!isset($this->attributes['joined_at'])) {
             return null;
         }
 
@@ -401,7 +401,7 @@ class Member extends Part
      */
     public function getAvatarAttribute(string $format = 'jpg', int $size = 1024): ?string
     {
-        if (! isset($this->attributes['avatar'])) {
+        if (!isset($this->attributes['avatar'])) {
             return null;
         }
 
@@ -429,7 +429,7 @@ class Member extends Part
      */
     protected function getPremiumSinceAttribute(): ?Carbon
     {
-        if (! isset($this->attributes['premium_since'])) {
+        if (!isset($this->attributes['premium_since'])) {
             return null;
         }
 
