@@ -995,7 +995,7 @@ class CommunicationHandler
         $button->setEmoji($emoji);
         $button->setListener(function (DiscordInteraction $interaction) use ($pk){
             $message = $pk->getMessage();
-            $interaction->updateMessage($message)->done(function () use ($pk) {
+            $interaction->respondWithMessage($message, true)->done(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Button added.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to add Button.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1017,7 +1017,7 @@ class CommunicationHandler
         $button->setEmoji($emoji);
         $button->setListener(function (DiscordInteraction $interaction) use ($pk){
             $message = $pk->getMessage();
-            $interaction->updateMessage($message)->done(function () use ($pk) {
+            $interaction->respondWithMessage($message, true)->done(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Button removed.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to remove Button.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1043,7 +1043,7 @@ class CommunicationHandler
             print_r($option->getValue().PHP_EOL);
         }
         $message = $pk->getMessage();
-        $interaction->updateMessage($message)->done(function () use ($pk) {
+        $interaction->respondWithMessage($message, true)->done(function () use ($pk) {
             $this->resolveRequest($pk->getUID(), true, "Select Menu added.");
         }, function (\Throwable $e) use ($pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to add Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1067,7 +1067,7 @@ class CommunicationHandler
             print_r($option->getValue().PHP_EOL);
         }
         $message = $pk->getMessage();
-        $interaction->updateMessage($message)->done(function () use ($pk) {
+        $interaction->respondWithMessage($message, true)->done(function () use ($pk) {
             $this->resolveRequest($pk->getUID(), true, "Select Menu removed..");
         }, function (\Throwable $e) use ($pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to remove Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
