@@ -91,10 +91,10 @@ class Interaction implements \Serializable
         return $this->id;
     }
     public function setInteractionData(?InteractionData $data): void{
-        $this->interactionData = $data;
+        $this->data = $data;
     }
     public function getInteractionData(): ?InteractionData{
-        return $this->interactionData;
+        return $this->data;
     }
     public function setToken(?string $token): void{
         $this->token = $token;
@@ -124,7 +124,7 @@ class Interaction implements \Serializable
             $this->serverId,
             $this->channelId, 
             $this->id,
-            $this->interactionData,
+            $this->data,
             $this->token,
             $this->version,
             $this->message
@@ -139,7 +139,7 @@ class Interaction implements \Serializable
             $this->serverId,
             $this->channelId, 
             $this->id,
-            $this->interactionData,
+            $this->data,
             $this->token,
             $this->version,
             $this->message
