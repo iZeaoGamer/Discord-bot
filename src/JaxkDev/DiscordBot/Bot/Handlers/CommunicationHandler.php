@@ -1025,7 +1025,9 @@ class CommunicationHandler
                 $this->resolveRequest($pk->getUID(), false, "Failed to add Button.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
             });
+
         }, $this->client->getDiscordClient(), true);
+
         $channel->sendMessage($pk->getMessage());
         $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.", );
     }, function (\Throwable $e) use ($pk) {
@@ -1063,7 +1065,6 @@ class CommunicationHandler
                 $this->logger->debug("Failed to remove Button ({$pk->getUID()}) - {$e->getMessage()}");
             });
         }, $this->client->getDiscordClient(), true);
-        $channel->sendMessage($pk->getMessage());
         $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
     }, function (\Throwable $e) use ($pk) {
         $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1103,7 +1104,6 @@ class CommunicationHandler
             $this->logger->debug("Failed to add Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
         });
     }, $this->client->getDiscordClient(), true);
-    $channel->sendMessage($pk->getMessage());
     $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
 }, function (\Throwable $e) use ($pk) {
     $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1140,7 +1140,6 @@ class CommunicationHandler
             $this->logger->debug("Failed to remove Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
         });
     }, $this->client->getDiscordClient(), true);
-    $channel->sendMessage($pk->getMessage());
     $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
 }, function (\Throwable $e) use ($pk) {
     $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
