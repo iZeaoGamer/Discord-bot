@@ -991,12 +991,9 @@ class CommunicationHandler
         $url = $pk->getUrl();
         $label = $pk->getLabel();
         $disabled = $pk->isDisabled();
-        $callable = $pk->getCallable();
-
         $button->setLabel($label);
         $button->setEmoji($emoji);
-        $button->setListener(function (DiscordInteraction $interact) use ($callable, $button){
-            $callable($button, $interact, $this->client->getDiscordClient());
+        $button->setListener(function (DiscordInteraction $interaction){
         }, $this->client->getDiscordClient());
     } 
     private function handleButtonRemove(RequestRemoveButton $pk): void
@@ -1008,12 +1005,10 @@ class CommunicationHandler
         $url = $pk->getUrl();
         $label = $pk->getLabel();
         $disabled = $pk->isDisabled();
-        $callable = $pk->getCallable();
 
         $button->setLabel($label);
         $button->setEmoji($emoji);
-        $button->setListener(function (DiscordInteraction $interact) use ($callable, $button){
-            $callable($button, $interact, $this->client->getDiscordClient());
+        $button->setListener(function (DiscordInteraction $interaction){
         }, $this->client->getDiscordClient());
     } 
     private function handleSelectAddMenu(RequestAddSelectMenu $pk): void
@@ -1029,11 +1024,12 @@ class CommunicationHandler
        $option->setDescription($pk->getDescription());
        $option->setEmoji($pk->getEmoji());
        $option->setDefault($pk->isDefault());
+       $select->setListener(function (DiscordInteraction $interaction, Collection $options) {
+        foreach ($options as $option) {
+            echo $option->getValue().PHP_EOL;
+        }
+    }, $this->client->getDiscordClient());
     
-       $callable = $pk->getCallable();
-       $select->setListener(function (DiscordInteraction $interact, Collection $result) use ($select, $callable){
-           $callable($interact, $select, $result); //todo see if we should be implementing Collection class.
-       }, $this->client->getDiscordClient());
     } 
     private function handleSelectRemoveMenu(RequestRemoveSelectMenu $pk): void
     {
@@ -1045,11 +1041,11 @@ class CommunicationHandler
        $select->setDisabled($pk->isDisabled());
        $option = Option::new($pk->getOptionLabel(), $pk->getValue());
        $select->removeOption($option);
-    
-       $callable = $pk->getCallable();
-       $select->setListener(function (DiscordInteraction $interact, Collection $result) use ($select, $callable){
-           $callable($interact, $select, $result);
-       }, $this->client->getDiscordClient());
+       $select->setListener(function (DiscordInteraction $interaction, Collection $options) {
+        foreach ($options as $option) {
+            echo $option->getValue().PHP_EOL;
+        }
+    }, $this->client->getDiscordClient());
     } 
 
     

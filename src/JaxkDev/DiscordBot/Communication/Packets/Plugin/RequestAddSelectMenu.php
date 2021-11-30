@@ -39,9 +39,6 @@ class RequestAddSelectMenu extends Packet
     /** @var int|null */
     private $maxValue;
 
-    /** @var callable */
-    private $callable;
-
     /** @var bool */
     private $disabled;
 
@@ -53,7 +50,7 @@ class RequestAddSelectMenu extends Packet
 
 
 
-    public function __construct(string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, callable $cb, bool $disabled = true, ?string $custom_id = null, bool $default = true)
+    public function __construct(string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null, bool $default = true)
     {
         parent::__construct();
         $this->labelOption = $labelOption;
@@ -63,7 +60,6 @@ class RequestAddSelectMenu extends Packet
         $this->placeHolder = $placeHolder;
         $this->minValue = $minValue;
         $this->maxValue = $maxValue;
-        $this->callable = $cb;
         $this->disabled = $disabled;
         $this->customId = $custom_id;
         $this->default = $default;
@@ -96,10 +92,6 @@ class RequestAddSelectMenu extends Packet
     public function getMaxValue(): ?int
     {
         return $this->maxValue;
-    }
-    public function getCallable(): callable
-    {
-        return $this->callable;
     }
     public function isDisabled(): bool
     {

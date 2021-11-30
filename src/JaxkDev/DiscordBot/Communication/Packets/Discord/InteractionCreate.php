@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
-use JaxkDev\DiscordBot\Models\Interaction\Interaction;
+use Discord\Parts\Interactions\Interaction;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class InteractionCreate extends Packet

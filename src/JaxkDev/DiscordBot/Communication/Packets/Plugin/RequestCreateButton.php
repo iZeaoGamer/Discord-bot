@@ -30,23 +30,19 @@ class RequestCreateButton extends Packet
     /** @var bool */
     private $disabled;
 
-    /** @var callable */
-    private $callable;
-
     /** @var string|null */
     private $emoji; //null if clear.
 
     /** @var string|null */
     private $url; //null if button isn't a link button. 
 
-    public function __construct(int $style, string $label, string $customId, bool $disabled, callable $cb, ?string $emoji = null, ?string $url = null)
+    public function __construct(int $style, string $label, string $customId, bool $disabled, ?string $emoji = null, ?string $url = null)
     {
         parent::__construct();
         $this->style = $style;
         $this->label = $label;
         $this->customId = $customId;
         $this->disabled = $disabled;
-        $this->callable = $cb;
         $this->emoji = $emoji;
         $this->url = $url;
     }
@@ -66,10 +62,6 @@ class RequestCreateButton extends Packet
     public function isDisabled(): bool
     {
         return $this->disabled;
-    }
-    public function getCallable(): callable
-    {
-        return $this->callable;
     }
     public function getEmoji(): ?string
     {
