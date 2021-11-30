@@ -111,16 +111,58 @@ class Api
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+
+    /** Removes a button interaction
+     * 
+     * @param int $style
+     * @param string $label
+     * @param string $customId
+     * @param callable $cb
+     * @param string|null $emoji
+     * @param string|null $url
+     * 
+     * @return PromiseInterface
+     */
     public function removeButton(int $style, string $label, string $customId, bool $disabled, callable $cb, ?string $emoji, ?string $url): PromiseInterface{
     $pk = new RequestRemoveButton($style, $label, $customId, $disabled, $cb, $emoji, $url);
     $this->plugin->writeOutboundData($pk);
     return ApiResolver::create($pk->getUID());
     }
+
+    /** Creates an option interaction
+     * 
+     * @param string $labelOption
+     * @param string|null $value
+     * @param string|null $description
+     * @param string|null $emoji
+     * @param string|null $placeHolder
+     * @param string|null $minValue
+     * @param string|null $maxValue
+     * @param callable $cb
+     * @param bool $disabled (Optional)
+     * @param string|null $custom_id (Optional)
+     * @param bool $defau;t (Optional)
+     * 
+     * @return PromiseInterface
+     */
     public function createOption(string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, callable $cb, bool $disabled = true, ?string $custom_id = null, bool $default = true): PromiseInterface{
         $pk = new RequestAddSelectMenu($labelOption, $value, $description, $emoji, $placeHolder, $minValue, $maxValue, $cb, $disabled, $custom_id, $default);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+
+    /** Removes an option interaction
+     * 
+     * @param string $labelOption
+     * @param string|null $value
+     * @param string|null $placeHolder
+     * @param string|null $minValue
+     * @param string|null $maxValue
+     * @param callable $cb
+     * @param bool $disabled (Optional)
+     * @param string|null $custom_id (Optional)
+     * @return PromiseInterface
+     */
     public function removeOption(string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, callable $cb, bool $disabled = true, ?string $custom_id = null): PromiseInterface{
         $pk = new RequestRemoveSelectMenu($labelOption, $value, $placeHolder, $minValue, $maxValue, $cb, $disabled, $custom_id);
         $this->plugin->writeOutboundData($pk);
