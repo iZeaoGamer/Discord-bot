@@ -1,7 +1,7 @@
 --- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/iZeaoGamer/Discord-bot
 build-by-default: true
 branches:
-- mains
+- main
 projects:
   Discord-bot:
     path: ""
