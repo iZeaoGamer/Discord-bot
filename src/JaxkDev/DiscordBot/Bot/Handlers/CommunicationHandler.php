@@ -1012,9 +1012,8 @@ class CommunicationHandler
                 foreach ($e->getFields() as $f) {
                     $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
                 }
-            }
             $builder->setEmbeds([$de]);
-
+            }
             if ($m instanceof Reply) {
                 if ($m->getReferencedMessageId() === null) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", ["Reply message has no referenced message ID."]);
