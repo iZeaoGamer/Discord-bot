@@ -92,6 +92,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveButton;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAddSelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveSelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyInteraction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
@@ -198,6 +199,7 @@ class CommunicationHandler
         elseif($pk instanceof RequestAddSelectMenu) $this->handleSelectAddMenu($pk);
         elseif($pk instanceof RequestRemoveSelectMenu) $this->handleSelectRemoveMenu($pk);
         elseif($pk instanceof RequestModifyInteraction) $this->handleModifyInteraction($pk);
+        elseif($pk instanceof RequestCreateInteraction) $this->handleCreateInteraction($pk);
     }
 
     private function handleDeleteWebhook(RequestDeleteWebhook $pk): void
@@ -1046,8 +1048,62 @@ class CommunicationHandler
         });
     });
     }
-            
-            
+    private function handleCreateInteraction(RequestCreateInteraction $pk){
+        $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+            $m = $pk->getMessage();
+            $builder = $pk->getMessageBuilder();
+            $e = $m->getEmbed();
+            $de = null;
+            if ($e !== null) {
+                $de = new DiscordEmbed($this->client->getDiscordClient());
+                if ($e->getType() !== null) $de->setType($e->getType());
+                if ($e->getTitle() !== null) $de->setTitle($e->getTitle());
+                if ($e->getUrl() !== null) $de->setURL($e->getUrl());
+                if ($e->getColour() !== null) $de->setColor($e->getColour());
+                if ($e->getAuthor()->getName() !== null) $de->setAuthor($e->getAuthor()->getName(), $e->getAuthor()->getIconUrl() ?? "", $e->getAuthor()->getUrl() ?? "");
+                if ($e->getThumbnail()->getUrl() !== null) $de->setThumbnail($e->getThumbnail()->getUrl());
+                if ($e->getImage()->getUrl() !== null) $de->setImage($e->getImage()->getUrl());
+                if ($e->getDescription() !== null) $de->setDescription($e->getDescription());
+                if ($e->getFooter()->getText() !== null) $de->setFooter($e->getFooter()->getText(), $e->getFooter()->getIconUrl() ?? "");
+                if ($e->getTimestamp() !== null) $de->setTimestamp($e->getTimestamp());
+                foreach ($e->getFields() as $f) {
+                    $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                }
+            }
+            if ($m instanceof Reply) {
+                if ($m->getReferencedMessageId() === null) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to send interaction.", ["Reply message has no referenced message ID."]);
+                    $this->logger->debug("Failed to send interaction ({$pk->getUID()}) - Reply message has no referenced message ID.");
+                    return;
+                }
+                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $builder, $pk, $de) {
+                    $builder->setReplyTo($msg);
+                    $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), true, "Interaction Sent.", [ModelConverter::genModelMessage($msg)]);
+                        $this->logger->debug("Sent Interaction ({$pk->getUID()})");
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                        $this->logger->debug("Failed to send interaction ({$pk->getUID()}) - {$e->getMessage()}");
+                    });
+                });
+            } else {
+                $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Interaction Sent.", [ModelConverter::genModelMessage($msg)]);
+                    $this->logger->debug("Sent Interaction ({$pk->getUID()})");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to send Interation ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }
+        });
+    }
+    /** 
+     * Handles button creation.
+     * @param RequestCreateButton $pk
+     * @deprecated Use 'CommunicationHandler::handleCreateInteraction()' instead.
+     * 
+     * @return void
+     */
     private function handleButtonAdd(RequestCreateButton $pk): void
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
@@ -1085,6 +1141,13 @@ class CommunicationHandler
     });
     
     } 
+      /** 
+     * Handles button deletion.
+     * @param RequestRemoveButton $pk
+     * @deprecated Use 'CommunicationHandler::handleModifyInteraction()' instead.
+     * 
+     * @return void
+     */
     private function handleButtonRemove(RequestRemoveButton $pk): void
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
@@ -1120,6 +1183,13 @@ class CommunicationHandler
         $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
     });
     } 
+      /** 
+     * Handles selection menu creation.
+     * @param RequestAddSelectButton $pk
+     * @deprecated Use 'CommunicationHandler::handleCreateInteraction()' instead.
+     * 
+     * @return void
+     */
     private function handleSelectAddMenu(RequestAddSelectMenu $pk): void
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
@@ -1160,6 +1230,13 @@ class CommunicationHandler
 });
     
     } 
+      /** 
+     * Handles selection menu deletion.
+     * @param RequestRemoveSelectMenu $pk
+     * @deprecated Use 'CommunicationHandler::handleModifyInteraction()' instead.
+     * 
+     * @return void
+     */
     private function handleSelectRemoveMenu(RequestRemoveSelectMenu $pk): void
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {

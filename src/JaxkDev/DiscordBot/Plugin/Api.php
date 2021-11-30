@@ -64,6 +64,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAddSelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveSelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveButton;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyInteraction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateInteraction;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -97,6 +98,19 @@ class Api
         $this->plugin = $plugin;
     }
 
+    /** Creates an interaction. 
+     * 
+     * @param MessageBuilder $builder
+     * @param Message $message
+     * 
+     * @return PromiseInterface
+     */
+    public function createInteraction(MessageBuilder $builder, Message $message): PromiseInterface{
+        $pk = new RequestCreateInteraction($builder, $message);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
     /** Creates a Button interaction
      * 
      * @param MessageBuilder $message
@@ -108,6 +122,7 @@ class Api
      * @param string|null $emoji - null to clear.
      * @param string|null $url - null when not using button links.
      * 
+     * @deprecated use $this->createInteraction() instead.
      * @return PromiseInterface
      */
     public function createButton(MessageBuilder $message, string $channelId, int $style, string $label, string $customId, bool $disabled, string $emoji = null, ?string $url = null): PromiseInterface{
@@ -140,6 +155,7 @@ class Api
      * @param string|null $emoji
      * @param string|null $url
      * 
+     * @deprecated use $this->modifyInteraction() instead.
      * @return PromiseInterface
      */
     public function removeButton(MessageBuilder $message, string $channelId, int $style, string $label, string $customId, bool $disabled, ?string $emoji, ?string $url): PromiseInterface{
@@ -166,6 +182,7 @@ class Api
      * @param string|null $custom_id (Optional)
      * @param bool $default (Optional)
      * 
+     * @deprecated use $this->createInteraction() instead.
      * @return PromiseInterface
      */
     public function createOption(MessageBuilder $message, string $channelId, string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null, bool $default = true): PromiseInterface{
@@ -188,6 +205,8 @@ class Api
      * @param string|null $maxValue
      * @param bool $disabled (Optional)
      * @param string|null $custom_id (Optional)
+     * 
+     * @deprecated use $this->modifyInteraction() instead.
      * @return PromiseInterface
      */
     public function removeOption(MessageBuilder $message, string $channelId, string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null): PromiseInterface{
