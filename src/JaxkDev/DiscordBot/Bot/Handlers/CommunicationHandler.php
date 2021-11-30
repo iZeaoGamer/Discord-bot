@@ -1026,7 +1026,7 @@ class CommunicationHandler
        $option->setDefault($pk->isDefault());
        $select->setListener(function (DiscordInteraction $interaction, Collection $options) {
         foreach ($options as $option) {
-            echo $option->getValue().PHP_EOL;
+            print_r($option->getValue().PHP_EOL);
         }
     }, $this->client->getDiscordClient());
     
