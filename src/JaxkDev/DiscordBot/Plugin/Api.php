@@ -75,6 +75,8 @@ use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Models\Webhook;
 use JaxkDev\DiscordBot\Models\Role;
+
+use Discord\Builders\MessageBuilder;
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 
 /**
@@ -96,6 +98,7 @@ class Api
 
     /** Creates a Button interaction
      * 
+     * @param MessageBuilder $message
      * @param int $style
      * @param string $label
      * @param string $customId
@@ -105,14 +108,15 @@ class Api
      * 
      * @return PromiseInterface
      */
-    public function createButton(int $style, string $label, string $customId, bool $disabled, string $emoji = null, ?string $url = null): PromiseInterface{
-        $pk = new RequestCreateButton($style, $label, $customId, $disabled, $emoji, $url);
+    public function createButton(MessageBuilder $message, int $style, string $label, string $customId, bool $disabled, string $emoji = null, ?string $url = null): PromiseInterface{
+        $pk = new RequestCreateButton($message, $style, $label, $customId, $disabled, $emoji, $url);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
 
     /** Removes a button interaction
      * 
+     * @param MessageBuilder $message
      * @param int $style
      * @param string $label
      * @param string $customId
@@ -121,14 +125,15 @@ class Api
      * 
      * @return PromiseInterface
      */
-    public function removeButton(int $style, string $label, string $customId, bool $disabled, ?string $emoji, ?string $url): PromiseInterface{
-    $pk = new RequestRemoveButton($style, $label, $customId, $disabled, $emoji, $url);
+    public function removeButton(MessageBuilder $message, int $style, string $label, string $customId, bool $disabled, ?string $emoji, ?string $url): PromiseInterface{
+    $pk = new RequestRemoveButton($message, $style, $label, $customId, $disabled, $emoji, $url);
     $this->plugin->writeOutboundData($pk);
     return ApiResolver::create($pk->getUID());
     }
 
     /** Creates an option interaction
      * 
+     * @param MessageBuilder $message
      * @param string $labelOption
      * @param string|null $value
      * @param string|null $description
@@ -142,14 +147,15 @@ class Api
      * 
      * @return PromiseInterface
      */
-    public function createOption(string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null, bool $default = true): PromiseInterface{
-        $pk = new RequestAddSelectMenu($labelOption, $value, $description, $emoji, $placeHolder, $minValue, $maxValue, $disabled, $custom_id, $default);
+    public function createOption(MessageBuilder $message, string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null, bool $default = true): PromiseInterface{
+        $pk = new RequestAddSelectMenu($message, $labelOption, $value, $description, $emoji, $placeHolder, $minValue, $maxValue, $disabled, $custom_id, $default);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
 
     /** Removes an option interaction
      * 
+     * @param MessageBuilder $message
      * @param string $labelOption
      * @param string|null $value
      * @param string|null $placeHolder
@@ -159,8 +165,8 @@ class Api
      * @param string|null $custom_id (Optional)
      * @return PromiseInterface
      */
-    public function removeOption(string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null): PromiseInterface{
-        $pk = new RequestRemoveSelectMenu($labelOption, $value, $placeHolder, $minValue, $maxValue, $disabled, $custom_id);
+    public function removeOption(MessageBuilder $message, string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null): PromiseInterface{
+        $pk = new RequestRemoveSelectMenu($message, $labelOption, $value, $placeHolder, $minValue, $maxValue, $disabled, $custom_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

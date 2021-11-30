@@ -14,9 +14,14 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
+use Discord\Builders\MessageBuilder;
+
 
 class RequestAddSelectMenu extends Packet
 {
+
+    /** @var MessageBuilder */
+    private $response;
 
     /** @var string */
     private $labelOption;
@@ -50,9 +55,10 @@ class RequestAddSelectMenu extends Packet
 
 
 
-    public function __construct(string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null, bool $default = true)
+    public function __construct(MessageBuilder $response, string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null, bool $default = true)
     {
         parent::__construct();
+        $this->response = $response;
         $this->labelOption = $labelOption;
         $this->value = $value;
         $this->description = $description;
@@ -63,6 +69,10 @@ class RequestAddSelectMenu extends Packet
         $this->disabled = $disabled;
         $this->customId = $custom_id;
         $this->default = $default;
+    }
+    public function getMessage(): MessageBuilder
+    {
+        return $this->response;
     }
 
     public function getOptionLabel(): string
@@ -101,13 +111,15 @@ class RequestAddSelectMenu extends Packet
     {
         return $this->customId;
     }
-    public function isDefault(): bool{
+    public function isDefault(): bool
+    {
         return $this->default;
     }
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
+            $this->response,
             $this->labelOption,
             $this->value,
             $this->description,
@@ -125,6 +137,7 @@ class RequestAddSelectMenu extends Packet
     {
         [
             $this->UID,
+            $this->response,
             $this->labelOption,
             $this->value,
             $this->description,

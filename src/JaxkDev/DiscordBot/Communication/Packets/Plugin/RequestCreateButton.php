@@ -14,9 +14,13 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
+use Discord\Builders\MessageBuilder;
 
 class RequestCreateButton extends Packet
 {
+
+    /** @var MessageBuilder */
+    private $response;
 
     /** @var int */
     private $style;
@@ -36,15 +40,20 @@ class RequestCreateButton extends Packet
     /** @var string|null */
     private $url; //null if button isn't a link button. 
 
-    public function __construct(int $style, string $label, string $customId, bool $disabled, ?string $emoji = null, ?string $url = null)
+    public function __construct(MessageBuilder $response, int $style, string $label, string $customId, bool $disabled, ?string $emoji = null, ?string $url = null)
     {
         parent::__construct();
+        $this->response = $response;
         $this->style = $style;
         $this->label = $label;
         $this->customId = $customId;
         $this->disabled = $disabled;
         $this->emoji = $emoji;
         $this->url = $url;
+    }
+    public function getMessage(): MessageBuilder
+    {
+        return $this->response;
     }
 
     public function getStyle(): int
@@ -76,6 +85,7 @@ class RequestCreateButton extends Packet
     {
         return serialize([
             $this->UID,
+            $this->response,
             $this->style,
             $this->label,
             $this->customId,
@@ -89,6 +99,7 @@ class RequestCreateButton extends Packet
     {
         [
             $this->UID,
+            $this->response,
             $this->style,
             $this->label,
             $this->customId,

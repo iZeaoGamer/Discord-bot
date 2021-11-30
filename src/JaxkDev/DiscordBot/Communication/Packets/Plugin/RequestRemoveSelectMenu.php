@@ -14,9 +14,13 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
+use Discord\Builders\MessageBuilder;
 
 class RequestRemoveSelectMenu extends Packet
 {
+
+    /** @var MessageBuilder */
+    private $response;
 
     /** @var string */
     private $labelOption;
@@ -41,9 +45,10 @@ class RequestRemoveSelectMenu extends Packet
 
 
 
-    public function __construct(string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null)
+    public function __construct(MessageBuilder $response, string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null)
     {
         parent::__construct();
+        $this->response = $response;
         $this->labelOption = $labelOption;
         $this->value = $value;
         $this->placeHolder = $placeHolder;
@@ -52,7 +57,10 @@ class RequestRemoveSelectMenu extends Packet
         $this->disabled = $disabled;
         $this->customId = $custom_id;
     }
-
+    public function getMessage(): MessageBuilder
+    {
+        return $this->response;
+    }
     public function getOptionLabel(): string
     {
         return $this->labelOption;
@@ -85,6 +93,7 @@ class RequestRemoveSelectMenu extends Packet
     {
         return serialize([
             $this->UID,
+            $this->response,
             $this->labelOption,
             $this->value,
             $this->placeHolder,
@@ -99,6 +108,7 @@ class RequestRemoveSelectMenu extends Packet
     {
         [
             $this->UID,
+            $this->response,
             $this->labelOption,
             $this->value,
             $this->placeHolder,
