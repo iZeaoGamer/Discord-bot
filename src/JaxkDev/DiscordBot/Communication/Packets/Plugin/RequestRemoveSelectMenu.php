@@ -98,7 +98,6 @@ class RequestRemoveSelectMenu extends Packet
             $this->placeHolder,
             $this->minValue,
             $this->maxValue,
-            $this->callable,
             $this->disabled,
             $this->customId
         ]);
@@ -113,7 +112,6 @@ class RequestRemoveSelectMenu extends Packet
             $this->placeHolder,
             $this->minValue,
             $this->maxValue,
-            $this->callable,
             $this->disabled,
             $this->customId
         ] = unserialize($data);

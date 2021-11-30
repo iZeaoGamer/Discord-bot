@@ -123,7 +123,6 @@ class RequestAddSelectMenu extends Packet
             $this->placeHolder,
             $this->minValue,
             $this->maxValue,
-            $this->callable,
             $this->disabled,
             $this->customId,
             $this->default
@@ -141,7 +140,6 @@ class RequestAddSelectMenu extends Packet
             $this->placeHolder,
             $this->minValue,
             $this->maxValue,
-            $this->callable,
             $this->disabled,
             $this->customId,
             $this->default

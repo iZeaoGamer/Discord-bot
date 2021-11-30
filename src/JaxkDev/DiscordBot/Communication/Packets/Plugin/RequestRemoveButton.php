@@ -88,7 +88,6 @@ class RequestRemoveButton extends Packet
             $this->label,
             $this->customId,
             $this->disabled,
-            $this->callable,
             $this->emoji,
             $this->url
         ]);
@@ -102,7 +101,6 @@ class RequestRemoveButton extends Packet
             $this->label,
             $this->customId,
             $this->disabled,
-            $this->callable,
             $this->emoji,
             $this->url
         ] = unserialize($data);

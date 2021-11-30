@@ -141,7 +141,7 @@ class Api
      * @param callable $cb
      * @param bool $disabled (Optional)
      * @param string|null $custom_id (Optional)
-     * @param bool $defau;t (Optional)
+     * @param bool $default (Optional)
      * 
      * @return PromiseInterface
      */
