@@ -1027,8 +1027,6 @@ class CommunicationHandler
             });
 
         }, $this->client->getDiscordClient(), true);
-
-        $channel->sendMessage($pk->getMessage());
         $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.", );
     }, function (\Throwable $e) use ($pk) {
         $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
