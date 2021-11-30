@@ -993,15 +993,18 @@ class CommunicationHandler
         $disabled = $pk->isDisabled();
         $button->setLabel($label);
         $button->setEmoji($emoji);
+        print_r("Button is transferring to a listener.");
         $button->setListener(function (DiscordInteraction $interaction) use ($pk){
             $message = $pk->getMessage();
-            $interaction->respondWithMessage($message, true)->done(function () use ($pk) {
+            print_r("Button is transferred with success!");
+            $interaction->respondWithMessage($message)->then(function () use ($pk) {
+
                 $this->resolveRequest($pk->getUID(), true, "Button added.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to add Button.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
             });
-        }, $this->client->getDiscordClient());
+        }, $this->client->getDiscordClient(), true);
     } 
     private function handleButtonRemove(RequestRemoveButton $pk): void
     {
@@ -1017,13 +1020,14 @@ class CommunicationHandler
         $button->setEmoji($emoji);
         $button->setListener(function (DiscordInteraction $interaction) use ($pk){
             $message = $pk->getMessage();
-            $interaction->respondWithMessage($message, true)->done(function () use ($pk) {
+            $interaction->respondWithMessage($message)->then(function () use ($pk) {
+
                 $this->resolveRequest($pk->getUID(), true, "Button removed.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to remove Button.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to remove Button ({$pk->getUID()}) - {$e->getMessage()}");
             });
-        }, $this->client->getDiscordClient());
+        }, $this->client->getDiscordClient(), true);
     } 
     private function handleSelectAddMenu(RequestAddSelectMenu $pk): void
     {
@@ -1043,13 +1047,14 @@ class CommunicationHandler
             print_r($option->getValue().PHP_EOL);
         }
         $message = $pk->getMessage();
-        $interaction->respondWithMessage($message, true)->done(function () use ($pk) {
+        $interaction->respondWithMessage($message)->then(function () use ($pk) {
+
             $this->resolveRequest($pk->getUID(), true, "Select Menu added.");
         }, function (\Throwable $e) use ($pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to add Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
             $this->logger->debug("Failed to add Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
         });
-    }, $this->client->getDiscordClient());
+    }, $this->client->getDiscordClient(), true);
     
     } 
     private function handleSelectRemoveMenu(RequestRemoveSelectMenu $pk): void
@@ -1067,13 +1072,13 @@ class CommunicationHandler
             print_r($option->getValue().PHP_EOL);
         }
         $message = $pk->getMessage();
-        $interaction->respondWithMessage($message, true)->done(function () use ($pk) {
+        $interaction->respondWithMessage($message)->then(function () use ($pk) {
             $this->resolveRequest($pk->getUID(), true, "Select Menu removed..");
         }, function (\Throwable $e) use ($pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to remove Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
             $this->logger->debug("Failed to remove Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
         });
-    }, $this->client->getDiscordClient());
+    }, $this->client->getDiscordClient(), true);
     } 
 
     
