@@ -59,6 +59,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUnmuteMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildAuditLog;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildTransfer;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestSearchMembers;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateButton;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAddSelectMenu;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveSelectMenu;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveButton;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -90,6 +94,38 @@ class Api
         $this->plugin = $plugin;
     }
 
+    /** Creates a Button interaction
+     * 
+     * @param int $style
+     * @param string $label
+     * @param string $customId
+     * @param bool $disabled
+     * @param callable $cb
+     * @param string|null $emoji - null to clear.
+     * @param string|null $url - null when not using button links.
+     * 
+     * @return PromiseInterface
+     */
+    public function createButton(int $style, string $label, string $customId, bool $disabled, callable $cb, ?string $emoji = null, ?string $url = null): PromiseInterface{
+        $pk = new RequestCreateButton($style, $label, $customId, $disabled, $cb, $emoji, $url);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    public function removeButton(int $style, string $label, string $customId, bool $disabled, callable $cb, ?string $emoji, ?string $url): PromiseInterface{
+    $pk = new RequestRemoveButton($style, $label, $customId, $disabled, $cb, $emoji, $url);
+    $this->plugin->writeOutboundData($pk);
+    return ApiResolver::create($pk->getUID());
+    }
+    public function createOption(string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, callable $cb, bool $disabled = true, ?string $custom_id = null, bool $default = true): PromiseInterface{
+        $pk = new RequestAddSelectMenu($labelOption, $value, $description, $emoji, $placeHolder, $minValue, $maxValue, $cb, $disabled, $custom_id, $default);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    public function removeOption(string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, callable $cb, bool $disabled = true, ?string $custom_id = null): PromiseInterface{
+        $pk = new RequestRemoveSelectMenu($labelOption, $value, $placeHolder, $minValue, $maxValue, $cb, $disabled, $custom_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
     /**
      * Creates a normal webhook inside a channel.
      *

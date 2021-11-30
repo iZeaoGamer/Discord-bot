@@ -15,6 +15,7 @@ namespace JaxkDev\DiscordBot\Bot\Handlers;
 use Discord\Discord;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
+use Discord\Parts\Interactions\Interaction as DiscordInteraction;
 use Discord\Parts\Thread\Thread as DiscordThread;
 use Discord\Parts\Guild\Ban as DiscordBan;
 use Discord\Parts\Guild\Guild as DiscordGuild;
@@ -63,6 +64,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreat
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\TypingStart as TypingStartPacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\InteractionCreate as InteractionCreatePacket;
 use JaxkDev\DiscordBot\Plugin\Utils;
 use Monolog\Logger;
 
@@ -118,11 +120,15 @@ class DiscordEventHandler
         $discord->on("MESSAGE_REACTION_REMOVE_EMOJI", [$this, "onMessageReactionRemoveEmoji"]);
 
         $discord->on("PRESENCE_UPDATE", [$this, "onPresenceUpdate"]);
+
         $discord->on("VOICE_STATE_UPDATE", [$this, "onVoiceStateUpdate"]);
+
         $discord->on("THREAD_CREATE", [$this, "onThreadCreate"]);
         $discord->on("THREAD_UPDATE", [$this, "onThreadUpdate"]);
         $discord->on("THREAD_DELETE", [$this, "onThreadDelete"]);
         $discord->on("TYPING_START", [$this, "onTypingStart"]);
+
+        $discord->on("INTERACTION_CREATE", [$this, "onInteractionCreate"]);
     }
 
     /*
@@ -336,6 +342,10 @@ array(5) {
             $ds->guild_id . "." . $ds->user_id,
             ModelConverter::genModelVoiceState($ds)
         ));
+    }
+    public function onInteractionCreate(DiscordInteraction $interactCreate, Discord $discord){
+        $packet = new InteractionCreatePacket(ModelConverter::genModelInteraction($interactCreate));
+        $this->client->getThread()->writeOutboundData($packet);
     }
 
     public function onPresenceUpdate(DiscordPresenceUpdate $presenceUpdate): void

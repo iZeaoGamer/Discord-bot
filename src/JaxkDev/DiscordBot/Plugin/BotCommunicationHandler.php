@@ -46,6 +46,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreat
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\TypingStart as TypingStartPacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\InteractionCreate as InteractionCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat as HeartbeatPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Activity;
@@ -87,6 +88,7 @@ use JaxkDev\DiscordBot\Plugin\Events\ThreadDeleted as ThreadDeletedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ChannelCreated as ChannelCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\MessageBulkDeleted as MessageBulkDeletedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\TypingStart as TypingStartEvent;
+use JaxkDev\DiscordBot\Plugin\Events\InteractionCreated as InteractionCreatedEvent;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 
@@ -147,6 +149,7 @@ class BotCommunicationHandler
         elseif ($packet instanceof ServerLeavePacket) $this->handleServerLeave($packet);
         elseif ($packet instanceof ServerUpdatePacket) $this->handleServerUpdate($packet);
         elseif ($packet instanceof TypingStartPacket) $this->handleTypingStart($packet);
+        elseif($packet instanceof InteractionCreatePacket) $this->handleInteraction($packet);
         elseif ($packet instanceof DiscordDataDumpPacket) $this->handleDataDump($packet);
         elseif ($packet instanceof DiscordReadyPacket) $this->handleReady();
     }
@@ -160,6 +163,9 @@ class BotCommunicationHandler
         });
 
         (new DiscordReadyEvent($this->plugin))->call();
+    }
+    private function handleInteraction(InteractionCreatePacket $packet): void{
+        (new InteractionCreatedEvent($this->plugin, $packet->getInteraction()))->call();
     }
 
     //Uses the storage (aka cache)

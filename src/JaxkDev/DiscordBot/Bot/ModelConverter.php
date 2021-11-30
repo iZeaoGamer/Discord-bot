@@ -33,6 +33,7 @@ use Discord\Parts\User\Activity as DiscordActivity;
 use Discord\Parts\User\Member as DiscordMember;
 use Discord\Parts\User\User as DiscordUser;
 use Discord\Parts\Guild\Guild as DiscordServer;
+use Discord\Parts\Interactions\Interaction as DiscordInteraction;
 use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -44,6 +45,7 @@ use JaxkDev\DiscordBot\Models\Invite;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Messages\Attachment;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Author;
+use Discord\Parts\Interactions\Request\InteractionData as DiscordInteractData;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Field;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Footer;
@@ -55,6 +57,8 @@ use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Models\Permissions\ChannelPermissions;
 use JaxkDev\DiscordBot\Models\Permissions\RolePermissions;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Interaction\Interaction;
+use JaxkDev\DiscordBot\Models\Interaction\Request\InteractionData;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
@@ -63,6 +67,14 @@ use JaxkDev\DiscordBot\Models\Webhook;
 
 abstract class ModelConverter
 {
+
+    static function genModelInteraction(DiscordInteraction $interact): Interaction{
+        return new Interaction($interact->application_id, $interact->type, $interact->guild_id, $interact->channel_id, $interact->id, self::genModelData($interact->data) ?? null,
+    $interact->token, $interact->version, self::genModelMessage($interact->message) ?? null);
+    }
+    static public function genModelData(DiscordInteractData $data): InteractionData{
+        return new InteractionData($data->name, $data->component_type, $data->id, $data->values, $data->custom_id);
+    }
 
     static public function genModelVoiceState(DiscordVoiceStateUpdate $stateUpdate): VoiceState
     {

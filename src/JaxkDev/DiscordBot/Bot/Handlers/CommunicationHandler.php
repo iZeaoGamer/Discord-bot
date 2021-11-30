@@ -22,6 +22,7 @@ use Discord\Parts\Channel\Message as DiscordMessage;
 use Discord\Parts\Channel\Overwrite as DiscordOverwrite;
 use Discord\Parts\Channel\Webhook as DiscordWebhook;
 use Discord\Parts\Embed\Embed as DiscordEmbed;
+use Discord\Parts\Interactions\Interaction as DiscordInteraction;
 use Discord\Parts\Guild\Guild as DiscordGuild;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
@@ -32,6 +33,9 @@ use Discord\Repository\Channel\WebhookRepository as DiscordWebhookRepository;
 use Discord\Repository\Guild\InviteRepository as DiscordInviteRepository;
 
 use Discord\Builders\MessageBuilder;
+use Discord\Builders\Components\ActionRow;
+use Discord\Builders\Components\Option;
+use Discord\Builders\Components\SelectMenu;
 
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
@@ -83,6 +87,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUnmuteMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildTransfer;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildAuditLog;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestSearchMembers;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateButton;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveButton;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAddSelectMenu;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveSelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
@@ -91,12 +99,15 @@ use JaxkDev\DiscordBot\Models\Channels\TextChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Messages\Reply;
+
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Plugin\ApiRejection;
 use Monolog\Logger;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function React\Promise\reject;
+
+use Discord\Builders\Components\Button;
 
 
 class CommunicationHandler
@@ -181,6 +192,10 @@ class CommunicationHandler
         elseif ($pk instanceof RequestGuildTransfer) $this->handleGuildTransfer($pk);
         elseif ($pk instanceof RequestGuildAuditLog) $this->handleAuditLog($pk);
         elseif ($pk instanceof RequestSearchMembers) $this->handleSearchMembers($pk);
+        elseif($pk instanceof RequestCreateButton) $this->handleButtonAdd($pk);
+        elseif($pk instanceof RequestRemoveButton) $this->handleButtonRemove($pk);
+        elseif($pk instanceof RequestAddSelectMenu) $this->handleSelectAddMenu($pk);
+        elseif($pk instanceof RequestRemoveSelectMenu) $this->handleSelectRemoveMenu($pk);
     }
 
     private function handleDeleteWebhook(RequestDeleteWebhook $pk): void
@@ -967,6 +982,78 @@ class CommunicationHandler
             });
         });
     }
+    private function handleButtonAdd(RequestCreateButton $pk): void
+    {
+        $button = Button::new($pk->getStyle(), $pk->getCustomId());
+        $row = ActionRow::new()->addComponent($button);
+        $emoji = $pk->getEmoji();
+        $customId = $pk->getCustomId();
+        $url = $pk->getUrl();
+        $label = $pk->getLabel();
+        $disabled = $pk->isDisabled();
+        $callable = $pk->getCallable();
+
+        $button->setLabel($label);
+        $button->setEmoji($emoji);
+        $button->setListener(function (DiscordInteraction $interact) use ($callable, $button){
+            $callable($button, $interact, $this->client->getDiscordClient());
+        }, $this->client->getDiscordClient());
+    } 
+    private function handleButtonRemove(RequestRemoveButton $pk): void
+    {
+        $button = Button::new($pk->getStyle(), $pk->getCustomId());
+        $row = ActionRow::new()->removeComponent($button);
+        $emoji = $pk->getEmoji();
+        $customId = $pk->getCustomId();
+        $url = $pk->getUrl();
+        $label = $pk->getLabel();
+        $disabled = $pk->isDisabled();
+        $callable = $pk->getCallable();
+
+        $button->setLabel($label);
+        $button->setEmoji($emoji);
+        $button->setListener(function (DiscordInteraction $interact) use ($callable, $button){
+            $callable($button, $interact, $this->client->getDiscordClient());
+        }, $this->client->getDiscordClient());
+    } 
+    private function handleSelectAddMenu(RequestAddSelectMenu $pk): void
+    {
+        $select = SelectMenu::new();
+       $select->setCustomId($pk->getCustomId());
+       $select->setPlaceHolder($pk->getPlaceHolder());
+       $select->setMinValues($pk->getMinValue());
+       $select->setMaxValues($pk->getMaxValue());
+       $select->setDisabled($pk->isDisabled());
+       $option = Option::new($pk->getOptionLabel(), $pk->getValue());
+       $select->addOption($option);
+       $option->setDescription($pk->getDescription());
+       $option->setEmoji($pk->getEmoji());
+       $option->setDefault($pk->isDefault());
+    
+       $callable = $pk->getCallable();
+       $select->setListener(function (DiscordInteraction $interact, Collection $result) use ($select, $callable){
+           $callable($interact, $select, $result); //todo see if we should be implementing Collection class.
+       }, $this->client->getDiscordClient());
+    } 
+    private function handleSelectRemoveMenu(RequestRemoveSelectMenu $pk): void
+    {
+        $select = SelectMenu::new();
+       $select->setCustomId($pk->getCustomId());
+       $select->setPlaceHolder($pk->getPlaceHolder());
+       $select->setMinValues($pk->getMinValue());
+       $select->setMaxValues($pk->getMaxValue());
+       $select->setDisabled($pk->isDisabled());
+       $option = Option::new($pk->getOptionLabel(), $pk->getValue());
+       $select->removeOption($option);
+    
+       $callable = $pk->getCallable();
+       $select->setListener(function (DiscordInteraction $interact, Collection $result) use ($select, $callable){
+           $callable($interact, $select, $result);
+       }, $this->client->getDiscordClient());
+    } 
+
+    
+
 
     private function handleSendMessage(RequestSendMessage $pk): void
     {
