@@ -984,6 +984,12 @@ class CommunicationHandler
     }
     private function handleButtonAdd(RequestCreateButton $pk): void
     {
+        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+            if (!$channel->allowText()) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to send interaction, Invalid channel - text is not allowed.");
+                $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
+                return;
+            }
         $button = Button::new($pk->getStyle(), $pk->getCustomId());
         $row = ActionRow::new()->addComponent($button);
         $emoji = $pk->getEmoji();
@@ -993,6 +999,7 @@ class CommunicationHandler
         $disabled = $pk->isDisabled();
         $button->setLabel($label);
         $button->setEmoji($emoji);
+        $pk->getMessage()->addComponent($row);
         print_r("Button is transferring to a listener.");
         $button->setListener(function (DiscordInteraction $interaction) use ($pk){
             $message = $pk->getMessage();
@@ -1005,9 +1012,22 @@ class CommunicationHandler
                 $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
             });
         }, $this->client->getDiscordClient(), true);
+        $channel->sendMessage($pk->getMessage());
+        $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.", );
+    }, function (\Throwable $e) use ($pk) {
+        $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+        $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
+    });
+    
     } 
     private function handleButtonRemove(RequestRemoveButton $pk): void
     {
+        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+            if (!$channel->allowText()) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to send interaction, Invalid channel - text is not allowed.");
+                $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
+                return;
+            }
         $button = Button::new($pk->getStyle(), $pk->getCustomId());
         $row = ActionRow::new()->removeComponent($button);
         $emoji = $pk->getEmoji();
@@ -1018,6 +1038,7 @@ class CommunicationHandler
 
         $button->setLabel($label);
         $button->setEmoji($emoji);
+        $pk->getMessage()->removeComponent($row);
         $button->setListener(function (DiscordInteraction $interaction) use ($pk){
             $message = $pk->getMessage();
             $interaction->respondWithMessage($message)->then(function () use ($pk) {
@@ -1028,9 +1049,21 @@ class CommunicationHandler
                 $this->logger->debug("Failed to remove Button ({$pk->getUID()}) - {$e->getMessage()}");
             });
         }, $this->client->getDiscordClient(), true);
+        $channel->sendMessage($pk->getMessage());
+        $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
+    }, function (\Throwable $e) use ($pk) {
+        $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+        $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
+    });
     } 
     private function handleSelectAddMenu(RequestAddSelectMenu $pk): void
     {
+        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+            if (!$channel->allowText()) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to send interaction, Invalid channel - text is not allowed.");
+                $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
+                return;
+            }
         $select = SelectMenu::new();
        $select->setCustomId($pk->getCustomId());
        $select->setPlaceHolder($pk->getPlaceHolder());
@@ -1042,6 +1075,7 @@ class CommunicationHandler
        $option->setDescription($pk->getDescription());
        $option->setEmoji($pk->getEmoji());
        $option->setDefault($pk->isDefault());
+       $pk->getMessage()->addComponent($option);
        $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($pk) {
         foreach ($options as $option) {
             print_r($option->getValue().PHP_EOL);
@@ -1055,10 +1089,22 @@ class CommunicationHandler
             $this->logger->debug("Failed to add Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
         });
     }, $this->client->getDiscordClient(), true);
+    $channel->sendMessage($pk->getMessage());
+    $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
+}, function (\Throwable $e) use ($pk) {
+    $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+    $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
+});
     
     } 
     private function handleSelectRemoveMenu(RequestRemoveSelectMenu $pk): void
     {
+        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+            if (!$channel->allowText()) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to send interaction, Invalid channel - text is not allowed.");
+                $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
+                return;
+            }
         $select = SelectMenu::new();
        $select->setCustomId($pk->getCustomId());
        $select->setPlaceHolder($pk->getPlaceHolder());
@@ -1067,6 +1113,7 @@ class CommunicationHandler
        $select->setDisabled($pk->isDisabled());
        $option = Option::new($pk->getOptionLabel(), $pk->getValue());
        $select->removeOption($option);
+       $pk->getMessage()->removeComponent($option);
        $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($pk) {
         foreach ($options as $option) {
             print_r($option->getValue().PHP_EOL);
@@ -1079,6 +1126,12 @@ class CommunicationHandler
             $this->logger->debug("Failed to remove Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
         });
     }, $this->client->getDiscordClient(), true);
+    $channel->sendMessage($pk->getMessage());
+    $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
+}, function (\Throwable $e) use ($pk) {
+    $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+    $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
+});
     } 
 
     

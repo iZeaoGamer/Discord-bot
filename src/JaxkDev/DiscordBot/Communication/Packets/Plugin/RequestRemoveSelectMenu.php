@@ -23,6 +23,9 @@ class RequestRemoveSelectMenu extends Packet
     private $response;
 
     /** @var string */
+    private $channelId;
+
+    /** @var string */
     private $labelOption;
 
     /** @var string|null */
@@ -45,10 +48,11 @@ class RequestRemoveSelectMenu extends Packet
 
 
 
-    public function __construct(MessageBuilder $response, string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null)
+    public function __construct(MessageBuilder $response, string $channelId, string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null)
     {
         parent::__construct();
         $this->response = $response;
+        $this->channelId = $channelId;
         $this->labelOption = $labelOption;
         $this->value = $value;
         $this->placeHolder = $placeHolder;
@@ -60,6 +64,9 @@ class RequestRemoveSelectMenu extends Packet
     public function getMessage(): MessageBuilder
     {
         return $this->response;
+    }
+    public function getChannelId(): string{
+        return $this->channelId;
     }
     public function getOptionLabel(): string
     {
@@ -94,6 +101,7 @@ class RequestRemoveSelectMenu extends Packet
         return serialize([
             $this->UID,
             $this->response,
+            $this->channelId,
             $this->labelOption,
             $this->value,
             $this->placeHolder,
@@ -109,6 +117,7 @@ class RequestRemoveSelectMenu extends Packet
         [
             $this->UID,
             $this->response,
+            $this->channelId,
             $this->labelOption,
             $this->value,
             $this->placeHolder,

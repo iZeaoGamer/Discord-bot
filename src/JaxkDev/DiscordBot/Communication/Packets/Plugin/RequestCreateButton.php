@@ -22,6 +22,9 @@ class RequestCreateButton extends Packet
     /** @var MessageBuilder */
     private $response;
 
+    /** @var string */
+    private $channelId;
+
     /** @var int */
     private $style;
 
@@ -40,10 +43,11 @@ class RequestCreateButton extends Packet
     /** @var string|null */
     private $url; //null if button isn't a link button. 
 
-    public function __construct(MessageBuilder $response, int $style, string $label, string $customId, bool $disabled, ?string $emoji = null, ?string $url = null)
+    public function __construct(MessageBuilder $response, string $channelId, int $style, string $label, string $customId, bool $disabled, ?string $emoji = null, ?string $url = null)
     {
         parent::__construct();
         $this->response = $response;
+        $this->channelId = $channelId;
         $this->style = $style;
         $this->label = $label;
         $this->customId = $customId;
@@ -55,6 +59,10 @@ class RequestCreateButton extends Packet
     {
         return $this->response;
     }
+    public function getChannelId(): string{
+        return $this->channelId;
+    }
+
 
     public function getStyle(): int
     {
@@ -86,6 +94,7 @@ class RequestCreateButton extends Packet
         return serialize([
             $this->UID,
             $this->response,
+            $this->channelId,
             $this->style,
             $this->label,
             $this->customId,
@@ -100,6 +109,7 @@ class RequestCreateButton extends Packet
         [
             $this->UID,
             $this->response,
+            $this->channelId,
             $this->style,
             $this->label,
             $this->customId,
