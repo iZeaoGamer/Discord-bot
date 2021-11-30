@@ -344,7 +344,7 @@ array(5) {
         ));
     }
     public function onInteractionCreate(DiscordInteraction $interactCreate, Discord $discord){
-        $packet = new InteractionCreatePacket($interactCreate);
+        $packet = new InteractionCreatePacket(ModelConverter::genModelInteraction($interactCreate));
         $this->client->getThread()->writeOutboundData($packet);
     }
 

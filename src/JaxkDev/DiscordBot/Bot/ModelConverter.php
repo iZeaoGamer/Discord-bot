@@ -46,6 +46,7 @@ use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Messages\Attachment;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Author;
 use Discord\Parts\Interactions\Request\InteractionData as DiscordInteractData;
+use Discord\Parts\Interactions\Request\Option as DiscordInteractOption;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Field;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Footer;
@@ -57,17 +58,27 @@ use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Models\Permissions\ChannelPermissions;
 use JaxkDev\DiscordBot\Models\Permissions\RolePermissions;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
-use JaxkDev\DiscordBot\Models\Interaction\Interaction;
-use JaxkDev\DiscordBot\Models\Interaction\Request\InteractionData;
+use JaxkDev\DiscordBot\Models\Interactions\Interaction;
+use JaxkDev\DiscordBot\Models\Interactions\Request\InteractionData;
+use JaxkDev\DiscordBot\Models\Interactions\Request\Option;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\VoiceState;
 use JaxkDev\DiscordBot\Models\Webhook;
-
 abstract class ModelConverter
 {
 
+    static function genModelInteraction(DiscordInteraction $interact): Interaction{
+        return new Interaction($interact->application_id, $interact->type, $interact->guild_id, $interact->channel_id, $interact->id, ($interact->data !== null ? self::genModelData($interact->data) : null),
+    $interact->token, $interact->version, ($interact->message !== null ? self::genModelMessage($interact->message) : null));
+    }
+    static public function genModelData(DiscordInteractData $data): InteractionData{
+        return new InteractionData($data->name, $data->component_type, $data->id, $data->values, $data->custom_id);
+    }
+    static function genModelOption(DiscordInteractOption $option): Option{
+        return new Option($option->name, $option->type, $option->value);
+    }
     static public function genModelVoiceState(DiscordVoiceStateUpdate $stateUpdate): VoiceState
     {
         if ($stateUpdate->guild_id === null) {

@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
-use Discord\Parts\Interactions\Interaction;
+use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class InteractionCreate extends Packet
@@ -34,10 +34,11 @@ class InteractionCreate extends Packet
 
     public function serialize(): ?string
     {
-        return serialize([
-            $this->UID,
-            $this->interaction
-        ]);
+        return serialize(
+            [
+                $this->UID,
+        $this->interaction
+    ]);
     }
 
     public function unserialize($data): void

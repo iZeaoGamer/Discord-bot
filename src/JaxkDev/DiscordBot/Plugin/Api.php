@@ -63,6 +63,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateButton;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAddSelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveSelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveButton;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyInteraction;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -114,6 +115,17 @@ class Api
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
         }
         $pk = new RequestCreateButton($message, $channelId, $style, $label, $customId, $disabled, $emoji, $url);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    public function modifyInteraction(MessageBuilder $message, string $channelId, string $messageId): PromiseInterface{
+        if (!Utils::validDiscordSnowflake($channelId)) {
+            return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
+        }
+        if (!Utils::validDiscordSnowflake($messageId)) {
+            return rejectPromise(new ApiRejection("Invalid channel id {$messageId}"));
+        }
+        $pk = new RequestModifyInteraction($message, $channelId, $messageId);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

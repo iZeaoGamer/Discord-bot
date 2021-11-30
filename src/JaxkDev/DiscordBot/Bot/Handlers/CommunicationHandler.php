@@ -91,6 +91,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateButton;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveButton;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAddSelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveSelectMenu;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
@@ -196,6 +197,7 @@ class CommunicationHandler
         elseif($pk instanceof RequestRemoveButton) $this->handleButtonRemove($pk);
         elseif($pk instanceof RequestAddSelectMenu) $this->handleSelectAddMenu($pk);
         elseif($pk instanceof RequestRemoveSelectMenu) $this->handleSelectRemoveMenu($pk);
+        elseif($pk instanceof RequestModifyInteraction) $this->handleModifyInteraction($pk);
     }
 
     private function handleDeleteWebhook(RequestDeleteWebhook $pk): void
@@ -982,6 +984,19 @@ class CommunicationHandler
             });
         });
     }
+    private function handleModifyInteraction(RequestModifyInteraction $pk){
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($pk){
+            $builder = $pk->getMessage();
+            $message->edit($builder)->then(function(DiscordMessage $message) use ($pk){
+                $this->resolveRequest($pk->getUID(), true, "Successfully modified an Interaction.", [ModelConverter::genModelMessage($message)]);
+            }, function (\Throwable $e) use ($pk){
+                $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - {$e->getMessage()}");
+            });
+        });
+    }
+            
+            
     private function handleButtonAdd(RequestCreateButton $pk): void
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
@@ -1000,10 +1015,9 @@ class CommunicationHandler
         $button->setLabel($label);
         $button->setEmoji($emoji);
         $pk->getMessage()->addComponent($row);
-        print_r("Button is transferring to a listener.");
+
         $button->setListener(function (DiscordInteraction $interaction) use ($pk){
             $message = $pk->getMessage();
-            print_r("Button is transferred with success!");
             $interaction->respondWithMessage($message)->then(function () use ($pk) {
 
                 $this->resolveRequest($pk->getUID(), true, "Button added.");
@@ -1355,6 +1369,16 @@ class CommunicationHandler
         $this->getChannel($pk, $channel_id, function (DiscordChannel $channel) use ($pk, $message_id, $cb) {
             $channel->messages->fetch($message_id)->done(function (DiscordMessage $dMessage) use ($cb) {
                 $cb($dMessage);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to fetch message.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to process request (" . get_class($pk) . "|{$pk->getUID()}) - message error: {$e->getMessage()}");
+            });
+        });
+    }
+    private function getMessageChannelId(Packet $pk, string $channel_id, string $message_id, callable $cb): void{
+        $this->getChannel($pk, $channel_id, function (DiscordChannel $channel) use ($pk, $message_id, $cb) {
+            $channel->messages->fetch($message_id)->done(function (DiscordMessage $dMessage) use ($channel, $cb) {
+                $cb($dMessage, $channel);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to fetch message.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to process request (" . get_class($pk) . "|{$pk->getUID()}) - message error: {$e->getMessage()}");
