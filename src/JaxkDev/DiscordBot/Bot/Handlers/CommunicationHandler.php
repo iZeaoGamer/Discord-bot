@@ -985,15 +985,66 @@ class CommunicationHandler
         });
     }
     private function handleModifyInteraction(RequestModifyInteraction $pk){
-        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($pk){
-            $builder = $pk->getMessage();
-            $message->edit($builder)->then(function(DiscordMessage $message) use ($pk){
-                $this->resolveRequest($pk->getUID(), true, "Successfully modified an Interaction.", [ModelConverter::genModelMessage($message)]);
-            }, function (\Throwable $e) use ($pk){
-                $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - {$e->getMessage()}");
-            });
+        $m = $pk->getMessage();
+        if($m->getId() === null){
+            $this->resolveRequest($pk->getUID(), false, "Message ID must be present.");
+            return;
+        }
+        $this->getMessage($pk, $m->getChannelId(), $m->getId(), function (DiscordMessage $message) use ($m, $pk){
+            $builder = $pk->getMessageBuilder();
+          
+            $e = $m->getEmbed();
+            $de = null;
+            if ($e !== null) {
+                $de = new DiscordEmbed($this->client->getDiscordClient());
+                if ($e->getType() !== null) $de->setType($e->getType());
+                if ($e->getTitle() !== null) $de->setTitle($e->getTitle());
+                if ($e->getUrl() !== null) $de->setURL($e->getUrl());
+                if ($e->getColour() !== null) $de->setColor($e->getColour());
+                if ($e->getAuthor()->getName() !== null) $de->setAuthor($e->getAuthor()->getName(), $e->getAuthor()->getIconUrl() ?? "", $e->getAuthor()->getUrl() ?? "");
+                if ($e->getThumbnail()->getUrl() !== null) $de->setThumbnail($e->getThumbnail()->getUrl());
+                if ($e->getImage()->getUrl() !== null) $de->setImage($e->getImage()->getUrl());
+                if ($e->getDescription() !== null) $de->setDescription($e->getDescription());
+                if ($e->getFooter()->getText() !== null) $de->setFooter($e->getFooter()->getText(), $e->getFooter()->getIconUrl() ?? "");
+                if ($e->getTimestamp() !== null) $de->setTimestamp($e->getTimestamp());
+                foreach ($e->getFields() as $f) {
+                    $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                }
+            }
+            $builder->setEmbeds([$de]);
+
+            if ($m instanceof Reply) {
+                if ($m->getReferencedMessageId() === null) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", ["Reply message has no referenced message ID."]);
+                    $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - Reply message has no referenced message ID.");
+                    return;
+                }
+                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($pk, $de) {
+                    $msg->edit($pk->getMessageBuilder())->done(function (DiscordMessage $msg) use ($pk){
+                        $this->resolveRequest($pk->getUID(), true, "Interaction sent.", [ModelConverter::genModelMessage($msg)]);
+                        $this->logger->debug("Sent Interaction ({$pk->getUID()})");
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                        $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - {$e->getMessage()}");
+                    });
+                });
+            } else {
+     
+                $message->edit($pk->getMessageBuilder())->done(function (DiscordMessage $msg) use ($pk){
+                    $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
+                    $this->logger->debug("Modified Interaction ({$pk->getUID()})");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to modify Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to edit Interaction ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }
+        $message->edit($builder)->done(function(DiscordMessage $message) use ($pk){
+            $this->resolveRequest($pk->getUID(), true, "Successfully modified an Interaction.", [ModelConverter::genModelMessage($message)]);
+        }, function (\Throwable $e) use ($pk){
+            $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - {$e->getMessage()}");
         });
+    });
     }
             
             

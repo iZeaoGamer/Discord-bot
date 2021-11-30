@@ -15,6 +15,7 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 use Discord\Builders\MessageBuilder;
+use JaxkDev\DiscordBot\Models\Messages\Message;
 
 class RequestModifyInteraction extends Packet
 {
@@ -22,28 +23,21 @@ class RequestModifyInteraction extends Packet
     /** @var MessageBuilder */
     private $response;
 
-    /** @var string */
-    private $channelId;
+    /** @var Message */
+    private $message;
 
-    /** @var string */
-    private $messageId;
-
-    public function __construct(MessageBuilder $response, string $channelId, string $messageId)
+    public function __construct(MessageBuilder $response, Message $message)
     {
         parent::__construct();
         $this->response = $response;
-        $this->channelId = $channelId;
-        $this->messageId = $messageId;
+        $this->message = $message;
     }
-    public function getMessage(): MessageBuilder
+    public function getMessageBuilder(): MessageBuilder
     {
         return $this->response;
     }
-    public function getChannelId(): string{
-        return $this->channelId;
-    }
-    public function getMessageId(): string{
-        return $this->messageId;
+    public function getMessage(): Message{
+        return $this->message;
     }
 
 
@@ -52,8 +46,7 @@ class RequestModifyInteraction extends Packet
         return serialize([
             $this->UID,
             $this->response,
-            $this->channelId,
-            $this->messageId
+           $this->message
          
         ]);
     }
@@ -63,8 +56,7 @@ class RequestModifyInteraction extends Packet
         [
             $this->UID,
             $this->response,
-            $this->channelId,
-            $this->messageId
+            $this->message
         ] = unserialize($data);
     }
 }

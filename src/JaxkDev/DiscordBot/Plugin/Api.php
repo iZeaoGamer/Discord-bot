@@ -118,14 +118,14 @@ class Api
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
-    public function modifyInteraction(MessageBuilder $message, string $channelId, string $messageId): PromiseInterface{
-        if (!Utils::validDiscordSnowflake($channelId)) {
-            return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
+    public function modifyInteraction(MessageBuilder $builder, Message $message): PromiseInterface{
+        if ($message->getId() === null) {
+            return rejectPromise(new ApiRejection("Interaction must have a valid ID to be able to edit it."));
         }
-        if (!Utils::validDiscordSnowflake($messageId)) {
-            return rejectPromise(new ApiRejection("Invalid channel id {$messageId}"));
+        if (strlen($message->getContent()) > 2000) {
+            return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
         }
-        $pk = new RequestModifyInteraction($message, $channelId, $messageId);
+        $pk = new RequestModifyInteraction($builder, $message);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
