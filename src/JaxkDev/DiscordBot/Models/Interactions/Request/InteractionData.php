@@ -19,8 +19,8 @@ class InteractionData implements \Serializable
 
 {
 
-    /** @var string */
-    private $name;
+    /** @var string|null */
+    private $name; //null when not using slash commands.
 
     /** @var int|null */
     private $type; //null when using slash commands.
@@ -34,7 +34,7 @@ class InteractionData implements \Serializable
     /** @var string|null */
     private $customId; //null when using slash commands
 
-    public function __construct(string $name, ?int $type, ?string $id = null, array $values = [], ?string $custom_id = null){
+    public function __construct(?string $name, ?int $type, ?string $id = null, array $values = [], ?string $custom_id = null){
        $this->setName($name);
        $this->setType($type);
        $this->setId($id);
@@ -42,10 +42,10 @@ class InteractionData implements \Serializable
        $this->setCustomId($custom_id);
       
     }
-    public function setName(string $name): void{
+    public function setName(?string $name): void{
         $this->name = $name;
     }
-    public function getName(): string{
+    public function getName(): ?string{
         return $this->name;
     }
     public function setId(?string $id): void{
