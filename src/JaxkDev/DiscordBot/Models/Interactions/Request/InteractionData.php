@@ -28,13 +28,13 @@ class InteractionData implements \Serializable
     /** @var string|null */
     private $id; //null when creating.
 
-    /** @var array */
+    /** @var array|null */
     private $values; //null when not selecting anything.
 
     /** @var string|null */
     private $customId; //null when using slash commands
 
-    public function __construct(?string $name, ?int $type, ?string $id = null, array $values = [], ?string $custom_id = null){
+    public function __construct(?string $name, ?int $type, ?string $id = null, ?array $values = null, ?string $custom_id = null){
        $this->setName($name);
        $this->setType($type);
        $this->setId($id);
@@ -54,10 +54,10 @@ class InteractionData implements \Serializable
     public function getId(): ?string{
         return $this->id;
     }
-    public function setSelected(array $values): void{
+    public function setSelected(?array $values): void{
         $this->values = $values;
     }
-    public function getSelected(): array{
+    public function getSelected(): ?array{
         return $this->values;
     }
     public function setCustomId(?string $custom_id){
