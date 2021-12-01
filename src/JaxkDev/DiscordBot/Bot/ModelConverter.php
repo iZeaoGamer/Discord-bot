@@ -70,7 +70,7 @@ abstract class ModelConverter
 {
 
     static function genModelInteraction(DiscordInteraction $interact): Interaction{
-        return new Interaction($interact->application_id, $interact->type, $interact->guild_id, $interact->channel_id, $interact->id, ($interact->data !== null ? self::genModelData($interact->data) : null),
+        return new Interaction($interact->application_id, $interact->type, self::genModelUser($interact->user), $interact->guild_id, $interact->channel_id, $interact->id, ($interact->data !== null ? self::genModelData($interact->data) : null),
     $interact->token, $interact->version, ($interact->message !== null ? self::genModelMessage($interact->message) : null));
     }
     static public function genModelData(DiscordInteractData $data): InteractionData{

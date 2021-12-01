@@ -15,6 +15,8 @@ namespace JaxkDev\DiscordBot\Models\Interactions;
 use JaxkDev\DiscordBot\Models\Interactions\Request\InteractionData;
 
 use JaxkDev\DiscordBot\Models\Messages\Message;
+use JaxkDev\DiscordBot\Models\User;
+
 class Interaction implements \Serializable
 
 {
@@ -24,6 +26,9 @@ class Interaction implements \Serializable
 
    /** @var int */
    private $type;
+
+   /** @var User */
+   private $user;
 
    /** @var string|null */
    private $serverId; //null when not in a guild.
@@ -46,11 +51,12 @@ class Interaction implements \Serializable
    /** @var Message|null */
    private $message; //null when not using message components as interaction type.
 
-    public function __construct(string $application_id, int $type, ?string $server_id, ?string $channel_id, ?string $id = null, ?InteractionData $data = null,
+    public function __construct(string $application_id, int $type, User $user, ?string $server_id, ?string $channel_id, ?string $id = null, ?InteractionData $data = null,
     ?string $token = null, ?int $version = null, ?Message $message = null)
     {
        $this->setApplicationID($application_id);
        $this->setType($type);
+       $this->setUser($user);
        $this->setServerId($server_id);
        $this->setChannelId($channel_id);
        $this->setId($id);
@@ -71,6 +77,12 @@ class Interaction implements \Serializable
     }
     public function getType(): int{
         return $this->type;
+    }
+    public function setUser(User $user): void{
+        $this->user = $user;
+    }
+    public function getUser(): User{
+        return $this->user;
     }
     public function setServerId(?string $serverId): void{
         $this->serverId = $serverId;
