@@ -194,15 +194,20 @@ class ComposerStaticInit6bcf578d60c79e52f17300e6732601ac
         array(
         0 => __DIR__ . '/..' . '/discord-php/slash/src/Discord',
         ),
-
         'Discord\\' => 
         array (
             0 => __DIR__ . '/..' . '/team-reflex/discord-php/src/Discord',
-        ),
+            1 => __DIR__ . '/..' . '/discord/interactions/src/Discord',
+    ),
         'Carbon\\' => 
         array (
             0 => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon',
         ),
+        'Elliptic\\' =>
+        array(
+            0 => __DIR__ . '/..' . '/simplito/elliptic-php/lib/'
+        )
+
     );
 
     public static $prefixesPsr0 = array (

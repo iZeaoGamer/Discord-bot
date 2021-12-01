@@ -35,5 +35,7 @@ return array(
     'Discord\\Http\\' => array($vendorDir . '/discord-php/http/src/Discord'),
     'Discord\\' => array($vendorDir . '/team-reflex/discord-php/src/Discord'),
     'Discord\\Slash\\' => array($vendorDir . '/discord-php/slash/src/Discord'),
+    'Discord\\' => array($vendorDir . '/discord/interactions/src/Discord'),
     'Carbon\\' => array($vendorDir . '/nesbot/carbon/src/Carbon'),
+    'Elliptic\\' => array($venderDir . '/simplito/elliptic-php/lib/'),
 );
