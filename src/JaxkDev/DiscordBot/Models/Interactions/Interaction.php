@@ -133,6 +133,7 @@ class Interaction implements \Serializable
         return serialize([
             $this->application_id,
             $this->type,
+            $this->user,
             $this->serverId,
             $this->channelId, 
             $this->id,
@@ -148,6 +149,7 @@ class Interaction implements \Serializable
         [
             $this->application_id,
             $this->type,
+            $this->user,
             $this->serverId,
             $this->channelId, 
             $this->id,
