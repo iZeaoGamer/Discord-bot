@@ -192,7 +192,7 @@ class ComposerStaticInit6bcf578d60c79e52f17300e6732601ac
         ),
         'Discord\\Slash\\' =>
         array(
-        0 => __DIR__ . '/..' . '/discord-php/slash/src/discord',
+        0 => __DIR__ . '/..' . '/discord-php/slash/src/Discord',
         ),
 
         'Discord\\' => 
