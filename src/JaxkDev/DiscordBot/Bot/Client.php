@@ -26,6 +26,7 @@ use Monolog\Logger;
 use Monolog\Handler\RotatingFileHandler;
 use pocketmine\utils\Utils;
 use React\EventLoop\TimerInterface;
+use Discord\Slash\Client as SlashClient;
 use Throwable;
 
 class Client
@@ -35,7 +36,10 @@ class Client
     private $thread;
 
     /** @var Discord */
-    public $client;
+    private $client;
+
+    /** @var SlashClient */
+    private $slashClient;
 
     /** @var Logger */
     private $logger;
@@ -101,6 +105,12 @@ class Client
                 'storeMessages' => true,
                 'intents' => Intents::getAllIntents()
             ]);
+            $this->slashClient = new SlashClient([
+                'loop' => $this->client->getLoop() // Discord and Client MUST share event loops
+            ]);
+            
+            $this->slashClient->linkDiscord($this->getDiscordClient()());
+            //$this->slashClient = $client;
         } catch (IntentException $e) {
             $this->close($e);
         }
@@ -213,6 +223,9 @@ class Client
     public function getThread(): BotThread
     {
         return $this->thread;
+    }
+    public function getSlashClient(): SlashClient{
+        return $this->slashClient;
     }
 
     public function getDiscordClient(): Discord

@@ -19,6 +19,15 @@
             'reference' => '1a5a663954db4a4415f5b3f5ee183e68487a18a7',
             'dev_requirement' => false,
         ),
+            'discord-php/slash' => array(
+                'pretty_version' => 'v1.0.5',
+                'version' => '1.0.5.0',
+                'type' => 'library',
+                'install_path' => __DIR__ . '/../discord-php/slash',
+                'aliases' => array(),
+                'reference' => '1a8517b9675f1a7b77075f96032adb15f23f3e06',
+                'dev_requirement' => false,
+            ),
         'evenement/evenement' => array(
             'pretty_version' => 'v3.0.1',
             'version' => '3.0.1.0',
