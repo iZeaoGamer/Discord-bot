@@ -106,6 +106,8 @@ class Client
                 'intents' => Intents::getAllIntents()
             ]);
             $this->slashClient = new SlashClient([
+                'token' => $config['discord']['token'],
+                'application_id' => $this->client->id,
                 'loop' => $this->client->getLoop() // Discord and Client MUST share event loops
             ]);
             
