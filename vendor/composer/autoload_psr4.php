@@ -35,18 +35,5 @@ return array(
     'Discord\\Http\\' => array($vendorDir . '/discord-php/http/src/Discord'),
     'Discord\\' => array($vendorDir . '/team-reflex/discord-php/src/Discord'),
     'Discord\\Slash\\' => array($vendorDir . '/discord-php/slash/src/Discord'),
-    'Elliptic\\' => array($vendorDir . '/simplito/elliptic-php/lib'),
-    'BI\\' => array($vendorDir . '/simplito/bigint-wrapper-php'),
-    'BN\\' => array($vendorDir . '/simplito/bn-php/lib'),
-    'Http\\Message\\' => array($vendorDir . '/php-http/message-factory/src/'),
-    'Http\\Message\\' => array($vendorDir . '/php-http/message/src/'),
-    'Http\\Client\\Test\\' => array($vendorDir . '/php-http/client-integration-tests/src/'),
     'Carbon\\' => array($vendorDir . '/nesbot/carbon/src/Carbon'),
-    'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
-    'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy/'),
-    'Doctrine\\Instantiator\\' => array($vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator/'),
-    'Clue\\StreamFilter\\' => array($vendorDir . '/clue/stream-filter/src/'),
-    'Bamarni\\Composer\\Bin\\' => array($vendorDir . '/bamarni/composer-bin-plugin/src'),
-    'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src/'),
-
 );

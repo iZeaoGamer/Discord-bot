@@ -23,11 +23,7 @@
         "ext-zlib": "*",
         "discord-php/http": "^9.0.5",
         "react/child-process": "^0.6.2",
-        "discord/interactions": "^2.0.0",
-        "discord-php/slash": "^1.0.5",
-        "kambo/httpmessage": "^0.9.1",
-        "simplito/elliptic-php": "^1.0.9"
-
+        "discord/interactions": "^2"
     },
     "require-dev": {
         "symfony/var-dumper": "*",
