@@ -1,0 +1,56 @@
+{
+    "name": "php-http/client-integration-tests",
+    "description": "HTTP Client integration tests",
+    "license": "MIT",
+    "keywords": ["http", "client", "integration", "tests"],
+    "homepage": "http://httplug.io",
+    "authors": [
+        {
+            "name": "Eric GELOEN",
+            "email": "geloen.eric@gmail.com"
+        },
+        {
+            "name": "Márk Sági-Kazár",
+            "email": "mark.sagikazar@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1 || ^8.0",
+        "phpunit/phpunit": "^7.5.20 || ^8.5.8 || ^9.3.11",
+        "php-http/message": "^1.0 || ^2.0",
+        "guzzlehttp/psr7": "^1.7 || ^2.0",
+        "th3n3rd/cartesian-product": "^0.3"
+    },
+    "suggest": {
+        "php-http/httplug": "To test async client"
+    },
+    "require-dev": {
+        "php-http/httplug": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Http\\Client\\Tests\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Http\\Client\\Curl\\Tests\\": "vendor/php-http/curl-client/tests/",
+            "Http\\Client\\Socket\\Tests\\": "vendor/php-http/socket-client/tests/",
+            "Http\\Adapter\\Guzzle5\\Tests\\": "vendor/php-http/guzzle5-adapter/tests/",
+            "Http\\Adapter\\Guzzle6\\Tests\\": "vendor/php-http/guzzle6-adapter/tests/",
+            "Http\\Adapter\\Buzz\\Tests\\": "vendor/php-http/buzz-adapter/tests/",
+            "Http\\Adapter\\React\\Tests\\": "vendor/php-http/react-adapter/tests/",
+            "Http\\Adapter\\Cake\\Tests\\": "vendor/php-http/cachephp-adapter/tests/",
+            "Http\\Adapter\\Zend\\Tests\\": "vendor/php-http/zend-adapter/tests/"
+        }
+    },
+    "bin": [
+        "bin/http_test_server"
+    ],
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.x-dev"
+        }
+    },
+    "minimum-stability": "dev"
+}

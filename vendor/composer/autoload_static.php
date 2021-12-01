@@ -33,6 +33,7 @@ class ComposerStaticInit6bcf578d60c79e52f17300e6732601ac
             'Symfony\\Contracts\\Translation\\' => 30,
             'Symfony\\Component\\Translation\\' => 30,
             'Symfony\\Component\\OptionsResolver\\' => 34,
+            ''
         ),
         'R' => 
         array (
@@ -52,6 +53,10 @@ class ComposerStaticInit6bcf578d60c79e52f17300e6732601ac
             'Ratchet\\RFC6455\\' => 16,
             'Ratchet\\Client\\' => 15,
         ),
+        'K' =>
+        array(
+            'Kambo\\Http\\Message\\' => 16,
+        ),
         'P' => 
         array (
             'Psr\\Log\\' => 8,
@@ -65,19 +70,43 @@ class ComposerStaticInit6bcf578d60c79e52f17300e6732601ac
         array (
             'JaxkDev\\DiscordBot\\' => 19,
         ),
+        'H' =>
+        array(
+            'Http\\Message\\' => 11,
+            'Http\\Client\\Tests' => 14,
+
+        ),
         'G' => 
         array (
             'GuzzleHttp\\Psr7\\' => 16,
+            'GuzzleHttp\\' => 9,
+        ),
+        'E' =>
+        array(
+            'Elliptic\\' => 7,
         ),
         'D' => 
         array (
             'Discord\\Http\\' => 13,
             'Discord\\' => 8,
             'Discord\\Slash\\' => 13,
+            'DeepCopy\\' => 7,
+            'Doctrine\\Instantiator\\' => 19,
         ),
         'C' => 
         array (
             'Carbon\\' => 7,
+            'Clue\\StreamFilter\\' => 14,
+        ),
+        'B' =>
+        array(
+            'BI\\' => 1,
+        ),
+        array(
+            'BN\\' => 1,
+        ), 
+        array(
+            'Bamarni\\Composer\\Bin\\' => 17
         ),
     );
 
@@ -194,18 +223,72 @@ class ComposerStaticInit6bcf578d60c79e52f17300e6732601ac
         array(
         0 => __DIR__ . '/..' . '/discord-php/slash/src/Discord',
         ),
-
-        'Discord\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/team-reflex/discord-php/src/Discord',
+        'Discord\\' =>
+        array(
+            0 => __DIR__ . '/..' . '/discord/interactions/src/Discord',
+            1 => __DIR__ . '/..' . '/team-reflex/discord-php/src/Discord',
+        ),
+        'Elliptic\\' =>
+        array(
+            0 => __DIR__ . '/..' . '/simplito/elliptic-php/lib'
+        ),
+        'BI\\' =>
+        array(
+            0 => __DIR__ . '/..' . '/simplito/bigint-wrapper-php/lib'
+        ),
+        'BN\\' =>
+        array(
+            0 => __DIR__ . '/..' . '/simplito/bn-php/lib'
+        ),
+        'Kambo\\Http\\Message\\' =>
+        array(
+            0 => __DIR__ . '/..' . '/kambo/httpmessage/src'
         ),
         'Carbon\\' => 
         array (
             0 => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon',
         ),
+        'Http\\Message\\' =>
+        array(
+            0 => __DIR__ . '/..' . '/php-http/message-factory/src',
+            1 => __DIR__ . '/..' . '/php-http/message/src'
+    ),
+    'Http\\Client\\Tests\\' =>
+    array(
+        0 => __DIR__ . '/..' . '/php-http/client-integration-tests/src'
+    ),
+    'PhpParser\\' =>
+    array(
+        0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser'
+    ),
+    'DeepCopy\\' =>
+    array(
+        0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/',
+    ),
+    'Doctrine\\Instantiator\\' =>
+    array(
+        0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator/'
+    ),
+    'Clue\\StreamFilter\\' =>
+    array(
+        0 => __DIR__ . '/..' . '/clue/stream-filter/src/'
+    ),
+    'Bamarni\\Composer\\Bin\\' =>
+    array(
+        0 => __DIR__ . '/..' . '/bamarni/composer-bin-plugin/src'
+),
+'GuzzleHttp\\' => array(
+    0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/'
+),
     );
 
     public static $prefixesPsr0 = array (
+        'D' => array(
+            'dflydev\\markdown' =>
+            array(
+                0 => __DIR__ . '/..' . '/dflydev/markdown/src'
+            ),
+        ),
         'T' => 
         array (
             'TrafficCophp' => 

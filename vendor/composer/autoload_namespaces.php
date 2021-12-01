@@ -8,4 +8,5 @@ $baseDir = dirname($vendorDir);
 return array(
     'TrafficCophp' => array($vendorDir . '/trafficcophp/bytebuffer/src'),
     'Evenement' => array($vendorDir . '/evenement/evenement/src'),
+    'dflydev\\markdown' => array($vendorDir . '/dflydev/markdown/src'),
 );
