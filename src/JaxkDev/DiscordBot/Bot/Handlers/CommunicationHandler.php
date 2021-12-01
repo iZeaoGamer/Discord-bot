@@ -1068,6 +1068,7 @@ class CommunicationHandler
                 foreach ($e->getFields() as $f) {
                     $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
                 }
+                $builder->setEmbeds([$de]);
             }
             if ($m instanceof Reply) {
                 if ($m->getReferencedMessageId() === null) {
