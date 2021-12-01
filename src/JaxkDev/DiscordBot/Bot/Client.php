@@ -109,7 +109,7 @@ class Client
                 'loop' => $this->client->getLoop() // Discord and Client MUST share event loops
             ]);
             
-            $this->slashClient->linkDiscord($this->getDiscordClient()());
+            $this->slashClient->linkDiscord($this->getDiscordClient());
             //$this->slashClient = $client;
         } catch (IntentException $e) {
             $this->close($e);
