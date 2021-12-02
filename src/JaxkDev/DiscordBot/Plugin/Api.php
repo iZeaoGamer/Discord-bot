@@ -59,6 +59,11 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUnmuteMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildAuditLog;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildTransfer;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestSearchMembers;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateButton;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAddSelectMenu;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveSelectMenu;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveButton;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateInteraction;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
@@ -72,8 +77,8 @@ use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Models\Webhook;
 use JaxkDev\DiscordBot\Models\Role;
+
 use Discord\Builders\MessageBuilder;
-use Discord\Builders\Components\Component;
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 
 /**
@@ -93,16 +98,122 @@ class Api
         $this->plugin = $plugin;
     }
 
-    /** Creates a Button interaction
+    /** Creates an interaction. 
      * 
      * @param MessageBuilder $builder
      * @param Message $message
      * 
      * @return PromiseInterface
      */
-    public function createInteraction(MessageBuilder $builder): PromiseInterface{
+    public function createInteraction(MessageBuilder $builder, Message $message): PromiseInterface{
+        $pk = new RequestCreateInteraction($builder, $message);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
 
-        $pk = new RequestCreateInteraction($builder);
+    /** Creates a Button interaction
+     * 
+     * @param MessageBuilder $message
+     * @param string $channelId
+     * @param int $style
+     * @param string $label
+     * @param string $customId
+     * @param bool $disabled
+     * @param string|null $emoji - null to clear.
+     * @param string|null $url - null when not using button links.
+     * 
+     * @deprecated use $this->createInteraction() instead.
+     * @return PromiseInterface
+     */
+    public function createButton(MessageBuilder $message, string $channelId, int $style, string $label, string $customId, bool $disabled, string $emoji = null, ?string $url = null): PromiseInterface{
+        if (!Utils::validDiscordSnowflake($channelId)) {
+            return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
+        }
+        $pk = new RequestCreateButton($message, $channelId, $style, $label, $customId, $disabled, $emoji, $url);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    public function modifyInteraction(MessageBuilder $builder, Message $message): PromiseInterface{
+        if ($message->getId() === null) {
+            return rejectPromise(new ApiRejection("Interaction must have a valid ID to be able to edit it."));
+        }
+        if (strlen($message->getContent()) > 2000) {
+            return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
+        }
+        $pk = new RequestModifyInteraction($builder, $message);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Removes a button interaction
+     * 
+     * @param MessageBuilder $message
+     * @param string $channelId
+     * @param int $style
+     * @param string $label
+     * @param string $customId
+     * @param string|null $emoji
+     * @param string|null $url
+     * 
+     * @deprecated use $this->modifyInteraction() instead.
+     * @return PromiseInterface
+     */
+    public function removeButton(MessageBuilder $message, string $channelId, int $style, string $label, string $customId, bool $disabled, ?string $emoji, ?string $url): PromiseInterface{
+        if (!Utils::validDiscordSnowflake($channelId)) {
+            return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
+        }
+        $pk = new RequestRemoveButton($message, $channelId, $style, $label, $customId, $disabled, $emoji, $url);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Creates an option interaction
+     * 
+     * @param MessageBuilder $message
+     * @param string $channelId
+     * @param string $labelOption
+     * @param string|null $value
+     * @param string|null $description
+     * @param string|null $emoji
+     * @param string|null $placeHolder
+     * @param string|null $minValue
+     * @param string|null $maxValue
+     * @param bool $disabled (Optional)
+     * @param string|null $custom_id (Optional)
+     * @param bool $default (Optional)
+     * 
+     * @deprecated use $this->createInteraction() instead.
+     * @return PromiseInterface
+     */
+    public function createOption(MessageBuilder $message, string $channelId, string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null, bool $default = true): PromiseInterface{
+        if (!Utils::validDiscordSnowflake($channelId)) {
+            return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
+        }
+        $pk = new RequestAddSelectMenu($message, $channelId, $labelOption, $value, $description, $emoji, $placeHolder, $minValue, $maxValue, $disabled, $custom_id, $default);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Removes an option interaction
+     * 
+     * @param MessageBuilder $message
+     * @param string $channelId
+     * @param string $labelOption
+     * @param string|null $value
+     * @param string|null $placeHolder
+     * @param string|null $minValue
+     * @param string|null $maxValue
+     * @param bool $disabled (Optional)
+     * @param string|null $custom_id (Optional)
+     * 
+     * @deprecated use $this->modifyInteraction() instead.
+     * @return PromiseInterface
+     */
+    public function removeOption(MessageBuilder $message, string $channelId, string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null): PromiseInterface{
+        if (!Utils::validDiscordSnowflake($channelId)) {
+            return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
+        }
+        $pk = new RequestRemoveSelectMenu($message, $channelId, $labelOption, $value, $placeHolder, $minValue, $maxValue, $disabled, $custom_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -538,10 +649,9 @@ class Api
      * Sends the Message to discord.
      *
      * @param Message $message
-     * @param MessageBuilder|null $builder
      * @return PromiseInterface Resolves with a Message model.
      */
-    public function sendMessage(Message $message, ?MessageBuilder $builder = null): PromiseInterface
+    public function sendMessage(Message $message): PromiseInterface
     {
         if ($message instanceof WebhookMessage) {
             //You can execute webhooks yourself using Api::fetchWebhooks() and use its token.
@@ -550,7 +660,7 @@ class Api
         if (strlen($message->getContent()) > 2000) {
             return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
         }
-        $pk = new RequestSendMessage($message, $builder);
+        $pk = new RequestSendMessage($message);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -589,10 +699,9 @@ class Api
      * Note you can't convert a 'REPLY' message to a normal 'MESSAGE'.
      *
      * @param Message $message
-     * @param MessageBuilder|null $builder
      * @return PromiseInterface Resolves with a Message model.
      */
-    public function editMessage(Message $message, ?MessageBuilder $builder = null): PromiseInterface
+    public function editMessage(Message $message): PromiseInterface
     {
         if ($message->getId() === null) {
             return rejectPromise(new ApiRejection("Message must have a valid ID to be able to edit it."));
@@ -600,7 +709,7 @@ class Api
         if (strlen($message->getContent()) > 2000) {
             return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
         }
-        $pk = new RequestEditMessage($message, $builder);
+        $pk = new RequestEditMessage($message);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

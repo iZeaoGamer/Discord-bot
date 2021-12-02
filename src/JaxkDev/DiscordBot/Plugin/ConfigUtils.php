@@ -17,17 +17,17 @@ namespace JaxkDev\DiscordBot\Plugin;
 
 abstract class ConfigUtils
 {
-    const VERSION = 3;
+
+    const VERSION = 2;
 
     // Map all versions to a static function.
     private const _PATCH_MAP = [
-        2 => "patch_1"
+        1 => "patch_1"
     ];
-
 
     static public function update(array &$config): void
     {
-        for ($i = (int)$config["version"]; $i < self::VERSION; $i += 2) {
+        for ($i = (int)$config["version"]; $i < self::VERSION; $i += 1) {
             $f = self::_PATCH_MAP[$i];
             $config = forward_static_call([self::class, $f], $config);
         }
@@ -35,16 +35,14 @@ abstract class ConfigUtils
 
     static private function patch_1(array $config): array
     {
-        $config["version"] = self::VERSION;
+        $config["version"] = 2;
         if (!isset($config["discord"])) {
             $config["discord"] = [
                 "token" => "Long token here",
-                "interactions_over_gateway" => true,
                 "use_plugin_cacert" => true
             ];
         } else {
             $config["discord"]["use_plugin_cacert"] = true;
-            $config["discord"]["interactions_over_gateway"] = true;
             unset($config["discord"]["usePluginCacert"]);
         }
         if (!isset($config["logging"])) {
@@ -91,13 +89,6 @@ abstract class ConfigUtils
             } else {
                 if (!is_string($config["discord"]["token"]) or strlen($config["discord"]["token"]) < 59) {
                     $result[] = "Invalid 'discord.token' ({$config["discord"]["token"]}), did you follow the wiki ?";
-                }
-            }
-            if (!array_key_exists("interactions_over_gateway", $config["discord"]) or $config["discord"]["interactions_over_gateway"] === null) {
-                $result[] = "No 'discord.interactions_over_gateway' field found.";
-            } else {
-                if (!is_bool($config["discord"]["interactions_over_gateway"])) {
-                    $result[] = "Invalid 'discord.interactions_over_gateway' ({$config["discord"]["interactions_over_gateway"]}), must be true or false";
                 }
             }
             if (!array_key_exists("use_plugin_cacert", $config["discord"]) or $config["discord"]["use_plugin_cacert"] === null) {

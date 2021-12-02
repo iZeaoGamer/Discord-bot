@@ -17,7 +17,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Models\Messages\Message;
 
-class RequestCreateInteraction extends Packet
+class RequestModifyInteraction extends Packet
 {
 
     /** @var MessageBuilder */

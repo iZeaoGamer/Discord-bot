@@ -69,14 +69,14 @@ use JaxkDev\DiscordBot\Models\Webhook;
 abstract class ModelConverter
 {
 
-    static public function genModelInteraction(DiscordInteraction $interact): Interaction{
+    static function genModelInteraction(DiscordInteraction $interact): Interaction{
         return new Interaction($interact->application_id, $interact->type, self::genModelUser($interact->user), $interact->guild_id, $interact->channel_id, $interact->id, ($interact->data !== null ? self::genModelData($interact->data) : null),
     $interact->token, $interact->version, ($interact->message !== null ? self::genModelMessage($interact->message) : null));
     }
     static public function genModelData(DiscordInteractData $data): InteractionData{
         return new InteractionData($data->name, $data->component_type, $data->id, $data->values, $data->custom_id);
     }
-    static public function genModelOption(DiscordInteractOption $option): Option{
+    static function genModelOption(DiscordInteractOption $option): Option{
         return new Option($option->name, $option->type, $option->value);
     }
     static public function genModelVoiceState(DiscordVoiceStateUpdate $stateUpdate): VoiceState
