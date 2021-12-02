@@ -100,9 +100,9 @@ class Api
      * 
      * @return PromiseInterface
      */
-    public function createInteraction(MessageBuilder $builder, Message $message): PromiseInterface{
+    public function createInteraction(MessageBuilder $builder): PromiseInterface{
 
-        $pk = new RequestCreateInteraction($builder, $message);
+        $pk = new RequestCreateInteraction($builder);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

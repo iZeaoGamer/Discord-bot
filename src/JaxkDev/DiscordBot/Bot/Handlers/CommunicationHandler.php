@@ -992,7 +992,7 @@ class CommunicationHandler
         $button->setListener(function (DiscordInteraction $interaction) use ($pk, $builder){
 
 
-            $interaction->acknowledge()->then(function () use ($pk) {
+            $interaction->respondWithMessage($builder)->then(function () use ($pk) {
 
                 $this->resolveRequest($pk->getUID(), true, "Interaction created.");
             }, function (\Throwable $e) use ($pk) {
@@ -1005,11 +1005,11 @@ class CommunicationHandler
 }
     }elseif($attach instanceof SelectMenu){
         $attach->setListener(function (DiscordInteraction $interaction, Collection $options) use ($pk, $builder){
-            $interaction->acknowledge()->then(function () use ($pk) {
+            $interaction->respondWithMessage($builder)->then(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Interaction created.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to create interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
+                $this->logger->debug("Failed to create interaction ({$pk->getUID()}) - {$e->getMessage()}");
             });
         }, $this->client->getDiscordClient(), false);
     }

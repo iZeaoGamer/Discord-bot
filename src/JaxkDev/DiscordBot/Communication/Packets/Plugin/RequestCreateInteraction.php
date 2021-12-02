@@ -23,30 +23,25 @@ class RequestCreateInteraction extends Packet
     /** @var MessageBuilder */
     private $response;
 
-    /** @var Message */
-    private $message;
 
-    public function __construct(MessageBuilder $response, Message $message)
+
+    public function __construct(MessageBuilder $response)
     {
         parent::__construct();
         $this->response = $response;
-        $this->message = $message;
     }
     public function getMessageBuilder(): MessageBuilder
     {
         return $this->response;
     }
-    public function getMessage(): Message{
-        return $this->message;
-    }
+
 
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->response,
-           $this->message
+            $this->response
          
         ]);
     }
@@ -55,8 +50,7 @@ class RequestCreateInteraction extends Packet
     {
         [
             $this->UID,
-            $this->response,
-            $this->message
+            $this->response
         ] = unserialize($data);
     }
 }
