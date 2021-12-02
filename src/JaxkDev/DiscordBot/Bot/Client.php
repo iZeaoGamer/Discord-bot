@@ -111,7 +111,7 @@ class Client
                 'loop' => $this->client->getLoop() // Discord and Client MUST share event loops
             ]);
             
-            $this->slashClient->linkDiscord($this->getDiscordClient(), $config['discord']['interactionsOverGateway']);
+            $this->slashClient->linkDiscord($this->getDiscordClient(), $config['discord']['interactions_over_gateway']);
             //$this->slashClient = $client;
         } catch (IntentException $e) {
             $this->close($e);

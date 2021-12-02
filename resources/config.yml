@@ -2,16 +2,8 @@
 version: 3
 
 discord:
-  # Your bot token.
-  # You can find this in your discord developer panel page!
   token: "login token here"
-
-  # You can enable/disable having interactions over gateway.
-  #  If the `interactionsOverGateway` option is set to true, the client will listen for interactions via
-  # *   gateway and the HTTP server will not be started.
-  # If this option is set to false, it'll start the HTTP server, instead of interactions over gateway.
-  interactionsOverGateway: true
-
+  interactions_over_gateway: true
   use_plugin_cacert: true
 
 logging:

@@ -15,6 +15,8 @@ discord:
                                   for help on how to set up the bot and get the token, see the beginning of this file.
   use_plugin_cacert: true|false   DO NOT modify this without being told to explicitly, You have been warned...
 
+  interactions_over_gateway: true|false Whether to start a HTTPS Server running interactions, or run interactions via gateway, and HTTP Server will not start.
+
 logging:
   debug: false|true               Log all discord thread information to screen/console,
                                   messages are logged to server.log and DiscordBot/logs by default.

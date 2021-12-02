@@ -39,11 +39,12 @@ abstract class ConfigUtils
         if (!isset($config["discord"])) {
             $config["discord"] = [
                 "token" => "Long token here",
-                "interactionsOverGateway" => true,
+                "interactions_over_gateway" => true,
                 "use_plugin_cacert" => true
             ];
         } else {
             $config["discord"]["use_plugin_cacert"] = true;
+            $config["discord"]["interactions_over_gateway"] = true;
             unset($config["discord"]["usePluginCacert"]);
         }
         if (!isset($config["logging"])) {
@@ -92,8 +93,8 @@ abstract class ConfigUtils
                     $result[] = "Invalid 'discord.token' ({$config["discord"]["token"]}), did you follow the wiki ?";
                 }
             }
-            if (!array_key_exists("interactionsOverGateway", $config["discord"]) or $config["discord"]["interactionsOverGateway"] === null) {
-                $result[] = "No 'discord.interactionsOverGateway' field found.";
+            if (!array_key_exists("interactions_over_gateway", $config["discord"]) or $config["discord"]["interactions_over_gateway"] === null) {
+                $result[] = "No 'discord.interactions_over_gateway' field found.";
             } else {
                 if (!is_bool($config["discord"]["interactionsOverGateway"])) {
                     $result[] = "Invalid 'discord.interactionsOverGateway' ({$config["discord"]["interactionsOverGateway"]}), must be true or false";
