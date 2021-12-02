@@ -96,8 +96,8 @@ abstract class ConfigUtils
             if (!array_key_exists("interactions_over_gateway", $config["discord"]) or $config["discord"]["interactions_over_gateway"] === null) {
                 $result[] = "No 'discord.interactions_over_gateway' field found.";
             } else {
-                if (!is_bool($config["discord"]["interactionsOverGateway"])) {
-                    $result[] = "Invalid 'discord.interactionsOverGateway' ({$config["discord"]["interactionsOverGateway"]}), must be true or false";
+                if (!is_bool($config["discord"]["interactions_over_gateway"])) {
+                    $result[] = "Invalid 'discord.interactions_over_gateway' ({$config["discord"]["interactions_over_gateway"]}), must be true or false";
                 }
             }
             if (!array_key_exists("use_plugin_cacert", $config["discord"]) or $config["discord"]["use_plugin_cacert"] === null) {
