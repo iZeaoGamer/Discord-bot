@@ -197,7 +197,7 @@ class ComposerStaticInit6bcf578d60c79e52f17300e6732601ac
         'Discord\\' => 
         array (
             0 => __DIR__ . '/..' . '/team-reflex/discord-php/src/Discord',
-            1 => __DIR__ . '/..' . '/discord/interactions/src/discord',
+            1 => __DIR__ . '/..' . '/discord/interactions/discord',
     ),
         'Carbon\\' => 
         array (
