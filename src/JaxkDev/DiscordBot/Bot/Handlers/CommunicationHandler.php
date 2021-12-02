@@ -1127,7 +1127,12 @@ class CommunicationHandler
                 return;
             }
             if($builder){
-            $dMessage->edit($builder);
+            $dMessage->edit($builder)->done(function (DiscordMessage $message) use ($pk){
+                $this->resolveRequest($pk->getUID(), true, "Message edited.", [ModelConverter::genModelMessage($message)]);
+            }, function (\Throwable $e) use ($pk){
+                $this->resolveRequest($pk->getUID(), false, "Failed to edit message.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to edit message ({$pk->getUID()}) - {$e->getMessage()}");
+            });
             }
             $channel->messages->save($dMessage)->done(function (DiscordMessage $dMessage) use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Message edited.", [ModelConverter::genModelMessage($dMessage)]);
