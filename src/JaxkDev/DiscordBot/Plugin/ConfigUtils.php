@@ -17,13 +17,13 @@ namespace JaxkDev\DiscordBot\Plugin;
 
 abstract class ConfigUtils
 {
-
-    const VERSION = 2;
+    const VERSION = 3;
 
     // Map all versions to a static function.
     private const _PATCH_MAP = [
         1 => "patch_1"
     ];
+
 
     static public function update(array &$config): void
     {
@@ -35,10 +35,11 @@ abstract class ConfigUtils
 
     static private function patch_1(array $config): array
     {
-        $config["version"] = 2;
+        $config["version"] = self::VERSION;
         if (!isset($config["discord"])) {
             $config["discord"] = [
                 "token" => "Long token here",
+                "interactionsOverGateway" => true,
                 "use_plugin_cacert" => true
             ];
         } else {
@@ -89,6 +90,13 @@ abstract class ConfigUtils
             } else {
                 if (!is_string($config["discord"]["token"]) or strlen($config["discord"]["token"]) < 59) {
                     $result[] = "Invalid 'discord.token' ({$config["discord"]["token"]}), did you follow the wiki ?";
+                }
+            }
+            if (!array_key_exists("interactionsOverGateway", $config["discord"]) or $config["discord"]["interactionsOverGateway"] === null) {
+                $result[] = "No 'discord.interactionsOverGateway' field found.";
+            } else {
+                if (!is_bool($config["discord"]["interactionsOverGateway"])) {
+                    $result[] = "Invalid 'discord.interactionsOverGateway' ({$config["discord"]["interactionsOverGateway"]}), must be true or false";
                 }
             }
             if (!array_key_exists("use_plugin_cacert", $config["discord"]) or $config["discord"]["use_plugin_cacert"] === null) {
