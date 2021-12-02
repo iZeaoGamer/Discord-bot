@@ -21,7 +21,7 @@ abstract class ConfigUtils
 
     // Map all versions to a static function.
     private const _PATCH_MAP = [
-        1 => "patch_1"
+        2 => "patch_1"
     ];
 
 
