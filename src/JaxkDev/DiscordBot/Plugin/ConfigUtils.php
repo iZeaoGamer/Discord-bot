@@ -27,7 +27,7 @@ abstract class ConfigUtils
 
     static public function update(array &$config): void
     {
-        for ($i = (int)$config["version"]; $i < self::VERSION; $i += 1) {
+        for ($i = (int)$config["version"]; $i < self::VERSION; $i += 2) {
             $f = self::_PATCH_MAP[$i];
             $config = forward_static_call([self::class, $f], $config);
         }
