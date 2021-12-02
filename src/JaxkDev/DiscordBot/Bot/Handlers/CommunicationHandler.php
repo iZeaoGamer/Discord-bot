@@ -985,9 +985,13 @@ class CommunicationHandler
     {
             $builder = $pk->getMessageBuilder();
             foreach($builder->getComponents() as $attach){
+               print_r($attach);
                 if($attach instanceof ActionRow){
+                    print_r($attach);
                     foreach($attach->getComponents() as $button){
+                        print_r($button);
                         if($button instanceof Button){
+                            print_r($button);
 
         $button->setListener(function (DiscordInteraction $interaction) use ($pk, $builder){
 
