@@ -1126,6 +1126,9 @@ class CommunicationHandler
             if ($channel === null) {
                 return;
             }
+            if($builder){
+            $dMessage->edit($builder);
+            }
             $channel->messages->save($dMessage)->done(function (DiscordMessage $dMessage) use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Message edited.", [ModelConverter::genModelMessage($dMessage)]);
             }, function (\Throwable $e) use ($pk) {
