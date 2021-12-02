@@ -985,9 +985,11 @@ class CommunicationHandler
     {
             $builder = $pk->getMessageBuilder();
             foreach($builder->getComponents() as $attach){
-                if($attach instanceof Button){
+                if($attach instanceof ActionRow){
+                    foreach($attach->getComponents() as $button){
+                        if($button instanceof Button){
 
-        $attach->setListener(function (DiscordInteraction $interaction) use ($pk, $builder){
+        $button->setListener(function (DiscordInteraction $interaction) use ($pk, $builder){
 
 
             $interaction->acknowledge()->then(function () use ($pk) {
@@ -999,6 +1001,8 @@ class CommunicationHandler
             });
 
         }, $this->client->getDiscordClient(), false);
+    }
+}
     }elseif($attach instanceof SelectMenu){
         $attach->setListener(function (DiscordInteraction $interaction, Collection $options) use ($pk, $builder){
             $interaction->acknowledge()->then(function () use ($pk) {
