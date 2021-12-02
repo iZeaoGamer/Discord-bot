@@ -538,9 +538,10 @@ class Api
      * Sends the Message to discord.
      *
      * @param Message $message
+     * @param MessageBuilder|null $builder
      * @return PromiseInterface Resolves with a Message model.
      */
-    public function sendMessage(Message $message): PromiseInterface
+    public function sendMessage(Message $message, ?MessageBuilder $builder = null): PromiseInterface
     {
         if ($message instanceof WebhookMessage) {
             //You can execute webhooks yourself using Api::fetchWebhooks() and use its token.
@@ -549,7 +550,7 @@ class Api
         if (strlen($message->getContent()) > 2000) {
             return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
         }
-        $pk = new RequestSendMessage($message);
+        $pk = new RequestSendMessage($message, $builder);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -588,9 +589,10 @@ class Api
      * Note you can't convert a 'REPLY' message to a normal 'MESSAGE'.
      *
      * @param Message $message
+     * @param MessageBuilder|null $builder
      * @return PromiseInterface Resolves with a Message model.
      */
-    public function editMessage(Message $message): PromiseInterface
+    public function editMessage(Message $message, ?MessageBuilder $builder = null): PromiseInterface
     {
         if ($message->getId() === null) {
             return rejectPromise(new ApiRejection("Message must have a valid ID to be able to edit it."));
@@ -598,7 +600,7 @@ class Api
         if (strlen($message->getContent()) > 2000) {
             return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
         }
-        $pk = new RequestEditMessage($message);
+        $pk = new RequestEditMessage($message, $builder);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

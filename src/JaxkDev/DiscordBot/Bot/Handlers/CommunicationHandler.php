@@ -1024,6 +1024,7 @@ class CommunicationHandler
     {
         $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
             $m = $pk->getMessage();
+            $builder = $pk->getMessageBuilder();
             $e = $m->getEmbed();
             $de = null;
             if ($e !== null) {
@@ -1041,6 +1042,9 @@ class CommunicationHandler
                 foreach ($e->getFields() as $f) {
                     $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
                 }
+                if($builder){
+                    $builder->setEmbeds([$de]);
+                }
             }
             if ($m instanceof Reply) {
                 if ($m->getReferencedMessageId() === null) {
@@ -1048,7 +1052,16 @@ class CommunicationHandler
                     $this->logger->debug("Failed to send message ({$pk->getUID()}) - Reply message has no referenced message ID.");
                     return;
                 }
-                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $pk, $de) {
+                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $pk, $de, $builder) {
+                    if($builder){
+                        $channel->sendMessage($builder)->done(function(DiscordMessage $msg) use ($pk){
+                            $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
+                            $this->logger->debug("Sent message ({$pk->getUID()})");
+                        }, function (\Throwable $e) use ($pk) {
+                            $this->resolveRequest($pk->getUID(), false, "Failed to send.", [$e->getMessage(), $e->getTraceAsString()]);
+                            $this->logger->debug("Failed to send message ({$pk->getUID()}) - {$e->getMessage()}");
+                        });   
+                    }else{
                     $channel->sendMessage($pk->getMessage()->getContent(), false, $de, null, $msg)->done(function (DiscordMessage $msg) use ($pk) {
                         $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
                         $this->logger->debug("Sent message ({$pk->getUID()})");
@@ -1056,6 +1069,7 @@ class CommunicationHandler
                         $this->resolveRequest($pk->getUID(), false, "Failed to send.", [$e->getMessage(), $e->getTraceAsString()]);
                         $this->logger->debug("Failed to send message ({$pk->getUID()}) - {$e->getMessage()}");
                     });
+                }
                 });
             } else {
                 $channel->sendMessage($m->getContent(), false, $de)->done(function (DiscordMessage $msg) use ($pk) {
@@ -1072,11 +1086,12 @@ class CommunicationHandler
     private function handleEditMessage(RequestEditMessage $pk): void
     {
         $message = $pk->getMessage();
+        $builder = $pk->getMessageBuilder();
         if ($message->getId() === null) {
             $this->resolveRequest($pk->getUID(), false, "No message ID provided.");
             return;
         }
-        $this->getMessage($pk, $message->getChannelId(), $message->getId(), function (DiscordMessage $dMessage) use ($pk, $message) {
+        $this->getMessage($pk, $message->getChannelId(), $message->getId(), function (DiscordMessage $dMessage) use ($builder, $pk, $message) {
             $e = $pk->getMessage()->getEmbed();
             $de = null;
             if ($e !== null) {
@@ -1094,8 +1109,15 @@ class CommunicationHandler
                 foreach ($e->getFields() as $f) {
                     $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
                 }
+                if($builder){
+                    $builder->setEmbeds([$de]);
+                }
             }
+            if($builder){
+                $dMessage->content = $message->getContent();
+            }else{
             $dMessage->content = $message->getContent();
+            }
             if ($de !== null) {
                 $dMessage->embeds->clear();
                 $dMessage->addEmbed($de);

@@ -13,6 +13,7 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Models\Messages\Message;
+use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestSendMessage extends Packet
@@ -21,22 +22,30 @@ class RequestSendMessage extends Packet
     /** @var Message */
     private $message;
 
-    public function __construct(Message $message)
+    /** @var MessageBuilder|null */
+    private $builder;
+
+    public function __construct(Message $message, ?MessageBuilder $builder)
     {
         parent::__construct();
         $this->message = $message;
+        $this->builder = $builder;
     }
 
     public function getMessage(): Message
     {
         return $this->message;
     }
+    public function getMessageBuilder(): ?MessageBuilder{
+        return $this->builder;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->message
+            $this->message,
+            $this->builder
         ]);
     }
 
@@ -44,7 +53,8 @@ class RequestSendMessage extends Packet
     {
         [
             $this->UID,
-            $this->message
+            $this->message,
+            $this->builder,
         ] = unserialize($data);
     }
 }
