@@ -34,6 +34,7 @@ use Discord\Repository\Guild\InviteRepository as DiscordInviteRepository;
 
 use Discord\Builders\MessageBuilder;
 use Discord\Builders\Components\ActionRow;
+use Discord\Builders\Components\Button;
 use Discord\Builders\Components\Option;
 use Discord\Builders\Components\SelectMenu;
 
@@ -103,9 +104,7 @@ use Monolog\Logger;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function React\Promise\reject;
-
-use Discord\Builders\Components\Button;
-
+use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 
 class CommunicationHandler
 {
@@ -977,25 +976,21 @@ class CommunicationHandler
         });
     }
     /** 
-     * Handles button creation.
+     * Handles interaction creation.
      * @param RequestCreateInteraction $pk
      * 
      * @return void
      */
     private function handleInteraction(RequestCreateInteraction $pk): void
     {
-        $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
-            if (!$channel->allowText()) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to send interaction, Invalid channel - text is not allowed.");
-                $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
-                return;
-            }
             $builder = $pk->getMessageBuilder();
             foreach($builder->getComponents() as $attach){
                 if($attach instanceof Button){
 
         $attach->setListener(function (DiscordInteraction $interaction) use ($pk, $builder){
-            $interaction->respondWithMessage($builder)->then(function () use ($pk) {
+
+
+            $interaction->acknowledge()->then(function () use ($pk) {
 
                 $this->resolveRequest($pk->getUID(), true, "Interaction created.");
             }, function (\Throwable $e) use ($pk) {
@@ -1003,24 +998,18 @@ class CommunicationHandler
                 $this->logger->debug("Failed to create interaction ({$pk->getUID()}) - {$e->getMessage()}");
             });
 
-        }, $this->client->getDiscordClient(), true);
+        }, $this->client->getDiscordClient(), false);
     }elseif($attach instanceof SelectMenu){
         $attach->setListener(function (DiscordInteraction $interaction, Collection $options) use ($pk, $builder){
-            $interaction->respondWithMessage($builder)->then(function () use ($pk) {
+            $interaction->acknowledge()->then(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Interaction created.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to create interaction.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
             });
-        }, $this->client->getDiscordClient(), true);
+        }, $this->client->getDiscordClient(), false);
     }
 }
-
-        $this->resolveRequest($pk->getUID(), true, "Successfully Interaction created.");
-    }, function (\Throwable $e) use ($pk) {
-        $this->resolveRequest($pk->getUID(), false, "Failed to create Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-        $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
-    });
     
     } 
 
