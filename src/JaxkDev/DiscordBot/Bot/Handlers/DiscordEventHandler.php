@@ -85,6 +85,8 @@ class DiscordEventHandler
 
     public function registerEvents(): void
     {
+        $this->logger->debug("Registering events, including Interaction Event.");
+        
         $discord = $this->client->getDiscordClient();
         $discord->on("MESSAGE_CREATE", [$this, "onMessageCreate"]);
         $discord->on("MESSAGE_DELETE", [$this, "onMessageDelete"]);
@@ -343,7 +345,7 @@ array(5) {
             ModelConverter::genModelVoiceState($ds)
         ));
     }
-    public function onInteractionCreate(DiscordInteraction $interactCreate, Discord $discord){
+    public function onInteractionCreate(DiscordInteraction $interactCreate){
         $packet = new InteractionCreatePacket(ModelConverter::genModelInteraction($interactCreate));
         $this->client->getThread()->writeOutboundData($packet);
     }
