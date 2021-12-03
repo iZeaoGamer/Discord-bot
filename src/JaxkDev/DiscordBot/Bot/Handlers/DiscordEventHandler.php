@@ -85,7 +85,7 @@ class DiscordEventHandler
 
     public function registerEvents(): void
     {
-        $this->logger->debug("Registering events, including Interaction Event.");
+        print_r("Registering discord events..");
         
         $discord = $this->client->getDiscordClient();
         $discord->on("MESSAGE_CREATE", [$this, "onMessageCreate"]);
