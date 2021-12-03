@@ -1125,7 +1125,7 @@ class CommunicationHandler
 
         $button->setListener(function (DiscordInteraction $interaction) use ($pk){
             $message = $pk->getMessage();
-            $interaction->respondWithMessage($message)->then(function () use ($pk) {
+            $interaction->respondWithMessage($message, true)->then(function () use ($pk) {
 
                 $this->resolveRequest($pk->getUID(), true, "Button added.", [ModelConverter::genModelInteraction($interaction)]);
             }, function (\Throwable $e) use ($pk) {
@@ -1133,8 +1133,8 @@ class CommunicationHandler
                 $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
             });
 
-        }, $this->client->getDiscordClient(), true);
-        $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.", );
+        }, $this->client->getDiscordClient(), false);
+        $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.", [ModelConverter::genModelInteraction($interaction)]);
     }, function (\Throwable $e) use ($pk) {
         $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
         $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
@@ -1169,14 +1169,14 @@ class CommunicationHandler
         $pk->getMessage()->removeComponent($row);
         $button->setListener(function (DiscordInteraction $interaction) use ($pk){
             $message = $pk->getMessage();
-            $interaction->respondWithMessage($message)->then(function () use ($pk) {
+            $interaction->respondWithMessage($message, true)->then(function () use ($pk) {
 
                 $this->resolveRequest($pk->getUID(), true, "Button removed.", [ModelConverter::genModelInteraction($interaction)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to remove Button.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to remove Button ({$pk->getUID()}) - {$e->getMessage()}");
             });
-        }, $this->client->getDiscordClient(), true);
+        }, $this->client->getDiscordClient(), false);
         $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.", [ModelConverter::genModelInteraction($interaction)]);
     }, function (\Throwable $e) use ($pk) {
         $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
