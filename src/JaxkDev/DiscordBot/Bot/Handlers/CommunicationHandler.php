@@ -110,7 +110,7 @@ use React\Promise\PromiseInterface;
 use function React\Promise\reject;
 
 use Discord\Builders\Components\Button;
-use JaxkDev\DiscordBot\Models\Messages\Webhook as MessagesWebhook;
+use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Models\Webhook;
 
 class CommunicationHandler
@@ -1281,7 +1281,7 @@ class CommunicationHandler
     {
         $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
             $m = $pk->getMessage();
-            if($m instanceof MessagesWebhook){
+            if($m instanceof WebhookMessage){
                 $e = $m->getEmbeds();
             }else{
             $e = $m->getEmbed();
@@ -1339,7 +1339,7 @@ class CommunicationHandler
         }
         $this->getMessage($pk, $message->getChannelId(), $message->getId(), function (DiscordMessage $dMessage) use ($pk, $message) {
             $m = $pk->getMessage();
-            if($m instanceof MessagesWebhook){
+            if($m instanceof WebhookMessage){
                 $e = $m->getEmbeds();
             }else{
             $e = $m->getEmbed();
