@@ -110,7 +110,8 @@ use React\Promise\PromiseInterface;
 use function React\Promise\reject;
 
 use Discord\Builders\Components\Button;
-
+use JaxkDev\DiscordBot\Models\Messages\Webhook as MessagesWebhook;
+use JaxkDev\DiscordBot\Models\Webhook;
 
 class CommunicationHandler
 {
@@ -1125,7 +1126,7 @@ class CommunicationHandler
 
         $button->setListener(function (DiscordInteraction $interaction) use ($pk){
             $message = $pk->getMessage();
-            $interaction->respondWithMessage($message, true)->then(function () use ($pk) {
+            $interaction->respondWithMessage($message, true)->then(function () use ($interaction, $pk) {
 
                 $this->resolveRequest($pk->getUID(), true, "Button added.", [ModelConverter::genModelInteraction($interaction)]);
             }, function (\Throwable $e) use ($pk) {
@@ -1134,7 +1135,7 @@ class CommunicationHandler
             });
 
         }, $this->client->getDiscordClient(), false);
-        $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.", [ModelConverter::genModelInteraction($interaction)]);
+        $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
     }, function (\Throwable $e) use ($pk) {
         $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
         $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
@@ -1169,7 +1170,7 @@ class CommunicationHandler
         $pk->getMessage()->removeComponent($row);
         $button->setListener(function (DiscordInteraction $interaction) use ($pk){
             $message = $pk->getMessage();
-            $interaction->respondWithMessage($message, true)->then(function () use ($pk) {
+            $interaction->respondWithMessage($message, true)->then(function () use ($interaction, $pk) {
 
                 $this->resolveRequest($pk->getUID(), true, "Button removed.", [ModelConverter::genModelInteraction($interaction)]);
             }, function (\Throwable $e) use ($pk) {
@@ -1177,7 +1178,7 @@ class CommunicationHandler
                 $this->logger->debug("Failed to remove Button ({$pk->getUID()}) - {$e->getMessage()}");
             });
         }, $this->client->getDiscordClient(), false);
-        $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.", [ModelConverter::genModelInteraction($interaction)]);
+        $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
     }, function (\Throwable $e) use ($pk) {
         $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
         $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
@@ -1215,7 +1216,7 @@ class CommunicationHandler
             print_r($option->getValue().PHP_EOL);
         }
         $message = $pk->getMessage();
-        $interaction->respondWithMessage($message)->then(function () use ($pk) {
+        $interaction->respondWithMessage($message)->then(function () use ($interaction, $pk) {
 
             $this->resolveRequest($pk->getUID(), true, "Select Menu added.", [ModelConverter::genModelInteraction($interaction)]);
         }, function (\Throwable $e) use ($pk) {
@@ -1223,7 +1224,7 @@ class CommunicationHandler
             $this->logger->debug("Failed to add Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
         });
     }, $this->client->getDiscordClient(), true);
-    $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.", [ModelConverter::genModelInteraction($interaction)]);
+    $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
 }, function (\Throwable $e) use ($pk) {
     $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
     $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
@@ -1266,7 +1267,7 @@ class CommunicationHandler
             $this->logger->debug("Failed to remove Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
         });
     }, $this->client->getDiscordClient(), true);
-    $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.", [ModelConverter::genModelInteraction($interaction)]);
+    $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
 }, function (\Throwable $e) use ($pk) {
     $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
     $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
@@ -1280,7 +1281,11 @@ class CommunicationHandler
     {
         $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
             $m = $pk->getMessage();
+            if($m instanceof MessagesWebhook){
+                $e = $m->getEmbeds();
+            }else{
             $e = $m->getEmbed();
+            }
             $de = null;
             if ($e !== null) {
                 $de = new DiscordEmbed($this->client->getDiscordClient());
@@ -1333,7 +1338,12 @@ class CommunicationHandler
             return;
         }
         $this->getMessage($pk, $message->getChannelId(), $message->getId(), function (DiscordMessage $dMessage) use ($pk, $message) {
-            $e = $pk->getMessage()->getEmbed();
+            $m = $pk->getMessage();
+            if($m instanceof MessagesWebhook){
+                $e = $m->getEmbeds();
+            }else{
+            $e = $m->getEmbed();
+            }
             $de = null;
             if ($e !== null) {
                 $de = new DiscordEmbed($this->client->getDiscordClient());

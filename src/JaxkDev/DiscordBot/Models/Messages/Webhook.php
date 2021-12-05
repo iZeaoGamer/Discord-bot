@@ -72,6 +72,16 @@ class Webhook extends Message
         $this->setWebhookId($webhook_id);
         $this->setEmbeds($embeds);
     }
+     //Hmm...
+     public function getEmbed(): ?Embed
+     {
+         throw new \AssertionError("Webhook messages must use getEmbeds()");
+     }
+ 
+     public function setEmbed(?Embed $embed): void
+     {
+         if ($embed !== null) throw new \AssertionError("Webhook messages must use setEmbeds()");
+     }
 
     /** @return Embed[] */
     public function getEmbeds(): array
