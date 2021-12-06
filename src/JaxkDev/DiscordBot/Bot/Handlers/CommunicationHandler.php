@@ -93,6 +93,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAddSelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveSelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateInteraction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDelayReply;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDelayDelete;
+
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
@@ -201,7 +204,56 @@ class CommunicationHandler
         elseif($pk instanceof RequestRemoveSelectMenu) $this->handleSelectRemoveMenu($pk);
         elseif($pk instanceof RequestModifyInteraction) $this->handleModifyInteraction($pk);
         elseif($pk instanceof RequestCreateInteraction) $this->handleCreateInteraction($pk);
+        elseif($pk instanceof RequestDelayReply) $this->handleDelayReply($pk);
+        elseif($pk instanceof RequestDelayDelete) $this->handleDelayDelete($pk);
     }
+    private function handleDelayReply(RequestDelayReply $pk): void
+    {
+        $message = $pk->getMessage();
+        if($message->getId() === null){
+            $this->resolveRequest($pk->getUID(), false, "Message Id must be present!");
+            return;
+        }
+        $this->getMessage($pk, $message->getChannelId(), $message->getId(), function (DiscordMessage $msg) use ($message, $pk){
+            $text = "";
+            if($message instanceof WebhookMessage){
+                $embed = $message->getEmbeds();
+            }else{
+                $embed = $message->getEmbed();
+            }
+            if(is_array($embed)){
+                foreach($embed as $embed){
+                    if($embed->getDescription() !== null){
+                        $text = $embed->getDescription();
+                    }
+                }
+            }else{
+            if(empty($message->getContent()) && $embed->getDescription() !== null){
+                    $text = $embed->getDescription();
+            }else{
+                $text = $message->getContent();
+            }
+        }
+    
+            $msg->delayedReply($text, 1000 * $pk->getDelay())->then(function () use ($msg, $pk){
+            $this->resolveRequest($pk->getUID(), true, "Delayed reply with success!", [ModelConverter::genModelMessage($msg)]);
+            }, function (\Throwable $e) use ($pk){
+                $this->resolveRequest($pk->getUID(), false, "Failed to delay send message.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+        }
+        private function handleDelayDelete(RequestDelayDelete $pk): void
+        {
+            $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $msg) use ($pk){
+        
+                $msg->delayedDelete(1000 * $pk->getDelay())->then(function () use ($pk){
+                $this->resolveRequest($pk->getUID(), true, "Delayed delete with success!");
+                }, function (\Throwable $e) use ($pk){
+                    $this->resolveRequest($pk->getUID(), false, "Failed to delay delete.", [$e->getMessage(), $e->getTraceAsString()]);
+                });
+            });
+            }
+    
 
     private function handleDeleteWebhook(RequestDeleteWebhook $pk): void
     {

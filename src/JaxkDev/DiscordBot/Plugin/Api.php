@@ -65,6 +65,8 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveSelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveButton;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateInteraction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDelayReply;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDelayDelete;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -98,12 +100,41 @@ class Api
         $this->plugin = $plugin;
     }
 
+    /** Creates a reply delay
+     * @param Message $message
+     * @param int $delay (In seconds)
+     * @return PromiseInterface Resolves with a Message model.
+    */
+    public function delayReply(Message $message, int $delay): PromiseInterface{
+        $pk = new RequestDelayReply($message, $delay);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Creates a delete delay 
+     * @param string $message_id
+     * @param string $channel_id
+     * @param int $delay (In seconds)
+     * @return PromiseInterface Resolves with no data.
+    */
+    public function delayDelete(string $message_id, string $channel_id, int $delay): PromiseInterface{
+        if (!Utils::validDiscordSnowflake($message_id)) {
+            return rejectPromise(new ApiRejection("Invalid message id {$message_id}"));
+        }
+        if (!Utils::validDiscordSnowflake($channel_id)) {
+            return rejectPromise(new ApiRejection("Invalid channel id {$channel_id}"));
+        }
+        $pk = new RequestDelayDelete($message_id, $channel_id, $delay);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
     /** Creates an interaction. 
      * 
      * @param MessageBuilder $builder
      * @param Message $message
      * 
-     * @return PromiseInterface
+     * @return PromiseInterface Resolves with a Message Model
      */
     public function createInteraction(MessageBuilder $builder, Message $message): PromiseInterface{
         $pk = new RequestCreateInteraction($builder, $message);
@@ -123,7 +154,7 @@ class Api
      * @param string|null $url - null when not using button links.
      * 
      * @deprecated use $this->createInteraction() instead.
-     * @return PromiseInterface
+     * @return PromiseInterface Resolves with a Interaction Model.
      */
     public function createButton(MessageBuilder $message, string $channelId, int $style, string $label, string $customId, bool $disabled, string $emoji = null, ?string $url = null): PromiseInterface{
         if (!Utils::validDiscordSnowflake($channelId)) {
@@ -133,6 +164,12 @@ class Api
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+
+    /** Modifys an interaction.
+     * @param MessageBuilder $builder
+     * @param Message $message
+     * @return PromiseInterface Resolves with a Message Model.
+     */
     public function modifyInteraction(MessageBuilder $builder, Message $message): PromiseInterface{
         if ($message->getId() === null) {
             return rejectPromise(new ApiRejection("Interaction must have a valid ID to be able to edit it."));
@@ -156,7 +193,7 @@ class Api
      * @param string|null $url
      * 
      * @deprecated use $this->modifyInteraction() instead.
-     * @return PromiseInterface
+     * @return PromiseInterface Resolves with a Interaction model.
      */
     public function removeButton(MessageBuilder $message, string $channelId, int $style, string $label, string $customId, bool $disabled, ?string $emoji, ?string $url): PromiseInterface{
         if (!Utils::validDiscordSnowflake($channelId)) {
@@ -183,7 +220,7 @@ class Api
      * @param bool $default (Optional)
      * 
      * @deprecated use $this->createInteraction() instead.
-     * @return PromiseInterface
+     * @return PromiseInterface Resolves with a Interaction Model
      */
     public function createOption(MessageBuilder $message, string $channelId, string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null, bool $default = true): PromiseInterface{
         if (!Utils::validDiscordSnowflake($channelId)) {
@@ -207,7 +244,7 @@ class Api
      * @param string|null $custom_id (Optional)
      * 
      * @deprecated use $this->modifyInteraction() instead.
-     * @return PromiseInterface
+     * @return PromiseInterface Resolves with a Interaction Model.
      */
     public function removeOption(MessageBuilder $message, string $channelId, string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null): PromiseInterface{
         if (!Utils::validDiscordSnowflake($channelId)) {
