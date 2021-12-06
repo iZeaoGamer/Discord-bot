@@ -336,6 +336,7 @@ class Message implements \Serializable
             $this->users_mentioned,
             $this->roles_mentioned,
             $this->channels_mentioned,
+            $this->stickers,
             $this->interaction
         ]);
     }
@@ -355,7 +356,9 @@ class Message implements \Serializable
             $this->users_mentioned,
             $this->roles_mentioned,
             $this->channels_mentioned,
+            $this->stickers,
             $this->interaction
+
         ] = unserialize($data);
     }
 }

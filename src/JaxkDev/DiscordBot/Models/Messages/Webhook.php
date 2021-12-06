@@ -14,6 +14,8 @@ namespace JaxkDev\DiscordBot\Models\Messages;
 
 use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 
+use JaxkDev\DiscordBot\Models\Interactions\Interaction;
+
 class Webhook extends Message
 {
 
@@ -39,6 +41,8 @@ class Webhook extends Message
      * @param string[]     $users_mentioned
      * @param string[]     $roles_mentioned
      * @param string[]     $channels_mentioned
+     * @param string[]     $stickers
+     * @param Interaction|null  $interaction
      */
     public function __construct(
         string $channel_id,
@@ -53,7 +57,9 @@ class Webhook extends Message
         bool $everyone_mentioned = false,
         array $users_mentioned = [],
         array $roles_mentioned = [],
-        array $channels_mentioned = []
+        array $channels_mentioned = [],
+        array $stickers = [],
+        ?Interaction $interaction = null
     ) {
         parent::__construct(
             $channel_id,
@@ -67,7 +73,9 @@ class Webhook extends Message
             $everyone_mentioned,
             $users_mentioned,
             $roles_mentioned,
-            $channels_mentioned
+            $channels_mentioned,
+            $stickers,
+            $interaction
         );
         $this->setWebhookId($webhook_id);
         $this->setEmbeds($embeds);
@@ -125,6 +133,8 @@ class Webhook extends Message
             $this->users_mentioned,
             $this->roles_mentioned,
             $this->channels_mentioned,
+            $this->stickers,
+            $this->interaction,
             $this->webhook_id
         ]);
     }
@@ -144,6 +154,8 @@ class Webhook extends Message
             $this->users_mentioned,
             $this->roles_mentioned,
             $this->channels_mentioned,
+            $this->stickers,
+            $this->interaction,
             $this->webhook_id
         ] = unserialize($data);
     }

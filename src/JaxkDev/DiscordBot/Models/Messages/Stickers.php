@@ -32,6 +32,17 @@ class Stickers implements \Serializable
     /** @var string|null */
     protected $preview;
 
+    /** 
+     * Stickers Constructor
+     * @param string $name
+     * @param int $type
+     * @param int $formatType
+     * @param string|null $id
+     * @param string|null $pack_id
+     * @param string|null $description,
+     * @param array|null $tags
+     * @param string|null $preview_asset
+     */
     public function __construct(
         string $name,
         int $type,
