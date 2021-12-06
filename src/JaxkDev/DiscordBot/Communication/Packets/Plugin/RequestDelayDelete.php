@@ -33,7 +33,7 @@ class RequestDelayDelete extends Packet
         parent::__construct();
         $this->message_id = $message_id;
         $this->channel_id = $channel_id;
-        $this->delay;
+        $this->delay = $delay;
     }
 
     public function getMessageId(): string

@@ -28,7 +28,7 @@ class RequestDelayReply extends Packet
     {
         parent::__construct();
         $this->message = $message;
-        $this->delay;
+        $this->delay = $delay;
     }
 
     public function getMessage(): Message
