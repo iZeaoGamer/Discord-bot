@@ -1471,21 +1471,41 @@ class CommunicationHandler
             }
             $de = null;
             if ($e !== null) {
+                if(is_array($e)){
+                    foreach($e as $embed){
                 $de = new DiscordEmbed($this->client->getDiscordClient());
-                if ($e->getType() !== null) $de->setType($e->getType());
-                if ($e->getTitle() !== null) $de->setTitle($e->getTitle());
-                if ($e->getUrl() !== null) $de->setURL($e->getUrl());
-                if ($e->getColour() !== null) $de->setColor($e->getColour());
-                if ($e->getAuthor()->getName() !== null) $de->setAuthor($e->getAuthor()->getName(), $e->getAuthor()->getIconUrl() ?? "", $e->getAuthor()->getUrl() ?? "");
-                if ($e->getThumbnail()->getUrl() !== null) $de->setThumbnail($e->getThumbnail()->getUrl());
-                if ($e->getImage()->getUrl() !== null) $de->setImage($e->getImage()->getUrl());
-                if ($e->getDescription() !== null) $de->setDescription($e->getDescription());
-                if ($e->getFooter()->getText() !== null) $de->setFooter($e->getFooter()->getText(), $e->getFooter()->getIconUrl() ?? "");
-                if ($e->getTimestamp() !== null) $de->setTimestamp($e->getTimestamp());
+                if ($embed->getType() !== null) $de->setType($embed->getType());
+                if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
+                foreach ($embed->getFields() as $f) {
+                    $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                }
+            }
+            }else{
+                $embed = $e;
+                $de = new DiscordEmbed($this->client->getDiscordClient());
+                if ($embed->getType() !== null) $de->setType($embed->getType());
+                if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
                 foreach ($e->getFields() as $f) {
                     $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
                 }
             }
+        }
             $dMessage->content = $message->getContent();
             if ($de !== null) {
                 $dMessage->embeds->clear();
