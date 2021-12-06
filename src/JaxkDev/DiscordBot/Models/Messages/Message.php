@@ -12,8 +12,10 @@
 
 namespace JaxkDev\DiscordBot\Models\Messages;
 
+use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 use JaxkDev\DiscordBot\Plugin\Utils;
+
 
 class Message implements \Serializable
 {
@@ -54,6 +56,13 @@ class Message implements \Serializable
     /** @var string[] */
     protected $channels_mentioned = [];
 
+    /** @var string[] */
+    protected $stickers = [];
+
+    /** @var Interaction|null */
+    protected $interaction;
+
+
     /**
      * Message constructor.
      *
@@ -69,6 +78,8 @@ class Message implements \Serializable
      * @param string[]     $users_mentioned
      * @param string[]     $roles_mentioned
      * @param string[]     $channels_mentioned
+     * @param string[]     $stickers
+     * @param Interaction|null  $interaction
      */
     public function __construct(
         string $channel_id,
@@ -82,7 +93,9 @@ class Message implements \Serializable
         bool $everyone_mentioned = false,
         array $users_mentioned = [],
         array $roles_mentioned = [],
-        array $channels_mentioned = []
+        array $channels_mentioned = [],
+        array $stickers = [],
+        ?Interaction $interaction = null
     ) {
         $this->setChannelId($channel_id);
         $this->setId($id);
@@ -96,6 +109,28 @@ class Message implements \Serializable
         $this->setUsersMentioned($users_mentioned);
         $this->setRolesMentioned($roles_mentioned);
         $this->setChannelsMentioned($channels_mentioned);
+        $this->setStickers($stickers);
+        $this->setInteraction($interaction);
+    }
+    /** @return string[] */
+    public function getStickers(): array{
+        return $this->stickers;
+    }
+    public function setStickers(array $stickers)
+    {
+        foreach ($stickers as $id) {
+            if (!Utils::validDiscordSnowflake($id)) {
+                throw new \AssertionError("Invalid Sticker ID: {$id}!");
+            }
+        }
+        $this->stickers = $stickers;
+    }
+
+    public function getInteraction(): ?Interaction{
+        return $this->interaction;
+    }
+    public function setInteraction(?Interaction $interaction): void{
+        $this->interaction = $interaction;
     }
 
     public function getId(): ?string
@@ -300,7 +335,8 @@ class Message implements \Serializable
             $this->everyone_mentioned,
             $this->users_mentioned,
             $this->roles_mentioned,
-            $this->channels_mentioned
+            $this->channels_mentioned,
+            $this->interaction
         ]);
     }
 
@@ -318,7 +354,8 @@ class Message implements \Serializable
             $this->everyone_mentioned,
             $this->users_mentioned,
             $this->roles_mentioned,
-            $this->channels_mentioned
+            $this->channels_mentioned,
+            $this->interaction
         ] = unserialize($data);
     }
 }

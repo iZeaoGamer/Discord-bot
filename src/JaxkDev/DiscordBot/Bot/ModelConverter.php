@@ -16,6 +16,7 @@ use AssertionError;
 use Carbon\Carbon;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
+use Discord\Parts\Channel\Sticker as DiscordSticker;
 use Discord\Parts\Thread\Thread as DiscordThread;
 use Discord\Parts\Channel\Overwrite as DiscordOverwrite;
 use Discord\Parts\Channel\Webhook as DiscordWebhook;
@@ -66,6 +67,7 @@ use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\VoiceState;
 use JaxkDev\DiscordBot\Models\Webhook;
+use JaxkDev\DiscordBot\Models\Messages\Stickers;
 abstract class ModelConverter
 {
 
@@ -308,6 +310,10 @@ abstract class ModelConverter
             $discordChannel->id
         ));
     }
+    static public function genModelStickers(DiscordSticker $sticker): Stickers
+    {
+        return new Stickers($sticker->name, $sticker->type, $sticker->format_type, $sticker->id, $sticker->pack_id, $sticker->description, $sticker->tags, $sticker->preview_asset);
+    }
 
     static public function genModelMessage(DiscordMessage $discordMessage): Message
     {
@@ -338,7 +344,10 @@ abstract class ModelConverter
                     $discordMessage->mention_everyone,
                     array_keys($discordMessage->mentions->toArray()),
                     array_keys($discordMessage->mention_roles->toArray()),
-                    array_keys($discordMessage->mention_channels->toArray())
+                    array_keys($discordMessage->mention_channels->toArray()),
+                    array_keys($discordMessage->stickers->toArray()),
+                    ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null)
+                   
                 );
             } else {
                 $embeds = [];
@@ -359,8 +368,10 @@ abstract class ModelConverter
                     $discordMessage->mention_everyone,
                     array_keys($discordMessage->mentions->toArray()),
                     array_keys($discordMessage->mention_roles->toArray()),
-                    array_keys($discordMessage->mention_channels->toArray())
-                );
+                    array_keys($discordMessage->mention_channels->toArray()),
+                    array_keys($discordMessage->stickers->toArray()),
+                   ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
+                ));
             }
         } elseif ($discordMessage->type === DiscordMessage::TYPE_REPLY) {
             if ($discordMessage->referenced_message === null) {
@@ -384,8 +395,10 @@ abstract class ModelConverter
                 $discordMessage->mention_everyone,
                 array_keys($discordMessage->mentions->toArray()),
                 array_keys($discordMessage->mention_roles->toArray()),
-                array_keys($discordMessage->mention_channels->toArray())
-            );
+                array_keys($discordMessage->mention_channels->toArray()),
+                array_keys($discordMessage->stickers->toArray()),
+                ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
+            ));
         }
         throw new AssertionError("Discord message type not supported.");
     }

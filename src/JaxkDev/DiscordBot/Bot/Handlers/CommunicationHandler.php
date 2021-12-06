@@ -1291,7 +1291,7 @@ class CommunicationHandler
     } 
       /** 
      * Handles selection menu creation.
-     * @param RequestAddSelectButton $pk
+     * @param RequestAddSelectMenu $pk
      * @deprecated Use 'CommunicationHandler::handleCreateInteraction()' instead.
      * 
      * @return void
