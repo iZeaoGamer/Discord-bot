@@ -34,65 +34,75 @@ class InteractionData implements \Serializable
     /** @var string|null */
     private $customId; //null when using slash commands
 
-    public function __construct(?string $name, ?int $type, ?string $id = null, ?array $values = null, ?string $custom_id = null){
-       $this->setName($name);
-       $this->setType($type);
-       $this->setId($id);
-       $this->setSelected($values);
-       $this->setCustomId($custom_id);
-      
+    public function __construct(?string $name, ?int $type, ?string $id = null, ?array $values = null, ?string $custom_id = null)
+    {
+        $this->setName($name);
+        $this->setType($type);
+        $this->setId($id);
+        $this->setSelected($values);
+        $this->setCustomId($custom_id);
     }
-    public function setName(?string $name): void{
+    public function setName(?string $name): void
+    {
         $this->name = $name;
     }
-    public function getName(): ?string{
+    public function getName(): ?string
+    {
         return $this->name;
     }
-    public function setId(?string $id): void{
+    public function setId(?string $id): void
+    {
         $this->id = $id;
     }
-    public function getId(): ?string{
+    public function getId(): ?string
+    {
         return $this->id;
     }
-    public function setSelected(?array $values): void{
+    public function setSelected(?array $values): void
+    {
         $this->values = $values;
     }
-    public function getSelected(): ?array{
+    public function getSelected(): ?array
+    {
         return $this->values;
     }
-    public function setCustomId(?string $custom_id){
+    public function setCustomId(?string $custom_id): void
+    {
         $this->customId = $custom_id;
     }
-    public function getCustomId(): ?string{
+    public function getCustomId(): ?string
+    {
         return $this->customId;
     }
-    public function setType(?int $type){
+    public function setType(?int $type): void
+    {
         $this->type = $type;
     }
-    public function getType(): ?int{
+    public function getType(): ?int
+    {
         return $this->type;
     }
-     //----- Serialization -----//
+    //----- Serialization -----//
 
-     public function serialize(): ?string
-     {
-         return serialize([
-             $this->name,
-             $this->type,
-             $this->id,
-             $this->values, 
-             $this->customId
-         ]);
-     }
- 
-     public function unserialize($data): void
-     {
-         [
+    public function serialize(): ?string
+    {
+        return serialize([
             $this->name,
             $this->type,
             $this->id,
-            $this->values, 
+            $this->values,
             $this->customId
-         ] = unserialize($data);
-     }
+        ]);
     }
+
+    public function unserialize($data): void
+    {
+        [
+            $this->name,
+            $this->type,
+            $this->id,
+            $this->values,
+            $this->customId
+        ] = unserialize($data);
+    }
+}

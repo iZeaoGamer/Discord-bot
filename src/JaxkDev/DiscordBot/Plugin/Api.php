@@ -136,8 +136,8 @@ class Api
      * 
      * @return PromiseInterface Resolves with a Message Model
      */
-    public function createInteraction(MessageBuilder $builder, Message $message): PromiseInterface{
-        $pk = new RequestCreateInteraction($builder, $message);
+    public function createInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false): PromiseInterface{
+        $pk = new RequestCreateInteraction($builder, $message, $ephemeral);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -170,14 +170,14 @@ class Api
      * @param Message $message
      * @return PromiseInterface Resolves with a Message Model.
      */
-    public function modifyInteraction(MessageBuilder $builder, Message $message): PromiseInterface{
+    public function modifyInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false): PromiseInterface{
         if ($message->getId() === null) {
             return rejectPromise(new ApiRejection("Interaction must have a valid ID to be able to edit it."));
         }
         if (strlen($message->getContent()) > 2000) {
             return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
         }
-        $pk = new RequestModifyInteraction($builder, $message);
+        $pk = new RequestModifyInteraction($builder, $message, $ephemeral);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

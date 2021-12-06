@@ -112,26 +112,6 @@ class Message implements \Serializable
         $this->setStickers($stickers);
         $this->setInteraction($interaction);
     }
-    /** @return string[] */
-    public function getStickers(): array{
-        return $this->stickers;
-    }
-    public function setStickers(array $stickers)
-    {
-        foreach ($stickers as $id) {
-            if (!Utils::validDiscordSnowflake($id)) {
-                throw new \AssertionError("Invalid Sticker ID: {$id}!");
-            }
-        }
-        $this->stickers = $stickers;
-    }
-
-    public function getInteraction(): ?Interaction{
-        return $this->interaction;
-    }
-    public function setInteraction(?Interaction $interaction): void{
-        $this->interaction = $interaction;
-    }
 
     public function getId(): ?string
     {
@@ -317,6 +297,26 @@ class Message implements \Serializable
             }
         }
         $this->channels_mentioned = $channels_mentioned;
+    }
+    /** @return string[] */
+    public function getStickers(): array{
+        return $this->stickers;
+    }
+    public function setStickers(array $stickers): void
+    {
+        foreach ($stickers as $id) {
+            if (!Utils::validDiscordSnowflake($id)) {
+                throw new \AssertionError("Invalid Sticker ID: {$id}!");
+            }
+        }
+        $this->stickers = $stickers;
+    }
+    /** @return Interaction|null */
+    public function getInteraction(): ?Interaction{
+        return $this->interaction;
+    }
+    public function setInteraction(?Interaction $interaction): void{
+        $this->interaction = $interaction;
     }
 
     //----- Serialization -----//

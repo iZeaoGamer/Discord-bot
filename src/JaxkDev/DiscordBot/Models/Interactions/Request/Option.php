@@ -23,53 +23,59 @@ class Option implements \Serializable
     private $name;
 
     /** @var int */
-    private $type; 
+    private $type;
 
-   /** @var mixed */
-   private $value;
+    /** @var mixed */
+    private $value;
 
-    public function __construct(string $name, int $type, mixed $value){
-       $this->setName($name);
-       $this->setType($type);
-       $this->setValue($value);
-      
+    public function __construct(string $name, int $type, mixed $value)
+    {
+        $this->setName($name);
+        $this->setType($type);
+        $this->setValue($value);
     }
-    public function setName(string $name): void{
+    public function setName(string $name): void
+    {
         $this->name = $name;
     }
-    public function getName(): string{
+    public function getName(): string
+    {
         return $this->name;
     }
-    public function setType(int $type){
+    public function setType(int $type): void
+    {
         $this->type = $type;
     }
-    public function getType(): int{
+    public function getType(): int
+    {
         return $this->type;
     }
-    public function setValue(mixed $value){
+    public function setValue(mixed $value)
+    {
         $this->value = $value;
     }
-    public function getValue(): mixed{
+    public function getValue(): mixed
+    {
         return $this->value;
     }
 
-     //----- Serialization -----//
+    //----- Serialization -----//
 
-     public function serialize(): ?string
-     {
-         return serialize([
-             $this->name,
-             $this->type,
-             $this->value
-         ]);
-     }
- 
-     public function unserialize($data): void
-     {
-         [
+    public function serialize(): ?string
+    {
+        return serialize([
             $this->name,
             $this->type,
-           $this->value
-         ] = unserialize($data);
-     }
+            $this->value
+        ]);
     }
+
+    public function unserialize($data): void
+    {
+        [
+            $this->name,
+            $this->type,
+            $this->value
+        ] = unserialize($data);
+    }
+}

@@ -97,7 +97,7 @@ class Stickers implements \Serializable
         return $this->id;
     }
 
-    public function setId(?string $id)
+    public function setId(?string $id): void
     {
         if ($id !== null) {
             if (!Utils::validDiscordSnowflake($id)) {
@@ -110,7 +110,7 @@ class Stickers implements \Serializable
     {
         return $this->pack_id;
     }
-    public function setPackId(?string $pack_id)
+    public function setPackId(?string $pack_id): void
     {
         if ($pack_id !== null) {
             if (!Utils::validDiscordSnowflake($pack_id)) {

@@ -198,62 +198,62 @@ class CommunicationHandler
         elseif ($pk instanceof RequestGuildTransfer) $this->handleGuildTransfer($pk);
         elseif ($pk instanceof RequestGuildAuditLog) $this->handleAuditLog($pk);
         elseif ($pk instanceof RequestSearchMembers) $this->handleSearchMembers($pk);
-        elseif($pk instanceof RequestCreateButton) $this->handleButtonAdd($pk);
-        elseif($pk instanceof RequestRemoveButton) $this->handleButtonRemove($pk);
-        elseif($pk instanceof RequestAddSelectMenu) $this->handleSelectAddMenu($pk);
-        elseif($pk instanceof RequestRemoveSelectMenu) $this->handleSelectRemoveMenu($pk);
-        elseif($pk instanceof RequestModifyInteraction) $this->handleModifyInteraction($pk);
-        elseif($pk instanceof RequestCreateInteraction) $this->handleCreateInteraction($pk);
-        elseif($pk instanceof RequestDelayReply) $this->handleDelayReply($pk);
-        elseif($pk instanceof RequestDelayDelete) $this->handleDelayDelete($pk);
+        elseif ($pk instanceof RequestCreateButton) $this->handleButtonAdd($pk);
+        elseif ($pk instanceof RequestRemoveButton) $this->handleButtonRemove($pk);
+        elseif ($pk instanceof RequestAddSelectMenu) $this->handleSelectAddMenu($pk);
+        elseif ($pk instanceof RequestRemoveSelectMenu) $this->handleSelectRemoveMenu($pk);
+        elseif ($pk instanceof RequestModifyInteraction) $this->handleModifyInteraction($pk);
+        elseif ($pk instanceof RequestCreateInteraction) $this->handleCreateInteraction($pk);
+        elseif ($pk instanceof RequestDelayReply) $this->handleDelayReply($pk);
+        elseif ($pk instanceof RequestDelayDelete) $this->handleDelayDelete($pk);
     }
     private function handleDelayReply(RequestDelayReply $pk): void
     {
         $message = $pk->getMessage();
-        if($message->getId() === null){
+        if ($message->getId() === null) {
             $this->resolveRequest($pk->getUID(), false, "Message Id must be present!");
             return;
         }
-        $this->getMessage($pk, $message->getChannelId(), $message->getId(), function (DiscordMessage $msg) use ($message, $pk){
+        $this->getMessage($pk, $message->getChannelId(), $message->getId(), function (DiscordMessage $msg) use ($message, $pk) {
             $text = "";
-            if($message instanceof WebhookMessage){
+            if ($message instanceof WebhookMessage) {
                 $embed = $message->getEmbeds();
-            }else{
+            } else {
                 $embed = $message->getEmbed();
             }
-            if(is_array($embed)){
-                foreach($embed as $embed){
-                    if($embed->getDescription() !== null){
+            if (is_array($embed)) {
+                foreach ($embed as $embed) {
+                    if ($embed->getDescription() !== null) {
                         $text = $embed->getDescription();
                     }
                 }
-            }else{
-            if(empty($message->getContent()) && $embed->getDescription() !== null){
+            } else {
+                if (empty($message->getContent()) && $embed->getDescription() !== null) {
                     $text = $embed->getDescription();
-            }else{
-                $text = $message->getContent();
+                } else {
+                    $text = $message->getContent();
+                }
             }
-        }
-    
-            $msg->delayedReply($text, 1000 * $pk->getDelay())->then(function () use ($msg, $pk){
-            $this->resolveRequest($pk->getUID(), true, "Delayed reply with success!", [ModelConverter::genModelMessage($msg)]);
-            }, function (\Throwable $e) use ($pk){
+
+            $msg->delayedReply($text, 1000 * $pk->getDelay())->then(function () use ($msg, $pk) {
+                $this->resolveRequest($pk->getUID(), true, "Delayed reply with success!", [ModelConverter::genModelMessage($msg)]);
+            }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to delay send message.", [$e->getMessage(), $e->getTraceAsString()]);
             });
         });
-        }
-        private function handleDelayDelete(RequestDelayDelete $pk): void
-        {
-            $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $msg) use ($pk){
-        
-                $msg->delayedDelete(1000 * $pk->getDelay())->then(function () use ($pk){
+    }
+    private function handleDelayDelete(RequestDelayDelete $pk): void
+    {
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $msg) use ($pk) {
+
+            $msg->delayedDelete(1000 * $pk->getDelay())->then(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Delayed delete with success!");
-                }, function (\Throwable $e) use ($pk){
-                    $this->resolveRequest($pk->getUID(), false, "Failed to delay delete.", [$e->getMessage(), $e->getTraceAsString()]);
-                });
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to delay delete.", [$e->getMessage(), $e->getTraceAsString()]);
             });
-            }
-    
+        });
+    }
+
 
     private function handleDeleteWebhook(RequestDeleteWebhook $pk): void
     {
@@ -1039,42 +1039,43 @@ class CommunicationHandler
             });
         });
     }
-    private function handleModifyInteraction(RequestModifyInteraction $pk){
+    private function handleModifyInteraction(RequestModifyInteraction $pk)
+    {
         $m = $pk->getMessage();
-        if($m->getId() === null){
+        if ($m->getId() === null) {
             $this->resolveRequest($pk->getUID(), false, "Message ID must be present.");
             return;
         }
-        $this->getMessage($pk, $m->getChannelId(), $m->getId(), function (DiscordMessage $message) use ($m, $pk){
+        $this->getMessage($pk, $m->getChannelId(), $m->getId(), function (DiscordMessage $message) use ($m, $pk) {
             $builder = $pk->getMessageBuilder();
-            if($m instanceof WebhookMessage){
+            if ($m instanceof WebhookMessage) {
                 $e = $m->getEmbeds();
-                }else{
-                    $e = $m->getEmbed();
-                }
+            } else {
+                $e = $m->getEmbed();
+            }
             $de = null;
             if ($e !== null) {
-                if(is_array($e)){
+                if (is_array($e)) {
                     $embeds = [];
-                        foreach($e as $embed){
-                    $de = new DiscordEmbed($this->client->getDiscordClient());
-                    if ($embed->getType() !== null) $de->setType($embed->getType());
-                    if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
-                    if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
-                    if ($embed->getColour() !== null) $de->setColor($embed->getColour());
-                    if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
-                    if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
-                    if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
-                    if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
-                    if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
-                    if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
-                    foreach ($embed->getFields() as $f) {
-                        $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                    foreach ($e as $embed) {
+                        $de = new DiscordEmbed($this->client->getDiscordClient());
+                        if ($embed->getType() !== null) $de->setType($embed->getType());
+                        if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                        if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                        if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                        if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                        if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                        if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                        if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                        if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                        if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
+                        foreach ($embed->getFields() as $f) {
+                            $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                        }
+                        $embeds[] = $de;
                     }
-                    $embeds[] = $de;
-                }
                     $builder->setEmbeds($embeds);
-                }else{
+                } else {
                     $embed = $e;
                     $de = new DiscordEmbed($this->client->getDiscordClient());
                     if ($embed->getType() !== null) $de->setType($embed->getType());
@@ -1090,7 +1091,7 @@ class CommunicationHandler
                     foreach ($e->getFields() as $f) {
                         $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
                     }
-                    $builder->setEmbeds([$de]);
+                    $builder = $builder->setEmbeds([$de]);
                 }
             }
             if ($m instanceof Reply) {
@@ -1099,9 +1100,16 @@ class CommunicationHandler
                     $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - Reply message has no referenced message ID.");
                     return;
                 }
-                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($pk, $de) {
-                    $msg->edit($pk->getMessageBuilder())->done(function (DiscordMessage $msg) use ($pk){
-                        $this->resolveRequest($pk->getUID(), true, "Interaction sent.", [ModelConverter::genModelMessage($msg)]);
+                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($builder, $pk, $de) {
+                    $builder = $builder->setReplyTo($msg);
+                    $msg->edit($builder)->done(function (DiscordMessage $msg) use ($pk) {
+                        $interaction = $msg->interaction;
+                        if (!$interaction instanceof DiscordInteraction) {
+                            $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
+                            return;
+                        }
+                        $ephemeral = $pk->isEphemeral();
+                        $this->resolveRequest($pk->getUID(), true, "Interaction sent.", [ModelConverter::genModelInteraction($interaction, $pk->getMessageBuilder(), $ephemeral)]);
                         $this->logger->debug("Sent Interaction ({$pk->getUID()})");
                     }, function (\Throwable $e) use ($pk) {
                         $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1109,8 +1117,8 @@ class CommunicationHandler
                     });
                 });
             } else {
-     
-                $message->edit($pk->getMessageBuilder())->done(function (DiscordMessage $msg) use ($pk){
+
+                $message->edit($pk->getMessageBuilder())->done(function (DiscordMessage $msg) use ($pk) {
                     $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
                     $this->logger->debug("Modified Interaction ({$pk->getUID()})");
                 }, function (\Throwable $e) use ($pk) {
@@ -1118,46 +1126,47 @@ class CommunicationHandler
                     $this->logger->debug("Failed to edit Interaction ({$pk->getUID()}) - {$e->getMessage()}");
                 });
             }
-        $message->edit($builder)->done(function(DiscordMessage $message) use ($pk){
-            $this->resolveRequest($pk->getUID(), true, "Successfully modified an Interaction.", [ModelConverter::genModelMessage($message)]);
-        }, function (\Throwable $e) use ($pk){
-            $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-            $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - {$e->getMessage()}");
+            $message->edit($builder)->done(function (DiscordMessage $message) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Successfully modified an Interaction.", [ModelConverter::genModelMessage($message)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - {$e->getMessage()}");
+            });
         });
-    });
     }
-    private function handleCreateInteraction(RequestCreateInteraction $pk){
+    private function handleCreateInteraction(RequestCreateInteraction $pk)
+    {
         $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
             $m = $pk->getMessage();
             $builder = $pk->getMessageBuilder();
-            if($m instanceof WebhookMessage){
-            $e = $m->getEmbeds();
-            }else{
+            if ($m instanceof WebhookMessage) {
+                $e = $m->getEmbeds();
+            } else {
                 $e = $m->getEmbed();
             }
             $de = null;
             if ($e !== null) {
-                if(is_array($e)){
+                if (is_array($e)) {
                     $embeds = [];
-                        foreach($e as $embed){
-                    $de = new DiscordEmbed($this->client->getDiscordClient());
-                    if ($embed->getType() !== null) $de->setType($embed->getType());
-                    if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
-                    if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
-                    if ($embed->getColour() !== null) $de->setColor($embed->getColour());
-                    if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
-                    if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
-                    if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
-                    if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
-                    if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
-                    if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
-                    foreach ($embed->getFields() as $f) {
-                        $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                    foreach ($e as $embed) {
+                        $de = new DiscordEmbed($this->client->getDiscordClient());
+                        if ($embed->getType() !== null) $de->setType($embed->getType());
+                        if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                        if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                        if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                        if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                        if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                        if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                        if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                        if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                        if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
+                        foreach ($embed->getFields() as $f) {
+                            $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                        }
+                        $embeds[] = $de;
                     }
-                    $embeds[] = $de;
-                }
                     $builder->setEmbeds($embeds);
-                }else{
+                } else {
                     $embed = $e;
                     $de = new DiscordEmbed($this->client->getDiscordClient());
                     if ($embed->getType() !== null) $de->setType($embed->getType());
@@ -1183,9 +1192,16 @@ class CommunicationHandler
                     return;
                 }
                 $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $builder, $pk, $de) {
-                    $builder->setReplyTo($msg);
-                    $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($pk) {
-                        $this->resolveRequest($pk->getUID(), true, "Interaction Sent.", [ModelConverter::genModelMessage($msg)]);
+                    $builder = $builder->setReplyTo($msg);
+                    $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
+                        $interaction = $msg->interaction;
+                        if (!$interaction instanceof DiscordInteraction) {
+                            $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
+                            return;
+                        }
+                        $ephemeral = $pk->isEphemeral();
+                        $this->resolveRequest($pk->getUID(), true, "Interaction sent.", [ModelConverter::genModelInteraction($interaction, $builder, $ephemeral)]);
+
                         $this->logger->debug("Sent Interaction ({$pk->getUID()})");
                     }, function (\Throwable $e) use ($pk) {
                         $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1193,9 +1209,14 @@ class CommunicationHandler
                     });
                 });
             } else {
-                $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), true, "Interaction Sent.", [ModelConverter::genModelMessage($msg)]);
-                    $this->logger->debug("Sent Interaction ({$pk->getUID()})");
+                $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
+                    $interaction = $msg->interaction;
+                    if (!$interaction instanceof DiscordInteraction) {
+                        $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
+                        return;
+                    }
+                    $ephemeral = $pk->isEphemeral();
+                    $this->resolveRequest($pk->getUID(), true, "Interaction sent.", [ModelConverter::genModelInteraction($interaction, $builder, $ephemeral)]);
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
                     $this->logger->debug("Failed to send Interation ({$pk->getUID()}) - {$e->getMessage()}");
@@ -1218,36 +1239,34 @@ class CommunicationHandler
                 $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
                 return;
             }
-        $button = Button::new($pk->getStyle(), $pk->getCustomId());
-        $row = ActionRow::new()->addComponent($button);
-        $emoji = $pk->getEmoji();
-        $customId = $pk->getCustomId();
-        $url = $pk->getUrl();
-        $label = $pk->getLabel();
-        $disabled = $pk->isDisabled();
-        $button->setLabel($label);
-        $button->setEmoji($emoji);
-        $pk->getMessage()->addComponent($row);
+            $button = Button::new($pk->getStyle(), $pk->getCustomId());
+            $row = ActionRow::new()->addComponent($button);
+            $emoji = $pk->getEmoji();
+            $customId = $pk->getCustomId();
+            $url = $pk->getUrl();
+            $label = $pk->getLabel();
+            $disabled = $pk->isDisabled();
+            $button->setLabel($label);
+            $button->setEmoji($emoji);
+            $pk->getMessage()->addComponent($row);
 
-        $button->setListener(function (DiscordInteraction $interaction) use ($pk){
-            $message = $pk->getMessage();
-            $interaction->respondWithMessage($message, true)->then(function () use ($interaction, $pk) {
+            $button->setListener(function (DiscordInteraction $interaction) use ($pk) {
+                $message = $pk->getMessage();
+                $interaction->respondWithMessage($message, true)->then(function () use ($interaction, $pk) {
 
-                $this->resolveRequest($pk->getUID(), true, "Button added.", [ModelConverter::genModelInteraction($interaction)]);
-            }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to add Button.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
-            });
-
-        }, $this->client->getDiscordClient(), false);
-        $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
-    }, function (\Throwable $e) use ($pk) {
-        $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-        $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
-    });
-    
-    } 
-      /** 
+                    $this->resolveRequest($pk->getUID(), true, "Button added.", [ModelConverter::genModelInteraction($interaction)]);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to add Button.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }, $this->client->getDiscordClient(), false);
+            $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
+        }, function (\Throwable $e) use ($pk) {
+            $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
+        });
+    }
+    /** 
      * Handles button deletion.
      * @param RequestRemoveButton $pk
      * @deprecated Use 'CommunicationHandler::handleModifyInteraction()' instead.
@@ -1262,34 +1281,34 @@ class CommunicationHandler
                 $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
                 return;
             }
-        $button = Button::new($pk->getStyle(), $pk->getCustomId());
-        $row = ActionRow::new()->removeComponent($button);
-        $emoji = $pk->getEmoji();
-        $customId = $pk->getCustomId();
-        $url = $pk->getUrl();
-        $label = $pk->getLabel();
-        $disabled = $pk->isDisabled();
+            $button = Button::new($pk->getStyle(), $pk->getCustomId());
+            $row = ActionRow::new()->removeComponent($button);
+            $emoji = $pk->getEmoji();
+            $customId = $pk->getCustomId();
+            $url = $pk->getUrl();
+            $label = $pk->getLabel();
+            $disabled = $pk->isDisabled();
 
-        $button->setLabel($label);
-        $button->setEmoji($emoji);
-        $pk->getMessage()->removeComponent($row);
-        $button->setListener(function (DiscordInteraction $interaction) use ($pk){
-            $message = $pk->getMessage();
-            $interaction->respondWithMessage($message, true)->then(function () use ($interaction, $pk) {
+            $button->setLabel($label);
+            $button->setEmoji($emoji);
+            $pk->getMessage()->removeComponent($row);
+            $button->setListener(function (DiscordInteraction $interaction) use ($pk) {
+                $message = $pk->getMessage();
+                $interaction->respondWithMessage($message, true)->then(function () use ($interaction, $pk) {
 
-                $this->resolveRequest($pk->getUID(), true, "Button removed.", [ModelConverter::genModelInteraction($interaction)]);
-            }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to remove Button.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to remove Button ({$pk->getUID()}) - {$e->getMessage()}");
-            });
-        }, $this->client->getDiscordClient(), false);
-        $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
-    }, function (\Throwable $e) use ($pk) {
-        $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-        $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
-    });
-    } 
-      /** 
+                    $this->resolveRequest($pk->getUID(), true, "Button removed.", [ModelConverter::genModelInteraction($interaction)]);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to remove Button.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to remove Button ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }, $this->client->getDiscordClient(), false);
+            $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
+        }, function (\Throwable $e) use ($pk) {
+            $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
+        });
+    }
+    /** 
      * Handles selection menu creation.
      * @param RequestAddSelectMenu $pk
      * @deprecated Use 'CommunicationHandler::handleCreateInteraction()' instead.
@@ -1304,39 +1323,38 @@ class CommunicationHandler
                 $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
                 return;
             }
-        $select = SelectMenu::new();
-       $select->setCustomId($pk->getCustomId());
-       $select->setPlaceHolder($pk->getPlaceHolder());
-       $select->setMinValues($pk->getMinValue());
-       $select->setMaxValues($pk->getMaxValue());
-       $select->setDisabled($pk->isDisabled());
-       $option = Option::new($pk->getOptionLabel(), $pk->getValue());
-       $select->addOption($option);
-       $option->setDescription($pk->getDescription());
-       $option->setEmoji($pk->getEmoji());
-       $option->setDefault($pk->isDefault());
-       $pk->getMessage()->addComponent($option);
-       $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($pk) {
-        foreach ($options as $option) {
-            print_r($option->getValue().PHP_EOL);
-        }
-        $message = $pk->getMessage();
-        $interaction->respondWithMessage($message)->then(function () use ($interaction, $pk) {
+            $select = SelectMenu::new();
+            $select->setCustomId($pk->getCustomId());
+            $select->setPlaceHolder($pk->getPlaceHolder());
+            $select->setMinValues($pk->getMinValue());
+            $select->setMaxValues($pk->getMaxValue());
+            $select->setDisabled($pk->isDisabled());
+            $option = Option::new($pk->getOptionLabel(), $pk->getValue());
+            $select->addOption($option);
+            $option->setDescription($pk->getDescription());
+            $option->setEmoji($pk->getEmoji());
+            $option->setDefault($pk->isDefault());
+            $pk->getMessage()->addComponent($option);
+            $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($pk) {
+                foreach ($options as $option) {
+                    print_r($option->getValue() . PHP_EOL);
+                }
+                $message = $pk->getMessage();
+                $interaction->respondWithMessage($message)->then(function () use ($interaction, $pk) {
 
-            $this->resolveRequest($pk->getUID(), true, "Select Menu added.", [ModelConverter::genModelInteraction($interaction)]);
+                    $this->resolveRequest($pk->getUID(), true, "Select Menu added.", [ModelConverter::genModelInteraction($interaction)]);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to add Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to add Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }, $this->client->getDiscordClient(), true);
+            $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
         }, function (\Throwable $e) use ($pk) {
-            $this->resolveRequest($pk->getUID(), false, "Failed to add Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
-            $this->logger->debug("Failed to add Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
+            $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
         });
-    }, $this->client->getDiscordClient(), true);
-    $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
-}, function (\Throwable $e) use ($pk) {
-    $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-    $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
-});
-    
-    } 
-      /** 
+    }
+    /** 
      * Handles selection menu deletion.
      * @param RequestRemoveSelectMenu $pk
      * @deprecated Use 'CommunicationHandler::handleModifyInteraction()' instead.
@@ -1351,83 +1369,83 @@ class CommunicationHandler
                 $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
                 return;
             }
-        $select = SelectMenu::new();
-       $select->setCustomId($pk->getCustomId());
-       $select->setPlaceHolder($pk->getPlaceHolder());
-       $select->setMinValues($pk->getMinValue());
-       $select->setMaxValues($pk->getMaxValue());
-       $select->setDisabled($pk->isDisabled());
-       $option = Option::new($pk->getOptionLabel(), $pk->getValue());
-       $select->removeOption($option);
-       $pk->getMessage()->removeComponent($option);
-       $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($pk) {
-        foreach ($options as $option) {
-            print_r($option->getValue().PHP_EOL);
-        }
-        $message = $pk->getMessage();
-        $interaction->respondWithMessage($message)->then(function () use ($pk) {
-            $this->resolveRequest($pk->getUID(), true, "Select Menu removed..");
+            $select = SelectMenu::new();
+            $select->setCustomId($pk->getCustomId());
+            $select->setPlaceHolder($pk->getPlaceHolder());
+            $select->setMinValues($pk->getMinValue());
+            $select->setMaxValues($pk->getMaxValue());
+            $select->setDisabled($pk->isDisabled());
+            $option = Option::new($pk->getOptionLabel(), $pk->getValue());
+            $select->removeOption($option);
+            $pk->getMessage()->removeComponent($option);
+            $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($pk) {
+                foreach ($options as $option) {
+                    print_r($option->getValue() . PHP_EOL);
+                }
+                $message = $pk->getMessage();
+                $interaction->respondWithMessage($message)->then(function () use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Select Menu removed..");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to remove Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to remove Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }, $this->client->getDiscordClient(), true);
+            $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
         }, function (\Throwable $e) use ($pk) {
-            $this->resolveRequest($pk->getUID(), false, "Failed to remove Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
-            $this->logger->debug("Failed to remove Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
+            $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
         });
-    }, $this->client->getDiscordClient(), true);
-    $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
-}, function (\Throwable $e) use ($pk) {
-    $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-    $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
-});
-    } 
+    }
 
-    
+
 
 
     private function handleSendMessage(RequestSendMessage $pk): void
     {
         $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
             $m = $pk->getMessage();
-            if($m instanceof WebhookMessage){
+            if ($m instanceof WebhookMessage) {
                 $e = $m->getEmbeds();
-            }else{
-            $e = $m->getEmbed();
+            } else {
+                $e = $m->getEmbed();
             }
             $de = null;
             if ($e !== null) {
-                if(is_array($e)){
-                    foreach($e as $embed){
-                $de = new DiscordEmbed($this->client->getDiscordClient());
-                if ($embed->getType() !== null) $de->setType($embed->getType());
-                if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
-                if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
-                if ($embed->getColour() !== null) $de->setColor($embed->getColour());
-                if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
-                if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
-                if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
-                if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
-                if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
-                if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
-                foreach ($embed->getFields() as $f) {
-                    $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                if (is_array($e)) {
+                    foreach ($e as $embed) {
+                        $de = new DiscordEmbed($this->client->getDiscordClient());
+                        if ($embed->getType() !== null) $de->setType($embed->getType());
+                        if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                        if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                        if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                        if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                        if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                        if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                        if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                        if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                        if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
+                        foreach ($embed->getFields() as $f) {
+                            $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                        }
+                    }
+                } else {
+                    $embed = $e;
+                    $de = new DiscordEmbed($this->client->getDiscordClient());
+                    if ($embed->getType() !== null) $de->setType($embed->getType());
+                    if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                    if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                    if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                    if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                    if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                    if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                    if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                    if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                    if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
+                    foreach ($e->getFields() as $f) {
+                        $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                    }
                 }
             }
-            }else{
-                $embed = $e;
-                $de = new DiscordEmbed($this->client->getDiscordClient());
-                if ($embed->getType() !== null) $de->setType($embed->getType());
-                if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
-                if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
-                if ($embed->getColour() !== null) $de->setColor($embed->getColour());
-                if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
-                if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
-                if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
-                if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
-                if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
-                if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
-                foreach ($e->getFields() as $f) {
-                    $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
-                }
-            }
-        }
             if ($m instanceof Reply) {
                 if ($m->getReferencedMessageId() === null) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to send.", ["Reply message has no referenced message ID."]);
@@ -1464,48 +1482,48 @@ class CommunicationHandler
         }
         $this->getMessage($pk, $message->getChannelId(), $message->getId(), function (DiscordMessage $dMessage) use ($pk, $message) {
             $m = $pk->getMessage();
-            if($m instanceof WebhookMessage){
+            if ($m instanceof WebhookMessage) {
                 $e = $m->getEmbeds();
-            }else{
-            $e = $m->getEmbed();
+            } else {
+                $e = $m->getEmbed();
             }
             $de = null;
             if ($e !== null) {
-                if(is_array($e)){
-                    foreach($e as $embed){
-                $de = new DiscordEmbed($this->client->getDiscordClient());
-                if ($embed->getType() !== null) $de->setType($embed->getType());
-                if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
-                if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
-                if ($embed->getColour() !== null) $de->setColor($embed->getColour());
-                if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
-                if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
-                if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
-                if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
-                if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
-                if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
-                foreach ($embed->getFields() as $f) {
-                    $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                if (is_array($e)) {
+                    foreach ($e as $embed) {
+                        $de = new DiscordEmbed($this->client->getDiscordClient());
+                        if ($embed->getType() !== null) $de->setType($embed->getType());
+                        if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                        if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                        if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                        if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                        if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                        if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                        if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                        if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                        if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
+                        foreach ($embed->getFields() as $f) {
+                            $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                        }
+                    }
+                } else {
+                    $embed = $e;
+                    $de = new DiscordEmbed($this->client->getDiscordClient());
+                    if ($embed->getType() !== null) $de->setType($embed->getType());
+                    if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                    if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                    if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                    if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                    if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                    if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                    if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                    if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                    if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
+                    foreach ($e->getFields() as $f) {
+                        $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                    }
                 }
             }
-            }else{
-                $embed = $e;
-                $de = new DiscordEmbed($this->client->getDiscordClient());
-                if ($embed->getType() !== null) $de->setType($embed->getType());
-                if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
-                if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
-                if ($embed->getColour() !== null) $de->setColor($embed->getColour());
-                if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
-                if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
-                if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
-                if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
-                if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
-                if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
-                foreach ($e->getFields() as $f) {
-                    $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
-                }
-            }
-        }
             $dMessage->content = $message->getContent();
             if ($de !== null) {
                 $dMessage->embeds->clear();
@@ -1655,7 +1673,8 @@ class CommunicationHandler
             });
         });
     }
-    private function getMessageChannelId(Packet $pk, string $channel_id, string $message_id, callable $cb): void{
+    private function getMessageChannelId(Packet $pk, string $channel_id, string $message_id, callable $cb): void
+    {
         $this->getChannel($pk, $channel_id, function (DiscordChannel $channel) use ($pk, $message_id, $cb) {
             $channel->messages->fetch($message_id)->done(function (DiscordMessage $dMessage) use ($channel, $cb) {
                 $cb($dMessage, $channel);

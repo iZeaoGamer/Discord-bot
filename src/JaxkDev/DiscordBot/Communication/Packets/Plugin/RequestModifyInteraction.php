@@ -26,18 +26,27 @@ class RequestModifyInteraction extends Packet
     /** @var Message */
     private $message;
 
-    public function __construct(MessageBuilder $response, Message $message)
+    /** @var bool */
+    private $ephemeral;
+
+    public function __construct(MessageBuilder $response, Message $message, bool $ephemeral)
     {
         parent::__construct();
         $this->response = $response;
         $this->message = $message;
+        $this->ephemeral = $ephemeral;
     }
     public function getMessageBuilder(): MessageBuilder
     {
         return $this->response;
     }
-    public function getMessage(): Message{
+    public function getMessage(): Message
+    {
         return $this->message;
+    }
+    public function isEphemeral(): bool
+    {
+        return $this->ephemeral;
     }
 
 
@@ -46,8 +55,9 @@ class RequestModifyInteraction extends Packet
         return serialize([
             $this->UID,
             $this->response,
-           $this->message
-         
+            $this->message,
+            $this->ephemeral
+
         ]);
     }
 
@@ -56,7 +66,8 @@ class RequestModifyInteraction extends Packet
         [
             $this->UID,
             $this->response,
-            $this->message
+            $this->message,
+            $this->ephemeral
         ] = unserialize($data);
     }
 }

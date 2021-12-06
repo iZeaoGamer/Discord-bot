@@ -13,6 +13,7 @@
 namespace JaxkDev\DiscordBot\Bot\Handlers;
 
 use Discord\Discord;
+use Discord\Builders\MessageBuilder;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
 use Discord\Parts\Interactions\Interaction as DiscordInteraction;
@@ -65,6 +66,8 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdat
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\TypingStart as TypingStartPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\InteractionCreate as InteractionCreatePacket;
+
+
 use JaxkDev\DiscordBot\Plugin\Utils;
 use Monolog\Logger;
 
@@ -86,7 +89,7 @@ class DiscordEventHandler
     public function registerEvents(): void
     {
         print_r("Registering discord events..");
-        
+
         $discord = $this->client->getDiscordClient();
         $discord->on("MESSAGE_CREATE", [$this, "onMessageCreate"]);
         $discord->on("MESSAGE_DELETE", [$this, "onMessageDelete"]);
@@ -345,7 +348,8 @@ array(5) {
             ModelConverter::genModelVoiceState($ds)
         ));
     }
-    public function onInteractionCreate(DiscordInteraction $interactCreate){
+    public function onInteractionCreate(DiscordInteraction $interactCreate)
+    {
         $packet = new InteractionCreatePacket(ModelConverter::genModelInteraction($interactCreate));
         $this->client->getThread()->writeOutboundData($packet);
     }

@@ -67,18 +67,36 @@ use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\VoiceState;
 use JaxkDev\DiscordBot\Models\Webhook;
+use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Models\Messages\Stickers;
+
 abstract class ModelConverter
 {
 
-    static function genModelInteraction(DiscordInteraction $interact): Interaction{
-        return new Interaction($interact->application_id, $interact->type, self::genModelUser($interact->user), $interact->guild_id, $interact->channel_id, $interact->id, ($interact->data !== null ? self::genModelData($interact->data) : null),
-    $interact->token, $interact->version, ($interact->message !== null ? self::genModelMessage($interact->message) : null));
+    static function genModelInteraction(DiscordInteraction $interact, MessageBuilder $builder = null, bool $ephemeral = false): Interaction
+    {
+        if ($builder !== null) {
+            $interact->respondWithMessage($builder, $ephemeral);
+        }
+        return new Interaction(
+            $interact->application_id,
+            $interact->type,
+            self::genModelUser($interact->user),
+            $interact->guild_id,
+            $interact->channel_id,
+            $interact->id,
+            ($interact->data !== null ? self::genModelData($interact->data) : null),
+            $interact->token,
+            $interact->version,
+            ($interact->message !== null ? self::genModelMessage($interact->message) : null)
+        );
     }
-    static public function genModelData(DiscordInteractData $data): InteractionData{
+    static public function genModelData(DiscordInteractData $data): InteractionData
+    {
         return new InteractionData($data->name, $data->component_type, $data->id, $data->values, $data->custom_id);
     }
-    static function genModelOption(DiscordInteractOption $option): Option{
+    static function genModelOption(DiscordInteractOption $option): Option
+    {
         return new Option($option->name, $option->type, $option->value);
     }
     static public function genModelVoiceState(DiscordVoiceStateUpdate $stateUpdate): VoiceState
@@ -347,7 +365,7 @@ abstract class ModelConverter
                     array_keys($discordMessage->mention_channels->toArray()),
                     array_keys($discordMessage->stickers->toArray()),
                     ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null)
-                   
+
                 );
             } else {
                 $embeds = [];
@@ -370,8 +388,9 @@ abstract class ModelConverter
                     array_keys($discordMessage->mention_roles->toArray()),
                     array_keys($discordMessage->mention_channels->toArray()),
                     array_keys($discordMessage->stickers->toArray()),
-                   ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
-                ));
+                    ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
+                    )
+                );
             }
         } elseif ($discordMessage->type === DiscordMessage::TYPE_REPLY) {
             if ($discordMessage->referenced_message === null) {
@@ -398,7 +417,8 @@ abstract class ModelConverter
                 array_keys($discordMessage->mention_channels->toArray()),
                 array_keys($discordMessage->stickers->toArray()),
                 ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
-            ));
+                )
+            );
         }
         throw new AssertionError("Discord message type not supported.");
     }
