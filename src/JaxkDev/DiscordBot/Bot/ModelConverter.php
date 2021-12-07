@@ -75,6 +75,7 @@ abstract class ModelConverter
 
     static function genModelInteraction(DiscordInteraction $interact, MessageBuilder $builder = null, bool $ephemeral = false): Interaction
     {
+    
         if ($builder !== null) {
             $interact->respondWithMessage($builder, $ephemeral);
         }

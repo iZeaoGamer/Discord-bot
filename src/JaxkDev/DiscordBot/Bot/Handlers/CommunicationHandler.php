@@ -1211,7 +1211,7 @@ class CommunicationHandler
                 $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $builder, $pk, $de) {
                     $builder = $builder->setReplyTo($msg);
                     $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
-                        $interaction = Utils::cast(DiscordInteraction::class, $msg->interaction);
+                        $interaction = $msg->interaction;
                         print_r($interaction);
                         if (!$interaction instanceof DiscordInteraction) {
                             $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
@@ -1228,7 +1228,7 @@ class CommunicationHandler
                 });
             } else {
                 $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
-                    $interaction = Utils::cast(DiscordInteraction::class, $msg->interaction);
+                    $interaction = $msg->interaction;
                     print_r($interaction);
                     if (!$interaction instanceof DiscordInteraction) {
                         $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
