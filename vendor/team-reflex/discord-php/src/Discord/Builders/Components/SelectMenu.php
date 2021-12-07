@@ -271,8 +271,7 @@ class SelectMenu extends Component
         }
 
         $this->listener = function (Interaction $interaction) use ($callback, $oneOff) {
-            if ($interaction->data->component_type == Component::TYPE_SELECT_MENU &&
-                $interaction->data->custom_id == $this->custom_id) {
+            if ($interaction->data->component_type == Component::TYPE_SELECT_MENU) {
                 $options = Collection::for(Option::class, null);
                 
                 foreach ($this->options as $option) {
@@ -285,10 +284,12 @@ class SelectMenu extends Component
                 $ack = function () use ($interaction) {
                     // attempt to acknowledge interaction if it has not already been responded to.
                     try {
+                        print_r("Interaction was acknowledged.");
                         $interaction->acknowledge();
-                    } catch (Exception $e) {
+                    } catch (\Throwable $e) {
+                        print_r("Failed to interact. Error: {$e->getMessage()}");
                     }
-                };
+                    };
 
                 if ($response instanceof PromiseInterface) {
                     $response->then($ack);

@@ -313,13 +313,15 @@ class Button extends Component
         }
 
         $this->listener = function (Interaction $interaction) use ($callback, $oneOff) {
-            if ($interaction->data->component_type == Component::TYPE_BUTTON && $interaction->data->custom_id == $this->custom_id) {
+            if ($interaction->data->component_type == Component::TYPE_BUTTON) {
                 $response = $callback($interaction);
                 $ack = function () use ($interaction) {
                     // attempt to acknowledge interaction if it has not already been responded to.
                     try {
                         $interaction->acknowledge();
-                    } catch (Exception $e) {
+                        print_r("Interaction was acknowledged.");
+                    } catch (\Throwable $e) {
+                        print_r("Failed to interact. Error: {$e->getMessage()}");
                     }
                 };
 
@@ -334,6 +336,7 @@ class Button extends Component
                 }
             }
         };
+
 
         $discord->on(Event::INTERACTION_CREATE, $this->listener);
 
