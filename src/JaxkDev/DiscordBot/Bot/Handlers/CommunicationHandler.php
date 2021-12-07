@@ -1309,14 +1309,21 @@ class CommunicationHandler
           //  $pk->getMessage()->addComponent($row);
 
             $button->setListener(function (DiscordInteraction $interaction) use ($builder, $pk) {
-
-                $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
+if(!$interaction->hasResponded()){
+                $interaction->acknowledgeWithResponse()->then(function () use ($interaction, $pk) {
 
                     $this->resolveRequest($pk->getUID(), true, "Button added.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to add Button.", [$e->getMessage(), $e->getTraceAsString()]);
                     $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
                 });
+            }else{
+                $interaction->updateOriginalResponse($builder)->then(function(DiscordMessage $message) use ($interaction, $pk){
+                    $this->resolveRequest($pk->getUID(), true, "Successfully sent interaction.", [ModelConverter::genModelMessage($message)]);
+                }, function (\Throwable $e) use ($pk){
+                    $this->resolveRequest($pk->getUID(), false, "Failed to send interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                });
+            }
             }, $this->client->getDiscordClient(), false);
             $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
         }, function (\Throwable $e) use ($pk) {
@@ -1394,13 +1401,21 @@ class CommunicationHandler
                     print_r($option->getValue() . PHP_EOL);
                 }
 
-                $interaction->acknowledgeWithResponse()->then(function () use ($interaction, $pk) {
-
-                    $this->resolveRequest($pk->getUID(), true, "Select Menu added.", [ModelConverter::genModelInteraction($interaction)]);
-                }, function (\Throwable $e) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), false, "Failed to add Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
-                    $this->logger->debug("Failed to add Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
-                });
+                if(!$interaction->hasResponded()){
+                    $interaction->acknowledgeWithResponse()->then(function () use ($interaction, $pk) {
+    
+                        $this->resolveRequest($pk->getUID(), true, "Select Menu added.", [ModelConverter::genModelInteraction($interaction)]);
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to add Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
+                        $this->logger->debug("Failed to add Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
+                    });
+                }else{
+                    $interaction->updateOriginalResponse($builder)->then(function(DiscordMessage $message) use ($interaction, $pk){
+                        $this->resolveRequest($pk->getUID(), true, "Successfully sent interaction.", [ModelConverter::genModelMessage($message)]);
+                    }, function (\Throwable $e) use ($pk){
+                        $this->resolveRequest($pk->getUID(), false, "Failed to send interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
+                }
             }, $this->client->getDiscordClient(), true);
             $this->resolveRequest($pk->getUID(), true, "Successfully sent Interaction.");
         }, function (\Throwable $e) use ($pk) {

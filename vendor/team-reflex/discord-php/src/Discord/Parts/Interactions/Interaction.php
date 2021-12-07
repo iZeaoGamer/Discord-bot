@@ -307,6 +307,9 @@ class Interaction extends Part
             'data' => $builder,
         ], $builder->requiresMultipart() ? $builder->toMultipart(false) : null);
     }
+    public function hasResponded(): bool{
+        return $this->responded;
+    }
 
     /**
      * Responds to the interaction with a payload.
