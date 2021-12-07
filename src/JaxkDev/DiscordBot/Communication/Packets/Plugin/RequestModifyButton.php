@@ -17,7 +17,7 @@ use Discord\Builders\Components\Button;
 use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Models\Messages\Message;
 
-class RequestCreateButton extends Packet
+class RequestModifyButton extends Packet
 {
 
     /** @var MessageBuilder */

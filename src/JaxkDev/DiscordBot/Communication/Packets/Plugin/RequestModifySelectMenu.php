@@ -19,7 +19,7 @@ use JaxkDev\DiscordBot\Models\Messages\Message;
 use Discord\Builders\Components\SelectMenu;
 
 
-class RequestAddSelectMenu extends Packet
+class RequestModifySelectMenu extends Packet
 {
 
     /** @var MessageBuilder */
@@ -51,7 +51,8 @@ class RequestAddSelectMenu extends Packet
     {
         return $this->response;
     }
-    public function getMessage(): Message{
+    public function getMessage(): Message
+    {
         return $this->message;
     }
     public function getChannelId(): string
@@ -63,7 +64,8 @@ class RequestAddSelectMenu extends Packet
     {
         return $this->select;
     }
-    public function isEphemeral(): bool{
+    public function isEphemeral(): bool
+    {
         return $this->ephemeral;
     }
     public function serialize(): ?string

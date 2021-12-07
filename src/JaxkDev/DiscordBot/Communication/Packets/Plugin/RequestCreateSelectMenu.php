@@ -13,11 +13,13 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use Discord\Builders\Components\Button;
+
 use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Models\Messages\Message;
+use Discord\Builders\Components\SelectMenu;
 
-class RequestCreateButton extends Packet
+
+class RequestCreateSelectMenu extends Packet
 {
 
     /** @var MessageBuilder */
@@ -29,19 +31,20 @@ class RequestCreateButton extends Packet
     /** @var string */
     private $channelId;
 
-    /** @var Button */
-    private $button;
+    /** @var SelectMenu */
+    private $select;
 
     /** @var bool */
     private $ephemeral;
 
-    public function __construct(MessageBuilder $response, Message $message, string $channelId, Button $button, bool $ephemeral)
+
+    public function __construct(MessageBuilder $response, Message $message, string $channelId, SelectMenu $select, bool $ephemeral)
     {
         parent::__construct();
         $this->response = $response;
         $this->message = $message;
         $this->channelId = $channelId;
-        $this->button = $button;
+        $this->select = $select;
         $this->ephemeral = $ephemeral;
     }
     public function getMessageBuilder(): MessageBuilder
@@ -56,9 +59,10 @@ class RequestCreateButton extends Packet
     {
         return $this->channelId;
     }
-    public function getButton(): Button
+
+    public function getSelectMenu(): SelectMenu
     {
-        return $this->button;
+        return $this->select;
     }
     public function isEphemeral(): bool
     {
@@ -71,7 +75,7 @@ class RequestCreateButton extends Packet
             $this->response,
             $this->message,
             $this->channelId,
-            $this->button,
+            $this->select,
             $this->ephemeral
         ]);
     }
@@ -83,7 +87,7 @@ class RequestCreateButton extends Packet
             $this->response,
             $this->message,
             $this->channelId,
-            $this->button,
+            $this->select,
             $this->ephemeral
         ] = unserialize($data);
     }

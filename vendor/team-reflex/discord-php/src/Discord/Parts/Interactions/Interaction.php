@@ -293,7 +293,7 @@ class Interaction extends Part
      * @param MessageBuilder $builder
      * @return ExtendedPromiseInterface
      */
-    public function editFollowUpMessage(MessageBuilder $builder): ExtendedPromiseInterface{
+    public function editFollowUpMessage(MessageBuilder $builder, string $message_id): ExtendedPromiseInterface{
         if (! $this->responded) {
             throw new RuntimeException('Cannot create a follow-up message as the interaction has not been responded to.');
         }
@@ -303,7 +303,7 @@ class Interaction extends Part
                 return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $this->message->id), (string) $multipart, $multipart->getHeaders());
             }
 
-            return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $this->message->id), $builder);
+            return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $message_id), $builder);
         //})()->then(function ($response) {
       //      return $this->factory->create(Message::class, $response, true);
     }

@@ -88,9 +88,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildTransfer;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildAuditLog;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestSearchMembers;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateButton;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveButton;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAddSelectMenu;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRemoveSelectMenu;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyButton;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateSelectMenu;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifySelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDelayReply;
@@ -199,8 +199,10 @@ class CommunicationHandler
         elseif ($pk instanceof RequestGuildTransfer) $this->handleGuildTransfer($pk);
         elseif ($pk instanceof RequestGuildAuditLog) $this->handleAuditLog($pk);
         elseif ($pk instanceof RequestSearchMembers) $this->handleSearchMembers($pk);
-        elseif ($pk instanceof RequestCreateButton) $this->handleButtonAdd($pk);
-        elseif ($pk instanceof RequestAddSelectMenu) $this->handleSelectAddMenu($pk);
+        elseif ($pk instanceof RequestCreateButton) $this->handleButtonCreate($pk);
+        elseif($pk instanceof RequestModifyButton) $this->handleButtonModify($pk);
+        elseif ($pk instanceof RequestCreateSelectMenu) $this->handleSelectCreateMenu($pk);
+        elseif($pk instanceof RequestModifySelectMenu) $this->handleSelectModifyMenu($pk);
         elseif ($pk instanceof RequestModifyInteraction) $this->handleModifyInteraction($pk);
         elseif ($pk instanceof RequestCreateInteraction) $this->handleCreateInteraction($pk);
         elseif ($pk instanceof RequestDelayReply) $this->handleDelayReply($pk);
@@ -1245,16 +1247,15 @@ class CommunicationHandler
     /** 
      * Handles button creation.
      * @param RequestCreateButton $pk
-     * @deprecated Use 'CommunicationHandler::handleCreateInteraction()' instead.
      * 
      * @return void
      */
-    private function handleButtonAdd(RequestCreateButton $pk): void
+    private function handleButtonCreate(RequestCreateButton $pk): void
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
             if (!$channel->allowText()) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to send interaction, Invalid channel - text is not allowed.");
-                $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
+                $this->logger->debug("Failed to send interaction ({$pk->getUID()}) - Channel does not allow text.");
                 return;
             }
           $button = $pk->getButton();
@@ -1306,22 +1307,27 @@ class CommunicationHandler
                   $builder = $builder->setEmbeds([$de]);
               }
           }
-          //  $pk->getMessage()->addComponent($row);
 
-            $button->setListener(function (DiscordInteraction $interaction) use ($builder, $pk) {
+            $button->setListener(function (DiscordInteraction $interaction) use ($channel, $builder, $pk) {
 if(!$interaction->hasResponded()){
                 $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
 
-                    $this->resolveRequest($pk->getUID(), true, "Button added.", [ModelConverter::genModelInteraction($interaction)]);
+                    $this->resolveRequest($pk->getUID(), true, "Button created.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), false, "Failed to add Button.", [$e->getMessage(), $e->getTraceAsString()]);
-                    $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
+                    $this->resolveRequest($pk->getUID(), false, "Failed to create Button.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to create Button ({$pk->getUID()}) - {$e->getMessage()}");
                 });
             }else{
-                $interaction->editFollowUpMessage($builder)->then(function() use ($builder, $interaction, $pk){
+                $channel->sendMessage($builder)->then(function (DiscordMessage $message) use ($interaction, $builder, $pk){
+                    $id = $message->id;
+                    $this->resolveRequest($pk->getUID(), true, "Successfully sent interaction message.");
+                $interaction->editFollowUpMessage($builder, $id)->then(function() use ($builder, $interaction, $pk){
                     $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk){
                     $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                });
+                }, function (\Throwable $e) use ($pk){
+                    $this->resolveRequest($pk->getUID(), false, "Failed to send interaction message.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             }
             }, $this->client->getDiscordClient(), false);
@@ -1333,18 +1339,17 @@ if(!$interaction->hasResponded()){
     }
     /** 
      * Handles selection menu creation.
-     * @param RequestAddSelectMenu $pk
-     * @deprecated Use 'CommunicationHandler::handleCreateInteraction()' instead.
+     * @param RequestCreateSelectMenu $pk
      * 
      * 
      * @return void
      */
-    private function handleSelectAddMenu(RequestAddSelectMenu $pk): void
+    private function handleSelectCreateMenu(RequestCreateSelectMenu $pk): void
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
             if (!$channel->allowText()) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to send interaction, Invalid channel - text is not allowed.");
-                $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
+                $this->logger->debug("Failed to send interaction ({$pk->getUID()}) - Channel does not allow text.");
                 return;
             }
            $select = $pk->getSelectMenu();
@@ -1396,7 +1401,7 @@ if(!$interaction->hasResponded()){
                    $builder = $builder->setEmbeds([$de]);
                }
            }
-            $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($builder, $pk) {
+            $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($channel, $builder, $pk) {
                 foreach ($options as $option) {
                     print_r($option->getValue() . PHP_EOL);
                 }
@@ -1404,16 +1409,22 @@ if(!$interaction->hasResponded()){
                 if(!$interaction->hasResponded()){
                     $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
     
-                        $this->resolveRequest($pk->getUID(), true, "Select Menu added.", [ModelConverter::genModelInteraction($interaction)]);
+                        $this->resolveRequest($pk->getUID(), true, "Select menu created.", [ModelConverter::genModelInteraction($interaction)]);
                     }, function (\Throwable $e) use ($pk) {
-                        $this->resolveRequest($pk->getUID(), false, "Failed to add Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
-                        $this->logger->debug("Failed to add Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
+                        $this->resolveRequest($pk->getUID(), false, "Failed to create Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
+                        $this->logger->debug("Failed to create Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
                     });
                 }else{
-                    $interaction->editFollowUpMessage($builder)->then(function() use ($builder, $interaction, $pk){
+                    $channel->sendMessage($builder)->then(function (DiscordMessage $message) use ($interaction, $builder, $pk){
+                        $id = $message->id;
+                        $this->resolveRequest($pk->getUID(), true, "Successfully sent interaction message.");
+                    $interaction->editFollowUpMessage($builder, $id)->then(function() use ($builder, $interaction, $pk){
                         $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelInteraction($interaction)]);
                     }, function (\Throwable $e) use ($pk){
                         $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
+                    }, function (\Throwable $e) use ($pk){
+                        $this->resolveRequest($pk->getUID(), false, "Failed to send interaction message.", [$e->getMessage(), $e->getTraceAsString()]);
                     });
                 }
             }, $this->client->getDiscordClient(), true);
@@ -1421,6 +1432,203 @@ if(!$interaction->hasResponded()){
         }, function (\Throwable $e) use ($pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to send Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
             $this->logger->debug("Failed to send Interaction ({$pk->getUID()}) - {$e->getMessage()}");
+        });
+    }
+
+     /** 
+     * Handles button creation.
+     * @param RequestModifyButton $pk
+     * 
+     * @return void
+     */
+    private function handleButtonModify(RequestModifyButton $pk): void
+    {
+        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+            if (!$channel->allowText()) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction, Invalid channel - text is not allowed.");
+                $this->logger->debug("Failed to modify button ({$pk->getUID()}) - Channel does not allow text.");
+                return;
+            }
+          $button = $pk->getButton();
+          $m = $pk->getMessage();
+          $builder = $pk->getMessageBuilder();
+          if ($m instanceof WebhookMessage) {
+              $e = $m->getEmbeds();
+          } else {
+              $e = $m->getEmbed();
+          }
+          $de = null;
+          if ($e !== null) {
+              if (is_array($e)) {
+                  $embeds = [];
+                  foreach ($e as $embed) {
+                      $de = new DiscordEmbed($this->client->getDiscordClient());
+                      if ($embed->getType() !== null) $de->setType($embed->getType());
+                      if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                      if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                      if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                      if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                      if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                      if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                      if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                      if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                      if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
+                      foreach ($embed->getFields() as $f) {
+                          $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                      }
+                      $embeds[] = $de;
+                  }
+                  $builder = $builder->setEmbeds($embeds);
+              } else {
+                  $embed = $e;
+                  $de = new DiscordEmbed($this->client->getDiscordClient());
+                  if ($embed->getType() !== null) $de->setType($embed->getType());
+                  if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                  if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                  if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                  if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                  if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                  if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                  if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                  if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                  if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
+                  foreach ($e->getFields() as $f) {
+                      $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                  }
+                  $builder = $builder->setEmbeds([$de]);
+              }
+          }
+
+            $button->setListener(function (DiscordInteraction $interaction) use ($m, $channel, $builder, $pk) {
+if(!$interaction->hasResponded()){
+                $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
+
+                    $this->resolveRequest($pk->getUID(), true, "Button modified.", [ModelConverter::genModelInteraction($interaction)]);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to modify Button.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to modify Button ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }else{
+                $this->getMessage($pk, $pk->getChannelId(), $m->getId(), function (DiscordMessage $message) use ($interaction, $builder, $pk){
+
+                $message->edit($builder)->then(function (DiscordMessage $message) use ($interaction, $builder, $pk){
+                    $id = $message->id;
+                    $this->resolveRequest($pk->getUID(), true, "Successfully modified interaction message.");
+                $interaction->editFollowUpMessage($builder, $id)->then(function() use ($builder, $interaction, $pk){
+                    $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelInteraction($interaction)]);
+                }, function (\Throwable $e) use ($pk){
+                    $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                });
+                }, function (\Throwable $e) use ($pk){
+                    $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction message.", [$e->getMessage(), $e->getTraceAsString()]);
+                });
+            });
+            }
+            }, $this->client->getDiscordClient(), false);
+            $this->resolveRequest($pk->getUID(), true, "Successfully modify Interaction.");
+        }, function (\Throwable $e) use ($pk) {
+            $this->resolveRequest($pk->getUID(), false, "Failed to modify Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->debug("Failed to modify Interaction ({$pk->getUID()}) - {$e->getMessage()}");
+        });
+    }
+    /** 
+     * Handles selection menu creation.
+     * @param RequestModifySelectMenu $pk
+     * 
+     * 
+     * @return void
+     */
+    private function handleSelectModifyMenu(RequestModifySelectMenu $pk): void
+    {
+        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+            if (!$channel->allowText()) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction, Invalid channel - text is not allowed.");
+                $this->logger->debug("Failed to modify Select Menu ({$pk->getUID()}) - Channel does not allow text.");
+                return;
+            }
+           $select = $pk->getSelectMenu();
+           $m = $pk->getMessage();
+           $builder = $pk->getMessageBuilder();
+           if ($m instanceof WebhookMessage) {
+               $e = $m->getEmbeds();
+           } else {
+               $e = $m->getEmbed();
+           }
+           $de = null;
+           if ($e !== null) {
+               if (is_array($e)) {
+                   $embeds = [];
+                   foreach ($e as $embed) {
+                       $de = new DiscordEmbed($this->client->getDiscordClient());
+                       if ($embed->getType() !== null) $de->setType($embed->getType());
+                       if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                       if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                       if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                       if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                       if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                       if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                       if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                       if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                       if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
+                       foreach ($embed->getFields() as $f) {
+                           $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                       }
+                       $embeds[] = $de;
+                   }
+                  $builde = $builder->setEmbeds($embeds);
+               } else {
+                   $embed = $e;
+                   $de = new DiscordEmbed($this->client->getDiscordClient());
+                   if ($embed->getType() !== null) $de->setType($embed->getType());
+                   if ($embed->getTitle() !== null) $de->setTitle($embed->getTitle());
+                   if ($embed->getUrl() !== null) $de->setURL($embed->getUrl());
+                   if ($embed->getColour() !== null) $de->setColor($embed->getColour());
+                   if ($embed->getAuthor()->getName() !== null) $de->setAuthor($embed->getAuthor()->getName(), $embed->getAuthor()->getIconUrl() ?? "", $embed->getAuthor()->getUrl() ?? "");
+                   if ($embed->getThumbnail()->getUrl() !== null) $de->setThumbnail($embed->getThumbnail()->getUrl());
+                   if ($embed->getImage()->getUrl() !== null) $de->setImage($embed->getImage()->getUrl());
+                   if ($embed->getDescription() !== null) $de->setDescription($embed->getDescription());
+                   if ($embed->getFooter()->getText() !== null) $de->setFooter($embed->getFooter()->getText(), $embed->getFooter()->getIconUrl() ?? "");
+                   if ($embed->getTimestamp() !== null) $de->setTimestamp($embed->getTimestamp());
+                   foreach ($e->getFields() as $f) {
+                       $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
+                   }
+                   $builder = $builder->setEmbeds([$de]);
+               }
+           }
+            $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($m, $channel, $builder, $pk) {
+                foreach ($options as $option) {
+                    print_r($option->getValue() . PHP_EOL);
+                }
+
+                if(!$interaction->hasResponded()){
+                    $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
+    
+                        $this->resolveRequest($pk->getUID(), true, "Select Menu modified.", [ModelConverter::genModelInteraction($interaction)]);
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to Modify Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
+                        $this->logger->debug("Failed to modify Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
+                    });
+                }else{
+                    $this->getMessage($pk, $pk->getChannelId(), $m->getId(), function (DiscordMessage $message) use ($interaction, $builder, $pk){
+    
+                    $message->edit($builder)->then(function (DiscordMessage $message) use ($interaction, $builder, $pk){
+                        $id = $message->id;
+                        $this->resolveRequest($pk->getUID(), true, "Successfully modified interaction message.");
+                    $interaction->editFollowUpMessage($builder, $id)->then(function() use ($builder, $interaction, $pk){
+                        $this->resolveRequest($pk->getUID(), true, "Successfully modified interaction.", [ModelConverter::genModelInteraction($interaction)]);
+                    }, function (\Throwable $e) use ($pk){
+                        $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
+                    }, function (\Throwable $e) use ($pk){
+                        $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction message.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
+                });
+                }
+            }, $this->client->getDiscordClient(), true);
+            $this->resolveRequest($pk->getUID(), true, "Successfully modified Interaction.");
+        }, function (\Throwable $e) use ($pk) {
+            $this->resolveRequest($pk->getUID(), false, "Failed to modify Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->debug("Failed to modify Interaction ({$pk->getUID()}) - {$e->getMessage()}");
         });
     }
 
