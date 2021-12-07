@@ -1318,10 +1318,11 @@ if(!$interaction->hasResponded()){
                     $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
                 });
             }else{
-                $interaction->updateOriginalResponse($builder)->then(function(DiscordMessage $message) use ($interaction, $pk){
-                    $this->resolveRequest($pk->getUID(), true, "Successfully sent interaction.", [ModelConverter::genModelMessage($message)]);
+                $interaction->getOriginalResponse()->then(function(DiscordMessage $message) use ($builder, $interaction, $pk){
+                    $message->edit($builder);
+                    $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelMessage($message)]);
                 }, function (\Throwable $e) use ($pk){
-                    $this->resolveRequest($pk->getUID(), false, "Failed to send interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             }
             }, $this->client->getDiscordClient(), false);
@@ -1410,10 +1411,11 @@ if(!$interaction->hasResponded()){
                         $this->logger->debug("Failed to add Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
                     });
                 }else{
-                    $interaction->updateOriginalResponse($builder)->then(function(DiscordMessage $message) use ($interaction, $pk){
-                        $this->resolveRequest($pk->getUID(), true, "Successfully sent interaction.", [ModelConverter::genModelMessage($message)]);
+                    $interaction->getOriginalResponse()->then(function(DiscordMessage $message) use ($builder, $interaction, $pk){
+                        $message->edit($builder);
+                        $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelMessage($message)]);
                     }, function (\Throwable $e) use ($pk){
-                        $this->resolveRequest($pk->getUID(), false, "Failed to send interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                        $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
                     });
                 }
             }, $this->client->getDiscordClient(), true);
