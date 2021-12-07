@@ -1394,7 +1394,7 @@ class CommunicationHandler
                     print_r($option->getValue() . PHP_EOL);
                 }
 
-                $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
+                $interaction->acknowledgeWithResponse()->then(function () use ($interaction, $pk) {
 
                     $this->resolveRequest($pk->getUID(), true, "Select Menu added.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk) {
