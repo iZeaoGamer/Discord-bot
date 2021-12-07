@@ -108,6 +108,7 @@ use JaxkDev\DiscordBot\Models\Messages\Reply;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Plugin\ApiRejection;
 use Monolog\Logger;
+use JaxkDev\DiscordBot\Plugin\Utils;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function React\Promise\reject;
@@ -1103,7 +1104,8 @@ class CommunicationHandler
                 $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($builder, $pk, $de) {
                     $builder = $builder->setReplyTo($msg);
                     $msg->edit($builder)->done(function (DiscordMessage $msg) use ($pk) {
-                        $interaction = $msg->interaction;
+                        $interaction = Utils::cast(DiscordInteraction::class, $msg->interaction);
+                        print_r($interaction);
                         if (!$interaction instanceof DiscordInteraction) {
                             $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
                             return;
@@ -1119,7 +1121,8 @@ class CommunicationHandler
             } else {
 
                 $message->edit($pk->getMessageBuilder())->done(function (DiscordMessage $msg) use ($pk) {
-                    $interaction = $msg->interaction;
+                    $interaction = Utils::cast(DiscordInteraction::class, $msg->interaction);
+                        print_r($interaction);
                     if (!$interaction instanceof DiscordInteraction) {
                         $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
                         return;
@@ -1133,7 +1136,8 @@ class CommunicationHandler
                 });
             }
             $message->edit($builder)->done(function (DiscordMessage $message) use ($pk) {
-                $interaction = $message->interaction;
+                $interaction = Utils::cast(DiscordInteraction::class, $message->interaction);
+                        print_r($interaction);
                     if (!$interaction instanceof DiscordInteraction) {
                         $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
                         return;
@@ -1207,7 +1211,8 @@ class CommunicationHandler
                 $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $builder, $pk, $de) {
                     $builder = $builder->setReplyTo($msg);
                     $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
-                        $interaction = $msg->interaction;
+                        $interaction = Utils::cast(DiscordInteraction::class, $msg->interaction);
+                        print_r($interaction);
                         if (!$interaction instanceof DiscordInteraction) {
                             $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
                             return;
@@ -1223,7 +1228,8 @@ class CommunicationHandler
                 });
             } else {
                 $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
-                    $interaction = $msg->interaction;
+                    $interaction = Utils::cast(DiscordInteraction::class, $msg->interaction);
+                    print_r($interaction);
                     if (!$interaction instanceof DiscordInteraction) {
                         $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
                         return;

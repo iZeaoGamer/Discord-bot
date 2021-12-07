@@ -46,4 +46,14 @@ abstract class Utils
             return $d;
         }
     }
+    public static function cast($destination, \stdClass $source)
+{
+    $sourceReflection = new \ReflectionObject($source);
+    $sourceProperties = $sourceReflection->getProperties();
+    foreach ($sourceProperties as $sourceProperty) {
+        $name = $sourceProperty->getName();
+        $destination->{$name} = $source->$name;
+    }
+    return $destination;
+}
 }
