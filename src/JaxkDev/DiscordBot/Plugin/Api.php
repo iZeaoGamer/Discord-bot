@@ -81,6 +81,8 @@ use JaxkDev\DiscordBot\Models\Webhook;
 use JaxkDev\DiscordBot\Models\Role;
 
 use Discord\Builders\MessageBuilder;
+use Discord\Builders\Components\Button;
+use Discord\Builders\Components\SelectMenu;
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 
 /**
@@ -146,21 +148,16 @@ class Api
      * 
      * @param MessageBuilder $message
      * @param string $channelId
-     * @param int $style
-     * @param string $label
-     * @param string $customId
-     * @param bool $disabled
-     * @param string|null $emoji - null to clear.
-     * @param string|null $url - null when not using button links.
+     * @param Button $button
      * 
      * @deprecated use $this->createInteraction() instead.
      * @return PromiseInterface Resolves with a Interaction Model.
      */
-    public function createButton(MessageBuilder $message, string $channelId, int $style, string $label, string $customId, bool $disabled, string $emoji = null, ?string $url = null): PromiseInterface{
+    public function createButton(MessageBuilder $message, string $channelId, Button $button, bool $ephemeral = false): PromiseInterface{
         if (!Utils::validDiscordSnowflake($channelId)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
         }
-        $pk = new RequestCreateButton($message, $channelId, $style, $label, $customId, $disabled, $emoji, $url);
+        $pk = new RequestCreateButton($message, $channelId, $button, $ephemeral);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -186,20 +183,16 @@ class Api
      * 
      * @param MessageBuilder $message
      * @param string $channelId
-     * @param int $style
-     * @param string $label
-     * @param string $customId
-     * @param string|null $emoji
-     * @param string|null $url
+     * @@param Button $button
      * 
      * @deprecated use $this->modifyInteraction() instead.
      * @return PromiseInterface Resolves with a Interaction model.
      */
-    public function removeButton(MessageBuilder $message, string $channelId, int $style, string $label, string $customId, bool $disabled, ?string $emoji, ?string $url): PromiseInterface{
+    public function removeButton(MessageBuilder $message, string $channelId, Button $button): PromiseInterface{
         if (!Utils::validDiscordSnowflake($channelId)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
         }
-        $pk = new RequestRemoveButton($message, $channelId, $style, $label, $customId, $disabled, $emoji, $url);
+        $pk = new RequestRemoveButton($message, $channelId, $button);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -208,25 +201,16 @@ class Api
      * 
      * @param MessageBuilder $message
      * @param string $channelId
-     * @param string $labelOption
-     * @param string|null $value
-     * @param string|null $description
-     * @param string|null $emoji
-     * @param string|null $placeHolder
-     * @param string|null $minValue
-     * @param string|null $maxValue
-     * @param bool $disabled (Optional)
-     * @param string|null $custom_id (Optional)
-     * @param bool $default (Optional)
+     * @param SelectMenu $select
      * 
      * @deprecated use $this->createInteraction() instead.
      * @return PromiseInterface Resolves with a Interaction Model
      */
-    public function createOption(MessageBuilder $message, string $channelId, string $labelOption, ?string $value, ?string $description, ?string $emoji, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null, bool $default = true): PromiseInterface{
+    public function createOption(MessageBuilder $message, string $channelId, SelectMenu $select): PromiseInterface{
         if (!Utils::validDiscordSnowflake($channelId)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
         }
-        $pk = new RequestAddSelectMenu($message, $channelId, $labelOption, $value, $description, $emoji, $placeHolder, $minValue, $maxValue, $disabled, $custom_id, $default);
+        $pk = new RequestAddSelectMenu($message, $channelId, $select);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -235,22 +219,16 @@ class Api
      * 
      * @param MessageBuilder $message
      * @param string $channelId
-     * @param string $labelOption
-     * @param string|null $value
-     * @param string|null $placeHolder
-     * @param string|null $minValue
-     * @param string|null $maxValue
-     * @param bool $disabled (Optional)
-     * @param string|null $custom_id (Optional)
+     * @param SelectMenu $select
      * 
      * @deprecated use $this->modifyInteraction() instead.
      * @return PromiseInterface Resolves with a Interaction Model.
      */
-    public function removeOption(MessageBuilder $message, string $channelId, string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null): PromiseInterface{
+    public function removeOption(MessageBuilder $message, string $channelId, SelectMenu $select): PromiseInterface{
         if (!Utils::validDiscordSnowflake($channelId)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
         }
-        $pk = new RequestRemoveSelectMenu($message, $channelId, $labelOption, $value, $placeHolder, $minValue, $maxValue, $disabled, $custom_id);
+        $pk = new RequestRemoveSelectMenu($message, $channelId, $select);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

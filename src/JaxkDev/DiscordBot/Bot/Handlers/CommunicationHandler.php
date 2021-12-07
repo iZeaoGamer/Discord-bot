@@ -1371,7 +1371,7 @@ class CommunicationHandler
                 }
                 $message = $pk->getMessage();
                 $interaction->respondWithMessage($message)->then(function () use ($pk) {
-                    $this->resolveRequest($pk->getUID(), true, "Select Menu removed..");
+                    $this->resolveRequest($pk->getUID(), true, "Select Menu removed.");
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to remove Select Menu.", [$e->getMessage(), $e->getTraceAsString()]);
                     $this->logger->debug("Failed to remove Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
