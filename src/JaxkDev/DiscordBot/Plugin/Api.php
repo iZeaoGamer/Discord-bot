@@ -134,7 +134,7 @@ class Api
      * @param MessageBuilder $builder
      * @param Message $message
      * 
-     * @return PromiseInterface Resolves with a Message Model
+     * @return PromiseInterface Resolves with a Interaction Model
      */
     public function createInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false): PromiseInterface{
         $pk = new RequestCreateInteraction($builder, $message, $ephemeral);
@@ -168,7 +168,7 @@ class Api
     /** Modifys an interaction.
      * @param MessageBuilder $builder
      * @param Message $message
-     * @return PromiseInterface Resolves with a Message Model.
+     * @return PromiseInterface Resolves with a Interaction Model.
      */
     public function modifyInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false): PromiseInterface{
         if ($message->getId() === null) {

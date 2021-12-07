@@ -40,7 +40,8 @@ class RequestDelayDelete extends Packet
     {
         return $this->message_id;
     }
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channel_id;
     }
     public function getDelay(): int
