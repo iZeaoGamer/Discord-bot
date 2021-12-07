@@ -15,6 +15,7 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 use Discord\Builders\MessageBuilder;
+use Discord\Builders\Components\SelectMenu;
 
 class RequestRemoveSelectMenu extends Packet
 {
@@ -25,76 +26,29 @@ class RequestRemoveSelectMenu extends Packet
     /** @var string */
     private $channelId;
 
-    /** @var string */
-    private $labelOption;
-
-    /** @var string|null */
-    private $value;
-
-    /** @var string|null */
-    private $placeHolder;
-
-    /** @var int|null */
-    private $minValue;
-
-    /** @var int|null */
-    private $maxValue;
-
-    /** @var bool */
-    private $disabled;
-
-    /** @var string|null */
-    private $customId;
+    /** @var SelectMenu */
+    private $select;
 
 
 
-    public function __construct(MessageBuilder $response, string $channelId, string $labelOption, ?string $value, ?string $placeHolder, ?int $minValue, ?int $maxValue, bool $disabled = true, ?string $custom_id = null)
+    public function __construct(MessageBuilder $response, string $channelId, SelectMenu $select)
     {
         parent::__construct();
         $this->response = $response;
         $this->channelId = $channelId;
-        $this->labelOption = $labelOption;
-        $this->value = $value;
-        $this->placeHolder = $placeHolder;
-        $this->minValue = $minValue;
-        $this->maxValue = $maxValue;
-        $this->disabled = $disabled;
-        $this->customId = $custom_id;
+        $this->select = $select;
     }
     public function getMessage(): MessageBuilder
     {
         return $this->response;
     }
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channelId;
     }
-    public function getOptionLabel(): string
+    public function getSelectMenu(): SelectMenu
     {
-        return $this->labelOption;
-    }
-    public function getValue(): ?string
-    {
-        return $this->value;
-    }
-    public function getPlaceHolder(): ?string
-    {
-        return $this->placeHolder;
-    }
-    public function getMinValue(): ?int
-    {
-        return $this->minValue;
-    }
-    public function getMaxValue(): ?int
-    {
-        return $this->maxValue;
-    }
-    public function isDisabled(): bool
-    {
-        return $this->disabled;
-    }
-    public function getCustomId(): ?string
-    {
-        return $this->customId;
+        return $this->select;
     }
     public function serialize(): ?string
     {
@@ -102,13 +56,7 @@ class RequestRemoveSelectMenu extends Packet
             $this->UID,
             $this->response,
             $this->channelId,
-            $this->labelOption,
-            $this->value,
-            $this->placeHolder,
-            $this->minValue,
-            $this->maxValue,
-            $this->disabled,
-            $this->customId
+            $this->select
         ]);
     }
 
@@ -118,13 +66,7 @@ class RequestRemoveSelectMenu extends Packet
             $this->UID,
             $this->response,
             $this->channelId,
-            $this->labelOption,
-            $this->value,
-            $this->placeHolder,
-            $this->minValue,
-            $this->maxValue,
-            $this->disabled,
-            $this->customId
+            $this->select
         ] = unserialize($data);
     }
 }

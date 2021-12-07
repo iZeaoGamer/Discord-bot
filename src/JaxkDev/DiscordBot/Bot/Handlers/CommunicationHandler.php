@@ -1104,6 +1104,7 @@ class CommunicationHandler
                 $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($builder, $pk, $de) {
                     $builder = $builder->setReplyTo($msg);
                     $msg->edit($builder)->done(function (DiscordMessage $msg) use ($pk) {
+                        
                         $interaction = $msg->interaction;
                         print_r($interaction);
                         if ($interaction === null) {
@@ -1258,20 +1259,12 @@ class CommunicationHandler
                 $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
                 return;
             }
-            $button = Button::new($pk->getStyle(), $pk->getCustomId());
-            $row = ActionRow::new()->addComponent($button);
-            $emoji = $pk->getEmoji();
-            $customId = $pk->getCustomId();
-            $url = $pk->getUrl();
-            $label = $pk->getLabel();
-            $disabled = $pk->isDisabled();
-            $button->setLabel($label);
-            $button->setEmoji($emoji);
-            $pk->getMessage()->addComponent($row);
+          $button = $pk->getButton();
+          //  $pk->getMessage()->addComponent($row);
 
             $button->setListener(function (DiscordInteraction $interaction) use ($pk) {
                 $message = $pk->getMessage();
-                $interaction->respondWithMessage($message, true)->then(function () use ($interaction, $pk) {
+                $interaction->respondWithMessage($message, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
 
                     $this->resolveRequest($pk->getUID(), true, "Button added.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk) {
@@ -1289,6 +1282,7 @@ class CommunicationHandler
      * Handles button deletion.
      * @param RequestRemoveButton $pk
      * @deprecated Use 'CommunicationHandler::handleModifyInteraction()' instead.
+     * //todo implement basic removals of buttons where possible.
      * 
      * @return void
      */
@@ -1300,17 +1294,8 @@ class CommunicationHandler
                 $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
                 return;
             }
-            $button = Button::new($pk->getStyle(), $pk->getCustomId());
-            $row = ActionRow::new()->removeComponent($button);
-            $emoji = $pk->getEmoji();
-            $customId = $pk->getCustomId();
-            $url = $pk->getUrl();
-            $label = $pk->getLabel();
-            $disabled = $pk->isDisabled();
-
-            $button->setLabel($label);
-            $button->setEmoji($emoji);
-            $pk->getMessage()->removeComponent($row);
+         
+            $button = $pk->getButton();
             $button->setListener(function (DiscordInteraction $interaction) use ($pk) {
                 $message = $pk->getMessage();
                 $interaction->respondWithMessage($message, true)->then(function () use ($interaction, $pk) {
@@ -1332,6 +1317,7 @@ class CommunicationHandler
      * @param RequestAddSelectMenu $pk
      * @deprecated Use 'CommunicationHandler::handleCreateInteraction()' instead.
      * 
+     * 
      * @return void
      */
     private function handleSelectAddMenu(RequestAddSelectMenu $pk): void
@@ -1342,18 +1328,7 @@ class CommunicationHandler
                 $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
                 return;
             }
-            $select = SelectMenu::new();
-            $select->setCustomId($pk->getCustomId());
-            $select->setPlaceHolder($pk->getPlaceHolder());
-            $select->setMinValues($pk->getMinValue());
-            $select->setMaxValues($pk->getMaxValue());
-            $select->setDisabled($pk->isDisabled());
-            $option = Option::new($pk->getOptionLabel(), $pk->getValue());
-            $select->addOption($option);
-            $option->setDescription($pk->getDescription());
-            $option->setEmoji($pk->getEmoji());
-            $option->setDefault($pk->isDefault());
-            $pk->getMessage()->addComponent($option);
+           $select = $pk->getSelectMenu();
             $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($pk) {
                 foreach ($options as $option) {
                     print_r($option->getValue() . PHP_EOL);
@@ -1378,6 +1353,7 @@ class CommunicationHandler
      * @param RequestRemoveSelectMenu $pk
      * @deprecated Use 'CommunicationHandler::handleModifyInteraction()' instead.
      * 
+     * //todo implement basic removals of buttons where possible.
      * @return void
      */
     private function handleSelectRemoveMenu(RequestRemoveSelectMenu $pk): void
@@ -1388,15 +1364,7 @@ class CommunicationHandler
                 $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
                 return;
             }
-            $select = SelectMenu::new();
-            $select->setCustomId($pk->getCustomId());
-            $select->setPlaceHolder($pk->getPlaceHolder());
-            $select->setMinValues($pk->getMinValue());
-            $select->setMaxValues($pk->getMaxValue());
-            $select->setDisabled($pk->isDisabled());
-            $option = Option::new($pk->getOptionLabel(), $pk->getValue());
-            $select->removeOption($option);
-            $pk->getMessage()->removeComponent($option);
+           $select = $pk->getSelectMenu();
             $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($pk) {
                 foreach ($options as $option) {
                     print_r($option->getValue() . PHP_EOL);

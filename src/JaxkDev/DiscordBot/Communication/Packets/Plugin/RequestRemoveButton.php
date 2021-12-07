@@ -15,6 +15,7 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 use Discord\Builders\MessageBuilder;
+use Discord\Builders\Components\Button;
 
 class RequestRemoveButton extends Packet
 {
@@ -25,67 +26,28 @@ class RequestRemoveButton extends Packet
     /** @var string */
     private $channelId;
 
-    /** @var int */
-    private $style;
+    /** @var Button */
+    private $button;
 
-    /** @var string */
-    private $label;
-
-    /** @var string */
-    private $customId;
-
-    /** @var bool */
-    private $disabled;
-
-    /** @var string|null */
-    private $emoji; //null if clear.
-
-    /** @var string|null */
-    private $url; //null if button isn't a link button. 
-
-    public function __construct(MessageBuilder $response, string $channelId, int $style, string $label, string $customId, bool $disabled, ?string $emoji = null, ?string $url = null)
+    public function __construct(MessageBuilder $response, string $channelId, Button $button)
     {
         parent::__construct();
         $this->response = $response;
         $this->channelId = $channelId;
-        $this->style = $style;
-        $this->label = $label;
-        $this->customId = $customId;
-        $this->disabled = $disabled;
-        $this->emoji = $emoji;
-        $this->url = $url;
+        $this->button = $button;
     }
     public function getMessage(): MessageBuilder
     {
         return $this->response;
     }
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channelId;
     }
 
-    public function getStyle(): int
+    public function getButton(): Button
     {
-        return $this->style;
-    }
-    public function getLabel(): string
-    {
-        return $this->label;
-    }
-    public function getCustomId(): string
-    {
-        return $this->customId;
-    }
-    public function isDisabled(): bool
-    {
-        return $this->disabled;
-    }
-    public function getEmoji(): ?string
-    {
-        return $this->emoji;
-    }
-    public function getURL(): ?string
-    {
-        return $this->url;
+        return $this->button;
     }
 
     public function serialize(): ?string
@@ -94,12 +56,7 @@ class RequestRemoveButton extends Packet
             $this->UID,
             $this->response,
             $this->channelId,
-            $this->style,
-            $this->label,
-            $this->customId,
-            $this->disabled,
-            $this->emoji,
-            $this->url
+            $this->button
         ]);
     }
 
@@ -109,12 +66,7 @@ class RequestRemoveButton extends Packet
             $this->UID,
             $this->response,
             $this->channelId,
-            $this->style,
-            $this->label,
-            $this->customId,
-            $this->disabled,
-            $this->emoji,
-            $this->url
+            $this->button
         ] = unserialize($data);
     }
 }
