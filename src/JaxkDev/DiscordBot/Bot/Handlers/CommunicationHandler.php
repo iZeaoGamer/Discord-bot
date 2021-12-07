@@ -1119,19 +1119,32 @@ class CommunicationHandler
             } else {
 
                 $message->edit($pk->getMessageBuilder())->done(function (DiscordMessage $msg) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
-                    $this->logger->debug("Modified Interaction ({$pk->getUID()})");
+                    $interaction = $msg->interaction;
+                    if (!$interaction instanceof DiscordInteraction) {
+                        $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
+                        return;
+                    }
+                    $ephemeral = $pk->isEphemeral();
+                    $this->resolveRequest($pk->getUID(), true, "Interaction sent.", [ModelConverter::genModelInteraction($interaction, $pk->getMessageBuilder(), $ephemeral)]);
+                    $this->logger->debug("Sent Interaction ({$pk->getUID()})");
                 }, function (\Throwable $e) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), false, "Failed to modify Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-                    $this->logger->debug("Failed to edit Interaction ({$pk->getUID()}) - {$e->getMessage()}");
+                    $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - {$e->getMessage()}");
                 });
             }
             $message->edit($builder)->done(function (DiscordMessage $message) use ($pk) {
-                $this->resolveRequest($pk->getUID(), true, "Successfully modified an Interaction.", [ModelConverter::genModelMessage($message)]);
-            }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - {$e->getMessage()}");
-            });
+                $interaction = $message->interaction;
+                    if (!$interaction instanceof DiscordInteraction) {
+                        $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
+                        return;
+                    }
+                    $ephemeral = $pk->isEphemeral();
+                    $this->resolveRequest($pk->getUID(), true, "Interaction sent.", [ModelConverter::genModelInteraction($interaction, $pk->getMessageBuilder(), $ephemeral)]);
+                    $this->logger->debug("Sent Interaction ({$pk->getUID()})");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - {$e->getMessage()}");
+                });
         });
     }
     private function handleCreateInteraction(RequestCreateInteraction $pk)
