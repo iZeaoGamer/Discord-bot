@@ -1123,7 +1123,7 @@ class CommunicationHandler
                 $message->edit($pk->getMessageBuilder())->done(function (DiscordMessage $msg) use ($pk) {
                     $interaction = $msg->interaction;
                     print_r($interaction);
-                    if (!$interaction instanceof DiscordInteraction) {
+                    if ($interaction === null) {
                         $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
                         return;
                     }
@@ -1213,7 +1213,7 @@ class CommunicationHandler
                     $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
                         $interaction = $msg->interaction;
                         print_r($interaction);
-                        if (!$interaction instanceof DiscordInteraction) {
+                        if ($interaction === null) {
                             $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
                             return;
                         }
