@@ -1310,7 +1310,7 @@ class CommunicationHandler
 
             $button->setListener(function (DiscordInteraction $interaction) use ($builder, $pk) {
 if(!$interaction->hasResponded()){
-                $interaction->acknowledgeWithResponse()->then(function () use ($interaction, $pk) {
+                $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
 
                     $this->resolveRequest($pk->getUID(), true, "Button added.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk) {
@@ -1318,9 +1318,8 @@ if(!$interaction->hasResponded()){
                     $this->logger->debug("Failed to add Button ({$pk->getUID()}) - {$e->getMessage()}");
                 });
             }else{
-                $interaction->getOriginalResponse()->then(function(DiscordMessage $message) use ($builder, $interaction, $pk){
-                    $message->edit($builder);
-                    $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelMessage($message)]);
+                $interaction->editFollowUpMessage($builder)->then(function() use ($builder, $interaction, $pk){
+                    $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk){
                     $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
@@ -1403,7 +1402,7 @@ if(!$interaction->hasResponded()){
                 }
 
                 if(!$interaction->hasResponded()){
-                    $interaction->acknowledgeWithResponse()->then(function () use ($interaction, $pk) {
+                    $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
     
                         $this->resolveRequest($pk->getUID(), true, "Select Menu added.", [ModelConverter::genModelInteraction($interaction)]);
                     }, function (\Throwable $e) use ($pk) {
@@ -1411,9 +1410,8 @@ if(!$interaction->hasResponded()){
                         $this->logger->debug("Failed to add Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
                     });
                 }else{
-                    $interaction->getOriginalResponse()->then(function(DiscordMessage $message) use ($builder, $interaction, $pk){
-                        $message->edit($builder);
-                        $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelMessage($message)]);
+                    $interaction->editFollowUpMessage($builder)->then(function() use ($builder, $interaction, $pk){
+                        $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelInteraction($interaction)]);
                     }, function (\Throwable $e) use ($pk){
                         $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
                     });
