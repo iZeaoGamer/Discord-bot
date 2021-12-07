@@ -15,6 +15,7 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use Discord\Builders\Components\Button;
 use Discord\Builders\MessageBuilder;
+use JaxkDev\DiscordBot\Models\Messages\Message;
 
 class RequestCreateButton extends Packet
 {
@@ -22,6 +23,9 @@ class RequestCreateButton extends Packet
     /** @var MessageBuilder */
     private $response;
 
+    /** @var Message */
+    private $message;
+    
     /** @var string */
     private $channelId;
 
@@ -31,17 +35,21 @@ class RequestCreateButton extends Packet
     /** @var bool */
     private $ephemeral;
 
-    public function __construct(MessageBuilder $response, string $channelId, Button $button, bool $ephemeral)
+    public function __construct(MessageBuilder $response, Message $message, string $channelId, Button $button, bool $ephemeral)
     {
         parent::__construct();
         $this->response = $response;
+        $this->message = $message;
         $this->channelId = $channelId;
         $this->button = $button;
         $this->ephemeral = $ephemeral;
     }
-    public function getMessage(): MessageBuilder
+    public function getMessageBuilder(): MessageBuilder
     {
         return $this->response;
+    }
+    public function getMessage(): Message{
+        return $this->message;
     }
     public function getChannelId(): string
     {
@@ -59,6 +67,7 @@ class RequestCreateButton extends Packet
         return serialize([
             $this->UID,
             $this->response,
+            $this->message,
             $this->channelId,
             $this->button,
             $this->ephemeral
@@ -70,6 +79,7 @@ class RequestCreateButton extends Packet
         [
             $this->UID,
             $this->response,
+            $this->message,
             $this->channelId,
             $this->button,
             $this->ephemeral
