@@ -1310,7 +1310,7 @@ class CommunicationHandler
 
             $button->setListener(function (DiscordInteraction $interaction) use ($channel, $builder, $pk) {
 if(!$interaction->hasResponded()){
-                $interaction->updateMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
+                $interaction->updateMessage($builder)->then(function () use ($interaction, $pk) {
 
                     $this->resolveRequest($pk->getUID(), true, "Button created.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk) {
@@ -1487,7 +1487,9 @@ if(!$interaction->hasResponded()){
           }
 
             $button->setListener(function (DiscordInteraction $interaction) use ($m, $channel, $builder, $pk) {
-
+                if($pk->doNothing()){
+                    return;
+                }
 if(!$interaction->hasResponded()){
                 $interaction->updateMessage($builder)->then(function () use ($interaction, $pk) {
 
@@ -1502,12 +1504,12 @@ if(!$interaction->hasResponded()){
                 $this->getMessage($pk, $pk->getChannelId(), $m->getId(), function (DiscordMessage $message) use ($m, $interaction, $builder, $pk){
                     
                 $interaction->editFollowUpMessage($builder, $m->getId())->then(function() use ($builder, $interaction, $pk){
-                    $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelInteraction($interaction)]);
+                    $this->resolveRequest($pk->getUID(), true, "Successfully edited interaction.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk){
                     $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             });
-            }, $this->client->getDiscordClient(), false);
+            }, $this->client->getDiscordClient(), true);
             $this->resolveRequest($pk->getUID(), true, "Successfully modify Interaction.");
         }, function (\Throwable $e) use ($pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to modify Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1581,6 +1583,9 @@ if(!$interaction->hasResponded()){
             $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($m, $channel, $builder, $pk) {
                 foreach ($options as $option) {
                     print_r($option->getValue() . PHP_EOL);
+                }
+                if($pk->doNothing()){
+                    return;
                 }
 
                 if(!$interaction->hasResponded()){

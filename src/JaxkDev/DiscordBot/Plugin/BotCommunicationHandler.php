@@ -149,7 +149,7 @@ class BotCommunicationHandler
         elseif ($packet instanceof ServerLeavePacket) $this->handleServerLeave($packet);
         elseif ($packet instanceof ServerUpdatePacket) $this->handleServerUpdate($packet);
         elseif ($packet instanceof TypingStartPacket) $this->handleTypingStart($packet);
-        elseif($packet instanceof InteractionCreatePacket) $this->handleInteraction($packet);
+        elseif ($packet instanceof InteractionCreatePacket) $this->handleInteraction($packet);
         elseif ($packet instanceof DiscordDataDumpPacket) $this->handleDataDump($packet);
         elseif ($packet instanceof DiscordReadyPacket) $this->handleReady();
     }
@@ -164,7 +164,8 @@ class BotCommunicationHandler
 
         (new DiscordReadyEvent($this->plugin))->call();
     }
-    private function handleInteraction(InteractionCreatePacket $packet): void{
+    private function handleInteraction(InteractionCreatePacket $packet): void
+    {
         (new InteractionCreatedEvent($this->plugin, $packet->getInteraction()))->call();
     }
 

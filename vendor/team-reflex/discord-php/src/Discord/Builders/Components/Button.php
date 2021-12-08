@@ -63,7 +63,7 @@ class Button extends Component
      * @var string
      */
     private $url;
-    
+
     /**
      * Whether the button is disabled.
      *
@@ -93,7 +93,7 @@ class Button extends Component
      */
     public function __construct(int $style, ?string $custom_id)
     {
-        if (! in_array($style, [
+        if (!in_array($style, [
             self::STYLE_PRIMARY,
             self::STYLE_SECONDARY,
             self::STYLE_SUCCESS,
@@ -134,7 +134,7 @@ class Button extends Component
      */
     public function setStyle(int $style): self
     {
-        if (! in_array($style, [
+        if (!in_array($style, [
             self::STYLE_PRIMARY,
             self::STYLE_SECONDARY,
             self::STYLE_SUCCESS,
@@ -297,7 +297,7 @@ class Button extends Component
             throw new InvalidArgumentException('You cannot add a listener to a link button.');
         }
 
-        if (! $this->custom_id) {
+        if (!$this->custom_id) {
             $this->custom_id = $this->generateUuid();
         }
 
@@ -313,33 +313,33 @@ class Button extends Component
         }
 
         $this->listener = function (Interaction $interaction) use ($callback, $oneOff) {
-            if($interaction->data->custom_id === $this->custom_id){
+            if ($interaction->data->custom_id === $this->custom_id) {
                 print_r("Custom ID: {$interaction->data->custom_id} is the same as {$this->custom_id}!");
-            }else{
+            } else {
                 print_r("Custom ID: {$interaction->data->custom_id} is not the same as {$this->custom_id}!");
             }
-            if ($interaction->data->component_type == Component::TYPE_BUTTON) {
-                $response = $callback($interaction);
-                $ack = function () use ($interaction) {
-                    // attempt to acknowledge interaction if it has not already been responded to.
-                    try {
-                        $interaction->acknowledge();
-                        print_r("Interaction was acknowledged.");
-                    } catch (\Throwable $e) {
-                        print_r("Failed to interact. Error: {$e->getMessage()}");
-                    }
-                };
-
-                if ($response instanceof PromiseInterface) {
-                    $response->then($ack);
-                } else {
-                    $ack();
+            //   if ($interaction->data->component_type == Component::TYPE_BUTTON) {
+            $response = $callback($interaction);
+            $ack = function () use ($interaction) {
+                // attempt to acknowledge interaction if it has not already been responded to.
+                try {
+                    $interaction->acknowledge();
+                    print_r("Interaction was acknowledged.");
+                } catch (\Throwable $e) {
+                    print_r("Failed to interact. Error: {$e->getMessage()}");
                 }
+            };
 
-                if ($oneOff) {
-                    $this->removeListener();
-                }
+            if ($response instanceof PromiseInterface) {
+                $response->then($ack);
+            } else {
+                $ack();
             }
+
+            if ($oneOff) {
+                $this->removeListener();
+            }
+            //   }
         };
 
 

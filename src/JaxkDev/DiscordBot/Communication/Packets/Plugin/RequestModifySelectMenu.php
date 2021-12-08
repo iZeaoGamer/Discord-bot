@@ -13,11 +13,9 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-
+use Discord\Builders\Components\SelectMenu;
 use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Models\Messages\Message;
-use Discord\Builders\Components\SelectMenu;
-
 
 class RequestModifySelectMenu extends Packet
 {
@@ -37,8 +35,10 @@ class RequestModifySelectMenu extends Packet
     /** @var bool */
     private $ephemeral;
 
+    /** @var bool */
+    private $doNothing;
 
-    public function __construct(MessageBuilder $response, Message $message, string $channelId, SelectMenu $select, bool $ephemeral)
+    public function __construct(MessageBuilder $response, Message $message, string $channelId, SelectMenu $select, bool $ephemeral, bool $doNothing)
     {
         parent::__construct();
         $this->response = $response;
@@ -46,6 +46,7 @@ class RequestModifySelectMenu extends Packet
         $this->channelId = $channelId;
         $this->select = $select;
         $this->ephemeral = $ephemeral;
+        $this->doNothing = $doNothing;
     }
     public function getMessageBuilder(): MessageBuilder
     {
@@ -59,7 +60,6 @@ class RequestModifySelectMenu extends Packet
     {
         return $this->channelId;
     }
-
     public function getSelectMenu(): SelectMenu
     {
         return $this->select;
@@ -67,6 +67,10 @@ class RequestModifySelectMenu extends Packet
     public function isEphemeral(): bool
     {
         return $this->ephemeral;
+    }
+    public function doNothing(): bool
+    {
+        return $this->doNothing;
     }
     public function serialize(): ?string
     {
@@ -76,7 +80,8 @@ class RequestModifySelectMenu extends Packet
             $this->message,
             $this->channelId,
             $this->select,
-            $this->ephemeral
+            $this->ephemeral,
+            $this->doNothing
         ]);
     }
 
@@ -88,7 +93,8 @@ class RequestModifySelectMenu extends Packet
             $this->message,
             $this->channelId,
             $this->select,
-            $this->ephemeral
+            $this->ephemeral,
+            $this->doNothing
         ] = unserialize($data);
     }
 }

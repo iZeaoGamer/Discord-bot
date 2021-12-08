@@ -35,7 +35,10 @@ class RequestModifyButton extends Packet
     /** @var bool */
     private $ephemeral;
 
-    public function __construct(MessageBuilder $response, Message $message, string $channelId, Button $button, bool $ephemeral)
+    /** @var bool */
+    private $doNothing;
+
+    public function __construct(MessageBuilder $response, Message $message, string $channelId, Button $button, bool $ephemeral, bool $doNothing)
     {
         parent::__construct();
         $this->response = $response;
@@ -43,6 +46,7 @@ class RequestModifyButton extends Packet
         $this->channelId = $channelId;
         $this->button = $button;
         $this->ephemeral = $ephemeral;
+        $this->doNothing = $doNothing;
     }
     public function getMessageBuilder(): MessageBuilder
     {
@@ -64,6 +68,10 @@ class RequestModifyButton extends Packet
     {
         return $this->ephemeral;
     }
+    public function doNothing(): bool
+    {
+        return $this->doNothing;
+    }
     public function serialize(): ?string
     {
         return serialize([
@@ -72,7 +80,8 @@ class RequestModifyButton extends Packet
             $this->message,
             $this->channelId,
             $this->button,
-            $this->ephemeral
+            $this->ephemeral,
+            $this->doNothing
         ]);
     }
 
@@ -84,7 +93,8 @@ class RequestModifyButton extends Packet
             $this->message,
             $this->channelId,
             $this->button,
-            $this->ephemeral
+            $this->ephemeral,
+            $this->doNothing
         ] = unserialize($data);
     }
 }

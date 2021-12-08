@@ -362,7 +362,8 @@ class Storage
         return self::$member_map[$id] ?? null;
     }
     /** @return Member[] */
-    public static function getMembers(): array{
+    public static function getMembers(): array
+    {
         return array_values(self::$member_map);
     }
 
@@ -475,7 +476,8 @@ class Storage
         return self::$role_map[$id] ?? null;
     }
     /** @return Role[] */
-    public static function getRoles(): array{
+    public static function getRoles(): array
+    {
         return array_values(self::$role_map);
     }
 
@@ -533,7 +535,8 @@ class Storage
         return self::$ban_map[$id] ?? null;
     }
     /** @return Ban[] */
-    public static function getBans(): array{
+    public static function getBans(): array
+    {
         return array_values(self::$ban_map);
     }
     /**
@@ -573,7 +576,8 @@ class Storage
         return self::$invite_map[$code] ?? null;
     }
     /** @return Invite[] */
-    public static function getInvites(): array{
+    public static function getInvites(): array
+    {
         return array_values(self::$invite_map);
     }
     /**
