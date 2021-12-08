@@ -1504,7 +1504,7 @@ if(!$interaction->hasResponded()){
                     $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             });
-            }, $this->client->getDiscordClient(), false);
+            }, $this->client->getDiscordClient(), true);
             $this->resolveRequest($pk->getUID(), true, "Successfully modify Interaction.");
         }, function (\Throwable $e) use ($pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to modify Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1596,7 +1596,7 @@ if(!$interaction->hasResponded()){
                         $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
                     });
                 });
-            }, $this->client->getDiscordClient(), false);
+            }, $this->client->getDiscordClient(), true);
             $this->resolveRequest($pk->getUID(), true, "Successfully modified Interaction.");
         }, function (\Throwable $e) use ($pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to modify Interaction.", [$e->getMessage(), $e->getTraceAsString()]);

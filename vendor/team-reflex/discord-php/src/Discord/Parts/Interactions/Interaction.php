@@ -73,7 +73,7 @@ class Interaction extends Part
      */
     protected function getDataAttribute(): ?InteractionData
     {
-        if (! isset($this->attributes['data'])) {
+        if (!isset($this->attributes['data'])) {
             return null;
         }
 
@@ -199,6 +199,10 @@ class Interaction extends Part
             'data' => $builder,
         ], $builder->requiresMultipart() ? $builder->toMultipart(false) : null);
     }
+    public function setResponded(bool $respond)
+    {
+        $this->responded = $respond;
+    }
 
     /**
      * Retrieves the original interaction response.
@@ -207,7 +211,7 @@ class Interaction extends Part
      */
     public function getOriginalResponse(): ExtendedPromiseInterface
     {
-        if (! $this->responded) {
+        if (!$this->responded) {
             throw new RuntimeException('Interaction has not been responded to.');
         }
 
@@ -226,7 +230,7 @@ class Interaction extends Part
      */
     public function updateOriginalResponse(MessageBuilder $builder): ExtendedPromiseInterface
     {
-        if (! $this->responded) {
+        if (!$this->responded) {
             throw new RuntimeException('Interaction has not been responded to.');
         }
 
@@ -250,7 +254,7 @@ class Interaction extends Part
      */
     public function deleteOriginalResponse(): ExtendedPromiseInterface
     {
-        if (! $this->responded) {
+        if (!$this->responded) {
             throw new RuntimeException('Interaction has not been responded to.');
         }
 
@@ -267,7 +271,7 @@ class Interaction extends Part
      */
     public function sendFollowUpMessage(MessageBuilder $builder, bool $ephemeral = false): ExtendedPromiseInterface
     {
-        if (! $this->responded) {
+        if (!$this->responded) {
             throw new RuntimeException('Cannot create a follow-up message as the interaction has not been responded to.');
         }
 
@@ -293,19 +297,20 @@ class Interaction extends Part
      * @param MessageBuilder $builder
      * @return ExtendedPromiseInterface
      */
-    public function editFollowUpMessage(MessageBuilder $builder, string $message_id): ExtendedPromiseInterface{
-        if (! $this->responded) {
+    public function editFollowUpMessage(MessageBuilder $builder, string $message_id): ExtendedPromiseInterface
+    {
+        if (!$this->responded) {
             throw new RuntimeException('Cannot create a follow-up message as the interaction has not been responded to.');
         }
-            if ($builder->requiresMultipart()) {
-                $multipart = $builder->toMultipart();
+        if ($builder->requiresMultipart()) {
+            $multipart = $builder->toMultipart();
 
-                return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $message_id), (string) $multipart, $multipart->getHeaders());
-            }
+            return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $message_id), (string) $multipart, $multipart->getHeaders());
+        }
 
-            return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $message_id), $builder);
+        return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $message_id), $builder);
         //})()->then(function ($response) {
-      //      return $this->factory->create(Message::class, $response, true);
+        //      return $this->factory->create(Message::class, $response, true);
     }
     /**
      * Responds to the interaction with a message.
@@ -326,7 +331,8 @@ class Interaction extends Part
             'data' => $builder,
         ], $builder->requiresMultipart() ? $builder->toMultipart(false) : null);
     }
-    public function hasResponded(): bool{
+    public function hasResponded(): bool
+    {
         return $this->responded;
     }
 
