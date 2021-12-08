@@ -179,6 +179,9 @@ class Api
         if (!Utils::validDiscordSnowflake($channelId)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
         }
+        if(!Utils::validDiscordSnowflake($message->getId())){
+            return rejectPromise(new APIRejection("Invalid Message ID: {$message->getId()}"));
+        }
         $pk = new RequestModifyButton($builder, $message, $channelId, $button, $ephemeral, $doNothing);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -232,6 +235,9 @@ class Api
     {
         if (!Utils::validDiscordSnowflake($channelId)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
+        }
+        if(!Utils::validDiscordSnowflake($message->getId())){
+            return rejectPromise(new APIRejection("Invalid Message ID: {$message->getId()}"));
         }
         $pk = new RequestModifySelectMenu($builder, $message, $channelId, $select, $ephemeral, $doNothing);
         $this->plugin->writeOutboundData($pk);

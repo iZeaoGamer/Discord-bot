@@ -98,6 +98,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDelayDelete;
 
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
+use JaxkDev\DiscordBot\Plugin\Storage;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
 use JaxkDev\DiscordBot\Models\Channels\TextChannel;
@@ -1490,6 +1491,11 @@ if(!$interaction->hasResponded()){
                 if($pk->doNothing()){
                     return;
                 }
+                if($interaction->channel_id !== $channel->id){
+                    $this->resolveRequest($pk->getUID(), false, "Failed to update interaction.", ["Interacted Channel ID: {$interaction->channel_id} is not the same as {$channel->id}"]);
+                    return;
+                }
+
 if(!$interaction->hasResponded()){
                 $interaction->updateMessage($builder)->then(function () use ($interaction, $pk) {
 
@@ -1510,7 +1516,7 @@ if(!$interaction->hasResponded()){
                 });
             });
             }, $this->client->getDiscordClient(), true);
-            $this->resolveRequest($pk->getUID(), true, "Successfully modify Interaction.");
+            $this->resolveRequest($pk->getUID(), true, "Successfully modified Interaction.");
         }, function (\Throwable $e) use ($pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to modify Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
             $this->logger->debug("Failed to modify Interaction ({$pk->getUID()}) - {$e->getMessage()}");
@@ -1585,6 +1591,10 @@ if(!$interaction->hasResponded()){
                     print_r($option->getValue() . PHP_EOL);
                 }
                 if($pk->doNothing()){
+                    return;
+                }
+                if($interaction->channel_id !== $channel->id){
+                    $this->resolveRequest($pk->getUID(), false, "Failed to update interaction.", ["Interacted Channel ID: {$interaction->channel_id} is not the same as {$channel->id}"]);
                     return;
                 }
 
