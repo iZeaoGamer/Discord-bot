@@ -313,7 +313,12 @@ class Button extends Component
         }
 
         $this->listener = function (Interaction $interaction) use ($callback, $oneOff) {
-            if ($interaction->data->component_type == Component::TYPE_BUTTON && $interaction->data->custom_id == $this->custom_id) {
+            if($interaction->data->custom_id === $this->custom_id){
+                print_r("Custom ID: {$interaction->data->custom_id} is the same as {$this->custom_id}!");
+            }else{
+                print_r("Custom ID: {$interaction->data->custom_id} is not the same as {$this->custom_id}!");
+            }
+            if ($interaction->data->component_type == Component::TYPE_BUTTON) {
                 $response = $callback($interaction);
                 $ack = function () use ($interaction) {
                     // attempt to acknowledge interaction if it has not already been responded to.
