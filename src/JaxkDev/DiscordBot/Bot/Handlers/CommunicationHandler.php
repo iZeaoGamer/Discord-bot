@@ -1491,6 +1491,7 @@ if(!$interaction->hasResponded()){
                 $interaction->updateMessage($builder)->then(function () use ($interaction, $pk) {
 
                     $this->resolveRequest($pk->getUID(), true, "Button modified.", [ModelConverter::genModelInteraction($interaction)]);
+                    $interaction->setResponded(false);
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to modify Button.", [$e->getMessage(), $e->getTraceAsString()]);
                     $this->logger->debug("Failed to modify Button ({$pk->getUID()}) - {$e->getMessage()}");
