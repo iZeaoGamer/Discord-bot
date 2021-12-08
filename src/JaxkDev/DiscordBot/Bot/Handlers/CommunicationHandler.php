@@ -1318,16 +1318,12 @@ if(!$interaction->hasResponded()){
                     $this->logger->debug("Failed to create Button ({$pk->getUID()}) - {$e->getMessage()}");
                 });
             }else{
-                $channel->sendMessage($builder)->then(function (DiscordMessage $message) use ($interaction, $builder, $pk){
-                    $id = $message->id;
+           
                     $this->resolveRequest($pk->getUID(), true, "Successfully sent interaction message.");
-                $interaction->editFollowUpMessage($builder, $id)->then(function() use ($builder, $interaction, $pk){
+                $interaction->sendFollowUpMessage($builder, $pk->isEphemeral())->then(function() use ($builder, $interaction, $pk){
                     $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk){
                     $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-                });
-                }, function (\Throwable $e) use ($pk){
-                    $this->resolveRequest($pk->getUID(), false, "Failed to send interaction message.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             }
             }, $this->client->getDiscordClient(), false);
@@ -1415,16 +1411,10 @@ if(!$interaction->hasResponded()){
                         $this->logger->debug("Failed to create Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
                     });
                 }else{
-                    $channel->sendMessage($builder)->then(function (DiscordMessage $message) use ($interaction, $builder, $pk){
-                        $id = $message->id;
-                        $this->resolveRequest($pk->getUID(), true, "Successfully sent interaction message.");
-                    $interaction->editFollowUpMessage($builder, $id)->then(function() use ($builder, $interaction, $pk){
+                    $interaction->sendFollowupMessage($builder, $pk->isEphemeral())->then(function() use ($builder, $interaction, $pk){
                         $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelInteraction($interaction)]);
                     }, function (\Throwable $e) use ($pk){
                         $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-                    });
-                    }, function (\Throwable $e) use ($pk){
-                        $this->resolveRequest($pk->getUID(), false, "Failed to send interaction message.", [$e->getMessage(), $e->getTraceAsString()]);
                     });
                 }
             }, $this->client->getDiscordClient(), true);
@@ -1509,18 +1499,12 @@ if(!$interaction->hasResponded()){
                     $this->logger->debug("Failed to modify Button ({$pk->getUID()}) - {$e->getMessage()}");
                 });
             }else{
-                $this->getMessage($pk, $pk->getChannelId(), $m->getId(), function (DiscordMessage $message) use ($interaction, $builder, $pk){
-
-                $message->edit($builder)->then(function (DiscordMessage $message) use ($interaction, $builder, $pk){
-                    $id = $message->id;
-                    $this->resolveRequest($pk->getUID(), true, "Successfully modified interaction message.");
-                $interaction->editFollowUpMessage($builder, $id)->then(function() use ($builder, $interaction, $pk){
+                $this->getMessage($pk, $pk->getChannelId(), $m->getId(), function (DiscordMessage $message) use ($m, $interaction, $builder, $pk){
+                    
+                $interaction->editFollowUpMessage($builder, $m->getId())->then(function() use ($builder, $interaction, $pk){
                     $this->resolveRequest($pk->getUID(), true, "Successfully edit interaction.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk){
                     $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-                });
-                }, function (\Throwable $e) use ($pk){
-                    $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction message.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             });
             }
@@ -1609,18 +1593,11 @@ if(!$interaction->hasResponded()){
                         $this->logger->debug("Failed to modify Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
                     });
                 }else{
-                    $this->getMessage($pk, $pk->getChannelId(), $m->getId(), function (DiscordMessage $message) use ($interaction, $builder, $pk){
-    
-                    $message->edit($builder)->then(function (DiscordMessage $message) use ($interaction, $builder, $pk){
-                        $id = $message->id;
-                        $this->resolveRequest($pk->getUID(), true, "Successfully modified interaction message.");
-                    $interaction->editFollowUpMessage($builder, $id)->then(function() use ($builder, $interaction, $pk){
+                    $this->getMessage($pk, $pk->getChannelId(), $m->getId(), function (DiscordMessage $message) use ($m, $interaction, $builder, $pk){
+                    $interaction->editFollowUpMessage($builder, $m->getId())->then(function() use ($builder, $interaction, $pk){
                         $this->resolveRequest($pk->getUID(), true, "Successfully modified interaction.", [ModelConverter::genModelInteraction($interaction)]);
                     }, function (\Throwable $e) use ($pk){
                         $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-                    });
-                    }, function (\Throwable $e) use ($pk){
-                        $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction message.", [$e->getMessage(), $e->getTraceAsString()]);
                     });
                 });
                 }
