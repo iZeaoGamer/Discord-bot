@@ -1310,7 +1310,7 @@ class CommunicationHandler
 
             $button->setListener(function (DiscordInteraction $interaction) use ($channel, $builder, $pk) {
 if(!$interaction->hasResponded()){
-                $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
+                $interaction->updateMessage($builder)->then(function () use ($interaction, $pk) {
 
                     $this->resolveRequest($pk->getUID(), true, "Button created.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk) {
@@ -1401,7 +1401,7 @@ if(!$interaction->hasResponded()){
                 }
 
                 if(!$interaction->hasResponded()){
-                    $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
+                    $interaction->updateMessage($builder)->then(function () use ($interaction, $pk) {
     
                         $this->resolveRequest($pk->getUID(), true, "Select menu created.", [ModelConverter::genModelInteraction($interaction)]);
                     }, function (\Throwable $e) use ($pk) {
@@ -1488,7 +1488,7 @@ if(!$interaction->hasResponded()){
 
             $button->setListener(function (DiscordInteraction $interaction) use ($m, $channel, $builder, $pk) {
 if(!$interaction->hasResponded()){
-                $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
+                $interaction->updateMessage($builder)->then(function () use ($interaction, $pk) {
 
                     $this->resolveRequest($pk->getUID(), true, "Button modified.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk) {
@@ -1581,7 +1581,7 @@ if(!$interaction->hasResponded()){
                 }
 
                 if(!$interaction->hasResponded()){
-                    $interaction->respondWithMessage($builder, $pk->isEphemeral())->then(function () use ($interaction, $pk) {
+                    $interaction->updateMessage($builder)->then(function () use ($interaction, $pk) {
     
                         $this->resolveRequest($pk->getUID(), true, "Select Menu modified.", [ModelConverter::genModelInteraction($interaction)]);
                     }, function (\Throwable $e) use ($pk) {
