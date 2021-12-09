@@ -434,10 +434,11 @@ class CommunicationHandler
                 return $role->position;
             }, $arr));
             $val = array_keys($arr);
-            $data = array_combine($keys, $val);
-            if ($data === false) {
-                $promise->reject(new ApiRejection("Internal error occurred while updating role positions."));
-                throw new \AssertionError("Keys do not match the associated ID's of the role positions.  (If you see this please open a github issue.)");
+            try {
+                $data = array_combine($keys, $val); //Throws valueError on >= PHP8, returns false on < PHP8.
+            } catch (\ValueError $e) {
+                $promise->reject(new ApiRejection("Internal error occurred while updating role positions. (" . $e->getMessage() . ")"));
+                return;
             }
             /** @var DiscordRole|null $k */
             $k = $arr[$role->getId()];
@@ -1514,11 +1515,11 @@ class CommunicationHandler
                         $this->logger->debug("Failed to modify Button ({$pk->getUID()}) - {$e->getMessage()}");
                     });
                 } catch (\Throwable $e) {
-                        $interaction->editFollowUpMessage($builder)->then(function () use ($builder, $interaction, $pk) {
-                            $this->resolveRequest($pk->getUID(), true, "Successfully edited interaction.", [ModelConverter::genModelInteraction($interaction)]);
-                        }, function (\Throwable $e) use ($pk) {
-                            $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-                        });
+                    $interaction->editFollowUpMessage($builder)->then(function () use ($builder, $interaction, $pk) {
+                        $this->resolveRequest($pk->getUID(), true, "Successfully edited interaction.", [ModelConverter::genModelInteraction($interaction)]);
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
                 }
             }, $this->client->getDiscordClient(), false);
             $this->resolveRequest($pk->getUID(), true, "Successfully modified Interaction.");
@@ -1613,10 +1614,10 @@ class CommunicationHandler
                     });
                 } catch (\Throwable $e) {
                     $interaction->editFollowUpMessage($builder)->then(function () use ($builder, $interaction, $pk) {
-                            $this->resolveRequest($pk->getUID(), true, "Successfully modified interaction.", [ModelConverter::genModelInteraction($interaction)]);
-                        }, function (\Throwable $e) use ($pk) {
-                            $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-                        });
+                        $this->resolveRequest($pk->getUID(), true, "Successfully modified interaction.", [ModelConverter::genModelInteraction($interaction)]);
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
                 }
             }, $this->client->getDiscordClient(), false);
             $this->resolveRequest($pk->getUID(), true, "Successfully modified Interaction.");
