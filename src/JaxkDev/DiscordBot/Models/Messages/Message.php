@@ -62,7 +62,6 @@ class Message implements \Serializable
     /** @var Interaction|null */
     protected $interaction;
 
-
     /**
      * Message constructor.
      *
@@ -299,7 +298,8 @@ class Message implements \Serializable
         $this->channels_mentioned = $channels_mentioned;
     }
     /** @return string[] */
-    public function getStickers(): array{
+    public function getStickers(): array
+    {
         return $this->stickers;
     }
     public function setStickers(array $stickers): void
@@ -312,10 +312,12 @@ class Message implements \Serializable
         $this->stickers = $stickers;
     }
     /** @return Interaction|null */
-    public function getInteraction(): ?Interaction{
+    public function getInteraction(): ?Interaction
+    {
         return $this->interaction;
     }
-    public function setInteraction(?Interaction $interaction): void{
+    public function setInteraction(?Interaction $interaction): void
+    {
         $this->interaction = $interaction;
     }
 
