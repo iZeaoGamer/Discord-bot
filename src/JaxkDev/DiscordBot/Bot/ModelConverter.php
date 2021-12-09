@@ -80,7 +80,7 @@ abstract class ModelConverter
             try {
                 $interact->updateMessage($builder);
             } catch (\Throwable $e) {
-                $interact->editFollowUpMessage($builder, $interact->message->id);
+                $interact->editFollowUpMessage($builder);
             }
         }
         return new Interaction(
