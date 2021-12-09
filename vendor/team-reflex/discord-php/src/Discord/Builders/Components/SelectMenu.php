@@ -271,7 +271,6 @@ class SelectMenu extends Component
         }
 
         $this->listener = function (Interaction $interaction) use ($callback, $oneOff) {
-            $interaction->data->custom_id = $this->custom_id;
             if ($interaction->data->custom_id === $this->custom_id) {
                 print_r("Custom ID: {$interaction->data->custom_id} is the same as {$this->custom_id}!");
             } else {
