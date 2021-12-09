@@ -77,9 +77,9 @@ abstract class ModelConverter
     {
 
         if ($builder !== null) {
-            if (!$interact->hasResponded()) {
+           try{
                 $interact->updateMessage($builder);
-            } else {
+           }catch(\Throwable $e){
                 $interact->editFollowUpMessage($builder, $interact->message->id);
             }
         }

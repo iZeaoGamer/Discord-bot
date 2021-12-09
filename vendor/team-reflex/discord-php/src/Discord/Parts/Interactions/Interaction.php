@@ -199,10 +199,6 @@ class Interaction extends Part
             'data' => $builder,
         ], $builder->requiresMultipart() ? $builder->toMultipart(false) : null);
     }
-    public function setResponded(bool $respond)
-    {
-        $this->responded = $respond;
-    }
 
     /**
      * Retrieves the original interaction response.
@@ -330,10 +326,6 @@ class Interaction extends Part
             'type' => InteractionResponseType::CHANNEL_MESSAGE_WITH_SOURCE,
             'data' => $builder,
         ], $builder->requiresMultipart() ? $builder->toMultipart(false) : null);
-    }
-    public function hasResponded(): bool
-    {
-        return $this->responded;
     }
 
     /**

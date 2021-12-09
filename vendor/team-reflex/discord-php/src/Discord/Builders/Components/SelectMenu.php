@@ -271,13 +271,14 @@ class SelectMenu extends Component
         }
 
         $this->listener = function (Interaction $interaction) use ($callback, $oneOff) {
+            $interaction->data->custom_id = $this->custom_id;
             if ($interaction->data->custom_id === $this->custom_id) {
                 print_r("Custom ID: {$interaction->data->custom_id} is the same as {$this->custom_id}!");
             } else {
                 print_r("Custom ID: {$interaction->data->custom_id} is not the same as {$this->custom_id}!");
             }
 
-            if ($interaction->data->component_type == Component::TYPE_SELECT_MENU) {
+            if ($interaction->data->component_type == Component::TYPE_SELECT_MENU && $interaction->data->custom_id === $this->custom_id) {
                 $options = Collection::for(Option::class, null);
 
                 foreach ($this->options as $option) {
