@@ -301,10 +301,10 @@ class Interaction extends Part
         if ($builder->requiresMultipart()) {
             $multipart = $builder->toMultipart();
 
-            return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $this->message_id), (string) $multipart, $multipart->getHeaders());
+            return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $this->message->id), (string) $multipart, $multipart->getHeaders());
         }
 
-        return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $this->message_id), $builder);
+        return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $this->message->id), $builder);
         //})()->then(function ($response) {
         //      return $this->factory->create(Message::class, $response, true);
     }
