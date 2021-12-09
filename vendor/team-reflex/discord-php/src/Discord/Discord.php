@@ -334,7 +334,7 @@ class Discord
         $this->on('ready', $function);
 
         $this->http = new Http(
-            'Bot '.$this->token,
+            'Bot ' . $this->token,
             $this->loop,
             $this->options['logger'],
             new React($this->loop, $options['socket_options'])
@@ -492,7 +492,7 @@ class Discord
             $member['guild_id'] = $guild->id;
             $member['status'] = 'offline';
 
-            if (! $this->users->has($member['user']->id)) {
+            if (!$this->users->has($member['user']->id)) {
                 $userPart = $this->factory->create(User::class, $member['user'], true);
                 $this->users->offsetSet($userPart->id, $userPart);
             }
@@ -503,7 +503,7 @@ class Discord
             ++$count;
         }
 
-        $this->logger->debug('parsed '.$count.' members (skipped '.$skipped.')', ['repository_count' => $guild->members->count(), 'actual_count' => $guild->member_count]);
+        $this->logger->debug('parsed ' . $count . ' members (skipped ' . $skipped . ')', ['repository_count' => $guild->members->count(), 'actual_count' => $guild->member_count]);
 
         if ($guild->members->count() >= $guild->member_count) {
             $this->largeSent = array_diff($this->largeSent, [$guild->id]);
@@ -598,17 +598,17 @@ class Discord
     {
         $this->connected = false;
 
-        if (! is_null($this->heartbeatTimer)) {
+        if (!is_null($this->heartbeatTimer)) {
             $this->loop->cancelTimer($this->heartbeatTimer);
             $this->heartbeatTimer = null;
         }
 
-        if (! is_null($this->heartbeatAckTimer)) {
+        if (!is_null($this->heartbeatAckTimer)) {
             $this->loop->cancelTimer($this->heartbeatAckTimer);
             $this->heartbeatAckTimer = null;
         }
 
-        if (! is_null($this->payloadTimer)) {
+        if (!is_null($this->payloadTimer)) {
             $this->loop->cancelTimer($this->payloadTimer);
             $this->payloadTimer = null;
         }
@@ -679,7 +679,7 @@ class Discord
             Event::VOICE_STATE_UPDATE => 'handleVoiceStateUpdate',
         ];
 
-        if (! is_null($hData = $this->handlers->getHandler($data->t))) {
+        if (!is_null($hData = $this->handlers->getHandler($data->t))) {
             $handler = new $hData['class'](
                 $this->http,
                 $this->factory,
@@ -714,7 +714,7 @@ class Discord
                 Event::GUILD_CREATE,
             ];
 
-            if (! $this->emittedReady && (array_search($data->t, $parse) === false)) {
+            if (!$this->emittedReady && (array_search($data->t, $parse) === false)) {
                 $this->unparsedPackets[] = function () use (&$handler, &$deferred, &$data) {
                     $handler->handle($deferred, $data->d);
                 };
@@ -754,7 +754,7 @@ class Discord
         $diff = $received - $this->heartbeatTime;
         $time = $diff * 1000;
 
-        if (! is_null($this->heartbeatAckTimer)) {
+        if (!is_null($this->heartbeatAckTimer)) {
             $this->loop->cancelTimer($this->heartbeatAckTimer);
             $this->heartbeatAckTimer = null;
         }
@@ -812,7 +812,7 @@ class Discord
      */
     protected function identify(bool $resume = true): bool
     {
-        if ($resume && $this->reconnecting && ! is_null($this->sessionId)) {
+        if ($resume && $this->reconnecting && !is_null($this->sessionId)) {
             $payload = [
                 'op' => Op::OP_RESUME,
                 'd' => [
@@ -880,7 +880,7 @@ class Discord
         $this->emit('heartbeat', [$this->seq, $this]);
 
         $this->heartbeatAckTimer = $this->loop->addTimer($this->heartbeatInterval / 1000, function () {
-            if (! $this->connected) {
+            if (!$this->connected) {
                 return;
             }
 
@@ -918,14 +918,14 @@ class Discord
             if (is_array($this->options['loadAllMembers'])) {
                 foreach ($this->largeGuilds as $key => $guild) {
                     if (array_search($guild, $this->options['loadAllMembers']) === false) {
-                        $this->logger->debug('not fetching members for guild ID '.$guild);
+                        $this->logger->debug('not fetching members for guild ID ' . $guild);
                         unset($this->largeGuilds[$key]);
                     }
                 }
             }
 
             $chunks = array_chunk($this->largeGuilds, 50);
-            $this->logger->debug('sending '.count($chunks).' chunks with '.count($this->largeGuilds).' large guilds overall');
+            $this->logger->debug('sending ' . count($chunks) . ' chunks with ' . count($this->largeGuilds) . ' large guilds overall');
             $this->largeSent = array_merge($this->largeGuilds, $this->largeSent);
             $this->largeGuilds = [];
 
@@ -936,7 +936,7 @@ class Discord
                     return;
                 }
 
-                $this->logger->debug('sending chunk with '.count($chunk).' large guilds');
+                $this->logger->debug('sending chunk with ' . count($chunk) . ' large guilds');
 
                 foreach ($chunk as $guild_id) {
                     $payload = [
@@ -1017,7 +1017,7 @@ class Discord
     {
         // Wait until payload count has been reset
         // Keep 5 payloads for heartbeats as required
-        if ($this->payloadCount >= 115 && ! $force) {
+        if ($this->payloadCount >= 115 && !$force) {
             $this->logger->debug('payload not sent, waiting', ['payload' => $data]);
             $this->once('payload_count_reset', function () use ($data) {
                 $this->send($data);
@@ -1063,17 +1063,17 @@ class Discord
     {
         $idle = $idle ? time() * 1000 : null;
 
-        if (! is_null($activity)) {
+        if (!is_null($activity)) {
             $activity = $activity->getRawAttributes();
 
-            if (! in_array($activity['type'], [Activity::TYPE_PLAYING, Activity::TYPE_STREAMING, Activity::TYPE_LISTENING, Activity::TYPE_WATCHING, Activity::TYPE_COMPETING])) {
+            if (!in_array($activity['type'], [Activity::TYPE_PLAYING, Activity::TYPE_STREAMING, Activity::TYPE_LISTENING, Activity::TYPE_WATCHING, Activity::TYPE_COMPETING])) {
                 throw new \Exception("The given activity type ({$activity['type']}) is invalid.");
 
                 return;
             }
         }
 
-        if (! array_search($status, ['online', 'dnd', 'idle', 'invisible', 'offline'])) {
+        if (!array_search($status, ['online', 'dnd', 'idle', 'invisible', 'offline'])) {
             $status = 'online';
         }
 
@@ -1226,7 +1226,7 @@ class Discord
             ];
 
             $query = http_build_query($params);
-            $this->gateway = trim($gateway, '/').'/?'.$query;
+            $this->gateway = trim($gateway, '/') . '/?' . $query;
 
             $deferred->resolve(['gateway' => $this->gateway, 'session' => (array) $session]);
         };
@@ -1316,8 +1316,8 @@ class Discord
             $validIntents = Intents::getValidIntents();
 
             foreach ($options['intents'] as $idx => $i) {
-                if (! in_array($i, $validIntents)) {
-                    throw new IntentException('Given intent at index '.$idx.' is invalid.');
+                if (!in_array($i, $validIntents)) {
+                    throw new IntentException('Given intent at index ' . $idx . ' is invalid.');
                 }
 
                 $intent |= $i;
@@ -1328,9 +1328,9 @@ class Discord
 
         $options['socket_options']['happy_eyeballs'] = false; //Discord doesn't use IPv6
 
-        if ($options['loadAllMembers'] && ! ($options['intents'] & Intents::GUILD_MEMBERS)) {
-            throw new IntentException('You have enabled the `loadAllMembers` option but have not enabled the required `GUILD_MEMBERS` intent.'.
-            'See the documentation on the `loadAllMembers` property for more information: http://discord-php.github.io/DiscordPHP/#basics');
+        if ($options['loadAllMembers'] && !($options['intents'] & Intents::GUILD_MEMBERS)) {
+            throw new IntentException('You have enabled the `loadAllMembers` option but have not enabled the required `GUILD_MEMBERS` intent.' .
+                'See the documentation on the `loadAllMembers` property for more information: http://discord-php.github.io/DiscordPHP/#basics');
         }
 
         // Discord doesn't currently support IPv6

@@ -313,9 +313,9 @@ class Thread extends Part
         return $this->http->get(Endpoint::bind(Endpoint::CHANNEL_PINS, $this->id))
             ->then(function ($responses) {
                 $messages = Collection::for(Message::class);
-                
+
                 foreach ($responses as $response) {
-                    if (! $message = $this->messages->get('id', $response->id)) {
+                    if (!$message = $this->messages->get('id', $response->id)) {
                         $message = $this->factory->create(Message::class, $response, true);
                     }
 
@@ -335,7 +335,7 @@ class Thread extends Part
      */
     public function deleteMessages($messages): ExtendedPromiseInterface
     {
-        if (! is_array($messages) && ! ($messages instanceof Traversable)) {
+        if (!is_array($messages) && !($messages instanceof Traversable)) {
             return \React\Promise\reject(new \Exception('$messages must be an array or implement Traversable.'));
         }
 
@@ -392,9 +392,11 @@ class Thread extends Part
 
         $options = $resolver->resolve($options);
 
-        if (isset($options['before'], $options['after']) ||
+        if (
+            isset($options['before'], $options['after']) ||
             isset($options['before'], $options['around']) ||
-            isset($options['around'], $options['after'])) {
+            isset($options['around'], $options['after'])
+        ) {
             return \React\Promise\reject(new \Exception('Can only specify one of before, after and around.'));
         }
 
@@ -417,7 +419,7 @@ class Thread extends Part
             $messages = new Collection();
 
             foreach ($responses as $response) {
-                if (! $message = $this->messages->get('id', $response->id)) {
+                if (!$message = $this->messages->get('id', $response->id)) {
                     $message = $this->factory->create(Message::class, $response, true);
                     $this->messages->push($message);
                 }
@@ -462,7 +464,7 @@ class Thread extends Part
      */
     public function unpinMessage(Message $message): ExtendedPromiseInterface
     {
-        if (! $message->pinned) {
+        if (!$message->pinned) {
             return \React\Promise\reject(new \Exception('This message is not pinned.'));
         }
 
@@ -494,7 +496,7 @@ class Thread extends Part
     public function sendMessage($message, bool $tts = false, $embed = null, $allowed_mentions = null, ?Message $replyTo = null): ExtendedPromiseInterface
     {
         // Backwards compatible support for old `sendMessage` function signature.
-        if (! ($message instanceof MessageBuilder)) {
+        if (!($message instanceof MessageBuilder)) {
             $message = MessageBuilder::new()
                 ->setContent($message);
 
@@ -577,7 +579,7 @@ class Thread extends Part
                     $this->discord->removeListener(Event::MESSAGE_CREATE, $eventHandler);
                     $deferred->resolve($messages);
 
-                    if (! is_null($timer)) {
+                    if (!is_null($timer)) {
                         $this->discord->getLoop()->cancelTimer($timer);
                     }
                 }
@@ -607,7 +609,7 @@ class Thread extends Part
             'parent_id' => $this->parent_id,
         ];
     }
-    
+
     /**
      * Returns a formatted mention.
      *

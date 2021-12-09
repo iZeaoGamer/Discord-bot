@@ -54,11 +54,11 @@ class Embed extends Part
      */
     protected function getTimestampAttribute(): Carbon
     {
-        if (! array_key_exists('timestamp', $this->attributes)) {
+        if (!array_key_exists('timestamp', $this->attributes)) {
             return Carbon::now();
         }
 
-        if (! empty($this->attributes['timestamp'])) {
+        if (!empty($this->attributes['timestamp'])) {
             return Carbon::parse($this->attributes['timestamp']);
         }
     }
@@ -122,12 +122,12 @@ class Embed extends Part
     {
         $fields = new Collection([], 'name', Field::class);
 
-        if (! array_key_exists('fields', $this->attributes)) {
+        if (!array_key_exists('fields', $this->attributes)) {
             return $fields;
         }
 
         foreach ($this->attributes['fields'] as $field) {
-            if (! ($field instanceof Field)) {
+            if (!($field instanceof Field)) {
                 $field = $this->factory->create(Field::class, $field, true);
             }
 
@@ -191,8 +191,8 @@ class Embed extends Part
      */
     protected function setTypeAttribute($type)
     {
-        if (! in_array($type, $this->getEmbedTypes())) {
-            throw new \InvalidArgumentException('Given type "'.$type.'" is not a valid embed type.');
+        if (!in_array($type, $this->getEmbedTypes())) {
+            throw new \InvalidArgumentException('Given type "' . $type . '" is not a valid embed type.');
         }
 
         $this->attributes['type'] = $type;
@@ -421,7 +421,7 @@ class Embed extends Part
      */
     public function setTimestamp(?int $timestamp = null)
     {
-        $this->timestamp = (new Carbon(($timestamp !== null ? '@'.$timestamp : 'now')))->format('c');
+        $this->timestamp = (new Carbon(($timestamp !== null ? '@' . $timestamp : 'now')))->format('c');
 
         return $this;
     }
@@ -449,8 +449,7 @@ class Embed extends Part
      */
     protected function exceedsOverallLimit(int $addition): bool
     {
-        $total = (
-            poly_strlen(($this->title ?? '')) +
+        $total = (poly_strlen(($this->title ?? '')) +
             poly_strlen(($this->description ?? '')) +
             poly_strlen(($this->footer['text'] ?? '')) +
             poly_strlen(($this->author['name'] ?? '')) +
@@ -480,12 +479,12 @@ class Embed extends Part
             return $color;
         }
 
-        if (! is_array($color)) {
+        if (!is_array($color)) {
             return hexdec((str_replace('#', '', (string) $color)));
         }
 
         if (count($color) < 1) {
-            throw new \InvalidArgumentException('Color "'.var_export($color, true).'" is not resolvable');
+            throw new \InvalidArgumentException('Color "' . var_export($color, true) . '" is not resolvable');
         }
 
         return (($color[0] << 16) + (($color[1] ?? 0) << 8) + ($color[2] ?? 0));
@@ -502,7 +501,7 @@ class Embed extends Part
      */
     private function attributeHelper($key, $class)
     {
-        if (! array_key_exists($key, $this->attributes)) {
+        if (!array_key_exists($key, $this->attributes)) {
             return $this->factory->create($class);
         }
 

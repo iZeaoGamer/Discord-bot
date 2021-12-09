@@ -102,7 +102,7 @@ class DiscordCommandClient extends Discord
 
         if ($this->commandClientOptions['defaultHelpCommand']) {
             $this->registerCommand('help', function ($message, $args) {
-                $prefix = str_replace((string) $this->user, '@'.$this->username, $this->commandClientOptions['prefix']);
+                $prefix = str_replace((string) $this->user, '@' . $this->username, $this->commandClientOptions['prefix']);
                 $fullCommandString = implode(' ', $args);
 
                 if (count($args) > 0) {
@@ -122,15 +122,15 @@ class DiscordCommandClient extends Discord
 
                     $embed = new Embed($this);
                     $embed->setAuthor($this->commandClientOptions['name'], $this->client->user->avatar)
-                        ->setTitle($prefix.$fullCommandString.'\'s Help')
-                        ->setDescription(! empty($help['longDescription']) ? $help['longDescription'] : $help['description'])
+                        ->setTitle($prefix . $fullCommandString . '\'s Help')
+                        ->setDescription(!empty($help['longDescription']) ? $help['longDescription'] : $help['description'])
                         ->setFooter($this->commandClientOptions['name']);
 
-                    if (! empty($help['usage'])) {
-                        $embed->addFieldValues('Usage', '``'.$help['usage'].'``', true);
+                    if (!empty($help['usage'])) {
+                        $embed->addFieldValues('Usage', '``' . $help['usage'] . '``', true);
                     }
 
-                    if (! empty($this->aliases)) {
+                    if (!empty($this->aliases)) {
                         $aliasesString = '';
                         foreach ($this->aliases as $alias => $command) {
                             if ($command != $commandString) {
@@ -140,12 +140,12 @@ class DiscordCommandClient extends Discord
                             $aliasesString .= "{$alias}\r\n";
                         }
 
-                        if (! empty($aliasesString)) {
+                        if (!empty($aliasesString)) {
                             $embed->addFieldValues('Aliases', $aliasesString, true);
                         }
                     }
 
-                    if (! empty($help['subCommandsHelp'])) {
+                    if (!empty($help['subCommandsHelp'])) {
                         foreach ($help['subCommandsHelp'] as $subCommandHelp) {
                             $embed->addFieldValues($subCommandHelp['command'], $subCommandHelp['description'], true);
                         }
@@ -171,7 +171,7 @@ class DiscordCommandClient extends Discord
                         'value' => $help['description'],
                         'inline' => true,
                     ];
-                    $commandsDescription .= "\n\n`".$help['command']."`\n".$help['description'];
+                    $commandsDescription .= "\n\n`" . $help['command'] . "`\n" . $help['description'];
 
                     foreach ($help['subCommandsHelp'] as $subCommandHelp) {
                         $embedfields[] = [
@@ -179,19 +179,18 @@ class DiscordCommandClient extends Discord
                             'value' => $subCommandHelp['description'],
                             'inline' => true,
                         ];
-                        $commandsDescription .= "\n\n`".$subCommandHelp['command']."`\n".$subCommandHelp['description'];
+                        $commandsDescription .= "\n\n`" . $subCommandHelp['command'] . "`\n" . $subCommandHelp['description'];
                     }
                 }
                 // Use embed fields in case commands count is below limit
                 if (count($embedfields) <= 25) {
-                    foreach ($embedfields as $field)
-                    {
+                    foreach ($embedfields as $field) {
                         $embed->addField($field);
                     }
                     $commandsDescription = '';
                 }
 
-                $embed->setDescription(substr($this->commandClientOptions['description'].$commandsDescription, 0, 2048));
+                $embed->setDescription(substr($this->commandClientOptions['description'] . $commandsDescription, 0, 2048));
 
                 $message->channel->sendEmbed($embed);
             }, [
@@ -261,7 +260,7 @@ class DiscordCommandClient extends Discord
      */
     public function unregisterCommand(string $command): void
     {
-        if (! array_key_exists($command, $this->commands)) {
+        if (!array_key_exists($command, $this->commands)) {
             throw new \Exception("A command with the name {$command} does not exist.");
         }
 
@@ -287,7 +286,7 @@ class DiscordCommandClient extends Discord
      */
     public function unregisterCommandAlias(string $alias): void
     {
-        if (! array_key_exists($alias, $this->aliases)) {
+        if (!array_key_exists($alias, $this->aliases)) {
             throw new \Exception("A command alias with the name {$alias} does not exist.");
         }
 
@@ -330,13 +329,13 @@ class DiscordCommandClient extends Discord
             $callable = function ($message) use ($callable) {
                 return $callable;
             };
-        } elseif (is_array($callable) && ! is_callable($callable)) {
+        } elseif (is_array($callable) && !is_callable($callable)) {
             $callable = function ($message) use ($callable) {
                 return $callable[array_rand($callable)];
             };
         }
 
-        if (! is_callable($callable)) {
+        if (!is_callable($callable)) {
             throw new \Exception('The callable parameter must be a string, array or callable.');
         }
 
@@ -387,7 +386,7 @@ class DiscordCommandClient extends Discord
 
         $options = $resolver->resolve($options);
 
-        if (! empty($options['usage'])) {
+        if (!empty($options['usage'])) {
             $options['usage'] .= ' ';
         }
 
@@ -422,7 +421,7 @@ class DiscordCommandClient extends Discord
                 'prefix' => '@mention ',
                 'prefixes' => [],
                 'name' => '<UsernamePlaceholder>',
-                'description' => 'A bot made with DiscordPHP '.self::VERSION.'.',
+                'description' => 'A bot made with DiscordPHP ' . self::VERSION . '.',
                 'defaultHelpCommand' => true,
                 'discordOptions' => [],
                 'caseInsensitiveCommands' => false,

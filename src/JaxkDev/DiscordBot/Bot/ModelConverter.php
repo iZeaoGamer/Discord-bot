@@ -75,11 +75,11 @@ abstract class ModelConverter
 
     static function genModelInteraction(DiscordInteraction $interact, MessageBuilder $builder = null, bool $ephemeral = false): Interaction
     {
-    
+
         if ($builder !== null) {
-            if(!$interact->hasResponded()){
-            $interact->updateMessage($builder);
-            }else{
+            if (!$interact->hasResponded()) {
+                $interact->updateMessage($builder);
+            } else {
                 $interact->editFollowUpMessage($builder, $interact->message->id);
             }
         }

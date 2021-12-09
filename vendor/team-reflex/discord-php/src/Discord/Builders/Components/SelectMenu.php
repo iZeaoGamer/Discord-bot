@@ -276,36 +276,37 @@ class SelectMenu extends Component
             } else {
                 print_r("Custom ID: {$interaction->data->custom_id} is not the same as {$this->custom_id}!");
             }
-            //   if ($interaction->data->component_type == Component::TYPE_SELECT_MENU) {
-            $options = Collection::for(Option::class, null);
 
-            foreach ($this->options as $option) {
-                if (in_array($option->getValue(), $interaction->data->values)) {
-                    $options->push($option);
+            if ($interaction->data->component_type == Component::TYPE_SELECT_MENU) {
+                $options = Collection::for(Option::class, null);
+
+                foreach ($this->options as $option) {
+                    if (in_array($option->getValue(), $interaction->data->values)) {
+                        $options->push($option);
+                    }
+                }
+
+                $response = $callback($interaction, $options);
+                $ack = function () use ($interaction) {
+                    // attempt to acknowledge interaction if it has not already been responded to.
+                    try {
+                        print_r("Interaction was acknowledged.");
+                        $interaction->acknowledge();
+                    } catch (\Throwable $e) {
+                        print_r("Failed to interact. Error: {$e->getMessage()}");
+                    }
+                };
+
+                if ($response instanceof PromiseInterface) {
+                    $response->then($ack);
+                } else {
+                    $ack();
+                }
+
+                if ($oneOff) {
+                    $this->removeListener();
                 }
             }
-
-            $response = $callback($interaction, $options);
-            $ack = function () use ($interaction) {
-                // attempt to acknowledge interaction if it has not already been responded to.
-                try {
-                    print_r("Interaction was acknowledged.");
-                    $interaction->acknowledge();
-                } catch (\Throwable $e) {
-                    print_r("Failed to interact. Error: {$e->getMessage()}");
-                }
-            };
-
-            if ($response instanceof PromiseInterface) {
-                $response->then($ack);
-            } else {
-                $ack();
-            }
-
-            if ($oneOff) {
-                $this->removeListener();
-            }
-            //}
         };
 
         $discord->on(Event::INTERACTION_CREATE, $this->listener);

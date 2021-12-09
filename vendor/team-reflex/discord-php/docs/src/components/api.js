@@ -61,7 +61,7 @@ export default class Api extends Component {
     });
   }
 
-  renderNavigation([ head, nodes ]) {
+  renderNavigation([head, nodes]) {
     if (nodes.length > 1) {
       return (
         <NodeList

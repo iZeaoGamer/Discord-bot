@@ -117,7 +117,7 @@ abstract class Permission extends Part
         parent::__construct($discord, $attributes, $created);
 
         foreach ($this->fillable as $permission) {
-            if (! isset($this->attributes[$permission])) {
+            if (!isset($this->attributes[$permission])) {
                 $this->attributes[$permission] = false;
             }
         }

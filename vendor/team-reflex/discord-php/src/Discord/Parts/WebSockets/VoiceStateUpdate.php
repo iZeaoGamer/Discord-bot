@@ -86,7 +86,7 @@ class VoiceStateUpdate extends Part
      */
     protected function getChannelAttribute(): ?Channel
     {
-        if (! $this->channel_id) {
+        if (!$this->channel_id) {
             return null;
         }
 
@@ -124,7 +124,7 @@ class VoiceStateUpdate extends Part
     {
         return $this->discord->guilds->get('id', $this->guild_id);
     }
-    
+
     /**
      * Gets the request_to_speak_timestamp attribute.
      *

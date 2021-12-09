@@ -92,7 +92,7 @@ class Webhook extends Part
      */
     protected function getUserAttribute(): ?Part
     {
-        if (! isset($this->attributes['user'])) {
+        if (!isset($this->attributes['user'])) {
             return null;
         }
 

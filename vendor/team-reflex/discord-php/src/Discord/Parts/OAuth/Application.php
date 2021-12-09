@@ -45,7 +45,7 @@ class Application extends Part
         if (isset($this->attributes['owner'])) {
             return $this->factory->create(User::class, $this->attributes['owner'], true);
         }
-        
+
         return null;
     }
 

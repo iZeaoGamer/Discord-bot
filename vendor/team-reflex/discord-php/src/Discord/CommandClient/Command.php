@@ -181,7 +181,7 @@ class Command
      */
     public function unregisterSubCommand(string $command): void
     {
-        if (! array_key_exists($command, $this->subCommands)) {
+        if (!array_key_exists($command, $this->subCommands)) {
             throw new \Exception("A sub-command with the name {$command} does not exist.");
         }
 
@@ -211,7 +211,7 @@ class Command
      */
     public function unregisterSubCommandAlias(string $alias): void
     {
-        if (! array_key_exists($alias, $this->subCommandAliases)) {
+        if (!array_key_exists($alias, $this->subCommandAliases)) {
             throw new \Exception("A sub-command alias with the name {$alias} does not exist.");
         }
 
@@ -240,7 +240,7 @@ class Command
             return $this->subCommands[$this->subCommandAliases[$subCommand]]->handle($message, $args);
         }
 
-        if (! is_null($subCommand)) {
+        if (!is_null($subCommand)) {
             array_unshift($args, $originalSubCommand);
         }
 
@@ -270,11 +270,11 @@ class Command
         $subCommandsHelp = [];
 
         foreach ($this->subCommands as $command) {
-            $subCommandsHelp[] = $command->getHelp($prefix.$this->command.' ');
+            $subCommandsHelp[] = $command->getHelp($prefix . $this->command . ' ');
         }
 
         return [
-            'command' => $prefix.$this->command,
+            'command' => $prefix . $this->command,
             'description' => $this->description,
             'longDescription' => $this->longDescription,
             'usage' => $this->usage,

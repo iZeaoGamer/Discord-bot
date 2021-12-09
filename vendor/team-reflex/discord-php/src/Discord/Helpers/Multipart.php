@@ -96,7 +96,7 @@ class Multipart
      */
     public function getContentType()
     {
-        return 'multipart/form-data; boundary='.substr($this->boundary, 2);
+        return 'multipart/form-data; boundary=' . substr($this->boundary, 2);
     }
 
     /**
@@ -109,7 +109,7 @@ class Multipart
         $body = '';
 
         foreach ($this->fields as $field) {
-            $body .= $this->boundary."\n";
+            $body .= $this->boundary . "\n";
             $body .= "Content-Disposition: form-data; name={$field['name']}";
 
             if (isset($field['filename'])) {
@@ -120,14 +120,14 @@ class Multipart
 
             if (isset($field['headers'])) {
                 foreach ($field['headers'] as $header => $value) {
-                    $body .= $header.': '.$value."\n";
+                    $body .= $header . ': ' . $value . "\n";
                 }
             }
 
-            $body .= "\n".$field['content']."\n";
+            $body .= "\n" . $field['content'] . "\n";
         }
 
-        $body .= $this->boundary."--\n";
+        $body .= $this->boundary . "--\n";
 
         return $body;
     }

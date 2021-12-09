@@ -120,7 +120,7 @@ class Collection implements ArrayAccess, JsonSerializable, IteratorAggregate, Co
     public function set($offset, $value)
     {
         // Don't insert elements that are not of type class.
-        if (! is_null($this->class) && ! ($value instanceof $this->class)) {
+        if (!is_null($this->class) && !($value instanceof $this->class)) {
             return;
         }
 
@@ -192,7 +192,7 @@ class Collection implements ArrayAccess, JsonSerializable, IteratorAggregate, Co
             return $this;
         }
 
-        if (! is_null($this->class) && ! ($item instanceof $this->class)) {
+        if (!is_null($this->class) && !($item instanceof $this->class)) {
             return $this;
         }
 
@@ -251,7 +251,7 @@ class Collection implements ArrayAccess, JsonSerializable, IteratorAggregate, Co
     public function has(...$keys): bool
     {
         foreach ($keys as $key) {
-            if (! isset($this->items[$key])) {
+            if (!isset($this->items[$key])) {
                 return false;
             }
         }

@@ -74,8 +74,7 @@ module.exports = {
             title: (node) => node.frontmatter.title,
             name: (node) => node.frontmatter.name,
             slug: (node) =>
-              `#${node.frontmatter.scope ? node.frontmatter.scope + "-" : ""}${
-                node.fields.idName
+              `#${node.frontmatter.scope ? node.frontmatter.scope + "-" : ""}${node.fields.idName
               }`,
             route: (node) => `${node.frontmatter.route}`,
             method: (node) => `${node.frontmatter.example}`,

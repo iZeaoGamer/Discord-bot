@@ -117,7 +117,7 @@ class TypingStart extends Part
      */
     protected function getGuildAttribute(): ?Guild
     {
-        if (! $this->guild_id) {
+        if (!$this->guild_id) {
             return null;
         }
 

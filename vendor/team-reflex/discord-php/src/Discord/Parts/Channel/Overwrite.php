@@ -41,7 +41,7 @@ class Overwrite extends Part
      */
     protected function setAllowAttribute($allow): void
     {
-        if (! ($allow instanceof ChannelPermission)) {
+        if (!($allow instanceof ChannelPermission)) {
             $allow = $this->factory->create(ChannelPermission::class, ['bitwise' => $allow], true);
         }
 
@@ -56,7 +56,7 @@ class Overwrite extends Part
      */
     protected function setDenyAttribute($deny): void
     {
-        if (! ($deny instanceof ChannelPermission)) {
+        if (!($deny instanceof ChannelPermission)) {
             $deny = $this->factory->create(ChannelPermission::class, ['bitwise' => $deny], true);
         }
 

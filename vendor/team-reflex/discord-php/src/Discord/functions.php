@@ -176,7 +176,7 @@ function poly_strlen($str)
  */
 function imageToBase64(string $filepath): string
 {
-    if (! file_exists($filepath)) {
+    if (!file_exists($filepath)) {
         throw new \InvalidArgumentException('The given filepath does not exist.');
     }
 
@@ -188,7 +188,7 @@ function imageToBase64(string $filepath): string
 
     $contents = file_get_contents($filepath);
 
-    return "data:{$mimetype};base64,".base64_encode($contents);
+    return "data:{$mimetype};base64," . base64_encode($contents);
 }
 
 /**
@@ -204,14 +204,14 @@ function getSnowflakeTimestamp(string $snowflake)
     if (\PHP_INT_SIZE === 4) { //x86
         $binary = \str_pad(\base_convert($snowflake, 10, 2), 64, 0, \STR_PAD_LEFT);
         $time = \base_convert(\substr($binary, 0, 42), 2, 10);
-        $timestamp = (float) ((((int) \substr($time, 0, -3)) + 1420070400).'.'.\substr($time, -3));
+        $timestamp = (float) ((((int) \substr($time, 0, -3)) + 1420070400) . '.' . \substr($time, -3));
         $workerID = (int) \base_convert(\substr($binary, 42, 5), 2, 10);
         $processID = (int) \base_convert(\substr($binary, 47, 5), 2, 10);
         $increment = (int) \base_convert(\substr($binary, 52, 12), 2, 10);
     } else { //x64
         $snowflake = (int) $snowflake;
         $time = (string) ($snowflake >> 22);
-        $timestamp = (float) ((((int) \substr($time, 0, -3)) + 1420070400).'.'.\substr($time, -3));
+        $timestamp = (float) ((((int) \substr($time, 0, -3)) + 1420070400) . '.' . \substr($time, -3));
         $workerID = ($snowflake & 0x3E0000) >> 17;
         $processID = ($snowflake & 0x1F000) >> 12;
         $increment = ($snowflake & 0xFFF);

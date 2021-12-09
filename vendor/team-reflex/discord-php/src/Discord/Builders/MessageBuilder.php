@@ -37,7 +37,7 @@ class MessageBuilder implements JsonSerializable
      * @var string|null
      */
     private $content;
-    
+
     /**
      * Whether the message is text-to-speech.
      *
@@ -205,7 +205,7 @@ class MessageBuilder implements JsonSerializable
      */
     public function addFile(string $filepath, ?string $filename = null): self
     {
-        if (! file_exists($filepath)) {
+        if (!file_exists($filepath)) {
             throw new FileNotFoundException("File does not exist at path {$filepath}.");
         }
 
@@ -262,7 +262,7 @@ class MessageBuilder implements JsonSerializable
      */
     public function addComponent(Component $component): self
     {
-        if (! ($component instanceof ActionRow || $component instanceof SelectMenu)) {
+        if (!($component instanceof ActionRow || $component instanceof SelectMenu)) {
             throw new InvalidArgumentException('You can only add action rows and select menus as components to messages. Put your other components inside an action row.');
         }
 
@@ -329,7 +329,7 @@ class MessageBuilder implements JsonSerializable
     public function setAllowedMentions(array $allowed_mentions)
     {
         $this->allowed_mentions = $allowed_mentions;
-        
+
         return $this;
     }
 
@@ -385,7 +385,7 @@ class MessageBuilder implements JsonSerializable
 
         foreach ($this->files as $idx => [$filename, $content]) {
             $fields[] = [
-                'name' => 'file'.$idx,
+                'name' => 'file' . $idx,
                 'content' => $content,
                 'filename' => $filename,
             ];

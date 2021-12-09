@@ -211,7 +211,7 @@ class MessageReaction extends Part
 
         return null;
     }
-    
+
     /**
      * Delete this reaction
      *

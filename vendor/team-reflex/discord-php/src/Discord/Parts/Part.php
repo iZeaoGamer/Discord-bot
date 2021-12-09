@@ -194,7 +194,7 @@ abstract class Part implements ArrayAccess, JsonSerializable
      */
     private function checkForMutator(string $key, string $type)
     {
-        $str = $type.\Discord\studly($key).'Attribute';
+        $str = $type . \Discord\studly($key) . 'Attribute';
 
         if (is_callable([$this, $str])) {
             return $str;
@@ -214,7 +214,7 @@ abstract class Part implements ArrayAccess, JsonSerializable
     private function getAttribute(string $key)
     {
         if (isset($this->repositories[$key])) {
-            if (! isset($this->repositories_cache[$key])) {
+            if (!isset($this->repositories_cache[$key])) {
                 $this->repositories_cache[$key] = $this->factory->create($this->repositories[$key], $this->getRepositoryAttributes());
             }
 
@@ -225,7 +225,7 @@ abstract class Part implements ArrayAccess, JsonSerializable
             return $this->{$str}();
         }
 
-        if (! isset($this->attributes[$key])) {
+        if (!isset($this->attributes[$key])) {
             return;
         }
 

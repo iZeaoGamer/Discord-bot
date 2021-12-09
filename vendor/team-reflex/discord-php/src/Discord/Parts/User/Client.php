@@ -86,7 +86,7 @@ class Client extends Part
      */
     public function setAvatar(string $filepath): bool
     {
-        if (! file_exists($filepath)) {
+        if (!file_exists($filepath)) {
             throw new FileNotFoundException("File does not exist at path {$filepath}.");
         }
 

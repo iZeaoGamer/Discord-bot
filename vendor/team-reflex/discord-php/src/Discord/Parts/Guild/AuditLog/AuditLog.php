@@ -125,7 +125,7 @@ class AuditLog extends Part
     {
         $types = array_values((new ReflectionClass(Entry::class))->getConstants());
 
-        if (! in_array($action_type, $types)) {
+        if (!in_array($action_type, $types)) {
             throw new InvalidArgumentException("The given action type `{$action_type}` is not valid.");
         }
 

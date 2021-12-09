@@ -257,7 +257,7 @@ class Guild extends Part
      */
     protected function getJoinedAtAttribute()
     {
-        if (! array_key_exists('joined_at', $this->attributes)) {
+        if (!array_key_exists('joined_at', $this->attributes)) {
             return null;
         }
 
@@ -375,7 +375,7 @@ class Guild extends Part
     {
         return in_array('PREVIEW_ENABLED', $this->features);
     }
-    
+
     protected function getFeatureVanityUrlAttribute(): bool
     {
         return in_array('VANITY_URL', $this->features);
@@ -438,7 +438,7 @@ class Guild extends Part
      */
     public function getVoiceRegions(): ExtendedPromiseInterface
     {
-        if (! is_null($this->regions)) {
+        if (!is_null($this->regions)) {
             return \React\Promise\resolve($this->regions);
         }
 
@@ -517,7 +517,7 @@ class Guild extends Part
                 return $region->id;
             })->toArray();
 
-            if (! in_array($this->region, $regions)) {
+            if (!in_array($this->region, $regions)) {
                 return self::REGION_DEFAULT;
             }
 
@@ -545,12 +545,12 @@ class Guild extends Part
             'before',
             'limit',
         ])
-        ->setAllowedTypes('user_id', ['string', 'int', Member::class, User::class])
-        ->setAllowedTypes('action_type', 'int')
-        ->setAllowedTypes('before', ['string', 'int', Entry::class])
-        ->setAllowedTypes('limit', 'int')
-        ->setAllowedValues('action_type', array_values((new ReflectionClass(Entry::class))->getConstants()))
-        ->setAllowedValues('limit', range(1, 100));
+            ->setAllowedTypes('user_id', ['string', 'int', Member::class, User::class])
+            ->setAllowedTypes('action_type', 'int')
+            ->setAllowedTypes('before', ['string', 'int', Entry::class])
+            ->setAllowedTypes('limit', 'int')
+            ->setAllowedValues('action_type', array_values((new ReflectionClass(Entry::class))->getConstants()))
+            ->setAllowedValues('limit', range(1, 100));
 
         $options = $resolver->resolve($options);
 
@@ -619,10 +619,10 @@ class Guild extends Part
             'query',
             'limit',
         ])
-        ->setDefaults(['limit' => 1])
-        ->setAllowedTypes('query', 'string')
-        ->setAllowedTypes('limit', 'int')
-        ->setAllowedValues('limit', range(1, 1000));
+            ->setDefaults(['limit' => 1])
+            ->setAllowedTypes('query', 'string')
+            ->setAllowedTypes('limit', 'int')
+            ->setAllowedValues('limit', range(1, 1000));
 
         $options = $resolver->resolve($options);
 
@@ -634,7 +634,7 @@ class Guild extends Part
             $members = new Collection();
 
             foreach ($responses as $response) {
-                if (! $member = $this->members->get('id', $response->user->id)) {
+                if (!$member = $this->members->get('id', $response->user->id)) {
                     $member = $this->factory->create(Member::class, $response, true);
                     $this->members->push($member);
                 }

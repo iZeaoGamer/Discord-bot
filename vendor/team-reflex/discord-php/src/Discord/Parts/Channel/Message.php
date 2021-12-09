@@ -213,7 +213,7 @@ class Message extends Part
         }
 
         foreach ($this->attributes['mention_channels'] ?? [] as $mention_channel) {
-            if (! $channel = $this->discord->getChannel($mention_channel->id)) {
+            if (!$channel = $this->discord->getChannel($mention_channel->id)) {
                 $channel = $this->factory->create(Channel::class, $mention_channel, true);
             }
 
@@ -316,7 +316,7 @@ class Message extends Part
         $users = new Collection();
 
         foreach ($this->attributes['mentions'] ?? [] as $mention) {
-            if (! $user = $this->discord->users->get('id', $mention->id)) {
+            if (!$user = $this->discord->users->get('id', $mention->id)) {
                 $user = $this->factory->create(User::class, $mention, true);
             }
             $users->push($user);
@@ -354,7 +354,7 @@ class Message extends Part
 
         return null;
     }
-    
+
     /**
      * Returns the member attribute.
      *
@@ -480,7 +480,7 @@ class Message extends Part
 
         return $stickers;
     }
-    
+
     /**
      * Returns the message link attribute.
      *
@@ -489,7 +489,7 @@ class Message extends Part
     public function getLinkAttribute(): ?string
     {
         if ($this->id && $this->channel_id) {
-            return 'https://discord.com/channels/'.($this->guild_id ?? '@me').'/'.$this->channel_id.'/'.$this->id;
+            return 'https://discord.com/channels/' . ($this->guild_id ?? '@me') . '/' . $this->channel_id . '/' . $this->id;
         }
     }
 
@@ -503,22 +503,22 @@ class Message extends Part
      */
     public function startThread(string $name, int $auto_archive_duration = 1440): ExtendedPromiseInterface
     {
-        if (! $this->guild) {
+        if (!$this->guild) {
             return reject(new RuntimeException('You can only start threads on guild text channels.'));
         }
 
-        if (! in_array($auto_archive_duration, [60, 1440, 4320, 10080])) {
+        if (!in_array($auto_archive_duration, [60, 1440, 4320, 10080])) {
             return reject(new InvalidArgumentException('`auto_archive_duration` must be one of 60, 1440, 4320, 10080.'));
         }
 
         switch ($auto_archive_duration) {
             case 4320:
-                if (! $this->guild->feature_three_day_thread_archive) {
+                if (!$this->guild->feature_three_day_thread_archive) {
                     return reject(new RuntimeException('Guild does not have access to three day thread archive.'));
                 }
                 break;
             case 10080:
-                if (! $this->guild->feature_seven_day_thread_archive) {
+                if (!$this->guild->feature_seven_day_thread_archive) {
                     return reject(new RuntimeException('Guild does not have access to seven day thread archive.'));
                 }
                 break;
@@ -723,7 +723,7 @@ class Message extends Part
                     $this->discord->removeListener(Event::MESSAGE_REACTION_ADD, $eventHandler);
                     $deferred->resolve($reactions);
 
-                    if (! is_null($timer)) {
+                    if (!is_null($timer)) {
                         $this->discord->getLoop()->cancelTimer($timer);
                     }
                 }

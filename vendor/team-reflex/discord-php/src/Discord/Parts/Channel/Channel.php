@@ -137,7 +137,7 @@ class Channel extends Part
      */
     protected function afterConstruct(): void
     {
-        if (! array_key_exists('bitrate', $this->attributes) && $this->type != self::TYPE_TEXT) {
+        if (!array_key_exists('bitrate', $this->attributes) && $this->type != self::TYPE_TEXT) {
             $this->bitrate = 64000;
         }
     }
@@ -186,7 +186,7 @@ class Channel extends Part
 
         if (array_key_exists('recipients', $this->attributes)) {
             foreach ((array) $this->attributes['recipients'] as $recipient) {
-                if (! $user = $this->discord->users->get('id', $recipient->id)) {
+                if (!$user = $this->discord->users->get('id', $recipient->id)) {
                     $user = $this->factory->create(User::class, $recipient, true);
                 }
                 $recipients->push($user);
@@ -228,19 +228,19 @@ class Channel extends Part
     public function getPinnedMessages(): ExtendedPromiseInterface
     {
         return $this->http->get(Endpoint::bind(Endpoint::CHANNEL_PINS, $this->id))
-        ->then(function ($responses) {
-            $messages = new Collection();
+            ->then(function ($responses) {
+                $messages = new Collection();
 
-            foreach ($responses as $response) {
-                if (! $message = $this->messages->get('id', $response->id)) {
-                    $message = $this->factory->create(Message::class, $response, true);
+                foreach ($responses as $response) {
+                    if (!$message = $this->messages->get('id', $response->id)) {
+                        $message = $this->factory->create(Message::class, $response, true);
+                    }
+
+                    $messages->push($message);
                 }
 
-                $messages->push($message);
-            }
-
-            return $messages;
-        });
+                return $messages;
+            });
     }
 
     /**
@@ -289,10 +289,10 @@ class Channel extends Part
      */
     public function setOverwrite(Part $part, Overwrite $overwrite): ExtendedPromiseInterface
     {
-        if (! $this->is_private) {
+        if (!$this->is_private) {
             $botperms = $this->guild->members->offsetGet($this->discord->id)->getPermissions($this);
 
-            if (! $botperms->manage_roles) {
+            if (!$botperms->manage_roles) {
                 return reject(new NoPermissionsException('You do not have permission to edit roles in the specified channel.'));
             }
         }
@@ -312,7 +312,7 @@ class Channel extends Part
             'deny' => (string) $overwrite->deny->bitwise,
         ];
 
-        if (! $this->created) {
+        if (!$this->created) {
             $this->attributes['permission_overwrites'][] = $payload;
 
             return \React\Promise\resolve();
@@ -344,14 +344,14 @@ class Channel extends Part
      */
     public function moveMember($member): ExtendedPromiseInterface
     {
-        if (! $this->allowVoice()) {
+        if (!$this->allowVoice()) {
             return reject(new \Exception('You cannot move a member in a text channel.'));
         }
 
-        if (! $this->is_private) {
+        if (!$this->is_private) {
             $botperms = $this->guild->members->offsetGet($this->discord->id)->getPermissions($this);
 
-            if (! $botperms->move_members) {
+            if (!$botperms->move_members) {
                 return reject(new NoPermissionsException('You do not have permission to move members in the specified channel.'));
             }
         }
@@ -372,14 +372,14 @@ class Channel extends Part
      */
     public function muteMember($member): ExtendedPromiseInterface
     {
-        if (! $this->allowVoice()) {
+        if (!$this->allowVoice()) {
             return reject(new \Exception('You cannot mute a member in a text channel.'));
         }
 
-        if (! $this->is_private) {
+        if (!$this->is_private) {
             $botperms = $this->guild->members->offsetGet($this->discord->id)->getPermissions($this);
 
-            if (! $botperms->mute_members) {
+            if (!$botperms->mute_members) {
                 return reject(new NoPermissionsException('You do not have permission to mute members in the specified channel.'));
             }
         }
@@ -400,14 +400,14 @@ class Channel extends Part
      */
     public function unmuteMember($member): ExtendedPromiseInterface
     {
-        if (! $this->allowVoice()) {
+        if (!$this->allowVoice()) {
             return \React\Promise\reject(new \Exception('You cannot unmute a member in a text channel.'));
         }
 
-        if (! $this->is_private) {
+        if (!$this->is_private) {
             $botperms = $this->guild->members->offsetGet($this->discord->id)->getPermissions($this);
 
-            if (! $botperms->mute_members) {
+            if (!$botperms->mute_members) {
                 return \React\Promise\reject(new NoPermissionsException('You do not have permission to unmute members in the specified channel.'));
             }
         }
@@ -432,10 +432,10 @@ class Channel extends Part
      */
     public function createInvite($options = []): ExtendedPromiseInterface
     {
-        if (! $this->is_private) {
+        if (!$this->is_private) {
             $botperms = $this->guild->members->offsetGet($this->discord->id)->getPermissions($this);
 
-            if (! $botperms->create_instant_invite) {
+            if (!$botperms->create_instant_invite) {
                 return reject(new NoPermissionsException('You do not have permission to create an invite for the specified channel.'));
             }
         }
@@ -472,7 +472,7 @@ class Channel extends Part
      */
     public function deleteMessages($messages): ExtendedPromiseInterface
     {
-        if (! is_array($messages) && ! ($messages instanceof Traversable)) {
+        if (!is_array($messages) && !($messages instanceof Traversable)) {
             return reject(new \Exception('$messages must be an array or implement Traversable.'));
         }
 
@@ -482,7 +482,8 @@ class Channel extends Part
             return resolve();
         } elseif ($count == 1 || $this->is_private) {
             foreach ($messages as $message) {
-                if ($message instanceof Message ||
+                if (
+                    $message instanceof Message ||
                     $message = $this->messages->get('id', $message)
                 ) {
                     return $message->delete();
@@ -503,7 +504,7 @@ class Channel extends Part
 
             $promises = [];
 
-            while (! empty($messageID)) {
+            while (!empty($messageID)) {
                 $promises[] = $this->http->post(Endpoint::bind(Endpoint::CHANNEL_MESSAGES_BULK_DELETE, $this->id), ['messages' => array_slice($messageID, 0, 100)]);
                 $messageID = array_slice($messageID, 100);
             }
@@ -535,10 +536,10 @@ class Channel extends Part
      */
     public function getMessageHistory(array $options): ExtendedPromiseInterface
     {
-        if (! $this->is_private) {
+        if (!$this->is_private) {
             $botperms = $this->guild->members->offsetGet($this->discord->id)->getPermissions($this);
 
-            if (! $botperms->read_message_history) {
+            if (!$botperms->read_message_history) {
                 return reject(new NoPermissionsException('You do not have permission to read the specified channel\'s message history.'));
             }
         }
@@ -552,9 +553,11 @@ class Channel extends Part
         $resolver->setAllowedValues('limit', range(1, 100));
 
         $options = $resolver->resolve($options);
-        if (isset($options['before'], $options['after']) ||
+        if (
+            isset($options['before'], $options['after']) ||
             isset($options['before'], $options['around']) ||
-            isset($options['around'], $options['after'])) {
+            isset($options['around'], $options['after'])
+        ) {
             return reject(new \Exception('Can only specify one of before, after and around.'));
         }
 
@@ -575,7 +578,7 @@ class Channel extends Part
             $messages = new Collection();
 
             foreach ($responses as $response) {
-                if (! $message = $this->messages->get('id', $response->id)) {
+                if (!$message = $this->messages->get('id', $response->id)) {
                     $message = $this->factory->create(Message::class, $response, true);
                 }
                 $messages->push($message);
@@ -594,10 +597,10 @@ class Channel extends Part
      */
     public function pinMessage(Message $message): ExtendedPromiseInterface
     {
-        if (! $this->is_private) {
+        if (!$this->is_private) {
             $botperms = $this->guild->members->offsetGet($this->discord->id)->getPermissions($this);
 
-            if (! $botperms->manage_messages) {
+            if (!$botperms->manage_messages) {
                 return reject(new NoPermissionsException('You do not have permission to pin messages in the specified channel.'));
             }
         }
@@ -626,15 +629,15 @@ class Channel extends Part
      */
     public function unpinMessage(Message $message): ExtendedPromiseInterface
     {
-        if (! $this->is_private) {
+        if (!$this->is_private) {
             $botperms = $this->guild->members->offsetGet($this->discord->id)->getPermissions($this);
 
-            if (! $botperms->manage_messages) {
+            if (!$botperms->manage_messages) {
                 return reject(new NoPermissionsException('You do not have permission to unpin messages in the specified channel.'));
             }
         }
 
-        if (! $message->pinned) {
+        if (!$message->pinned) {
             return reject(new \Exception('This message is not pinned.'));
         }
 
@@ -677,7 +680,7 @@ class Channel extends Part
     {
         $this->attributes['permission_overwrites'] = $overwrites;
 
-        if (! is_null($overwrites)) {
+        if (!is_null($overwrites)) {
             foreach ($overwrites as $overwrite) {
                 $overwrite = (array) $overwrite;
                 $overwrite['channel_id'] = $this->id;
@@ -698,7 +701,7 @@ class Channel extends Part
      */
     public function startThread(string $name, bool $private = false, int $auto_archive_duration = 1440): ExtendedPromiseInterface
     {
-        if ($private && ! $this->guild->feature_private_threads) {
+        if ($private && !$this->guild->feature_private_threads) {
             return reject(new RuntimeException('Guild does not have access to private threads.'));
         }
 
@@ -714,18 +717,18 @@ class Channel extends Part
             return reject(new InvalidArgumentException('You cannot start a thread in this type of channel.'));
         }
 
-        if (! in_array($auto_archive_duration, [60, 1440, 4320, 10080])) {
+        if (!in_array($auto_archive_duration, [60, 1440, 4320, 10080])) {
             return reject(new InvalidArgumentException('`auto_archive_duration` must be one of 60, 1440, 4320, 10080.'));
         }
 
         switch ($auto_archive_duration) {
             case 4320:
-                if (! $this->guild->feature_three_day_thread_archive) {
+                if (!$this->guild->feature_three_day_thread_archive) {
                     return reject(new RuntimeException('Guild does not have access to three day thread archive.'));
                 }
                 break;
             case 10080:
-                if (! $this->guild->feature_seven_day_thread_archive) {
+                if (!$this->guild->feature_seven_day_thread_archive) {
                     return reject(new RuntimeException('Guild does not have access to seven day thread archive.'));
                 }
                 break;
@@ -757,7 +760,7 @@ class Channel extends Part
     public function sendMessage($message, bool $tts = false, $embed = null, $allowed_mentions = null, ?Message $replyTo = null): ExtendedPromiseInterface
     {
         // Backwards compatible support for old `sendMessage` function signature.
-        if (! ($message instanceof MessageBuilder)) {
+        if (!($message instanceof MessageBuilder)) {
             $message = MessageBuilder::new()
                 ->setContent($message);
 
@@ -778,22 +781,22 @@ class Channel extends Part
             }
         }
 
-        if (! $this->allowText()) {
+        if (!$this->allowText()) {
             return reject(new InvalidArgumentException('You can only send messages to text channels.'));
         }
 
-        if (! $this->is_private && $member = $this->guild->members->get('id', $this->discord->id)) {
+        if (!$this->is_private && $member = $this->guild->members->get('id', $this->discord->id)) {
             $botperms = $member->getPermissions($this);
 
-            if (! $botperms->send_messages) {
+            if (!$botperms->send_messages) {
                 return reject(new NoPermissionsException('You do not have permission to send messages in the specified channel.'));
             }
 
-            if ($message->getTts() && ! $botperms->send_tts_messages) {
+            if ($message->getTts() && !$botperms->send_tts_messages) {
                 return reject(new NoPermissionsException('You do not have permission to send tts messages in the specified channel.'));
             }
 
-            if ($message->numFiles() > 0 && ! $botperms->attach_files) {
+            if ($message->numFiles() > 0 && !$botperms->attach_files) {
                 return reject(new NoPermissionsException('You do not have permission to send files in the specified channel.'));
             }
         }
@@ -871,7 +874,7 @@ class Channel extends Part
      */
     public function broadcastTyping(): ExtendedPromiseInterface
     {
-        if (! $this->allowText()) {
+        if (!$this->allowText()) {
             return \React\Promise\reject(new \Exception('You cannot broadcast typing to a voice channel.'));
         }
 
@@ -913,7 +916,7 @@ class Channel extends Part
                     $this->discord->removeListener(Event::MESSAGE_CREATE, $eventHandler);
                     $deferred->resolve($messages);
 
-                    if (! is_null($timer)) {
+                    if (!is_null($timer)) {
                         $this->discord->getLoop()->cancelTimer($timer);
                     }
                 }
@@ -1005,7 +1008,7 @@ class Channel extends Part
             'guild_id' => $this->guild_id,
         ];
     }
-    
+
     /**
      * Returns a formatted mention for text channel or name of the channel.
      *

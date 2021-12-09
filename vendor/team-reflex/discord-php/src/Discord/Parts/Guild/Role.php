@@ -43,7 +43,7 @@ class Role extends Part
      */
     protected function afterConstruct(): void
     {
-        if (! isset($this->attributes['permissions'])) {
+        if (!isset($this->attributes['permissions'])) {
             $this->permissions = $this->factory->create(RolePermission::class);
         }
     }
@@ -66,7 +66,7 @@ class Role extends Part
      */
     protected function setPermissionsAttribute($permission): void
     {
-        if (! ($permission instanceof RolePermission)) {
+        if (!($permission instanceof RolePermission)) {
             $permission = $this->factory->create(RolePermission::class, ['bitwise' => $permission], true);
         }
 
@@ -139,7 +139,7 @@ class Role extends Part
             'mentionable' => $this->mentionable,
         ];
     }
-    
+
     /**
      * @inheritdoc
      */

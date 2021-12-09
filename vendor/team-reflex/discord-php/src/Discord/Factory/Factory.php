@@ -59,7 +59,7 @@ class Factory
      */
     public function create(string $class, $data = [], bool $created = false)
     {
-        if (! is_array($data)) {
+        if (!is_array($data)) {
             $data = (array) $data;
         }
 
@@ -68,7 +68,7 @@ class Factory
         } elseif (strpos($class, 'Discord\\Repository') !== false) {
             $object = $this->repository($class, $data);
         } else {
-            throw new \Exception('The class '.$class.' is not a Part or a Repository.');
+            throw new \Exception('The class ' . $class . ' is not a Part or a Repository.');
         }
 
         return $object;
