@@ -1311,7 +1311,7 @@ class CommunicationHandler
 
             $button->setListener(function (DiscordInteraction $interaction) use ($channel, $builder, $pk) {
 if(!$interaction->hasResponded()){
-                $interaction->updateMessage($builder)->then(function () use ($interaction, $pk) {
+                $interaction->acknowledge()->then(function () use ($interaction, $pk) {
 
                     $this->resolveRequest($pk->getUID(), true, "Button created.", [ModelConverter::genModelInteraction($interaction)]);
                 }, function (\Throwable $e) use ($pk) {
@@ -1402,7 +1402,7 @@ if(!$interaction->hasResponded()){
                 }
 
                 if(!$interaction->hasResponded()){
-                    $interaction->updateMessage($builder)->then(function () use ($interaction, $pk) {
+                    $interaction->acknowledge()->then(function () use ($interaction, $pk) {
     
                         $this->resolveRequest($pk->getUID(), true, "Select menu created.", [ModelConverter::genModelInteraction($interaction)]);
                     }, function (\Throwable $e) use ($pk) {
