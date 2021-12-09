@@ -1212,6 +1212,9 @@ class CommunicationHandler
                 }
                 $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $builder, $pk, $de) {
                     $builder = $builder->setReplyTo($msg);
+                    if($pk->isEphemeral()){
+                        $builder->_setFlags(64);
+                    }
                     $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
                         $interaction = $msg->interaction;
                         print_r($interaction);
@@ -1229,6 +1232,9 @@ class CommunicationHandler
                     });
                 });
             } else {
+                if($pk->isEphemeral()){
+                    $builder->_setFlags(64);
+                }
                 $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
                     $interaction = $msg->interaction;
                     print_r($interaction);
