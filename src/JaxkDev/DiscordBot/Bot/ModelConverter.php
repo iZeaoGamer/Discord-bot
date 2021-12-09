@@ -77,7 +77,11 @@ abstract class ModelConverter
     {
     
         if ($builder !== null) {
-            $interact->respondWithMessage($builder, $ephemeral);
+            if(!$interact->hasResponded()){
+            $interact->updateMessage($builder);
+            }else{
+                $interact->editFollowUpMessage($builder, $interact->message->id);
+            }
         }
         return new Interaction(
             $interact->application_id,
