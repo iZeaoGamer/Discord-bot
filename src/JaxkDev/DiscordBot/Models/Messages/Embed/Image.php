@@ -39,7 +39,7 @@ class Image implements \Serializable
 
     public function setUrl(?string $url): void
     {
-        if ($url !== null and str_starts_with($url, "https")) {
+        if ($url !== null and !str_starts_with($url, "https")) {
             throw new \AssertionError("URL '$url' must start with https.");
         }
         $this->url = $url;
