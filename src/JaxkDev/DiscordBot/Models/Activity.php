@@ -182,7 +182,7 @@ class Activity implements \Serializable
     public function setUrl(?string $url): void
     {
         if ($url !== null) {
-            if (strpos($url, "https://") !== 0) {
+            if (!str_starts_with($url, "https://")) {
                 throw new \AssertionError("Invalid url '$url'.");
             }
         }
