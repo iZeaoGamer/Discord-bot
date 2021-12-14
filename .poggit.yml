@@ -5,8 +5,6 @@ branches:
 projects:
   Discord-bot:
     path: ""
-    lint:
-      phpstan: false
     includeDirs:
       vendor: vendor
 ...
