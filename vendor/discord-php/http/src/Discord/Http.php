@@ -51,7 +51,7 @@ class Http
      *
      * @var string
      */
-    public const BASE_URL = 'https://discord.com/api/v'.self::HTTP_API_VERSION;
+    public const BASE_URL = 'https://discord.com/api/v' . self::HTTP_API_VERSION;
 
     /**
      * The number of concurrent requests which can
@@ -162,7 +162,7 @@ class Http
      */
     public function get($url, $content = null, array $headers = []): ExtendedPromiseInterface
     {
-        if (! ($url instanceof Endpoint)) {
+        if (!($url instanceof Endpoint)) {
             $url = Endpoint::bind($url);
         }
 
@@ -180,7 +180,7 @@ class Http
      */
     public function post($url, $content = null, array $headers = []): ExtendedPromiseInterface
     {
-        if (! ($url instanceof Endpoint)) {
+        if (!($url instanceof Endpoint)) {
             $url = Endpoint::bind($url);
         }
 
@@ -198,7 +198,7 @@ class Http
      */
     public function put($url, $content = null, array $headers = []): ExtendedPromiseInterface
     {
-        if (! ($url instanceof Endpoint)) {
+        if (!($url instanceof Endpoint)) {
             $url = Endpoint::bind($url);
         }
 
@@ -216,7 +216,7 @@ class Http
      */
     public function patch($url, $content = null, array $headers = []): ExtendedPromiseInterface
     {
-        if (! ($url instanceof Endpoint)) {
+        if (!($url instanceof Endpoint)) {
             $url = Endpoint::bind($url);
         }
 
@@ -234,7 +234,7 @@ class Http
      */
     public function delete($url, $content = null, array $headers = []): ExtendedPromiseInterface
     {
-        if (! ($url instanceof Endpoint)) {
+        if (!($url instanceof Endpoint)) {
             $url = Endpoint::bind($url);
         }
 
@@ -275,7 +275,7 @@ class Http
 
         // If there is content and Content-Type is not set,
         // assume it is JSON.
-        if (! is_null($content) && ! isset($headers['Content-Type'])) {
+        if (!is_null($content) && !isset($headers['Content-Type'])) {
             $content = json_encode($content);
 
             $baseHeaders['Content-Type'] = 'application/json';
@@ -317,9 +317,9 @@ class Http
             // Discord Rate-limit
             if ($statusCode == 429) {
                 $rateLimit = new RateLimit($data->global, $data->retry_after);
-                $this->logger->warning($request.' hit rate-limit: '.$rateLimit);
+                $this->logger->warning($request . ' hit rate-limit: ' . $rateLimit);
 
-                if ($rateLimit->isGlobal() && ! $this->rateLimit) {
+                if ($rateLimit->isGlobal() && !$this->rateLimit) {
                     $this->rateLimit = $rateLimit;
                     $this->rateLimitReset = $this->loop->addTimer($rateLimit->getRetryAfter(), function () {
                         $this->rateLimit = null;
@@ -339,27 +339,27 @@ class Http
             // Cloudflare SSL Handshake error
             // Push to the back of the bucket to be retried.
             elseif ($statusCode == 502 || $statusCode == 525) {
-                $this->logger->warning($request.' 502/525 - retrying request');
+                $this->logger->warning($request . ' 502/525 - retrying request');
 
                 $this->executeRequest($request, $deferred);
             }
             // Any other unsuccessful status codes
             elseif ($statusCode < 200 || $statusCode >= 300) {
                 $error = $this->handleError($response);
-                $this->logger->warning($request.' failed: '.$error);
+                $this->logger->warning($request . ' failed: ' . $error);
 
                 $deferred->reject($error);
                 $request->getDeferred()->reject($error);
             }
             // All is well
             else {
-                $this->logger->debug($request.' successful');
+                $this->logger->debug($request . ' successful');
 
                 $deferred->resolve($response);
                 $request->getDeferred()->resolve($data);
             }
         }, function (Exception $e) use ($request) {
-            $this->logger->warning($request.' failed: '.$e->getMessage());
+            $this->logger->warning($request . ' failed: ' . $e->getMessage());
 
             $request->getDeferred()->reject($e);
         });
@@ -387,7 +387,7 @@ class Http
      */
     protected function getBucket(string $key): Bucket
     {
-        if (! isset($this->buckets[$key])) {
+        if (!isset($this->buckets[$key])) {
             $bucket = new Bucket($key, $this->loop, $this->logger, function (Request $request) {
                 $deferred = new Deferred();
                 $this->queue->enqueue([$request, $deferred]);
@@ -440,7 +440,7 @@ class Http
      */
     public function handleError(ResponseInterface $response): Throwable
     {
-        $reason = $response->getReasonPhrase().' - ';
+        $reason = $response->getReasonPhrase() . ' - ';
 
         // attempt to prettyify the response content
         if (($content = json_decode((string) $response->getBody())) !== null) {
@@ -457,8 +457,10 @@ class Http
             case 404:
                 return new NotFoundException($reason);
             case 500:
-                if (strpos(strtolower((string) $response->getBody()), 'longer than 2000 characters') !== false ||
-                    strpos(strtolower((string) $response->getBody()), 'string value is too long') !== false) {
+                if (
+                    strpos(strtolower((string) $response->getBody()), 'longer than 2000 characters') !== false ||
+                    strpos(strtolower((string) $response->getBody()), 'string value is too long') !== false
+                ) {
                     // Response was longer than 2000 characters and was blocked by Discord.
                     return new ContentTooLongException('Response was more than 2000 characters. Use another method to get this data.');
                 }
@@ -474,6 +476,6 @@ class Http
      */
     public function getUserAgent(): string
     {
-        return 'DiscordBot (https://github.com/discord-php/DiscordPHP-HTTP, '.self::VERSION.')';
+        return 'DiscordBot (https://github.com/discord-php/DiscordPHP-HTTP, ' . self::VERSION . ')';
     }
 }

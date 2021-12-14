@@ -261,7 +261,7 @@ abstract class Part implements ArrayAccess, JsonSerializable
      * @throws \Exception
      * @see self::getAttribute() This function forwards onto getAttribute.
      */
-    #[\ReturnTypeWillChange]
+    # [\ReturnTypeWillChange]
     public function offsetGet($key)
     {
         return $this->getAttribute($key);

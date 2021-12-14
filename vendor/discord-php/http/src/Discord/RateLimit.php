@@ -71,6 +71,6 @@ class RateLimit
      */
     public function __toString()
     {
-        return 'RATELIMIT '.($this->global ? 'Global' : 'Non-global').', retry after '.$this->retry_after.' s';
+        return 'RATELIMIT ' . ($this->global ? 'Global' : 'Non-global') . ', retry after ' . $this->retry_after . ' s';
     }
 }

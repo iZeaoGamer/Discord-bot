@@ -90,7 +90,7 @@ class Request
      */
     public function getUrl(): string
     {
-        return Http::BASE_URL.'/'.$this->url;
+        return Http::BASE_URL . '/' . $this->url;
     }
 
     /**
@@ -130,7 +130,7 @@ class Request
      */
     public function getBucketID(): string
     {
-        return $this->method.$this->url->toAbsoluteEndpoint(true);
+        return $this->method . $this->url->toAbsoluteEndpoint(true);
     }
 
     /**
@@ -140,6 +140,6 @@ class Request
      */
     public function __toString()
     {
-        return 'REQ '.strtoupper($this->method).' '.$this->url;
+        return 'REQ ' . strtoupper($this->method) . ' ' . $this->url;
     }
 }

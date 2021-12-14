@@ -2,7 +2,7 @@
 
 namespace Discord;
 
-abstract class InteractionResponseFlags {
+abstract class InteractionResponseFlags
+{
   const EPHEMERAL = 1 << 6;
 }
-

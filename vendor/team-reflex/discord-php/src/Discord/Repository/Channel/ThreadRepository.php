@@ -70,7 +70,7 @@ class ThreadRepository extends AbstractRepository
     public function archived(bool $private = false, bool $joined = false, ?int $limit = null, $before = null): ExtendedPromiseInterface
     {
         if ($joined) {
-            if (! $private) {
+            if (!$private) {
                 throw new InvalidArgumentException('You cannot fetch threads that the bot has joined but are not private.');
             }
 

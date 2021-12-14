@@ -16,7 +16,7 @@ class Endpoint
     // GET
     public const GATEWAY = 'gateway';
     // GET
-    public const GATEWAY_BOT = self::GATEWAY.'/bot';
+    public const GATEWAY_BOT = self::GATEWAY . '/bot';
 
     // GET, POST, PUT
     public const GLOBAL_APPLICATION_COMMANDS = 'applications/:application_id/commands';
@@ -45,143 +45,172 @@ class Endpoint
     // GET, PATCH, DELETE
     public const CHANNEL = 'channels/:channel_id';
     // GET, POST
-    public const CHANNEL_MESSAGES = self::CHANNEL.'/messages';
+    public const CHANNEL_MESSAGES = self::CHANNEL . '/messages';
     // GET, PATCH, DELETE
-    public const CHANNEL_MESSAGE = self::CHANNEL.'/messages/:message_id';
+    public const CHANNEL_MESSAGE = self::CHANNEL . '/messages/:message_id';
     // POST
-    public const CHANNEL_CROSSPOST_MESSAGE = self::CHANNEL.'/messages/:message_id/crosspost';
+    public const CHANNEL_CROSSPOST_MESSAGE = self::CHANNEL . '/messages/:message_id/crosspost';
     // POST
-    public const CHANNEL_MESSAGES_BULK_DELETE = self::CHANNEL.'/messages/bulk-delete';
+    public const CHANNEL_MESSAGES_BULK_DELETE = self::CHANNEL . '/messages/bulk-delete';
     // PUT, DELETE
-    public const CHANNEL_PERMISSIONS = self::CHANNEL.'/permissions/:overwrite_id';
+    public const CHANNEL_PERMISSIONS = self::CHANNEL . '/permissions/:overwrite_id';
     // GET, POST
-    public const CHANNEL_INVITES = self::CHANNEL.'/invites';
+    public const CHANNEL_INVITES = self::CHANNEL . '/invites';
     // POST
-    public const CHANNEL_FOLLOW = self::CHANNEL.'/followers';
+    public const CHANNEL_FOLLOW = self::CHANNEL . '/followers';
     // POST
-    public const CHANNEL_TYPING = self::CHANNEL.'/typing';
+    public const CHANNEL_TYPING = self::CHANNEL . '/typing';
     // GET
-    public const CHANNEL_PINS = self::CHANNEL.'/pins';
+    public const CHANNEL_PINS = self::CHANNEL . '/pins';
     // PUT, DELETE
-    public const CHANNEL_PIN = self::CHANNEL.'/pins/:message_id';
+    public const CHANNEL_PIN = self::CHANNEL . '/pins/:message_id';
     // POST
-    public const CHANNEL_THREADS = self::CHANNEL.'/threads';
+    public const CHANNEL_THREADS = self::CHANNEL . '/threads';
     // POST
-    public const CHANNEL_MESSAGE_THREADS = self::CHANNEL_MESSAGE.'/threads';
+    public const CHANNEL_MESSAGE_THREADS = self::CHANNEL_MESSAGE . '/threads';
     // GET
-    public const CHANNEL_THREADS_ACTIVE = self::CHANNEL_THREADS.'/active';
+    public const CHANNEL_THREADS_ACTIVE = self::CHANNEL_THREADS . '/active';
     // GET
-    public const CHANNEL_THREADS_ARCHIVED_PUBLIC = self::CHANNEL_THREADS.'/archived/public';
+    public const CHANNEL_THREADS_ARCHIVED_PUBLIC = self::CHANNEL_THREADS . '/archived/public';
     // GET
-    public const CHANNEL_THREADS_ARCHIVED_PRIVATE = self::CHANNEL_THREADS.'/archived/private';
+    public const CHANNEL_THREADS_ARCHIVED_PRIVATE = self::CHANNEL_THREADS . '/archived/private';
     // GET
-    public const CHANNEL_THREADS_ARCHIVED_PRIVATE_ME = self::CHANNEL.'/users/@me/threads/archived/private';
+    public const CHANNEL_THREADS_ARCHIVED_PRIVATE_ME = self::CHANNEL . '/users/@me/threads/archived/private';
 
     // GET, PATCH, DELETE
     public const THREAD = 'channels/:thread_id';
     // GET
-    public const THREAD_MEMBERS = self::THREAD.'/thread-members';
+    public const THREAD_MEMBERS = self::THREAD . '/thread-members';
     // GET, PUT, DELETE
-    public const THREAD_MEMBER = self::THREAD_MEMBERS.'/:user_id';
+    public const THREAD_MEMBER = self::THREAD_MEMBERS . '/:user_id';
     // PUT, DELETE
-    public const THREAD_MEMBER_ME = self::THREAD_MEMBERS.'/@me';
+    public const THREAD_MEMBER_ME = self::THREAD_MEMBERS . '/@me';
 
     // GET, DELETE
-    public const MESSAGE_REACTION_ALL = self::CHANNEL.'/messages/:message_id/reactions';
+    public const MESSAGE_REACTION_ALL = self::CHANNEL . '/messages/:message_id/reactions';
     // GET, DELETE
-    public const MESSAGE_REACTION_EMOJI = self::CHANNEL.'/messages/:message_id/reactions/:emoji';
+    public const MESSAGE_REACTION_EMOJI = self::CHANNEL . '/messages/:message_id/reactions/:emoji';
     // PUT, DELETE
-    public const OWN_MESSAGE_REACTION = self::CHANNEL.'/messages/:message_id/reactions/:emoji/@me';
+    public const OWN_MESSAGE_REACTION = self::CHANNEL . '/messages/:message_id/reactions/:emoji/@me';
     // DELETE
-    public const USER_MESSAGE_REACTION = self::CHANNEL.'/messages/:message_id/reactions/:emoji/:user_id';
+    public const USER_MESSAGE_REACTION = self::CHANNEL . '/messages/:message_id/reactions/:emoji/:user_id';
 
     // GET, POST
-    public const CHANNEL_WEBHOOKS = self::CHANNEL.'/webhooks';
+    public const CHANNEL_WEBHOOKS = self::CHANNEL . '/webhooks';
 
     // POST
     public const GUILDS = 'guilds';
     // GET, PATCH, DELETE
     public const GUILD = 'guilds/:guild_id';
     // GET, POST, PATCH
-    public const GUILD_CHANNELS = self::GUILD.'/channels';
+    public const GUILD_CHANNELS = self::GUILD . '/channels';
 
     // GET
-    public const GUILD_MEMBERS = self::GUILD.'/members';
+    public const GUILD_MEMBERS = self::GUILD . '/members';
     // GET
-    public const GUILD_MEMBERS_SEARCH = self::GUILD.'/members/search';
+    public const GUILD_MEMBERS_SEARCH = self::GUILD . '/members/search';
     // GET, PATCH, PUT, DELETE
-    public const GUILD_MEMBER = self::GUILD.'/members/:user_id';
+    public const GUILD_MEMBER = self::GUILD . '/members/:user_id';
     // PATCH
-    public const GUILD_MEMBER_SELF_NICK = self::GUILD.'/members/@me/nick';
+    public const GUILD_MEMBER_SELF_NICK = self::GUILD . '/members/@me/nick';
     // PUT, DELETE
-    public const GUILD_MEMBER_ROLE = self::GUILD.'/members/:user_id/roles/:role_id';
+    public const GUILD_MEMBER_ROLE = self::GUILD . '/members/:user_id/roles/:role_id';
 
     // GET
-    public const GUILD_BANS = self::GUILD.'/bans';
+    public const GUILD_BANS = self::GUILD . '/bans';
     // GET, PUT, DELETE
-    public const GUILD_BAN = self::GUILD.'/bans/:user_id';
+    public const GUILD_BAN = self::GUILD . '/bans/:user_id';
 
     // GET, PATCH
-    public const GUILD_ROLES = self::GUILD.'/roles';
+    public const GUILD_ROLES = self::GUILD . '/roles';
     // GET, POST, PATCH, DELETE
-    public const GUILD_ROLE = self::GUILD.'/roles/:role_id';
+    public const GUILD_ROLE = self::GUILD . '/roles/:role_id';
 
     // GET, POST
-    public const GUILD_INVITES = self::GUILD.'/invites';
+    public const GUILD_INVITES = self::GUILD . '/invites';
 
     // GET, POST
-    public const GUILD_INTEGRATIONS = self::GUILD.'/integrations';
+    public const GUILD_INTEGRATIONS = self::GUILD . '/integrations';
     // PATCH, DELETE
-    public const GUILD_INTEGRATION = self::GUILD.'/integrations/:integration_id';
+    public const GUILD_INTEGRATION = self::GUILD . '/integrations/:integration_id';
     // POST
-    public const GUILD_INTEGRATION_SYNC = self::GUILD.'/integrations/:integration_id/sync';
+    public const GUILD_INTEGRATION_SYNC = self::GUILD . '/integrations/:integration_id/sync';
 
     // GET, POST
-    public const GUILD_EMOJIS = self::GUILD.'/emojis';
+    public const GUILD_EMOJIS = self::GUILD . '/emojis';
     // GET, PATCH, DELETE
-    public const GUILD_EMOJI = self::GUILD.'/emojis/:emoji_id';
+    public const GUILD_EMOJI = self::GUILD . '/emojis/:emoji_id';
 
     // GET
-    public const GUILD_PREVIEW = self::GUILD.'/preview';
+    public const GUILD_PREVIEW = self::GUILD . '/preview';
     // GET, POST
-    public const GUILD_PRUNE = self::GUILD.'/prune';
+    public const GUILD_PRUNE = self::GUILD . '/prune';
     // GET
-    public const GUILD_REGIONS = self::GUILD.'/regions';
+    public const GUILD_REGIONS = self::GUILD . '/regions';
     // GET, PATCH
-    public const GUILD_WIDGET_SETTINGS = self::GUILD.'/widget';
+    public const GUILD_WIDGET_SETTINGS = self::GUILD . '/widget';
     // GET
-    public const GUILD_WIDGET = self::GUILD.'/widget.json';
+    public const GUILD_WIDGET = self::GUILD . '/widget.json';
     // GET
-    public const GUILD_WIDGET_IMAGE = self::GUILD.'/widget.png';
-    // GET
-    public const GUILD_VANITY_URL = self::GUILD.'/vanity-url';
+    public const GUILD_WIDGET_IMAGE = self::GUILD . '/widget.png';
     // GET, PATCH
-    public const GUILD_MEMBERSHIP_SCREENING = self::GUILD.'/member-verification';
+    public const GUILD_WELCOME_SCREEN = self::GUILD . '/welcome-screen';
+    // PATCH
+    public const GUILD_USER_CURRENT_VOICE_STATE = self::GUILD . '/voice-states/@me';
+    // PATCH
+    public const GUILD_USER_VOICE_STATE = self::GUILD . '/voice-states/:user_id';
     // GET
-    public const GUILD_WEBHOOKS = self::GUILD.'/webhooks';
+    public const GUILD_VANITY_URL = self::GUILD . '/vanity-url';
+    // GET, PATCH
+    public const GUILD_MEMBERSHIP_SCREENING = self::GUILD . '/member-verification';
+    // GET
+    public const GUILD_WEBHOOKS = self::GUILD . '/webhooks';
 
     // GET, POST
-    public const GUILD_SCHEDULED_EVENTS = self::GUILD.'/scheduled-events';
+    public const GUILD_STICKERS = self::GUILD . '/stickers';
     // GET, PATCH, DELETE
-    public const GUILD_SCHEDULED_EVENT = self::GUILD.'/scheduled-events/:guild_scheduled_event_id';
+    public const GUILD_STICKER = self::GUILD . '/stickers/:sticker_id';
+
     // GET
-    public const GUILD_SCHEDULED_EVENT_USERS = self::GUILD.'/scheduled-events/:guild_scheduled_event_id/users';
+    public const STICKER = 'stickers/:sticker_id';
+    // GET
+    public const STICKER_PACKS = 'sticker-packs';
+
+    // GET, POST
+    public const GUILD_SCHEDULED_EVENTS = self::GUILD . '/scheduled-events';
+    // GET, PATCH, DELETE
+    public const GUILD_SCHEDULED_EVENT = self::GUILD . '/scheduled-events/:guild_scheduled_event_id';
+    // GET
+    public const GUILD_SCHEDULED_EVENT_USERS = self::GUILD . '/scheduled-events/:guild_scheduled_event_id/users';
 
     // GET, DELETE
     public const INVITE = 'invites/:code';
+
+     // POST
+     public const STAGE_INSTANCES = 'stage-instances';
+
+    // GET, PATCH, DELETE
+    public const STAGE_INSTANCE = 'stage-instances/:channel_id';
+
+     // GET, POST
+     public const GUILDS_TEMPLATE = self::GUILDS.'/templates/:template_code';
+     // GET, POST
+     public const GUILD_TEMPLATES = self::GUILD.'/templates';
+     // PUT, PATCH, DELETE
+     public const GUILD_TEMPLATE = self::GUILD.'/templates/:template_code';
 
     // GET, PATCH
     public const USER_CURRENT = 'users/@me';
     // GET
     public const USER = 'users/:user_id';
     // GET
-    public const USER_CURRENT_GUILDS = self::USER_CURRENT.'/guilds';
+    public const USER_CURRENT_GUILDS = self::USER_CURRENT . '/guilds';
     // DELETE
-    public const USER_CURRENT_GUILD = self::USER_CURRENT.'/guilds/:guild_id';
+    public const USER_CURRENT_GUILD = self::USER_CURRENT . '/guilds/:guild_id';
     // GET, POST
-    public const USER_CURRENT_CHANNELS = self::USER_CURRENT.'/channels';
+    public const USER_CURRENT_CHANNELS = self::USER_CURRENT . '/channels';
     // GET
-    public const USER_CURRENT_CONNECTIONS = self::USER_CURRENT.'/connections';
+    public const USER_CURRENT_CONNECTIONS = self::USER_CURRENT . '/connections';
     // GET
     public const APPLICATION_CURRENT = 'oauth2/applications/@me';
 
@@ -192,11 +221,11 @@ class Endpoint
     // POST
     public const WEBHOOK_EXECUTE = self::WEBHOOK_TOKEN;
     // POST
-    public const WEBHOOK_EXECUTE_SLACK = self::WEBHOOK_EXECUTE.'/slack';
+    public const WEBHOOK_EXECUTE_SLACK = self::WEBHOOK_EXECUTE . '/slack';
     // POST
-    public const WEBHOOK_EXECUTE_GITHUB = self::WEBHOOK_EXECUTE.'/github';
+    public const WEBHOOK_EXECUTE_GITHUB = self::WEBHOOK_EXECUTE . '/github';
     // PATCH, DELETE
-    public const WEBHOOK_MESSAGE = self::WEBHOOK_TOKEN.'/messages/:message_id';
+    public const WEBHOOK_MESSAGE = self::WEBHOOK_TOKEN . '/messages/:message_id';
 
     /**
      * Regex to identify parameters in endpoints.
@@ -250,7 +279,7 @@ class Endpoint
     public function __construct(string $endpoint)
     {
         $this->endpoint = $endpoint;
-    
+
         if (preg_match_all(self::REGEX, $endpoint, $vars)) {
             $this->vars = $vars[1] ?? [];
         }
@@ -294,7 +323,7 @@ class Endpoint
     {
         $this->query[$key] = $value;
     }
-    
+
     /**
      * Converts the endpoint into the absolute endpoint with
      * placeholders replaced.
@@ -310,15 +339,15 @@ class Endpoint
         $endpoint = $this->endpoint;
 
         foreach ($this->vars as $var) {
-            if (! isset($this->args[$var]) || ($onlyMajorParameters && ! $this->isMajorParameter($var))) {
+            if (!isset($this->args[$var]) || ($onlyMajorParameters && !$this->isMajorParameter($var))) {
                 continue;
             }
 
             $endpoint = str_replace(":{$var}", $this->args[$var], $endpoint);
         }
 
-        if (! $onlyMajorParameters && count($this->query) > 0) {
-            $endpoint .= '?'.http_build_query($this->query);
+        if (!$onlyMajorParameters && count($this->query) > 0) {
+            $endpoint .= '?' . http_build_query($this->query);
         }
 
         return $endpoint;
@@ -347,7 +376,7 @@ class Endpoint
     {
         $endpoint = new Endpoint($endpoint);
         $endpoint->bindArgs(...$args);
-        
+
         return $endpoint;
     }
 

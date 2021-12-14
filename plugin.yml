@@ -1,11 +1,11 @@
 name: DiscordBot
-version: 3.1.0
+version: 3.2.0
 author: JaxkDev
 main: JaxkDev\DiscordBot\Plugin\Main
 description: Plugin to host a discord bot using DiscordPHP with a react\promise API !
 website: https://github.com/DiscordBot-PMMP/DiscordBot
 
-api: 3.7.0
+api: 3.26 ##will update this to 4.0.0 api once 3.0.0 is no longer supported.
 extensions:
   core: ">=8.0" #aka PHP Version.
 

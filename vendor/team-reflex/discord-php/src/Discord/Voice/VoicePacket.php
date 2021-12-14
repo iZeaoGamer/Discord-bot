@@ -81,7 +81,7 @@ class VoicePacket
         $this->seq = $seq;
         $this->timestamp = $timestamp;
 
-        if (! $encryption) {
+        if (!$encryption) {
             $this->initBufferNoEncryption($data);
         } else {
             $this->initBufferEncryption($data, $key);
@@ -95,7 +95,7 @@ class VoicePacket
      */
     protected function initBufferNoEncryption(string $data): void
     {
-        $data = (binary) $data;
+        $data = (string) $data;
         $header = $this->buildHeader();
 
         $buffer = new Buffer(strlen((string) $header) + strlen($data));
@@ -113,7 +113,7 @@ class VoicePacket
      */
     protected function initBufferEncryption(string $data, string $key): void
     {
-        $data = (binary) $data;
+        $data = (string) $data;
         $header = $this->buildHeader();
         $nonce = new Buffer(24);
         $nonce->write((string) $header, 0);

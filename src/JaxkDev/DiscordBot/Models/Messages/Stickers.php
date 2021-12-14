@@ -4,15 +4,11 @@ namespace JaxkDev\DiscordBot\Models\Messages;
 
 use JaxkDev\DiscordBot\Plugin\Utils;
 
+use JaxkDev\DiscordBot\Models\User;
 
 class Stickers implements \Serializable
 {
 
-    /** @var string|null */
-    protected $id; //null when sending.
-
-    /** @var string|null */
-    protected $pack_id; //null if using guild stickers type.
 
     /** @var string */
     protected $name;
@@ -20,47 +16,46 @@ class Stickers implements \Serializable
     /** @var string|null */
     protected $description; //null when sending.
 
-    /** @var string|null */
-    protected $tags; //null when not using suggestive tags.
-
     /** @var int */
     protected $type;
 
     /** @var int */
     protected $format_type;
 
-    /** @var string|null */
-    protected $preview;
+    /** @var bool|null */
+    protected $available; //null when creating.
 
-    /** 
-     * Stickers Constructor
-     * @param string $name
-     * @param int $type
-     * @param int $formatType
-     * @param string|null $id
-     * @param string|null $pack_id
-     * @param string|null $description,
-     * @param array|null $tags
-     * @param string|null $preview_asset
-     */
-    public function __construct(
-        string $name,
-        int $type,
-        int $formatType,
-        ?string $id = null,
-        ?string $pack_id = null,
-        ?string $description = null,
-        ?array $tags = null,
-        ?string $preview_asset = null
-    ) {
+    /** @var string|null */
+    protected $serverId;
+
+    /** @var User|null */
+    protected $user;
+
+    /** @var int|null */
+    protected $sortValue;
+
+    /** @var array */
+    protected $tags; //null when not using suggestive tags.
+
+    /** @var string|null */
+    protected $id; //null when sending.
+
+    /** @var string|null */
+    protected $pack_id; //null if using guild stickers type.
+
+    public function __construct(string $name, string $description, int $type, int $format_type, ?bool $available = null, ?string $server_id = null, ?User $user = null, ?int $sort_value = null, array $tags = [], ?string $id = null, ?string $pack_id = null)
+    {
         $this->setName($name);
+        $this->setDescription($description);
         $this->setType($type);
-        $this->setFormatType($formatType);
+        $this->setFormatType($format_type);
+        $this->setAvailable($available);
+        $this->setServerId($server_id);
+        $this->setUser($user);
+        $this->setSortValue($sort_value);
+        $this->setTags($tags);
         $this->setId($id);
         $this->setPackId($pack_id);
-        $this->setDescription($description);
-        $this->setTags($tags);
-        $this->setPreview($preview_asset);
     }
     public function getName(): string
     {
@@ -92,6 +87,39 @@ class Stickers implements \Serializable
         }
         $this->format_type = $format_type;
     }
+    public function isAvailable(): ?bool
+    {
+        return $this->available;
+    }
+    public function setAvailable(?bool $available)
+    {
+        $this->available = $available;
+    }
+    public function getServerId(): ?string
+    {
+        return $this->serverId;
+    }
+    public function setServerId(?string $serverId)
+    {
+        $this->serverId = $serverId;
+    }
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+    public function setUser(?User $user)
+    {
+        $this->user = $user;
+    }
+    public function getSortValue(): ?int
+    {
+        return $this->sortValue;
+    }
+    public function setSortValue(?int $sortValue)
+    {
+        $this->sortValue = $sortValue;
+    }
+
     public function getId(): ?string
     {
         return $this->id;
@@ -132,53 +160,57 @@ class Stickers implements \Serializable
         }
         $this->description = $description;
     }
-    public function getTags(): ?string{
+    public function getTags(): array
+    {
         return $this->tags;
     }
-    public function setTags(?string $tags): void{
-    if($tags !== null){
-        if(strlen($tags) > 200){
-            throw new \AssertionError("The suggestive tags must be below the maximum character limit 200.");
+    /** @param string[] $tags
+     * @return void
+     */
+    public function setTags(array $tags): void
+    {
+        $limit = 0;
+        foreach ($tags as $tag) {
+            $limit += 1;
         }
+        if ($limit > 200) {
+            throw new \AssertionError("The tag {$tag} must be below the 200 characters limit.");
+        }
+        $this->tags = $tags;
     }
-    $this->tags = $tags;
+    //----- Serialization -----//
+
+    public function serialize(): ?string
+    {
+        return serialize([
+            $this->name,
+            $this->description,
+            $this->type,
+            $this->format_type,
+            $this->available,
+            $this->serverId,
+            $this->user,
+            $this->sortValue,
+            $this->tags,
+            $this->id,
+            $this->pack_id
+        ]);
+    }
+
+    public function unserialize($data): void
+    {
+        [
+            $this->name,
+            $this->description,
+            $this->type,
+            $this->format_type,
+            $this->available,
+            $this->serverId,
+            $this->user,
+            $this->sortValue,
+            $this->tags,
+            $this->id,
+            $this->pack_id
+        ] = unserialize($data);
+    }
 }
-public function getPreview(): ?string{
-    return $this->preview;
-}
-public function setPreview(?string $preview): void{
-    $this->preview = $preview;
-}
- //----- Serialization -----//
-
- public function serialize(): ?string
- {
-     return serialize([
-        $this->name,
-        $this->type,
-        $this->format_type,
-        $this->id,
-        $this->pack_id,
-        $this->description,
-        $this->tags,
-        $this->preview
-     ]);
- }
-
- public function unserialize($data): void
- {
-     [
-        $this->name,
-        $this->type,
-        $this->format_type,
-        $this->id,
-        $this->pack_id,
-        $this->description,
-        $this->tags,
-        $this->preview,
-     ] = unserialize($data);
- }
-
-}
-
-

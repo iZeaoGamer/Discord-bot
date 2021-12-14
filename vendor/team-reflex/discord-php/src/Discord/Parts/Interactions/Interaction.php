@@ -287,7 +287,6 @@ class Interaction extends Part
             return $this->factory->create(Message::class, $response, true);
         });
     }
-
     /** 
      * Edits a follow up message.
      * @param MessageBuilder $builder
@@ -308,6 +307,7 @@ class Interaction extends Part
         //})()->then(function ($response) {
         //      return $this->factory->create(Message::class, $response, true);
     }
+
     /**
      * Responds to the interaction with a message.
      *

@@ -36,6 +36,7 @@ use Discord\Parts\User\User as DiscordUser;
 use Discord\Parts\Guild\Guild as DiscordServer;
 use Discord\Parts\Interactions\Interaction as DiscordInteraction;
 use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
+use Discord\Parts\Channel\StageInstance as DiscordStage;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
@@ -69,7 +70,7 @@ use JaxkDev\DiscordBot\Models\VoiceState;
 use JaxkDev\DiscordBot\Models\Webhook;
 use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Models\Messages\Stickers;
-
+use JaxkDev\DiscordBot\Models\Channels\Stage;
 abstract class ModelConverter
 {
 
@@ -133,6 +134,9 @@ abstract class ModelConverter
             $webhook->avatar,
             $webhook->token
         );
+    }
+    static function genModelStage(DiscordStage $stage): Stage{
+        return new Stage($stage->guild_id, $stage->channel_id, $stage->topic, $stage->id, $stage->privacy_level, $stage->discoverable_disabled);
     }
 
     static public function genModelActivity(DiscordActivity $discordActivity): Activity
@@ -335,7 +339,7 @@ abstract class ModelConverter
     }
     static public function genModelStickers(DiscordSticker $sticker): Stickers
     {
-        return new Stickers($sticker->name, $sticker->type, $sticker->format_type, $sticker->id, $sticker->pack_id, $sticker->description, $sticker->tags, $sticker->preview_asset);
+        return new Stickers($sticker->name, $sticker->description, $sticker->type, $sticker->format_type, $sticker->available, $sticker->guild_id, ($sticker->user !== null ? self::genModelUser($sticker->user) : null), $sticker->sort_value, $sticker->tags, $sticker->id, $sticker->pack_id);
     }
 
     static public function genModelMessage(DiscordMessage $discordMessage): Message

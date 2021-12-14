@@ -191,7 +191,7 @@ class RecieveStream extends EventEmitter implements DuplexStreamInterface
             return;
         }
 
-        if (! $this->isPaused) {
+        if (!$this->isPaused) {
             return;
         }
 
@@ -235,7 +235,7 @@ class RecieveStream extends EventEmitter implements DuplexStreamInterface
         });
 
         $dest->on('drain', function () {
-            $this->unpause();
+            $this->resume();
         });
 
         $end = isset($options['end']) ? $options['end'] : true;
@@ -267,7 +267,7 @@ class RecieveStream extends EventEmitter implements DuplexStreamInterface
         });
 
         $dest->on('drain', function () {
-            $this->unpause();
+            $this->resume();
         });
 
         $end = isset($options['end']) ? $options['end'] : true;

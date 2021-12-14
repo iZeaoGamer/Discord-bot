@@ -22,6 +22,7 @@ use Discord\Parts\Channel\Message as DiscordMessage;
 use Discord\Parts\Channel\Overwrite as DiscordOverwrite;
 use Discord\Parts\Channel\Webhook as DiscordWebhook;
 use Discord\Parts\Embed\Embed as DiscordEmbed;
+use Discord\Parts\Channel\StageInstance as DiscordStage;
 use Discord\Parts\Interactions\Interaction as DiscordInteraction;
 use Discord\Parts\Guild\Guild as DiscordGuild;
 use Discord\Parts\Guild\Invite as DiscordInvite;
@@ -31,6 +32,8 @@ use Discord\Parts\User\Member as DiscordMember;
 use Discord\Parts\User\User as DiscordUser;
 use Discord\Repository\Channel\WebhookRepository as DiscordWebhookRepository;
 use Discord\Repository\Guild\InviteRepository as DiscordInviteRepository;
+use Discord\Repository\Guild\StageInstanceRepository as DiscordStageRepository;
+use Discord\Parts\Channel\Sticker as DiscordSticker;
 
 use Discord\Builders\MessageBuilder;
 use Discord\Builders\Components\ActionRow;
@@ -95,6 +98,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDelayReply;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDelayDelete;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerUpdate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStageCreate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStageUpdate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStageDelete;
 
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
@@ -208,6 +215,9 @@ class CommunicationHandler
         elseif ($pk instanceof RequestCreateInteraction) $this->handleCreateInteraction($pk);
         elseif ($pk instanceof RequestDelayReply) $this->handleDelayReply($pk);
         elseif ($pk instanceof RequestDelayDelete) $this->handleDelayDelete($pk);
+        elseif($pk instanceof RequestStageCreate) $this->handleStageCreate($pk);
+        elseif($pk instanceof RequestStageUpdate) $this->handleStageUpdate($pk);
+        elseif($pk instanceof RequestStageDelete) $this->handleStageDelete($pk);
     }
     private function handleDelayReply(RequestDelayReply $pk): void
     {
@@ -643,6 +653,61 @@ class CommunicationHandler
             });
         });
     }
+    private function handleStageCreate(RequestStageCreate $pk){
+        $this->getServer($pk, $pk->getStage()->getServerId(), function (DiscordGuild $guild) use ($pk) {
+            $c = $pk->getStage();
+            /** @var DiscordStage $dc */
+            $dc = $guild->stage_instances->create([
+                'channel_id' => $c->getChannelID(),
+                'topic' => $c->getTopic(),
+                'guild_id' => $guild->id
+            ]);
+                $dc->topic = $c->getTopic();
+                $dc->privacy_level = $c->getPrivacyLevel();
+            $guild->stage_instances->save($dc)->then(function (DiscordStage $stage) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Created Stage.", [ModelConverter::genModelStage($stage)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to create Stage.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to create stage ({$pk->getUID()}) - {$e->getMessage()}");
+            });
+        });
+    }
+    private function handleStageUpdate(RequestStageUpdate $pk): void
+    {
+        if ($pk->getStage()->getId() === null) {
+            $this->resolveRequest($pk->getUID(), false, "Failed to update stage.", ["Stage ID must be present."]);
+            return;
+        }
+        $this->getServer($pk, $pk->getStage()->getServerId(), function (DiscordGuild $guild) use ($pk) {
+            $guild->stage_instances->fetch($pk->getStage()->getId())->then(function (DiscordStage $dc) use ($guild, $pk) {
+                $c = $pk->getStage();
+                $dc->id = $c->getId();
+                $dc->channel_id = $c->getChannelId();
+                $dc->topic = $c->getTopic();
+                $dc->privacy_level = $c->getPrivacyLevel();
+                $dc->discoverable_disabled = $c->isDisabled();
+                $dc->guild_id = $c->getServerId();
+            $guild->stage_instances->save($dc)->then(function (DiscordStage $stage) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Updated Stage.", [ModelConverter::genModelStage($stage)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to update Stage.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to update stage ({$pk->getUID()}) - {$e->getMessage()}");
+            });
+        });
+    });
+    }
+    private function handleStageDelete(RequestStageDelete $pk): void
+    {
+     $this->getStage($pk, $pk->getServerId(), $pk->getStageId(), function (DiscordGuild $guild, DiscordStage $stage) use ($pk){
+            $guild->stage_instances->delete($stage)->then(function () use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Stage deleted.");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to delete stage.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to delete stage ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            });
+
+    }
     private function handleBulkDelete(RequestMessageBulkDelete $pk): void
     {
         $this->getChannel($pk, $pk->getChannelID(), function (DiscordChannel $channel) use ($pk) {
@@ -877,6 +942,29 @@ class CommunicationHandler
                 $this->resolveRequest($pk->getUID(), true, "Transferred guild.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to transfer guild.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }
+    private function handleStickerUpdate(RequestStickerUpdate $pk)
+    {
+        $serverId = $pk->getSticker()->getServerId();
+        if($serverId === null){
+            $this->resolveRequest($pk->getUID(), false, "Server ID must not be null.");
+            return;
+        }
+        $this->getServer($pk, $serverId, function (DiscordGuild $guild) use ($pk) {
+            $guild->stickers->fetch($pk->getSticker()->getId())->then(function (DiscordSticker $sticker) use ($guild, $pk) {
+                $sticker->name = $pk->getSticker()->getName();
+                $sticker->description = $pk->getSticker()->getDescription();
+                $guild->stickers->save($sticker)->then(function (DiscordSticker $sticker) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Successfully updated Guild Sticker.", [ModelConverter::genModelStickers($sticker)]);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to update guild sticker.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to update guild sticker ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to update guild sticker", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to update guild sticker ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
             });
         });
     }
@@ -1866,6 +1954,17 @@ class CommunicationHandler
         }, function (\Throwable $e) use ($pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to fetch server.", [$e->getMessage(), $e->getTraceAsString()]);
             $this->logger->debug("Failed to process request (" . get_class($pk) . "|{$pk->getUID()}) - server error: {$e->getMessage()}");
+        });
+    }
+    private function getStage(Packet $pk, string $server_id, string $stage_id, callable $cb): void
+    {
+        $this->getServer($pk, $server_id, function(DiscordGuild $guild) use ($cb, $pk, $stage_id){
+            $guild->stage_instances->fetch($stage_id)->done(function (DiscordStage $stage) use ($guild, $cb) {
+                $cb($guild, $stage);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to fetch Stage.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to process request (" . get_class($pk) . "|{$pk->getUID()}) - message error: {$e->getMessage()}");
+            });
         });
     }
 

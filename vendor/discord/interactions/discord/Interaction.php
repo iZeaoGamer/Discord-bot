@@ -4,9 +4,11 @@ namespace Discord;
 
 use RuntimeException;
 
-class Interaction {
-  public static function verifyKey($rawBody, $signature, $timestamp, $client_public_key) {
-    if (! class_exists('\Elliptic\EdDSA')) {
+class Interaction
+{
+  public static function verifyKey($rawBody, $signature, $timestamp, $client_public_key)
+  {
+    if (!class_exists('\Elliptic\EdDSA')) {
       throw new RuntimeException('The `simplito/elliptic-php` package is required to validate interactions.');
     }
 

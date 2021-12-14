@@ -225,7 +225,7 @@ class Option extends Component
         if ($this->description) {
             $content['description'] = $this->description;
         }
-
+        
         if ($this->emoji) {
             $content['emoji'] = $this->emoji;
         }

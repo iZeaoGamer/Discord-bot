@@ -85,7 +85,7 @@ abstract class AbstractRepository extends Collection
      */
     public function freshen(): ExtendedPromiseInterface
     {
-        if (! isset($this->endpoints['all'])) {
+        if (!isset($this->endpoints['all'])) {
             return \React\Promise\reject(new \Exception('You cannot freshen this repository.'));
         }
 
@@ -133,7 +133,7 @@ abstract class AbstractRepository extends Collection
     public function save(Part $part): ExtendedPromiseInterface
     {
         if ($part->created) {
-            if (! isset($this->endpoints['update'])) {
+            if (!isset($this->endpoints['update'])) {
                 return \React\Promise\reject(new \Exception('You cannot update this part.'));
             }
 
@@ -142,7 +142,7 @@ abstract class AbstractRepository extends Collection
             $endpoint->bindAssoc(array_merge($part->getRepositoryAttributes(), $this->vars));
             $attributes = $part->getUpdatableAttributes();
         } else {
-            if (! isset($this->endpoints['create'])) {
+            if (!isset($this->endpoints['create'])) {
                 return \React\Promise\reject(new \Exception('You cannot create this part.'));
             }
 
@@ -173,15 +173,15 @@ abstract class AbstractRepository extends Collection
      */
     public function delete($part): ExtendedPromiseInterface
     {
-        if (! ($part instanceof Part)) {
+        if (!($part instanceof Part)) {
             $part = $this->factory->part($this->class, [$this->discrim => $part], true);
         }
 
-        if (! $part->created) {
+        if (!$part->created) {
             return \React\Promise\reject(new \Exception('You cannot delete a non-existant part.'));
         }
 
-        if (! isset($this->endpoints['delete'])) {
+        if (!isset($this->endpoints['delete'])) {
             return \React\Promise\reject(new \Exception('You cannot delete this part.'));
         }
 
@@ -205,11 +205,11 @@ abstract class AbstractRepository extends Collection
      */
     public function fresh(Part $part): ExtendedPromiseInterface
     {
-        if (! $part->created) {
+        if (!$part->created) {
             return \React\Promise\reject(new \Exception('You cannot get a non-existant part.'));
         }
 
-        if (! isset($this->endpoints['get'])) {
+        if (!isset($this->endpoints['get'])) {
             return \React\Promise\reject(new \Exception('You cannot get this part.'));
         }
 
@@ -234,11 +234,11 @@ abstract class AbstractRepository extends Collection
      */
     public function fetch(string $id, bool $fresh = false): ExtendedPromiseInterface
     {
-        if (! $fresh && $part = $this->get($this->discrim, $id)) {
+        if (!$fresh && $part = $this->get($this->discrim, $id)) {
             return \React\Promise\resolve($part);
         }
 
-        if (! isset($this->endpoints['get'])) {
+        if (!isset($this->endpoints['get'])) {
             return \React\Promise\resolve(new \Exception('You cannot get this part.'));
         }
 

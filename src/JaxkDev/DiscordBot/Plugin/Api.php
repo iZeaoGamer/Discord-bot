@@ -67,12 +67,18 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDelayReply;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDelayDelete;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerUpdate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStageCreate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStageUpdate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStageDelete;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Channels\Stage;
+use JaxkDev\DiscordBot\Models\Messages\Stickers;
 use JaxkDev\DiscordBot\Models\Invite;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Messages\Message;
@@ -100,6 +106,37 @@ class Api
     public function __construct(Main $plugin)
     {
         $this->plugin = $plugin;
+    }
+    public function createStage(Stage $stage): PromiseInterface{
+        $pk = new RequestStageCreate($stage);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    public function updateStage(Stage $stage): PromiseInterface{
+        if($stage->getID() === null){
+            return rejectPromise(new APIRejection("Stage ID must be present."));
+        }
+        $pk = new RequestStageUpdate($stage);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    public function deleteStage(string $server_id, string $stage_id): PromiseInterface{
+        $pk = new RequestStageDelete($server_id, $stage_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+
+
+    /** Updates a sticker.
+     * @param Stickers $sticker
+     * @return PromiseInterfaces Resolves with no data.
+    */
+    public function updateSticker(Stickers $sticker): PromiseInterface{
+        $pk = new RequestStickerUpdate($sticker);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
     }
 
     /** Creates a reply delay

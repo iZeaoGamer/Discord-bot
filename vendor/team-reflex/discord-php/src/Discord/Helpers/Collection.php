@@ -369,7 +369,7 @@ class Collection implements ArrayAccess, JsonSerializable, IteratorAggregate, Co
      *
      * @return mixed
      */
-    #[\ReturnTypeWillChange]
+    # [\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->items[$offset] ?? null;

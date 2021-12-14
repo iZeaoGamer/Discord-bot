@@ -22,6 +22,7 @@ use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
+use JaxkDev\DiscordBot\Models\Channels\Stage;
 
 /*
  * Notes:
@@ -82,6 +83,12 @@ class Storage
     /** @var Array<string, string[]> */
     private static $invite_server_map = [];
 
+    /** @var Array<string, Stage> */
+    private static $stage_map;
+
+    /** @var Array<string, string[]> */
+    private static $stage_server_map;
+
     /** @var null|User */
     private static $bot_user = null;
 
@@ -89,6 +96,45 @@ class Storage
     private static $timestamp = 0;
 
 
+    public static function getStage(string $id): ?Stage{
+        return self::$stage_map[$id];
+    }
+    /** @return Stage[] */
+    public static function getStages(): array{
+        return array_values(self::$stage_server_map);
+    }
+    public static function addStage(Stage $stage): void{
+        if ($stage->getId() === null) {
+            throw new \AssertionError("Failed to add stage channel to storage, ID not found.");
+        }
+        if (isset(self::$stage_map[$stage->getId()])) return;
+        self::$stage_server_map[$stage->getServerId()][] = $stage->getId();
+        self::$stage_map[$stage->getId()] = $stage;
+    }
+    public function updateStage(Stage $stage){
+        if ($stage->getId() === null) {
+            throw new \AssertionError("Failed to update stage channel in storage, ID not found.");
+        }
+        if (!isset(self::$stage_map[$stage->getId()])) {
+            self::addStage($stage);
+        } else {
+            self::$stage_map[$stage->getId()] = $stage;
+        }
+    }
+
+    public static function removeStage(string $stage_id): void
+    {
+        $channel = self::getStage($stage_id);
+        if (!$channel instanceof Stage) return; //Already deleted or not added.
+        unset(self::$stage_map[$stage_id]);
+        $server_id = $channel->getServerId();
+
+        //if($channel instanceof ServerChannel){
+        $i = array_search($stage_id, self::$stage_server_map[$server_id], true);
+        if ($i === false || is_string($i)) return; //Not in this servers thread map.
+        array_splice(self::$stage_server_map[$server_id], $i, 1);
+        //  }
+    }
     public static function getServer(string $id): ?Server
     {
         return self::$server_map[$id] ?? null;

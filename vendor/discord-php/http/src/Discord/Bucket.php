@@ -110,7 +110,7 @@ class Bucket
     public function enqueue(Request $request)
     {
         $this->queue->enqueue($request);
-        $this->logger->debug($this.' queued '.$request);
+        $this->logger->debug($this . ' queued ' . $request);
         $this->checkQueue();
     }
 
@@ -126,8 +126,8 @@ class Bucket
 
         $checkQueue = function () use (&$checkQueue) {
             // Check for rate-limits
-            if ($this->requestRemaining < 1 && ! is_null($this->requestRemaining)) {
-                $this->logger->info($this.' expecting rate limit, timer interval '.(($this->resetTimer->getInterval() ?? 0) * 1000).' ms');
+            if ($this->requestRemaining < 1 && !is_null($this->requestRemaining)) {
+                $this->logger->info($this . ' expecting rate limit, timer interval ' . (($this->resetTimer->getInterval() ?? 0) * 1000) . ' ms');
                 $this->checkerRunning = false;
 
                 return;
@@ -180,14 +180,14 @@ class Bucket
 
                     // Bucket-specific rate-limit
                     // Re-queue the request and wait the retry after time
-                    if (! $rateLimit->isGlobal()) {
+                    if (!$rateLimit->isGlobal()) {
                         $this->loop->addTimer($rateLimit->getRetryAfter(), $checkQueue);
                     }
                     // Stop the queue checker for a global rate-limit.
                     // Will be restarted when global rate-limit finished.
                     else {
                         $this->checkerRunning = false;
-                        $this->logger->debug($this.' stopping queue checker');
+                        $this->logger->debug($this . ' stopping queue checker');
                     }
                 } else {
                     $checkQueue();
@@ -206,6 +206,6 @@ class Bucket
      */
     public function __toString()
     {
-        return 'BUCKET '.$this->name;
+        return 'BUCKET ' . $this->name;
     }
 }

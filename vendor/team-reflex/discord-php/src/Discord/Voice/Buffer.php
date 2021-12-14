@@ -141,7 +141,7 @@ class Buffer extends BaseBuffer implements ArrayAccess
      *
      * @return mixed
      */
-    #[\ReturnTypeWillChange]
+    # [\ReturnTypeWillChange]
     public function offsetGet($key)
     {
         return $this->buffer[$key];

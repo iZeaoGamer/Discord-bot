@@ -22,6 +22,7 @@ use Discord\Parts\Guild\Ban as DiscordBan;
 use Discord\Parts\Guild\Guild as DiscordGuild;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
+use Discord\Parts\Channel\Sticker as DiscordSticker;
 use Discord\Parts\Permissions\RolePermission as DiscordRolePermission;
 use Discord\Parts\User\Member as DiscordMember;
 use Discord\Parts\User\User as DiscordUser;
@@ -29,6 +30,7 @@ use Discord\Parts\WebSockets\MessageReaction as DiscordMessageReaction;
 use Discord\Parts\WebSockets\PresenceUpdate as DiscordPresenceUpdate;
 use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
 use Discord\Parts\WebSockets\TypingStart as DiscordTypingStart;
+use Discord\Parts\Channel\StageInstance as DiscordStageInstance;
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;
@@ -66,6 +68,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdat
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\TypingStart as TypingStartPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\InteractionCreate as InteractionCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildStickersUpdate as GuildStickersUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\StageCreate as StageCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\StageUpdate as StageUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\StageDelete as StageDeletePacket;
 
 
 use JaxkDev\DiscordBot\Plugin\Utils;
@@ -134,6 +140,11 @@ class DiscordEventHandler
         $discord->on("TYPING_START", [$this, "onTypingStart"]);
 
         $discord->on("INTERACTION_CREATE", [$this, "onInteractionCreate"]);
+        $discord->on("GUILD_STICKERS_UPDATE", [$this, "onStickersUpdate"]);
+        
+        $discord->on("STAGE_INSTANCE_CREATE", [$this, "onStageCreate"]);
+        $discord->on("STAGE_INSTANCE_UPDATE", [$this, "onStageUpdate"]);
+        $discord->on("STAGE_INSTANCE_DELETE", [$this, "onStageDelete"]);
     }
 
     /*
@@ -339,7 +350,22 @@ array(5) {
         $this->client->getThread()->writeOutboundData(new DiscordReadyPacket());
         $this->client->getCommunicationHandler()->sendHeartbeat();
     }
-
+    public function onStageCreate(DiscordStageInstance $stage){
+        $packet = new StageCreatePacket(ModelConverter::genModelStage($stage));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onStageUpdate(DiscordStageInstance $stage){
+        $packet = new StageUpdatePacket(ModelConverter::genModelStage($stage));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onStageDelete(DiscordStageInstance $stage){
+        $packet = new StageDeletePacket(ModelConverter::genModelStage($stage));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onStickersUpdate(DiscordSticker $sticker): void{
+        $packet = new GuildStickersUpdatePacket(ModelConverter::genModelStickers($sticker));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
     public function onVoiceStateUpdate(DiscordVoiceStateUpdate $ds): void
     {
         if ($ds->guild_id === null) return; //DM's
