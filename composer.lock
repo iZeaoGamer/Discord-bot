@@ -1751,7 +1751,7 @@
         },
         {
             "name": "ratchet/pawl",
-            "version": "v0.3.5",
+            "version": "v0.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ratchetphp/Pawl.git",
@@ -3368,7 +3368,7 @@
                 "monolog/monolog": "^2.1",
                 "nesbot/carbon": "^2.38",
                 "php": "^7.4|^8.0",
-                "ratchet/pawl": "0.3.*",
+                "ratchet/pawl": "0.4.*",
                 "react/child-process": "^0.6.2",
                 "react/datagram": "1.5.*",
                 "react/http": "^1.1",
@@ -3933,7 +3933,7 @@
                 "pocketmine/spl": "^0.4.0"
             },
             "require-dev": {
-                "phpstan/phpstan": "0.12.98",
+                "phpstan/phpstan": "0.12.99",
                 "phpstan/phpstan-phpunit": "^0.12.6",
                 "phpstan/phpstan-strict-rules": "^0.12.2",
                 "phpunit/phpunit": "^9.2"
