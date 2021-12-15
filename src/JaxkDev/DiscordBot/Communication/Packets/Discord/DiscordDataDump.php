@@ -20,6 +20,7 @@ use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class DiscordDataDump extends Packet
@@ -49,12 +50,14 @@ class DiscordDataDump extends Packet
     /** @var User[] */
     private $users = [];
 
+    /** @var ServerTemplate[] */
+    private $templates;
+
     /** @var null|User */
     private $bot_user = null;
 
     /** @var int */
     private $timestamp;
-
 
     /**
      * @return Server[]
@@ -156,6 +159,14 @@ class DiscordDataDump extends Packet
     {
         $this->users[] = $user;
     }
+    public function getTemplates(): array
+    {
+        return $this->templates;
+    }
+    public function addTemplate(ServerTemplate $template): void
+    {
+        $this->templates[] = $template;
+    }
 
     public function getBotUser(): ?User
     {
@@ -180,7 +191,7 @@ class DiscordDataDump extends Packet
     public function getSize(): int
     {
         return sizeof($this->servers) + sizeof($this->threads) + sizeof($this->channels) + sizeof($this->roles) + sizeof($this->members)
-            + sizeof($this->users) + sizeof($this->bans) + sizeof($this->invites);
+            + sizeof($this->users) + sizeof($this->bans) + sizeof($this->invites) + sizeof($this->templates);
     }
 
     public function serialize(): ?string
@@ -195,6 +206,7 @@ class DiscordDataDump extends Packet
             $this->bans,
             $this->members,
             $this->users,
+            $this->templates,
             $this->bot_user,
             $this->timestamp
         ]);
@@ -212,6 +224,7 @@ class DiscordDataDump extends Packet
             $this->bans,
             $this->members,
             $this->users,
+            $this->templates,
             $this->bot_user,
             $this->timestamp
         ] = unserialize($data);

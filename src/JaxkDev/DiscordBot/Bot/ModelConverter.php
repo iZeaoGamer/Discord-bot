@@ -29,6 +29,7 @@ use Discord\Parts\Embed\Video as DiscordVideo;
 use Discord\Parts\Guild\Ban as DiscordBan;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
+use Discord\Parts\Guild\Emoji as DiscordEmoji;
 use Discord\Parts\Permissions\RolePermission as DiscordRolePermission;
 use Discord\Parts\User\Activity as DiscordActivity;
 use Discord\Parts\User\Member as DiscordMember;
@@ -37,6 +38,7 @@ use Discord\Parts\Guild\Guild as DiscordServer;
 use Discord\Parts\Interactions\Interaction as DiscordInteraction;
 use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
 use Discord\Parts\Channel\StageInstance as DiscordStage;
+use Discord\Parts\Guild\GuildTemplate as DiscordGuildTemplate;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
@@ -71,10 +73,20 @@ use JaxkDev\DiscordBot\Models\Webhook;
 use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Models\Messages\Stickers;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
+use JaxkDev\DiscordBot\Models\Emoji;
+use JaxkDev\DiscordBot\Models\ServerTemplate;
+
 abstract class ModelConverter
 {
-
-    static function genModelInteraction(DiscordInteraction $interact, MessageBuilder $builder = null, bool $ephemeral = false): Interaction
+    static public function genModelEmoji(DiscordEmoji $emoji): Emoji
+    {
+        return new Emoji($emoji->name, $emoji->guild_id, $emoji->managed, $emoji->id, $emoji->require_colons, array_keys($emoji->roles->toArray()), ($emoji->user !== null ? self::genModelUser($emoji->user) : null), $emoji->animated, $emoji->available);
+    }
+    static public function genModelServerTemplate(DiscordGuildTemplate $template): ServerTemplate
+    {
+        return new ServerTemplate($template->name, $template->description, $template->source_guild_id, $template->code, $template->usage_count, $template->creator_id, $template->created_at->getTimestamp(), $template->updated_at->getTimestamp(), $template->is_dirty);
+    }
+    static public function genModelInteraction(DiscordInteraction $interact, MessageBuilder $builder = null, bool $ephemeral = false): Interaction
     {
 
         if ($builder !== null) {
@@ -135,7 +147,8 @@ abstract class ModelConverter
             $webhook->token
         );
     }
-    static function genModelStage(DiscordStage $stage): Stage{
+    static function genModelStage(DiscordStage $stage): Stage
+    {
         return new Stage($stage->guild_id, $stage->channel_id, $stage->topic, $stage->id, $stage->privacy_level, $stage->discoverable_disabled);
     }
 

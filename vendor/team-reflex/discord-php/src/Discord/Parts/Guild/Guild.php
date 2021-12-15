@@ -26,6 +26,7 @@ use Discord\Repository\Guild\MemberRepository;
 use Discord\Repository\Guild\RoleRepository;
 use Discord\Parts\Guild\AuditLog\AuditLog;
 use Discord\Parts\Guild\AuditLog\Entry;
+use Discord\Repository\Guild\GuildTemplateRepository;
 use Discord\Repository\Guild\StickerRepository;
 use Discord\Repository\Guild\StageInstanceRepository;
 use Exception;
@@ -107,6 +108,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * @property EmojiRepository    $emojis
  * @property StickerRepository $stickers
  * @property StageInstanceRepository $stage_instances
+ * @property GuildTemplateRepository $templates
  */
 class Guild extends Part
 {
@@ -216,6 +218,7 @@ class Guild extends Part
         'emojis' => EmojiRepository::class,
         'stickers' => StickerRepository::class,
         'stage_instances' => StageInstanceRepository::class,
+        'templates' => GuildTemplateRepository::class,
     ];
 
     /**

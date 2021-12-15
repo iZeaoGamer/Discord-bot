@@ -23,6 +23,7 @@ use Discord\Parts\Guild\Guild as DiscordGuild;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\Channel\Sticker as DiscordSticker;
+use Discord\Parts\Guild\GuildTemplate as DiscordTemplate;
 use Discord\Parts\Permissions\RolePermission as DiscordRolePermission;
 use Discord\Parts\User\Member as DiscordMember;
 use Discord\Parts\User\User as DiscordUser;
@@ -31,6 +32,7 @@ use Discord\Parts\WebSockets\PresenceUpdate as DiscordPresenceUpdate;
 use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
 use Discord\Parts\WebSockets\TypingStart as DiscordTypingStart;
 use Discord\Parts\Channel\StageInstance as DiscordStageInstance;
+use Discord\Parts\Guild\Emoji as DiscordEmoji;
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;
@@ -72,6 +74,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildStickersUpdate as Guil
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageCreate as StageCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageUpdate as StageUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageDelete as StageDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildEmojiUpdate as GuildEmojiUpdatePacket;
 
 
 use JaxkDev\DiscordBot\Plugin\Utils;
@@ -141,10 +144,11 @@ class DiscordEventHandler
 
         $discord->on("INTERACTION_CREATE", [$this, "onInteractionCreate"]);
         $discord->on("GUILD_STICKERS_UPDATE", [$this, "onStickersUpdate"]);
-        
+
         $discord->on("STAGE_INSTANCE_CREATE", [$this, "onStageCreate"]);
         $discord->on("STAGE_INSTANCE_UPDATE", [$this, "onStageUpdate"]);
         $discord->on("STAGE_INSTANCE_DELETE", [$this, "onStageDelete"]);
+        $discord->on("GUILD_EMOJIS_UPDATE", [$this, "onEmojiUpdate"]);
     }
 
     /*
@@ -320,6 +324,25 @@ array(5) {
                 $this->logger->notice("Cannot fetch invites from server '" . $guild->name . "' (" . $guild->id .
                     "), Bot does not have 'manage_guild' permission.");
             }
+            if ($permissions->manage_guild) {
+                $guild->templates->freshen()->done(function () use ($guild) {
+                    $this->logger->debug("Successfully fetched " . sizeof($guild->templates) .
+                        " templates from server '" . $guild->name . "' (" . $guild->id . ")");
+                    if (sizeof($guild->templates) === 0) return;
+                    $pk = new DiscordDataDumpPacket();
+                    $pk->setTimestamp(time());
+                    /** @var DiscordInvite $invite */
+                    foreach ($guild->templates as $template) {
+                        $pk->addTemplate(ModelConverter::genModelServerTemplate($template));
+                    }
+                    $this->client->getThread()->writeOutboundData($pk);
+                }, function () use ($guild) {
+                    $this->logger->warning("Failed to fetch templates from server '" . $guild->name . "' (" . $guild->id . ")");
+                });
+            } else {
+                $this->logger->notice("Cannot fetch templates from server '" . $guild->name . "' (" . $guild->id .
+                    "), Bot does not have 'manage_guild' permission.");
+            }
 
             /** @var DiscordMember $member */
             foreach ($guild->members as $member) {
@@ -350,19 +373,28 @@ array(5) {
         $this->client->getThread()->writeOutboundData(new DiscordReadyPacket());
         $this->client->getCommunicationHandler()->sendHeartbeat();
     }
-    public function onStageCreate(DiscordStageInstance $stage){
+    public function onEmojiUpdate(DiscordEmoji $emoji): void
+    {
+        $packet = new GuildEmojiUpdatePacket(ModelConverter::genModelEmoji($emoji));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onStageCreate(DiscordStageInstance $stage): void
+    {
         $packet = new StageCreatePacket(ModelConverter::genModelStage($stage));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onStageUpdate(DiscordStageInstance $stage){
+    public function onStageUpdate(DiscordStageInstance $stage): void
+    {
         $packet = new StageUpdatePacket(ModelConverter::genModelStage($stage));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onStageDelete(DiscordStageInstance $stage){
+    public function onStageDelete(DiscordStageInstance $stage): void
+    {
         $packet = new StageDeletePacket(ModelConverter::genModelStage($stage));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onStickersUpdate(DiscordSticker $sticker): void{
+    public function onStickersUpdate(DiscordSticker $sticker): void
+    {
         $packet = new GuildStickersUpdatePacket(ModelConverter::genModelStickers($sticker));
         $this->client->getThread()->writeOutboundData($packet);
     }
@@ -374,7 +406,7 @@ array(5) {
             ModelConverter::genModelVoiceState($ds)
         ));
     }
-    public function onInteractionCreate(DiscordInteraction $interactCreate)
+    public function onInteractionCreate(DiscordInteraction $interactCreate): void
     {
         $packet = new InteractionCreatePacket(ModelConverter::genModelInteraction($interactCreate));
         $this->client->getThread()->writeOutboundData($packet);
@@ -549,8 +581,13 @@ array(5) {
         if ($guild->region === null) {
             return;
         }
+        $templates = [];
+        /** @var DiscordTemplate $template */
+        foreach ($guild->templates as $template) {
+            $templates[] = ModelConverter::genModelServerTemplate($template);
+        }
 
-        $packet = new ServerJoinPacket(ModelConverter::genModelServer($guild), $threads, $channels, $members, $roles);
+        $packet = new ServerJoinPacket(ModelConverter::genModelServer($guild), $threads, $channels, $members, $roles, $templates);
         $this->client->getThread()->writeOutboundData($packet);
     }
 

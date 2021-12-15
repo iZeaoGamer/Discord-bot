@@ -71,14 +71,20 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStageCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStageUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStageDelete;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestEmojiUpdate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTemplateCreate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTemplateUpdate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTemplateDelete;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Models\Messages\Stickers;
+use JaxkDev\DiscordBot\Models\Emoji;
 use JaxkDev\DiscordBot\Models\Invite;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Messages\Message;
@@ -107,21 +113,86 @@ class Api
     {
         $this->plugin = $plugin;
     }
-    public function createStage(Stage $stage): PromiseInterface{
+
+    /** Creates a server template within a guild. 
+     * @param ServerTemplate
+     * @return PromiseInterface Resolves with a ServerTemplate model.
+     */
+    public function createTemplate(ServerTemplate $template): PromiseInterface
+    {
+        $pk = new RequestTemplateCreate($template);
+        $this->plugin->writeOutBoundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    /** Updates a server template within a guild. 
+     * @param ServerTemplate
+     * @return PromiseInterface Resolves with a ServerTemplate model.
+     */
+    public function updateTemplate(ServerTemplate $template): PromiseInterface
+    {
+        if ($template->getCode() === null) {
+            return rejectPromise(new ApiRejection("Template Code must be present."));
+        }
+        $pk = new RequestTemplateUpdate($template);
+        $this->plugin->writeOutBoundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    /**  Deletes a server template using server Id and Template code. 
+     * @param string $server_id
+     * @param string $code
+     * @return PromiseInterface Resolves with no data.
+     */
+    public function deleteTemplate(string $server_id, string $code): PromiseInterface
+    {
+        $pk = new RequestTemplateDelete($server_id, $code);
+        $this->plugin->writeOutBoundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    /** Updates a emoji within a guild.
+     * @param Emoji $emoji
+     * @return PromiseInterface Resolves with a Emoji Model.
+     */
+    public function updateEmoji(Emoji $emoji): PromiseInterface
+    {
+        if ($emoji->getId() === null) {
+            return rejectPromise(new ApiRejection("Emoji ID must be present."));
+        }
+        $pk = new RequestEmojiUpdate($emoji);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Creates a stage channel.
+     * @param Stage $stage
+     * @return PromiseInterface Resolves with a Stage Model.
+     */
+    public function createStage(Stage $stage): PromiseInterface
+    {
         $pk = new RequestStageCreate($stage);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
-    public function updateStage(Stage $stage): PromiseInterface{
-        if($stage->getID() === null){
-            return rejectPromise(new APIRejection("Stage ID must be present."));
+
+    /** Updates a stage channel.
+     * @param Stage $stage
+     * @return PromiseInterface Resolves with a Stage Model.
+     */
+    public function updateStage(Stage $stage): PromiseInterface
+    {
+        if ($stage->getID() === null) {
+            return rejectPromise(new ApiRejection("Stage ID must be present."));
         }
         $pk = new RequestStageUpdate($stage);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
-
-    public function deleteStage(string $server_id, string $stage_id): PromiseInterface{
+    /** Deletes a stage channel.
+     * @param string $server_id
+     * @param string $stage_id
+     * @return PromiseInterface Resolves with no data.
+     */
+    public function deleteStage(string $server_id, string $stage_id): PromiseInterface
+    {
         $pk = new RequestStageDelete($server_id, $stage_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -131,9 +202,10 @@ class Api
 
     /** Updates a sticker.
      * @param Stickers $sticker
-     * @return PromiseInterfaces Resolves with no data.
-    */
-    public function updateSticker(Stickers $sticker): PromiseInterface{
+     * @return PromiseInterface Resolves with a Sticker Model.
+     */
+    public function updateSticker(Stickers $sticker): PromiseInterface
+    {
         $pk = new RequestStickerUpdate($sticker);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -216,7 +288,7 @@ class Api
         if (!Utils::validDiscordSnowflake($channelId)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
         }
-        if(!Utils::validDiscordSnowflake($message->getId())){
+        if (!Utils::validDiscordSnowflake($message->getId())) {
             return rejectPromise(new APIRejection("Invalid Message ID: {$message->getId()}"));
         }
         $pk = new RequestModifyButton($builder, $message, $channelId, $button, $ephemeral, $doNothing);
@@ -273,7 +345,7 @@ class Api
         if (!Utils::validDiscordSnowflake($channelId)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
         }
-        if(!Utils::validDiscordSnowflake($message->getId())){
+        if (!Utils::validDiscordSnowflake($message->getId())) {
             return rejectPromise(new APIRejection("Invalid Message ID: {$message->getId()}"));
         }
         $pk = new RequestModifySelectMenu($builder, $message, $channelId, $select, $ephemeral, $doNothing);

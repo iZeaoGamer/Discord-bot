@@ -13,7 +13,7 @@ namespace Discord\Parts\Guild;
 
 use Discord\Helpers\Collection;
 use Discord\Parts\Part;
-
+use Discord\Parts\User\User;
 /**
  * An emoji object represents a custom emoji.
  *

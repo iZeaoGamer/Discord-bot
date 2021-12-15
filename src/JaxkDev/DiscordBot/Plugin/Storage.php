@@ -22,6 +22,7 @@ use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
+use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 
 /*
@@ -95,15 +96,76 @@ class Storage
     /** @var int */
     private static $timestamp = 0;
 
+    /** @var Array<string, ServerTemplate> */
+    private static $template_map;
 
-    public static function getStage(string $id): ?Stage{
+    /** @var Array<string, string[]> */
+    private static $template_server_map;
+
+    public static function getTemplate(string $code): ?ServerTemplate
+    {
+        return self::$template_map[$code] ?? null;
+    }
+    /** @return ServerTemplate[] */
+    public static function getTemplates(): array
+    {
+        return array_values(self::$template_map);
+    }
+    public static function addTemplate(ServerTemplate $template): void
+    {
+        if ($template->getCode() === null) {
+            throw new \AssertionError("Failed to add Server Template to storage, Template Code not found.");
+        }
+        if (isset(self::$template_map[$template->getCode()])) return;
+        self::$template_server_map[$template->getServerId()][] = $template->getCode();
+        self::$template_map[$template->getCode()] = $template;
+    }
+    public static function updateTemplate(ServerTemplate $template): void
+    {
+        if ($template->getCode() === null) {
+            throw new \AssertionError("Failed to update Server Template in storage, Template Code not found.");
+        }
+        if (!isset(self::$template_map[$template->getCode()])) {
+            self::addTemplate($template);
+        } else {
+            self::$template_map[$template->getCode()] = $template;
+        }
+    }
+    public static function removeTemplate(string $code): void
+    {
+        $template = self::getTemplate($code);
+        if (!$template instanceof ServerTemplate) return; //Already deleted or not added.
+        unset(self::$template_map[$code]);
+        $server_id = $template->getServerId();
+
+        $i = array_search($code, self::$template_server_map[$server_id], true);
+        if ($i === false || is_string($i)) return; //Not in this servers template map.
+        array_splice(self::$template_server_map[$server_id], $i, 1);
+    }
+    /**
+     * @param string $server_id
+     * @return ServerTemplate[]
+     */
+    public static function getTemplatesByServer(string $server_id): array
+    {
+        $templates = [];
+        foreach ((self::$stage_server_map[$server_id] ?? []) as $id) {
+            $t = self::getTemplate($id);
+            if ($t !== null) $templates[] = $t;
+        }
+        return $templates;
+    }
+    public static function getStage(string $id): ?Stage
+    {
         return self::$stage_map[$id];
     }
     /** @return Stage[] */
-    public static function getStages(): array{
-        return array_values(self::$stage_server_map);
+    public static function getStages(): array
+    {
+        return array_values(self::$stage_map);
     }
-    public static function addStage(Stage $stage): void{
+    public static function addStage(Stage $stage): void
+    {
         if ($stage->getId() === null) {
             throw new \AssertionError("Failed to add stage channel to storage, ID not found.");
         }
@@ -111,7 +173,8 @@ class Storage
         self::$stage_server_map[$stage->getServerId()][] = $stage->getId();
         self::$stage_map[$stage->getId()] = $stage;
     }
-    public function updateStage(Stage $stage){
+    public function updateStage(Stage $stage)
+    {
         if ($stage->getId() === null) {
             throw new \AssertionError("Failed to update stage channel in storage, ID not found.");
         }
@@ -129,11 +192,22 @@ class Storage
         unset(self::$stage_map[$stage_id]);
         $server_id = $channel->getServerId();
 
-        //if($channel instanceof ServerChannel){
         $i = array_search($stage_id, self::$stage_server_map[$server_id], true);
-        if ($i === false || is_string($i)) return; //Not in this servers thread map.
+        if ($i === false || is_string($i)) return; //Not in this servers stage map.
         array_splice(self::$stage_server_map[$server_id], $i, 1);
-        //  }
+    }
+    /**
+     * @param string $server_id
+     * @return Stage[]
+     */
+    public static function getStagesByServer(string $server_id): array
+    {
+        $channels = [];
+        foreach ((self::$stage_server_map[$server_id] ?? []) as $id) {
+            $c = self::getStage($id);
+            if ($c !== null) $channels[] = $c;
+        }
+        return $channels;
     }
     public static function getServer(string $id): ?Server
     {
@@ -157,6 +231,8 @@ class Storage
         self::$role_server_map[$id] = [];
         self::$invite_server_map[$id] = [];
         self::$ban_server_map[$id] = [];
+        self::$stage_server_map[$id] = [];
+        self::$template_server_map[$id] = [];
     }
 
     public static function updateServer(Server $server): void
@@ -204,6 +280,12 @@ class Storage
         //Remove servers bans.
         foreach (self::$ban_server_map[$server_id] as $bid) {
             unset(self::$ban_map[$bid]);
+        }
+        foreach (self::$stage_server_map[$server_id] as $sid) {
+            unset(self::$stage_map[$sid]);
+        }
+        foreach (self::$template_server_map[$server_id] as $tid) {
+            unset(self::$template_map[$tid]);
         }
         unset(self::$ban_server_map[$server_id]);
     }

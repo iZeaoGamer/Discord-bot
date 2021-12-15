@@ -40,6 +40,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerJoin as ServerJoinPac
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerLeave as ServerLeavePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerUpdate as ServerUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordReady as DiscordReadyPacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildEmojiUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\VoiceStateUpdate as VoiceStateUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBulkDelete as MessageBulkDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
@@ -51,6 +52,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildStickersUpdate as Guil
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageCreate as StageCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageUpdate as StageUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageDelete as StageDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildEmojiUpdate as GuildEmojiUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat as HeartbeatPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Activity;
@@ -97,6 +99,7 @@ use JaxkDev\DiscordBot\Plugin\Events\GuildStickerUpdated as GuildStickerUpdatedE
 use JaxkDev\DiscordBot\Plugin\Events\StageCreated as StageCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\StageDeleted as StageDeletedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\StageUpdated as StageUpdatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\GuildEmojiUpdated as GuildEmojiUpdatedEvent;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 
@@ -163,6 +166,7 @@ class BotCommunicationHandler
         elseif ($packet instanceof StageCreatePacket) $this->handleStageCreate($packet);
         elseif ($packet instanceof StageUpdatePacket) $this->handleStageUpdate($packet);
         elseif ($packet instanceof StageDeletePacket) $this->handleStageDelete($packet);
+        elseif ($packet instanceof GuildEmojiUpdatePacket) $this->handleEmojiUpdate($packet);
         elseif ($packet instanceof DiscordReadyPacket) $this->handleReady();
     }
 
@@ -175,6 +179,10 @@ class BotCommunicationHandler
         });
 
         (new DiscordReadyEvent($this->plugin))->call();
+    }
+    private function handleEmojiUpdate(GuildEmojiUpdatePacket $packet): void
+    {
+        (new GuildEmojiUpdatedEvent($this->plugin, $packet->getEmoji()))->call();
     }
     private function handleGuildSticker(GuildStickersUpdatePacket $packet): void
     {
@@ -490,7 +498,8 @@ class BotCommunicationHandler
             $packet->getThreads(),
             $packet->getRoles(),
             $packet->getChannels(),
-            $packet->getMembers()
+            $packet->getMembers(),
+            $packet->getTemplates()
         ))->call();
 
         Storage::addServer($packet->getServer());
@@ -505,6 +514,9 @@ class BotCommunicationHandler
         }
         foreach ($packet->getThreads() as $thread) {
             Storage::addThread($thread);
+        }
+        foreach ($packet->getTemplates() as $template) {
+            Storage::addTemplate($template);
         }
     }
 

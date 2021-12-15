@@ -17,6 +17,7 @@ use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class ServerJoin extends Packet
@@ -37,6 +38,9 @@ class ServerJoin extends Packet
     /** @var Role[] */
     private $roles;
 
+    /** @var ServerTemplate[] */
+    private $templates;
+
     /**
      * ServerJoin constructor.
      *
@@ -45,8 +49,9 @@ class ServerJoin extends Packet
      * @param ServerChannel[] $channels
      * @param Member[]        $members
      * @param Role[]          $roles
+     * @param ServerTemplate[] $templates
      */
-    public function __construct(Server $server, array $threads, array $channels, array $members, array $roles)
+    public function __construct(Server $server, array $threads, array $channels, array $members, array $roles, array $templates)
     {
         parent::__construct();
         $this->server = $server;
@@ -54,6 +59,7 @@ class ServerJoin extends Packet
         $this->channels = $channels;
         $this->members = $members;
         $this->roles = $roles;
+        $this->templates = $templates;
     }
 
     public function getServer(): Server
@@ -73,16 +79,22 @@ class ServerJoin extends Packet
         return $this->channels;
     }
 
+    /** @return Member[] */
+    public function getMembers(): array
+    {
+        return $this->members;
+    }
+
     /** @return Role[] */
     public function getRoles(): array
     {
         return $this->roles;
     }
 
-    /** @return Member[] */
-    public function getMembers(): array
+    /** @return ServerTemplate[] */
+    public function getTemplates(): array
     {
-        return $this->members;
+        return $this->templates;
     }
 
     public function serialize(): ?string
@@ -91,9 +103,10 @@ class ServerJoin extends Packet
             $this->UID,
             $this->server,
             $this->threads,
-            $this->roles,
             $this->channels,
-            $this->members
+            $this->members,
+            $this->roles,
+            $this->templates
         ]);
     }
 
@@ -103,9 +116,10 @@ class ServerJoin extends Packet
             $this->UID,
             $this->server,
             $this->threads,
-            $this->roles,
             $this->channels,
-            $this->members
+            $this->members,
+            $this->roles,
+            $this->templates
         ] = unserialize($data);
     }
 }
