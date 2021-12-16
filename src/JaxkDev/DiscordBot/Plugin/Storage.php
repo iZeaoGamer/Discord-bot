@@ -23,6 +23,7 @@ use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
+use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 
 /*
@@ -85,10 +86,22 @@ class Storage
     private static $invite_server_map = [];
 
     /** @var Array<string, Stage> */
-    private static $stage_map;
+    private static $stage_map = [];
 
     /** @var Array<string, string[]> */
-    private static $stage_server_map;
+    private static $stage_server_map = [];
+
+    /** @var Array<string, ServerTemplate> */
+    private static $template_map = [];
+
+    /** @var Array<string, string[]> */
+    private static $template_server_map = [];
+
+    /** @var Array<string, ServerScheduledEvent> */
+    private static $scheduled_map = [];
+
+    /** @var Array<string, string[]> */
+    private static $scheduled_server_map = [];
 
     /** @var null|User */
     private static $bot_user = null;
@@ -96,12 +109,59 @@ class Storage
     /** @var int */
     private static $timestamp = 0;
 
-    /** @var Array<string, ServerTemplate> */
-    private static $template_map;
+    public static function getSchedule(string $id): ?ServerScheduledEvent
+    {
+        return self::$scheduled_map[$id] ?? null;
+    }
+    /** @return ServerTemplate[] */
+    public static function getScheduledEvents(): array
+    {
+        return array_values(self::$scheduled_map);
+    }
+    public static function addSchedule(ServerScheduledEvent $schedule): void
+    {
+        if ($schedule->getId() === null) {
+            throw new \AssertionError("Failed to add Server Template to storage, Template Code not found.");
+        }
+        if (isset(self::$scheduled_map[$schedule->getId()])) return;
+        self::$scheduled_server_map[$schedule->getServerId()][] = $schedule->getId();
+        self::$scheduled_map[$schedule->getId()] = $schedule;
+    }
+    public static function updateSchedule(ServerScheduledEvent $schedule): void
+    {
+        if ($schedule->getId() === null) {
+            throw new \AssertionError("Failed to update Server Scheduled Event in storage, ID not found.");
+        }
+        if (!isset(self::$scheduled_map[$schedule->getId()])) {
+            self::addSchedule($schedule);
+        } else {
+            self::$scheduled_map[$schedule->getId()] = $schedule;
+        }
+    }
+    public static function removeSchedule(string $id): void
+    {
+        $schedule = self::getSchedule($id);
+        if (!$schedule instanceof ServerScheduledEvent) return; //Already deleted or not added.
+        unset(self::$scheduled_map[$id]);
+        $server_id = $schedule->getServerId();
 
-    /** @var Array<string, string[]> */
-    private static $template_server_map;
-
+        $i = array_search($id, self::$scheduled_server_map[$server_id], true);
+        if ($i === false || is_string($i)) return; //Not in this servers template map.
+        array_splice(self::$scheduled_server_map[$server_id], $i, 1);
+    }
+    /**
+     * @param string $server_id
+     * @return ServerScheduledEvent[]
+     */
+    public static function getScheduledEventsByServer(string $server_id): array
+    {
+        $events = [];
+        foreach ((self::$scheduled_server_map[$server_id] ?? []) as $id) {
+            $s = self::getSchedule($id);
+            if ($s !== null) $events[] = $s;
+        }
+        return $events;
+    }
     public static function getTemplate(string $code): ?ServerTemplate
     {
         return self::$template_map[$code] ?? null;
@@ -233,6 +293,7 @@ class Storage
         self::$ban_server_map[$id] = [];
         self::$stage_server_map[$id] = [];
         self::$template_server_map[$id] = [];
+        self::$scheduled_server_map[$id] = [];
     }
 
     public static function updateServer(Server $server): void
@@ -286,6 +347,9 @@ class Storage
         }
         foreach (self::$template_server_map[$server_id] as $tid) {
             unset(self::$template_map[$tid]);
+        }
+        foreach (self::$scheduled_server_map[$server_id] as $sid) {
+            unset(self::$scheduled_map[$sid]);
         }
         unset(self::$ban_server_map[$server_id]);
     }

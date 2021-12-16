@@ -12,6 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Plugin;
 
+use Discord\WebSockets\Events\GuildScheduledEventCreate;
+use Discord\WebSockets\Events\GuildScheduledEventUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution as ResolutionPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordDataDump as DiscordDataDumpPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\BanAdd as BanAddPacket;
@@ -53,6 +55,11 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\StageCreate as StageCreateP
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageUpdate as StageUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageDelete as StageDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildEmojiUpdate as GuildEmojiUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventCreate as GuildScheduledEventCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUpdate as GuildScheduledEventUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventDelete as GuildScheduledEventDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUserAdd as GuildScheduledEventUserAddPacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUserRemove as GuildScheduledEventUserRemovePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat as HeartbeatPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Activity;
@@ -100,6 +107,11 @@ use JaxkDev\DiscordBot\Plugin\Events\StageCreated as StageCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\StageDeleted as StageDeletedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\StageUpdated as StageUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\GuildEmojiUpdated as GuildEmojiUpdatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledCreated as ServerScheduledCreatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledUpdated as ServerScheduledUpdatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledDeleted as ServerScheduledDeletedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledUserAdded as ServerScheduledUserAddedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledUserRemoved as ServerScheduledUserRemovedEvent;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 
@@ -167,6 +179,11 @@ class BotCommunicationHandler
         elseif ($packet instanceof StageUpdatePacket) $this->handleStageUpdate($packet);
         elseif ($packet instanceof StageDeletePacket) $this->handleStageDelete($packet);
         elseif ($packet instanceof GuildEmojiUpdatePacket) $this->handleEmojiUpdate($packet);
+        elseif ($packet instanceof GuildScheduledEventCreatePacket) $this->handleScheduleCreate($packet);
+        elseif ($packet instanceof GuildScheduledEventUpdatePacket) $this->handleScheduleUpdate($packet);
+        elseif ($packet instanceof GuildScheduledEventDeletePacket) $this->handleScheduleDelete($packet);
+        elseif($packet instanceof GuildScheduledEventUserAddPacket) $this->handleScheduleAddUser($packet);
+        elseif($packet instanceof GuildScheduledEventUserRemovePacket) $this->handleScheduleRemoveUser($packet);
         elseif ($packet instanceof DiscordReadyPacket) $this->handleReady();
     }
 
@@ -180,6 +197,29 @@ class BotCommunicationHandler
 
         (new DiscordReadyEvent($this->plugin))->call();
     }
+    private function handleScheduleCreate(GuildScheduledEventCreatePacket $packet): void
+    {
+        (new ServerScheduledCreatedEvent($this->plugin, $packet->getScheduledEvent()))->call();
+        Storage::addSchedule($packet->getScheduledEvent());
+    }
+    private function handleScheduleUpdate(GuildScheduledEventUpdatePacket $packet): void
+    {
+        (new ServerScheduledUpdatedEvent($this->plugin, $packet->getScheduledEvent()))->call();
+        Storage::updateSchedule($packet->getScheduledEvent());
+    }
+    private function handleScheduleDelete(GuildScheduledEventDeletePacket $packet): void
+    {
+        (new ServerScheduledDeletedEvent($this->plugin, $packet->getScheduledEvent()))->call();
+        Storage::removeSchedule($packet->getScheduledEvent());
+    }
+    private function handleScheduleAddUser(GuildScheduledEventUserAddPacket $packet): void{
+        (new ServerScheduledUserAddedEvent($packet->getScheduledEvent(), $packet->getServer(), $packet->getUser()))->call();
+    }
+    private function handleScheduleRemoveUser(GuildScheduledEventUserRemovePacket $packet): void{
+        (new ServerScheduledUserRemovedEvent($packet->getScheduledEvent(), $packet->getServer(), $packet->getUser()));
+
+    }
+    
     private function handleEmojiUpdate(GuildEmojiUpdatePacket $packet): void
     {
         (new GuildEmojiUpdatedEvent($this->plugin, $packet->getEmoji()))->call();
@@ -499,7 +539,8 @@ class BotCommunicationHandler
             $packet->getRoles(),
             $packet->getChannels(),
             $packet->getMembers(),
-            $packet->getTemplates()
+            $packet->getTemplates(),
+            $packet->getScheduledEvents(),
         ))->call();
 
         Storage::addServer($packet->getServer());
@@ -517,6 +558,9 @@ class BotCommunicationHandler
         }
         foreach ($packet->getTemplates() as $template) {
             Storage::addTemplate($template);
+        }
+        foreach($packet->getScheduledEvents() as $scheduled){
+            Storage::addSchedule($scheduled);
         }
     }
 

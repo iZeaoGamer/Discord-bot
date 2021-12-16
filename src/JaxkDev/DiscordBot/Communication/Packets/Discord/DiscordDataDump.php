@@ -22,6 +22,7 @@ use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
+use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 
 class DiscordDataDump extends Packet
 {
@@ -51,7 +52,10 @@ class DiscordDataDump extends Packet
     private $users = [];
 
     /** @var ServerTemplate[] */
-    private $templates;
+    private $templates = [];
+
+    /** @var ServerScheduledEvent[] */
+    private $scheduledEvents = [];
 
     /** @var null|User */
     private $bot_user = null;
@@ -167,6 +171,12 @@ class DiscordDataDump extends Packet
     {
         $this->templates[] = $template;
     }
+    public function getScheduledEvents(): array{
+        return $this->scheduledEvents;
+    }
+    public function addSchedule(ServerScheduledEvent $scheduled){
+        $this->scheduledEvents[] = $scheduled;
+    }
 
     public function getBotUser(): ?User
     {
@@ -191,7 +201,7 @@ class DiscordDataDump extends Packet
     public function getSize(): int
     {
         return sizeof($this->servers) + sizeof($this->threads) + sizeof($this->channels) + sizeof($this->roles) + sizeof($this->members)
-            + sizeof($this->users) + sizeof($this->bans) + sizeof($this->invites) + sizeof($this->templates);
+            + sizeof($this->users) + sizeof($this->bans) + sizeof($this->invites) + sizeof($this->templates) + sizeof($this->scheduledEvents);
     }
 
     public function serialize(): ?string
@@ -207,6 +217,7 @@ class DiscordDataDump extends Packet
             $this->members,
             $this->users,
             $this->templates,
+            $this->scheduledEvents,
             $this->bot_user,
             $this->timestamp
         ]);
@@ -225,6 +236,7 @@ class DiscordDataDump extends Packet
             $this->members,
             $this->users,
             $this->templates,
+            $this->scheduledEvents,
             $this->bot_user,
             $this->timestamp
         ] = unserialize($data);

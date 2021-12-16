@@ -26,6 +26,7 @@ use Discord\Repository\Guild\MemberRepository;
 use Discord\Repository\Guild\RoleRepository;
 use Discord\Parts\Guild\AuditLog\AuditLog;
 use Discord\Parts\Guild\AuditLog\Entry;
+use Discord\Repository\Guild\ScheduledEventRepository;
 use Discord\Repository\Guild\GuildTemplateRepository;
 use Discord\Repository\Guild\StickerRepository;
 use Discord\Repository\Guild\StageInstanceRepository;
@@ -109,6 +110,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * @property StickerRepository $stickers
  * @property StageInstanceRepository $stage_instances
  * @property GuildTemplateRepository $templates
+ * @property ScheduledeventRepository $scheduled_events
  */
 class Guild extends Part
 {
@@ -219,6 +221,7 @@ class Guild extends Part
         'stickers' => StickerRepository::class,
         'stage_instances' => StageInstanceRepository::class,
         'templates' => GuildTemplateRepository::class,
+        'scheduled_events' => ScheduledEventRepository::class,
     ];
 
     /**

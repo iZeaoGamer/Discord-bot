@@ -32,7 +32,9 @@ use Discord\Parts\WebSockets\PresenceUpdate as DiscordPresenceUpdate;
 use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
 use Discord\Parts\WebSockets\TypingStart as DiscordTypingStart;
 use Discord\Parts\Channel\StageInstance as DiscordStageInstance;
+use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
 use Discord\Parts\Guild\Emoji as DiscordEmoji;
+use Discord\WebSockets\Events\GuildScheduledEventCreate;
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;
@@ -75,7 +77,11 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\StageCreate as StageCreateP
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageUpdate as StageUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageDelete as StageDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildEmojiUpdate as GuildEmojiUpdatePacket;
-
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventCreate as GuildScheduledEventCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUpdate as GuildScheduledEventUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventDelete as GuildScheduledEventDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUserAdd as GuildScheduledEventUserAddPacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUserRemove as GuildScheduledEventUserRemovePacket;
 
 use JaxkDev\DiscordBot\Plugin\Utils;
 use Monolog\Logger;
@@ -149,6 +155,11 @@ class DiscordEventHandler
         $discord->on("STAGE_INSTANCE_UPDATE", [$this, "onStageUpdate"]);
         $discord->on("STAGE_INSTANCE_DELETE", [$this, "onStageDelete"]);
         $discord->on("GUILD_EMOJIS_UPDATE", [$this, "onEmojiUpdate"]);
+        $discord->on("GUILD_SCHEDULED_EVENT_CREATE", [$this, "onScheduleCreate"]);
+        $discord->on("GUILD_SCHEDULED_EVENT_UPDATE", [$this, "onScheduleUpdate"]);
+        $discord->on("GUILD_SCHEDULED_EVENT_DELETE", [$this, "onScheduleDelete"]);
+        $discord->on("GUILD_SCHEDULED_EVENT_USER_ADD", [$this, "onScheduleUserAdd"]);
+        $discord->on("GUILD_SCHEDULED_EVENT_USER_REMOVE", [$this, "onScheduleUserRemove"]);
     }
 
     /*
@@ -331,7 +342,7 @@ array(5) {
                     if (sizeof($guild->templates) === 0) return;
                     $pk = new DiscordDataDumpPacket();
                     $pk->setTimestamp(time());
-                    /** @var DiscordInvite $invite */
+                    /** @var DiscordTemplate $template */
                     foreach ($guild->templates as $template) {
                         $pk->addTemplate(ModelConverter::genModelServerTemplate($template));
                     }
@@ -343,6 +354,26 @@ array(5) {
                 $this->logger->notice("Cannot fetch templates from server '" . $guild->name . "' (" . $guild->id .
                     "), Bot does not have 'manage_guild' permission.");
             }
+            if ($permissions->manage_guild) {
+                $guild->scheduled_events->freshen(true)->done(function () use ($guild) {
+                    $this->logger->debug("Successfully fetched " . sizeof($guild->scheduled_events) .
+                        " scheduled events from server '" . $guild->name . "' (" . $guild->id . ")");
+                    if (sizeof($guild->scheduled_events) === 0) return;
+                    $pk = new DiscordDataDumpPacket();
+                    $pk->setTimestamp(time());
+                    /** @var DiscordScheduledEvent $scheduled */
+                    foreach ($guild->scheduled_events as $scheduled) {
+                        $pk->addSchedule(ModelConverter::genModelScheduledEvent($scheduled));
+                    }
+                    $this->client->getThread()->writeOutboundData($pk);
+                }, function () use ($guild) {
+                    $this->logger->warning("Failed to fetch scheduled events from server '" . $guild->name . "' (" . $guild->id . ")");
+                });
+            } else {
+                $this->logger->notice("Cannot fetch scheduled events from server '" . $guild->name . "' (" . $guild->id .
+                    "), Bot does not have 'manage_guild' permission.");
+            }
+
 
             /** @var DiscordMember $member */
             foreach ($guild->members as $member) {
@@ -372,6 +403,33 @@ array(5) {
 
         $this->client->getThread()->writeOutboundData(new DiscordReadyPacket());
         $this->client->getCommunicationHandler()->sendHeartbeat();
+    }
+    public function onScheduleCreate(DiscordScheduledEvent $schedule): void
+    {
+        $packet = new GuildScheduledEventCreatePacket(ModelConverter::genModelScheduledEvent($schedule));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onScheduleUpdate(DiscordScheduledEvent $schedule): void
+    {
+        $packet = new GuildScheduledEventUpdatePacket(ModelConverter::genModelScheduledEvent($schedule));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onScheduleDelete(DiscordScheduledEvent $schedule): void
+    {
+        $packet = new GuildScheduledEventDeletePacket(ModelConverter::genModelScheduledEvent($schedule));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onScheduleUserAdd(DiscordScheduledEvent $schedule, DiscordGuild $guild, DiscordUser $user): void
+    {
+        $packet = new GuildScheduledEventUserAddPacket(ModelConverter::genModelScheduledEvent($schedule),
+    ModelConverter::genModelServer($guild), ModelConverter::genModelUser($user));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onScheduleUserRemove(DiscordScheduledEvent $schedule, DiscordGuild $guild, DiscordUser $user): void
+    {
+        $packet = new GuildScheduledEventUserRemovePacket(ModelConverter::genModelScheduledEvent($schedule),
+    ModelConverter::genModelServer($guild), ModelConverter::genModelUser($user));
+        $this->client->getThread()->writeOutboundData($packet);
     }
     public function onEmojiUpdate(DiscordEmoji $emoji): void
     {
@@ -578,16 +636,22 @@ array(5) {
         foreach ($guild->members as $member) {
             $members[] = ModelConverter::genModelMember($member);
         }
-        if ($guild->region === null) {
-            return;
-        }
         $templates = [];
         /** @var DiscordTemplate $template */
         foreach ($guild->templates as $template) {
             $templates[] = ModelConverter::genModelServerTemplate($template);
         }
+        $scheduled = [];
+        /** @var DiscordScheduledEvent $schedule */
+        foreach($guild->scheduled_events as $schedule){
+            $scheduled[] = ModelConverter::genModelScheduledEvent($schedule);
+        }
+        if ($guild->region === null) {
+            return;
+        }
 
-        $packet = new ServerJoinPacket(ModelConverter::genModelServer($guild), $threads, $channels, $members, $roles, $templates);
+
+        $packet = new ServerJoinPacket(ModelConverter::genModelServer($guild), $threads, $channels, $members, $roles, $templates, $scheduled);
         $this->client->getThread()->writeOutboundData($packet);
     }
 

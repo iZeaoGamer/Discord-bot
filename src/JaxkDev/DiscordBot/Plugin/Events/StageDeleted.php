@@ -27,10 +27,10 @@ class StageDeleted extends DiscordBotEvent
     /** @var Stage */
     private $stage;
 
-    public function __construct(Plugin $plugin, Stage $server)
+    public function __construct(Plugin $plugin, Stage $stage)
     {
         parent::__construct($plugin);
-        $this->server = $server;
+        $this->stage = $stage;
     }
 
     public function getStage(): Stage

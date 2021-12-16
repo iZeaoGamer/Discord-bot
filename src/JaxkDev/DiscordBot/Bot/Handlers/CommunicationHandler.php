@@ -32,6 +32,7 @@ use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\User\Activity as DiscordActivity;
 use Discord\Parts\User\Member as DiscordMember;
 use Discord\Parts\User\User as DiscordUser;
+use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
 use Discord\Repository\Channel\WebhookRepository as DiscordWebhookRepository;
 use Discord\Repository\Guild\InviteRepository as DiscordInviteRepository;
 use Discord\Repository\Guild\StageInstanceRepository as DiscordStageRepository;
@@ -108,6 +109,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestEmojiUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTemplateCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTemplateUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTemplateDelete;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleCreate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleUpdate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
 use JaxkDev\DiscordBot\Plugin\Storage;
@@ -227,6 +231,9 @@ class CommunicationHandler
         elseif ($pk instanceof RequestTemplateCreate) $this->handleTemplateCreate($pk);
         elseif ($pk instanceof RequestTemplateUpdate) $this->handleTemplateUpdate($pk);
         elseif ($pk instanceof RequestTemplateDelete) $this->handleTemplateDelete($pk);
+        elseif ($pk instanceof RequestScheduleCreate) $this->handleScheduleCreate($pk);
+        elseif ($pk instanceof RequestScheduleUpdate) $this->handleScheduleUpdate($pk);
+        elseif ($pk instanceof RequestScheduleDelete) $this->handleScheduleDelete($pk);
     }
     private function handleDelayReply(RequestDelayReply $pk): void
     {
@@ -333,22 +340,23 @@ class CommunicationHandler
     }
     private function handleTemplateCreate(RequestTemplateCreate $pk): void
     {
-        $this->getServer($pk, $pk->getTemplate()->getServerId(), function (DiscordGuild $guild) use ($pk){
+        $this->getServer($pk, $pk->getTemplate()->getServerId(), function (DiscordGuild $guild) use ($pk) {
             $guild->templates->save($guild->templates->create([
                 'name' => $pk->getTemplate()->getName(),
                 'description' => $pk->getTemplate()->getDescription()
-            ]))->then(function(DiscordTemplate $template) use ($pk){
+            ]))->then(function (DiscordTemplate $template) use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Successfully created Guild Template.", [ModelConverter::genModelServerTemplate($template)]);
-            }, function (\Throwable $e) use ($pk){
+            }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to create guild template.", [$e->getMessage(), $e->getTraceAsString()]);
             });
         });
     }
-    private function handleTemplateUpdate(RequestTemplateUpdate $pk): void{
+    private function handleTemplateUpdate(RequestTemplateUpdate $pk): void
+    {
         if ($pk->getTemplate()->getCode() === null) {
             throw new \AssertionError("Template code must be present.");
         }
-        $this->getServer($pk, $pk->getTemplate()->getServerId(), function (DiscordGuild $guild) use ($pk){
+        $this->getServer($pk, $pk->getTemplate()->getServerId(), function (DiscordGuild $guild) use ($pk) {
             $guild->template->fetch($pk->getTemplate()->getCode())->then(function (DiscordTemplate $template) use ($guild, $pk) {
                 $template->name = $pk->getTemplate()->getName();
                 $template->description = $pk->getTemplate()->getDescription();
@@ -365,7 +373,8 @@ class CommunicationHandler
             });
         });
     }
-    private function handleTemplateDelete(RequestTemplateDelete $pk): void{
+    private function handleTemplateDelete(RequestTemplateDelete $pk): void
+    {
         $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
             $guild->templates->fetch($pk->getCode())->then(function (DiscordTemplate $template) use ($guild, $pk) {
                 $guild->templates->delete($template)->then(function () use ($pk) {
@@ -377,6 +386,55 @@ class CommunicationHandler
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to delete template.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to delete template ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
+            });
+        });
+    }
+    private function handleScheduleCreate(RequestScheduleCreate $pk): void
+    {
+        $this->getServer($pk, $pk->getScheduledEvent()->getServerId(), function (DiscordGuild $guild) use ($pk) {
+            $guild->scheduled_events->save($guild->scheduled_events->create([
+                'description' => $pk->getScheduledEvent()->getDescription()
+            ]))->then(function (DiscordScheduledEvent $schedule) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Successfully created Guild Scheduled Event.", [ModelConverter::genModelScheduledEvent($schedule)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to create guild Scheduled Event.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }
+    private function handleScheduleUpdate(RequestScheduleUpdate $pk): void
+    {
+        if ($pk->getScheduledEvent()->getId() === null) {
+            throw new \AssertionError("Guild Schedule ID must be present.");
+        }
+        $this->getServer($pk, $pk->getScheduledEvent()->getServerId(), function (DiscordGuild $guild) use ($pk) {
+            $guild->scheduled_events->fetch($pk->getScheduledEvent()->getId())->then(function (DiscordScheduledEvent $schedule) use ($guild, $pk) {
+                $schedule->description = $pk->getScheduledEvent()->getDescription();
+                /** @phpstan-ignore-line avatar can be null. */
+                $guild->scheduled_events->save($schedule)->then(function (DiscordScheduledEvent $schedule) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Successfully updated Schedule Event.", [ModelConverter::genModelScheduledEvent($schedule)]);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to update Scheduled Event.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to update scheduled event ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to update scheduled event.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to update scheduled event ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
+            });
+        });
+    }
+    private function handleScheduleDelete(RequestScheduleDelete $pk): void
+    {
+        $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
+            $guild->scheduled_events->fetch($pk->getId())->then(function (DiscordScheduledEvent $schedule) use ($guild, $pk) {
+                $guild->scheduled_events->delete($schedule)->then(function () use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Successfully deleted Scheduled Event.");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to delete Scheduled Event.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to delete Scheduled Event ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to delete Scheduled Event.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to delete Scheduled Event ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
             });
         });
     }
@@ -712,7 +770,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleStageCreate(RequestStageCreate $pk)
+    private function handleStageCreate(RequestStageCreate $pk): void
     {
         $this->getServer($pk, $pk->getStage()->getServerId(), function (DiscordGuild $guild) use ($pk) {
             $c = $pk->getStage();
@@ -994,7 +1052,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleGuildTransfer(RequestGuildTransfer $pk)
+    private function handleGuildTransfer(RequestGuildTransfer $pk): void
     {
         $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
             $guild->transferOwnership($pk->getUserId())->then(function () use ($pk) {
@@ -1004,7 +1062,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleGuildEmojiUpdate(RequestEmojiUpdate $pk)
+    private function handleGuildEmojiUpdate(RequestEmojiUpdate $pk): void
     {
         $this->getServer($pk, $pk->getEmoji()->getServerId(), function (DiscordGuild $guild) use ($pk) {
             $guild->emojis->fetch($pk->getEmoji()->getId())->then(function (DiscordEmoji $emoji) use ($guild, $pk) {
@@ -1028,7 +1086,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleStickerUpdate(RequestStickerUpdate $pk)
+    private function handleStickerUpdate(RequestStickerUpdate $pk): void
     {
         $serverId = $pk->getSticker()->getServerId();
         if ($serverId === null) {
@@ -1213,7 +1271,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleModifyInteraction(RequestModifyInteraction $pk)
+    private function handleModifyInteraction(RequestModifyInteraction $pk): void
     {
         $m = $pk->getMessage();
         if ($m->getId() === null) {
@@ -1325,7 +1383,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleCreateInteraction(RequestCreateInteraction $pk)
+    private function handleCreateInteraction(RequestCreateInteraction $pk): void
     {
         $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
             $m = $pk->getMessage();

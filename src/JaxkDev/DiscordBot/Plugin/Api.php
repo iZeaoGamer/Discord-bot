@@ -75,6 +75,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestEmojiUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTemplateCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTemplateUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTemplateDelete;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleCreate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleUpdate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleDelete;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -84,6 +87,7 @@ use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Models\Messages\Stickers;
+use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Models\Emoji;
 use JaxkDev\DiscordBot\Models\Invite;
 use JaxkDev\DiscordBot\Models\Member;
@@ -113,6 +117,39 @@ class Api
     {
         $this->plugin = $plugin;
     }
+    /** Creates a scheduled event within a guild.
+     * @param ServerScheduledEvent
+     * @return PromiseInterface Resolves with a ServerScheduledEvent Model.
+     */
+    public function createEvent(ServerScheduledEvent $schedule): PromiseInterface{
+        $pk = new RequestScheduleCreate($schedule);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Updates a scheduled event within a guild.
+     * @param ServerScheduledEvent
+     * @return PromiseInterface Resolves with a ServerScheduledEvent Model.
+     */
+    public function updateEvent(ServerScheduledEvent $schedule): PromiseInterface{
+        if($schedule->getId() === null){
+            return rejectPromise(new ApiRejection("ID must be present."));
+        }
+        $pk = new RequestScheduleUpdate($schedule);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Deletes a scheduled event within a guild.
+     * @param string $serverId
+     * @param string $id
+     * @return PromiseInterface Resolves with no data.
+     */
+    public function deleteEvent(string $serverId, string $id): PromiseInterface{
+        $pk = new RequestScheduleDelete($serverId, $id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
 
     /** Creates a server template within a guild. 
      * @param ServerTemplate
@@ -121,7 +158,7 @@ class Api
     public function createTemplate(ServerTemplate $template): PromiseInterface
     {
         $pk = new RequestTemplateCreate($template);
-        $this->plugin->writeOutBoundData($pk);
+        $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
     /** Updates a server template within a guild. 
@@ -134,7 +171,7 @@ class Api
             return rejectPromise(new ApiRejection("Template Code must be present."));
         }
         $pk = new RequestTemplateUpdate($template);
-        $this->plugin->writeOutBoundData($pk);
+        $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
     /**  Deletes a server template using server Id and Template code. 
@@ -145,7 +182,7 @@ class Api
     public function deleteTemplate(string $server_id, string $code): PromiseInterface
     {
         $pk = new RequestTemplateDelete($server_id, $code);
-        $this->plugin->writeOutBoundData($pk);
+        $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
     /** Updates a emoji within a guild.

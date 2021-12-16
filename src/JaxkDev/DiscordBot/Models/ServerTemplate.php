@@ -110,8 +110,10 @@ class ServerTemplate implements \Serializable
     }
     public function setCreatorId(?string $creator_id): void
     {
-        if (!Utils::validDiscordSnowflake($creator_id)) {
-            throw new \AssertionError("Creator ID: '{$creator_id}' is invalid.");
+        if ($creator_id !== null) {
+            if (!Utils::validDiscordSnowflake($creator_id)) {
+                throw new \AssertionError("Creator ID: '{$creator_id}' is invalid.");
+            }
         }
         $this->creatorId = $creator_id;
     }

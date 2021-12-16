@@ -30,6 +30,7 @@ use Discord\Parts\Guild\Ban as DiscordBan;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\Guild\Emoji as DiscordEmoji;
+use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
 use Discord\Parts\Permissions\RolePermission as DiscordRolePermission;
 use Discord\Parts\User\Activity as DiscordActivity;
 use Discord\Parts\User\Member as DiscordMember;
@@ -70,6 +71,7 @@ use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\VoiceState;
 use JaxkDev\DiscordBot\Models\Webhook;
+use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Models\Messages\Stickers;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
@@ -85,6 +87,10 @@ abstract class ModelConverter
     static public function genModelServerTemplate(DiscordGuildTemplate $template): ServerTemplate
     {
         return new ServerTemplate($template->name, $template->description, $template->source_guild_id, $template->code, $template->usage_count, $template->creator_id, $template->created_at->getTimestamp(), $template->updated_at->getTimestamp(), $template->is_dirty);
+    }
+    static function genModelScheduledEvent(DiscordScheduledEvent $schedule): ServerScheduledEvent{
+        return new ServerScheduledEvent($schedule->guild_id, $schedule->name, $schedule->id, $schedule->channel_id, $schedule->creator_id, $schedule->description, $schedule->scheduled_start_time->getTimestamp(), ($schedule->scheduled_end_time !== null ? $schedule->scheduled_end_time->getTimestamp() : null),
+    $schedule->privacy_level, $schedule->status, $schedule->entity_type, $schedule->entity_id, $schedule->user_count);
     }
     static public function genModelInteraction(DiscordInteraction $interact, MessageBuilder $builder = null, bool $ephemeral = false): Interaction
     {

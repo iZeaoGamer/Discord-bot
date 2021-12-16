@@ -68,6 +68,12 @@ class Entry extends Part
     public const STICKER_CREATE = 90;
     public const STICKER_UPDATE = 91;
     public const STICKER_DELETE = 92;
+    public const GUILD_SCHEDULED_EVENT_CREATE = 100;
+    public const GUILD_SCHEDULED_EVENT_UPDATE = 101;
+    public const GUILD_SCHEDULED_EVENT_DELETE = 102;
+    public const THREAD_CREATE = 110;
+    public const THREAD_UPDATE = 111;
+    public const THREAD_DELETE = 112;
     // AUDIT LOG ENTRY TYPES
 
     /**
