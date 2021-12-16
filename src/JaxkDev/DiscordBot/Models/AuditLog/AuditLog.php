@@ -171,7 +171,9 @@ class AuditLog implements \Serializable
             $this->serverId,
             $this->webhooks,
             $this->users,
-            $this->audit_log_entries
+            $this->audit_log_entries,
+            $this->events,
+            $this->threads
         ]);
     }
 
@@ -181,7 +183,9 @@ class AuditLog implements \Serializable
             $this->serverId,
             $this->webhooks,
             $this->users,
-            $this->audit_log_entries
+            $this->audit_log_entries,
+            $this->events,
+            $this->threads
         ] = unserialize($data);
     }
 }
