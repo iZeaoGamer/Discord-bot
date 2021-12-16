@@ -391,7 +391,7 @@ abstract class ModelConverter
                     array_keys($discordMessage->mentions->toArray()),
                     array_keys($discordMessage->mention_roles->toArray()),
                     array_keys($discordMessage->mention_channels->toArray()),
-                    array_keys($discordMessage->stickers->toArray()),
+                    array_keys($discordMessage->sticker_items->toArray()),
                     ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null)
 
                 );
@@ -415,7 +415,7 @@ abstract class ModelConverter
                     array_keys($discordMessage->mentions->toArray()),
                     array_keys($discordMessage->mention_roles->toArray()),
                     array_keys($discordMessage->mention_channels->toArray()),
-                    array_keys($discordMessage->stickers->toArray()),
+                    array_keys($discordMessage->sticker_items->toArray()),
                     ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
                     )
                 );
@@ -443,7 +443,7 @@ abstract class ModelConverter
                 array_keys($discordMessage->mentions->toArray()),
                 array_keys($discordMessage->mention_roles->toArray()),
                 array_keys($discordMessage->mention_channels->toArray()),
-                array_keys($discordMessage->stickers->toArray()),
+                array_keys($discordMessage->sticker_items->toArray()),
                 ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
                 )
             );

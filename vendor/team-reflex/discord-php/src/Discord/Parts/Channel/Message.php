@@ -71,7 +71,7 @@ use function React\Promise\reject;
  * @property bool                 $suppress_embeds        Do not include embeds when serializing message.
  * @property bool                 $source_message_deleted Source message for this message has been deleted.
  * @property bool                 $urgent                 Message is urgent.
- * @property Collection|Sticker[] $stickers         Stickers attached to the message.
+ * @property Collection|Sticker[] $sticker_items          Stickers attached to the message.
  * @property object|null          $interaction            The interaction which triggered the message (slash commands).
  * @property string|null          $link                   Returns a link to the message.
  */
@@ -134,6 +134,7 @@ class Message extends Part
         'message_reference',
         'referenced_message',
         'flags',
+        'sticker_items',
         'stickers',
         'interaction',
     ];
@@ -450,12 +451,12 @@ class Message extends Part
      *
      * @return Sticker[]|Collection
      */
-    protected function getStickerAttribute(): Collection
+    protected function getStickerItemsAttribute(): Collection
     {
         $sticker_items = Collection::for(Sticker::class);
 
-        foreach ($this->attributes['stickers'] ?? [] as $sticker) {
-            $sticker_items->push($this->factory->create(Sticker::class, $sticker_items, true));
+        foreach ($this->attributes['sticker_items'] ?? [] as $sticker) {
+            $sticker_items->push($this->factory->create(Sticker::class, $sticker, true));
         }
 
         return $sticker_items;
