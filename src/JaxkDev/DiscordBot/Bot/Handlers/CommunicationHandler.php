@@ -30,6 +30,7 @@ use Discord\Parts\Guild\Guild as DiscordGuild;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\User\Activity as DiscordActivity;
+use Discord\Parts\Guild\AuditLog\AuditLog as DiscordAuditLog;
 use Discord\Parts\User\Member as DiscordMember;
 use Discord\Parts\User\User as DiscordUser;
 use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
@@ -913,8 +914,8 @@ class CommunicationHandler
     {
         $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), function (DiscordMessage $message) use ($pk) {
             //     $guild->channels->fetch($pk->getChannel()->getID())->then(function (DiscordChannel $discord) use ($pk){
-            $message->startThread($pk->getName(), $pk->getDuration())->then(function () use ($pk) {
-                $this->resolveRequest($pk->getUID());
+            $message->startThread($pk->getName(), $pk->getDuration())->then(function () use ($message, $pk) {
+                $this->resolveRequest($pk->getUID(), false, "Successfully created thread message.", [ModelConverter::genModelMessage($message)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages..", [$e->getMessage(), $e->getTraceAsString()]);
             });
@@ -1117,8 +1118,8 @@ class CommunicationHandler
                 "action_type" => $pk->getActionType(),
                 "before" => $pk->getBefore(),
                 "limit" => $pk->getLimit()
-            ])->then(function () use ($pk) {
-                $this->resolveRequest($pk->getUID(), true, "Searched AuditLog with success!.");
+            ])->then(function (DiscordAuditLog $log) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Searched AuditLog with success!.", [ModelConverter::genModelAuditLog($log)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to search audit log.", [$e->getMessage(), $e->getTraceAsString()]);
             });
@@ -1157,26 +1158,44 @@ class CommunicationHandler
     private function handleVoiceChannelJoin(RequestJoinVoiceChannel $pk): void
     {
         $channel = $pk->getChannel();
-        $voiceChannel = new DiscordChannel($this->client->getDiscordClient(), [
-            'name' => $channel->getName(),
-            'id' => $channel->getID()
-        ]);
-        try {
-            $this->client->getDiscordClient()->joinVoiceChannel($voiceChannel, $pk->isMuted(), $pk->isDeafend(), null, true);
-            $this->resolveRequest($pk->getUID());
-        } catch (\Throwable $e) {
-            $this->resolveRequest($pk->getUID(), false, $e->getMessage());
+        if($channel->getId() === null){
+            $this->resolveRequest($pk->getUID(), false, "Voice Channel ID must be present");
+            return;
         }
+       $voiceChannel = $this->client->getDiscordClient()->getChannel($channel->getId());
+       if($voiceChannel === null){
+           $this->resolveRequest($pk->getUID(), false, "Voice Channel with ID: {$channel->getId()} does not exist!");
+           return;
+       }
+       if($voiceChannel->type !== $voiceChannel::TYPE_VOICE){
+           $this->resolveRequest($pk->getUID(), false, "Channel: {$channel->getId()} is not a voice channel, silly!");
+           return;
+       }
+     
+            $this->client->getDiscordClient()->joinVoiceChannel($voiceChannel, $pk->isMuted(), $pk->isDeafend(), null, true)->then(function() use ($voiceChannel, $channel, $pk){
+            $this->resolveRequest($pk->getUID(), true, "Successfully joined Voice Channel ID: {$channel->getId()}", [ModelConverter::genModelVoiceChannel($voiceChannel)]);
+            }, function (\Throwable $e) use ($pk, $channel){
+                $this->resolveRequest($pk->getUID(), false, "Unable to Join Voice Channel ID: {$channel->getId()}", [$e->getMessage(), $e->getTraceAsString()]);
+            });
     }
     private function handleVoiceChannelLeave(RequestLeaveVoiceChannel $pk): void
     {
         $channel = $pk->getChannel();
+        if($channel->getId() === null){
+            $this->resolveRequest($pk->getUID(), false, "Unable to leave Voice Channel.", ["ID Must be present!"]);
+            return;
+        }
         try {
             $voiceClient = $this->client->getDiscordClient()->getVoiceClient($channel->getServerID());
             if ($voiceClient === null) {
                 $this->resolveRequest($pk->getUID(), false, "Bot isn't in a voice channel.");
                 return;
             }
+            if($voiceClient->getChannel()->type !== $voiceClient->getChannel()::TYPE_VOICE){
+                $this->resolveRequest($pk->getUID(), false, "Unable to leave Voice Channel. Is this channel corrupted?");
+                return;
+            }
+            $this->resolveRequest($pk->getUID(), true, "Successfully left voice channel.");
             $voiceClient->close();
         } catch (\Throwable $e) {
             $this->resolveRequest($pk->getUID(), false, $e->getMessage());
@@ -1185,10 +1204,19 @@ class CommunicationHandler
     private function handleVoiceChannelMove(RequestMoveVoiceChannel $pk): void
     {
         $channel = $pk->getChannel();
-        $voiceChannel = new DiscordChannel($this->client->getDiscordClient(), [
-            'name' => $channel->getName(),
-            'id' => $channel->getID()
-        ]);
+        if($channel->getId() === null){
+            $this->resolveRequest($pk->getUID(), false, "Voice Channel ID must be present");
+            return;
+        }
+       $voiceChannel = $this->client->getDiscordClient()->getChannel($channel->getId());
+       if($voiceChannel === null){
+           $this->resolveRequest($pk->getUID(), false, "Voice Channel with ID: {$channel->getId()} does not exist!");
+           return;
+       }
+       if($voiceChannel->type !== $voiceChannel::TYPE_VOICE){
+           $this->resolveRequest($pk->getUID(), false, "Channel: {$channel->getId()} is not a voice channel, silly!");
+           return;
+       }
         try {
             $voiceClient = $this->client->getDiscordClient()->getVoiceClient($channel->getServerID());
             if ($voiceClient === null) {
@@ -1209,9 +1237,12 @@ class CommunicationHandler
             return;
         }
         $this->getChannel($pk, $channel->getID(), function (DiscordChannel $discordChannel) use ($channel, $pk) {
-
-            $discordChannel->moveMember($pk->getUserId())->then(function () use ($pk, $channel) {
-                $this->resolveRequest($pk->getUID(), true, "Succcessfully moved member to {$channel->getID()}!");
+            if($discordChannel->type !== $discordChannel::TYPE_VOICE){
+                $this->resolveRequest($pk->getUID(), false, "Channel {$channel->getId()} is not a voice channel.");
+                return;
+            }
+            $discordChannel->moveMember($pk->getUserId())->then(function () use ($discordChannel, $pk, $channel) {
+                $this->resolveRequest($pk->getUID(), true, "Succcessfully moved member to {$channel->getID()}!", [ModelConverter::genModelVoiceChannel($discordChannel)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to move member.", [$e->getMessage(), $e->getTraceAsString()]);
             });
@@ -1225,9 +1256,12 @@ class CommunicationHandler
             return;
         }
         $this->getChannel($pk, $channel->getID(), function (DiscordChannel $discordChannel) use ($channel, $pk) {
-
-            $discordChannel->muteMember($pk->getUserId())->then(function () use ($pk, $channel) {
-                $this->resolveRequest($pk->getUID(), true, "Succcessfully moved member to {$channel->getID()}!");
+            if($discordChannel->type !== $discordChannel::TYPE_VOICE){
+                $this->resolveRequest($pk->getUID(), false, "Channel ID: {$channel->getId()} is not a Voice Channel.");
+                return;
+            }
+            $discordChannel->muteMember($pk->getUserId())->then(function () use ($pk, $discordChannel, $channel) {
+                $this->resolveRequest($pk->getUID(), true, "Succcessfully moved member to {$channel->getID()}!", [ModelConverter::genModelVoiceChannel($discordChannel)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to move member.", [$e->getMessage(), $e->getTraceAsString()]);
             });
@@ -1241,9 +1275,12 @@ class CommunicationHandler
             return;
         }
         $this->getChannel($pk, $channel->getID(), function (DiscordChannel $discordChannel) use ($channel, $pk) {
-
-            $discordChannel->unmuteMember($pk->getUserId())->then(function () use ($pk, $channel) {
-                $this->resolveRequest($pk->getUID(), true, "Succcessfully unmuted member in {$channel->getID()}!");
+            if($discordChannel->type !== $discordChannel::TYPE_VOICE){
+                $this->resolveRequest($pk->getUID(), false, "Channel ID: {$channel->getId()} is not a Voice Channel.");
+                return;
+            }
+            $discordChannel->unmuteMember($pk->getUserId())->then(function () use ($pk, $discordChannel, $channel) {
+                $this->resolveRequest($pk->getUID(), true, "Succcessfully unmuted member in {$channel->getID()}!", [ModelConverter::genModelVoiceChannel($discordChannel)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to unmute member.", [$e->getMessage(), $e->getTraceAsString()]);
             });
@@ -1356,7 +1393,7 @@ class CommunicationHandler
                     $interaction = $msg->interaction;
                     print_r($interaction);
                     if ($interaction === null) {
-                        $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
+                        $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message. (Turned into Message");
                         return;
                     }
                     $ephemeral = $pk->isEphemeral();
@@ -1449,7 +1486,7 @@ class CommunicationHandler
                         $interaction = $msg->interaction;
                         print_r($interaction);
                         if ($interaction === null) {
-                            $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
+                            $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message (Data turned into Message model)", [ModelConverter::genModelMessage($msg)]);
                             return;
                         }
                         $ephemeral = $pk->isEphemeral();
@@ -1546,7 +1583,6 @@ class CommunicationHandler
             }
 
             $button->setListener(function (DiscordInteraction $interaction) use ($channel, $builder, $pk) {
-                ///if(!$interaction->hasResponded()){
                 try {
                     $interaction->acknowledge()->then(function () use ($interaction, $pk) {
 
@@ -2005,7 +2041,7 @@ class CommunicationHandler
     {
         $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $dMessage) use ($pk) {
             $dMessage->delete()->done(function () use ($pk) {
-                $this->resolveRequest($pk->getUID());
+                $this->resolveRequest($pk->getUID(), false, "Successfully deleted message.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to delete message.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to delete message ({$pk->getUID()}) - {$e->getMessage()}");
@@ -2073,7 +2109,7 @@ class CommunicationHandler
                 /** @var DiscordInvite $dInvite */
                 $dInvite = $invites->offsetGet($pk->getInviteCode());
                 $invites->delete($dInvite)->done(function (DiscordInvite $dInvite) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), true, "Invite revoked.", [ModelConverter::genModelInvite($dInvite)]);
+                    $this->resolveRequest($pk->getUID(), true, "Invite revoked.");
                     $this->logger->debug("Invite revoked ({$pk->getUID()})");
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to revoke.", [$e->getMessage(), $e->getTraceAsString()]);

@@ -926,8 +926,8 @@ class Api
     /**
      * Create a server channel.
      *
-     * @param ServerChannel $channel CategoryChannel, TextChannel, ThreadChannel or VoiceChannel.
-     * @return PromiseInterface Resolves with a Channel model of same type provided.
+     * @param ServerChannel $channel CategoryChannel, TextChannel or VoiceChannel.
+     * @return PromiseInterface Resolves with a Channel model.
      */
     public function createChannel(ServerChannel $channel): PromiseInterface
     {
@@ -945,7 +945,7 @@ class Api
      * @see Api::unpinMessage()
      *
      * @param ServerChannel $channel
-     * @return PromiseInterface Resolves with a Channel model of same type provided.
+     * @return PromiseInterface Resolves with a Channel model.
      */
     public function updateChannel(ServerChannel $channel): PromiseInterface
     {
@@ -953,6 +953,13 @@ class Api
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+
+    /**
+     * Transfers Server Ownership to another user.
+     * @param string $server_id
+     * @param string $user_id
+     * @return PromiseInterface Resolves with no data.
+     */
     public function transferOwnership(string $server_id, string $user_id): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($server_id)) {
@@ -965,6 +972,14 @@ class Api
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+
+    /**
+     * Searches members within the given parmeters through out the Discord server.
+     * @param string $server_id
+     * @param string $user_id
+     * @param int $limit
+     * @return PromiseInterface Resolves with no data.
+     */
     public function searchMembers(string $server_id, string $user_id, int $limit): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($server_id)) {
@@ -975,6 +990,16 @@ class Api
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+
+    /**
+     * Searches Audit log within the given parmeters through out the discord server.
+     * @param string $server_id
+     * @param string $user_id
+     * @param int $action_type
+     * @param string $before
+     * @param int $limit
+     * @return PromiseInterface Resolves with a AuditLog Model.
+     */
     public function searchAuditLog(string $server_id, string $user_id, int $action_type, string $before, int $limit): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($server_id)) {
@@ -994,16 +1019,28 @@ class Api
      * Joins a voice channel. ID must be present!
      * 
      * @param VoiceChannel $channel
-     * @return PromiseInterface Resolves with a Voice Channel model of A Voice Channel.
+     * @return PromiseInterface Resolves with a Voice Channel model.
      */
     public function joinVoiceChannel(VoiceChannel $channel, bool $isDeafened, bool $isMuted): PromiseInterface
     {
+        if($channel->getId() === null){
+            return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
+        }
         $pk = new RequestJoinVoiceChannel($channel, $isDeafened, $isMuted);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+
+    /**
+     * Leaves a voice channel. Left Voice channel ID must be present.
+     * @param VoiceChannel $channel
+     * @return PromiseInterface Resolves with no data.
+     */
     public function leaveVoiceChannel(VoiceChannel $channel): PromiseInterface
     {
+        if($channel->getId() === null){
+            return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
+        }
         $pk = new RequestLeaveVoiceChannel($channel);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -1013,16 +1050,29 @@ class Api
      * Moves to another voice channel. Moved Voice Channel ID must be present.
      * 
      * @param VoiceChannel $channel
-     * @return PromiseInterface Resolves with the Moved Voice Channel model of Voice type provided.
+     * @return PromiseInterface Resolves with a Voice Channel Model.
      */
     public function moveVoiceChannel(VoiceChannel $channel): PromiseInterface
     {
+        if($channel->getId() === null){
+            return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
+        }
         $pk = new RequestMoveVoiceChannel($channel);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+
+    /**
+     * Moves a member to another voice channel. Moved to Voice Channel ID Must be present.
+     * @param string $userID
+     * @param VoiceChannel $channel
+     * @return PromiseInterface Resolves with a Voice Channel Model.
+     */
     public function moveMember(string $userID, VoiceChannel $channel): PromiseInterface
     {
+        if($channel->getId() === null){
+            return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
+        }
         if (!Utils::validDiscordSnowflake($userID)) {
             return rejectPromise(new ApiRejection("Invalid Member ID '$userID'."));
         }
@@ -1030,8 +1080,19 @@ class Api
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+
+    /**
+     * Mutes a member that's in the current Voice Channel. Muted member's Voice Channel ID must be present.
+     * @param string $userID
+     * @param VoiceChannel $channel
+     * @return PromiseInterface Resolves with a VoiceChannel Model.
+     */
     public function muteMember(string $userID, VoiceChannel $channel): PromiseInterface
     {
+        if($channel->getId() === null){
+            return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
+        }
+
         if (!Utils::validDiscordSnowflake($userID)) {
             return rejectPromise(new ApiRejection("Invalid Member ID '$userID'."));
         }
@@ -1061,7 +1122,7 @@ class Api
      * @param string $channel_id
      * @param string $name
      * @param int $duration
-     * @return PromiseInterface Resolves with a Thread message creation.
+     * @return PromiseInterface Resolves with a Message Model.
      */
     public function startMessageThread(string $message_id, string $channel_id, string $name, int $duration): PromiseInterface
     {
@@ -1080,7 +1141,7 @@ class Api
      * Updates a thread.
      * 
      * @param ThreadChannel $channel
-     * @return PromiseInterface Resolves with the Updated Thread Model.
+     * @return PromiseInterface Resolves with a Thread Channel Model.
      */
     public function updateThread(ThreadChannel $channel)
     {
@@ -1094,7 +1155,7 @@ class Api
      * 
      * @param string $server_id
      * @param string $channel_id
-     * @return PromiseInterface Resolves with the deleted thread model.
+     * @return PromiseInterface Resolves with no data.
      */
     public function deleteThread(string $server_id, string $channel_id)
     {
@@ -1147,7 +1208,7 @@ class Api
      *
      * @param string $server_id
      * @param string $invite_code
-     * @return PromiseInterface Resolves with a Invite model.
+     * @return PromiseInterface Resolves with no data.
      */
     public function revokeInvite(string $server_id, string $invite_code): PromiseInterface
     {

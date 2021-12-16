@@ -40,6 +40,9 @@ use Discord\Parts\Interactions\Interaction as DiscordInteraction;
 use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
 use Discord\Parts\Channel\StageInstance as DiscordStage;
 use Discord\Parts\Guild\GuildTemplate as DiscordGuildTemplate;
+use Discord\Parts\Guild\AuditLog\AuditLog as DiscordAuditLog;
+use Discord\Parts\Guild\AuditLog\Entry as DiscordEntryLog;
+use Discord\Parts\Guild\AuditLog\Options as DiscordEntryOptions;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
@@ -73,6 +76,9 @@ use JaxkDev\DiscordBot\Models\VoiceState;
 use JaxkDev\DiscordBot\Models\Webhook;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use Discord\Builders\MessageBuilder;
+use JaxkDev\DiscordBot\Models\AuditLog\AuditLog;
+use JaxkDev\DiscordBot\Models\AuditLog\Options;
+use JaxkDev\DiscordBot\Models\AuditLog\Entry;
 use JaxkDev\DiscordBot\Models\Messages\Stickers;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Models\Emoji;
@@ -80,17 +86,117 @@ use JaxkDev\DiscordBot\Models\ServerTemplate;
 
 abstract class ModelConverter
 {
+    static public function genModelAuditLog(DiscordAuditLog $log): AuditLog
+    {
+        /** @var WebHook[] $webhooks */
+        $webhooks = [];
+        foreach ($log->webhooks as $webhook) {
+            $webhooks[] = self::genModelWebhook($webhook);
+        }
+
+        /** @var User[] $users */
+        $users = [];
+        foreach ($log->users as $user) {
+            $users[] = self::genModelUser($user);
+        }
+
+        /** @var Entry[] $entries */
+        $entries = [];
+        foreach ($log->audit_log_entries as $entry) {
+            $entries[] = self::genModelEntryLog($entry);
+        }
+
+        /** @var ServerScheduledEvent[] $schedules */
+        $schedules = [];
+        foreach ($log->guild_scheduled_events as $schedule) {
+            $schedules[] = ModelConverter::genModelScheduledEvent($schedule);
+        }
+        /** @var ThreadChannel[] $threads */
+        $threads = [];
+        foreach ($log->threads as $thread) {
+            $threads[] = self::genModelThread($thread);
+        }
+        return new AuditLog(
+            $log->guild_id,
+            $webhooks,
+            $users,
+            $entries,
+            $schedules,
+            $threads
+
+
+        );
+    }
+    static public function genModelEntryLog(DiscordEntryLog $entry): Entry
+    {
+        return new Entry(
+            $entry->id,
+            $entry->user_id,
+            $entry->target_id,
+            $entry->action_type,
+            self::genModelAuditLogOptions($entry->options),
+            $entry->reason
+        );
+    }
+    static public function genModelAuditLogOptions(DiscordEntryOptions $option): Options
+    {
+        return new Options(
+            $option->delete_member_days,
+            $option->members_removed,
+            $option->channel_id,
+            $option->message_id,
+            $option->count,
+            $option->id,
+            $option->type,
+            $option->role_name
+        );
+    }
+
     static public function genModelEmoji(DiscordEmoji $emoji): Emoji
     {
-        return new Emoji($emoji->name, $emoji->guild_id, $emoji->managed, $emoji->id, $emoji->require_colons, array_keys($emoji->roles->toArray()), ($emoji->user !== null ? self::genModelUser($emoji->user) : null), $emoji->animated, $emoji->available);
+        return new Emoji(
+            $emoji->name,
+            $emoji->guild_id,
+            $emoji->managed,
+            $emoji->id,
+            $emoji->require_colons,
+            array_keys($emoji->roles->toArray()),
+            ($emoji->user !== null ? self::genModelUser($emoji->user) : null),
+            $emoji->animated,
+            $emoji->available
+        );
     }
     static public function genModelServerTemplate(DiscordGuildTemplate $template): ServerTemplate
     {
-        return new ServerTemplate($template->name, $template->description, $template->source_guild_id, $template->code, $template->usage_count, $template->creator_id, $template->created_at->getTimestamp(), $template->updated_at->getTimestamp(), $template->is_dirty);
+        return new ServerTemplate(
+            $template->name,
+            $template->description,
+            $template->source_guild_id,
+            $template->code,
+            $template->usage_count,
+            $template->creator_id,
+            $template->created_at->getTimestamp(),
+            $template->updated_at->getTimestamp(),
+            $template->is_dirty
+        );
     }
-    static function genModelScheduledEvent(DiscordScheduledEvent $schedule): ServerScheduledEvent{
-        return new ServerScheduledEvent($schedule->guild_id, $schedule->name, $schedule->id, $schedule->channel_id, $schedule->creator_id, $schedule->description, $schedule->scheduled_start_time->getTimestamp(), ($schedule->scheduled_end_time !== null ? $schedule->scheduled_end_time->getTimestamp() : null),
-    $schedule->privacy_level, $schedule->status, $schedule->entity_type, $schedule->entity_id, $schedule->user_count);
+    static function genModelScheduledEvent(DiscordScheduledEvent $schedule): ServerScheduledEvent
+    {
+        return new ServerScheduledEvent(
+            $schedule->guild_id,
+            $schedule->name,
+            $schedule->id,
+            $schedule->channel_id,
+            $schedule->creator_id,
+            $schedule->description,
+            $schedule->scheduled_start_time->getTimestamp(),
+            ($schedule->scheduled_end_time !== null ? $schedule->scheduled_end_time->getTimestamp() : null),
+            $schedule->privacy_level,
+            $schedule->status,
+            $schedule->entity_type,
+            $schedule->entity_id,
+            $schedule->user_count
+        );
     }
     static public function genModelInteraction(DiscordInteraction $interact, MessageBuilder $builder = null, bool $ephemeral = false): Interaction
     {
@@ -117,11 +223,21 @@ abstract class ModelConverter
     }
     static public function genModelData(DiscordInteractData $data): InteractionData
     {
-        return new InteractionData($data->name, $data->component_type, $data->id, $data->values, $data->custom_id);
+        return new InteractionData(
+            $data->name,
+            $data->component_type,
+            $data->id,
+            $data->values,
+            $data->custom_id
+        );
     }
     static function genModelOption(DiscordInteractOption $option): Option
     {
-        return new Option($option->name, $option->type, $option->value);
+        return new Option(
+            $option->name,
+            $option->type,
+            $option->value
+        );
     }
     static public function genModelVoiceState(DiscordVoiceStateUpdate $stateUpdate): VoiceState
     {
@@ -155,7 +271,14 @@ abstract class ModelConverter
     }
     static function genModelStage(DiscordStage $stage): Stage
     {
-        return new Stage($stage->guild_id, $stage->channel_id, $stage->topic, $stage->id, $stage->privacy_level, $stage->discoverable_disabled);
+        return new Stage(
+            $stage->guild_id,
+            $stage->channel_id,
+            $stage->topic,
+            $stage->id,
+            $stage->privacy_level,
+            $stage->discoverable_disabled
+        );
     }
 
     static public function genModelActivity(DiscordActivity $discordActivity): Activity
@@ -295,7 +418,16 @@ abstract class ModelConverter
     }
     static public function genModelThread(DiscordThread $thread): ThreadChannel
     {
-        return new ThreadChannel($thread->name, $thread->guild_id, $thread->owner_id, $thread->locked, $thread->auto_archive_duration, $thread->rate_limit_per_user, $thread->archiver_id, $thread->id);
+        return new ThreadChannel(
+            $thread->name,
+            $thread->guild_id,
+            $thread->owner_id,
+            $thread->locked,
+            $thread->auto_archive_duration,
+            $thread->rate_limit_per_user,
+            $thread->archiver_id,
+            $thread->id
+        );
     }
 
     static public function genModelCategoryChannel(DiscordChannel $discordChannel): CategoryChannel
@@ -358,7 +490,19 @@ abstract class ModelConverter
     }
     static public function genModelStickers(DiscordSticker $sticker): Stickers
     {
-        return new Stickers($sticker->name, $sticker->description, $sticker->type, $sticker->format_type, $sticker->available, $sticker->guild_id, ($sticker->user !== null ? self::genModelUser($sticker->user) : null), $sticker->sort_value, $sticker->tags, $sticker->id, $sticker->pack_id);
+        return new Stickers(
+            $sticker->name,
+            $sticker->description,
+            $sticker->type,
+            $sticker->format_type,
+            $sticker->available,
+            $sticker->guild_id,
+            ($sticker->user !== null ? self::genModelUser($sticker->user) : null),
+            $sticker->sort_value,
+            $sticker->tags,
+            $sticker->id,
+            $sticker->pack_id
+        );
     }
 
     static public function genModelMessage(DiscordMessage $discordMessage): Message
@@ -488,32 +632,53 @@ abstract class ModelConverter
 
     static public function genModelEmbedFooter(DiscordFooter $footer): Footer
     {
-        return new Footer($footer->text, $footer->icon_url);
+        return new Footer(
+            $footer->text,
+            $footer->icon_url
+        );
     }
 
     static public function genModelEmbedImage(DiscordImage $image): Image
     {
-        return new Image($image->url, $image->width, $image->height);
+        return new Image(
+            $image->url,
+            $image->width,
+            $image->height
+        );
     }
 
     static public function genModelEmbedVideo(DiscordVideo $video): Video
     {
-        return new Video($video->url, $video->width, $video->height);
+        return new Video(
+            $video->url,
+            $video->width,
+            $video->height
+        );
     }
 
     static public function genModelEmbedAuthor(DiscordAuthor $author): Author
     {
-        return new Author($author->name, $author->url, $author->icon_url);
+        return new Author(
+            $author->name,
+            $author->url,
+            $author->icon_url
+        );
     }
 
     static public function genModelEmbedField(DiscordField $field): Field
     {
-        return new Field($field->name, $field->value, $field->inline);
+        return new Field(
+            $field->name,
+            $field->value,
+            $field->inline
+        );
     }
 
     static public function genModelRolePermission(DiscordRolePermission $rolePermission): RolePermissions
     {
-        return new RolePermissions($rolePermission->bitwise);
+        return new RolePermissions(
+            $rolePermission->bitwise
+        );
     }
 
     static public function genModelRole(DiscordRole $discordRole): Role
@@ -547,6 +712,10 @@ abstract class ModelConverter
 
     static public function genModelBan(DiscordBan $ban): Ban
     {
-        return new Ban($ban->guild_id, $ban->user_id, $ban->reason);
+        return new Ban(
+            $ban->guild_id,
+            $ban->user_id,
+            $ban->reason
+        );
     }
 }

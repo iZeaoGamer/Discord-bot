@@ -30,8 +30,8 @@ use ReflectionClass;
  * @property Collection|User[]    $users
  * @property Collection|Entry[]   $audit_log_entries
  * @property Collection           $integrations
- * @property Collection|GuildScheduledEvent[] $guild_scheduled_events
- * @property Collection|Threads[] $threads
+ * @property Collection|ScheduledEvent[] $guild_scheduled_events
+ * @property Collection|Thread[] $threads
  */
 class AuditLog extends Part
 {
