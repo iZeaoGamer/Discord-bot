@@ -29,6 +29,7 @@ class StageInstanceRepository extends AbstractRepository
      * @inheritdoc
      */
     protected $discrim = 'channel_id';
+
     /**
      * @inheritdoc
      */
