@@ -42,6 +42,12 @@ class Role implements \Serializable
     /** @var string */
     private $server_id;
 
+    /** @var bool */
+    private $managed;
+
+    /** @var string|null */
+    private $icon;
+
     public function __construct(
         string $name,
         int $colour,
@@ -49,6 +55,8 @@ class Role implements \Serializable
         int $hoisted_position,
         bool $mentionable,
         string $server_id,
+        bool $managed = false,
+        ?string $icon = null,
         RolePermissions $permissions = null,
         ?string $id = null
     ) {
@@ -58,6 +66,8 @@ class Role implements \Serializable
         $this->setHoistedPosition($hoisted_position);
         $this->setMentionable($mentionable);
         $this->setServerId($server_id);
+        $this->setManaged($managed);
+        $this->setIconURL($icon);
         $this->setPermissions($permissions ?? new RolePermissions(0));
         $this->setId($id);
     }
@@ -153,6 +163,23 @@ class Role implements \Serializable
         }
         $this->server_id = $server_id;
     }
+    public function isManaged(): bool{
+        return $this->managed;
+    }
+    public function setManaged(bool $managed): void{
+        $this->managed = $managed;
+    }
+    public function getIconURL(): ?string{
+        return $this->icon;
+    }
+    public function setIconURL(?string $url): void{
+        if($url !== null){
+            if(!str_starts_with($url, "https://cdn.discordapp.com/role-icons/")){
+                throw new \AssertionError("Invalid Role Icon URL: {$url}");
+            }
+        }
+        $this->icon = $url;
+    }
 
     //----- Serialization -----//
 
@@ -166,7 +193,10 @@ class Role implements \Serializable
             $this->mentionable,
             $this->hoisted,
             $this->hoisted_position,
-            $this->server_id
+            $this->server_id,
+            $this->managed,
+            $this->icon
+            
         ]);
     }
 
@@ -180,7 +210,9 @@ class Role implements \Serializable
             $this->mentionable,
             $this->hoisted,
             $this->hoisted_position,
-            $this->server_id
+            $this->server_id,
+            $this->managed,
+            $this->icon
         ] = unserialize($data);
     }
 }

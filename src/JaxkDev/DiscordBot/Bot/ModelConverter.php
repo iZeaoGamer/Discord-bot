@@ -690,8 +690,11 @@ abstract class ModelConverter
             $discordRole->position,
             $discordRole->mentionable,
             $discordRole->guild_id,
+            $discordRole->managed,
+            $discordRole->icon,
             self::genModelRolePermission($discordRole->permissions),
             $discordRole->id
+           
         );
     }
 
