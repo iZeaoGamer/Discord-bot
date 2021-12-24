@@ -78,6 +78,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTemplateDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleDelete;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateReaction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateReaction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteReaction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchReaction;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -88,6 +92,7 @@ use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Models\Messages\Stickers;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\Messages\Reaction;
 use JaxkDev\DiscordBot\Models\Emoji;
 use JaxkDev\DiscordBot\Models\Invite;
 use JaxkDev\DiscordBot\Models\Member;
@@ -117,11 +122,64 @@ class Api
     {
         $this->plugin = $plugin;
     }
+
+    /** Creates a reaction.
+     * @param Reaction $reaction
+     * @return PromiseInterface Resolves with a Reaction Model.
+     */
+    public function createReaction(Reaction $reaction): PromiseInterface
+    {
+        $pk = new RequestCreateReaction($reaction);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Updates a reaction.
+     * @param Reaction $reaction
+     * @return PromiseInterface Resolves with a Reaction Model.
+     */
+    public function updateReaction(Reaction $reaction): PromiseInterface
+    {
+        if ($reaction->getId() === null) {
+            return rejectPromise(new ApiRejection("ID must be present."));
+        }
+        $pk = new RequestUpdateReaction($reaction);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Deletes a reaction.
+     * @param string $channel_id
+     * @param string $message_id
+     * @param string $reaction_id
+     * @return PromiseInterface Resolves with no data.
+     */
+    public function deleteReaction(string $channel_id, string $message_id, string $reaction_id): PromiseInterface
+    {
+        $pk = new RequestDeleteReaction($channel_id, $message_id, $reaction_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Fetches a reaction.
+     * @param string $channel_id
+     * @param string $message_id
+     * @param string $reaction_id
+     * @return PromiseInterface Resolves with a Reaction Model.
+     */
+    public function fetchReaction(string $channel_id, string $message_id, string $reaction_id): PromiseInterface
+    {
+        $pk = new RequestFetchReaction($channel_id, $message_id, $reaction_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
     /** Creates a scheduled event within a guild.
      * @param ServerScheduledEvent
      * @return PromiseInterface Resolves with a ServerScheduledEvent Model.
      */
-    public function createEvent(ServerScheduledEvent $schedule): PromiseInterface{
+    public function createEvent(ServerScheduledEvent $schedule): PromiseInterface
+    {
         $pk = new RequestScheduleCreate($schedule);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -131,8 +189,9 @@ class Api
      * @param ServerScheduledEvent
      * @return PromiseInterface Resolves with a ServerScheduledEvent Model.
      */
-    public function updateEvent(ServerScheduledEvent $schedule): PromiseInterface{
-        if($schedule->getId() === null){
+    public function updateEvent(ServerScheduledEvent $schedule): PromiseInterface
+    {
+        if ($schedule->getId() === null) {
             return rejectPromise(new ApiRejection("ID must be present."));
         }
         $pk = new RequestScheduleUpdate($schedule);
@@ -145,7 +204,8 @@ class Api
      * @param string $id
      * @return PromiseInterface Resolves with no data.
      */
-    public function deleteEvent(string $serverId, string $id): PromiseInterface{
+    public function deleteEvent(string $serverId, string $id): PromiseInterface
+    {
         $pk = new RequestScheduleDelete($serverId, $id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -1023,7 +1083,7 @@ class Api
      */
     public function joinVoiceChannel(VoiceChannel $channel, bool $isDeafened, bool $isMuted): PromiseInterface
     {
-        if($channel->getId() === null){
+        if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
         }
         $pk = new RequestJoinVoiceChannel($channel, $isDeafened, $isMuted);
@@ -1038,7 +1098,7 @@ class Api
      */
     public function leaveVoiceChannel(VoiceChannel $channel): PromiseInterface
     {
-        if($channel->getId() === null){
+        if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
         }
         $pk = new RequestLeaveVoiceChannel($channel);
@@ -1054,7 +1114,7 @@ class Api
      */
     public function moveVoiceChannel(VoiceChannel $channel): PromiseInterface
     {
-        if($channel->getId() === null){
+        if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
         }
         $pk = new RequestMoveVoiceChannel($channel);
@@ -1070,7 +1130,7 @@ class Api
      */
     public function moveMember(string $userID, VoiceChannel $channel): PromiseInterface
     {
-        if($channel->getId() === null){
+        if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
         }
         if (!Utils::validDiscordSnowflake($userID)) {
@@ -1089,7 +1149,7 @@ class Api
      */
     public function muteMember(string $userID, VoiceChannel $channel): PromiseInterface
     {
-        if($channel->getId() === null){
+        if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
         }
 

@@ -18,6 +18,7 @@ use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
 use Discord\Parts\Channel\Sticker as DiscordSticker;
 use Discord\Parts\Thread\Thread as DiscordThread;
+use Discord\Parts\Channel\Reaction as DiscordReaction;
 use Discord\Parts\Channel\Overwrite as DiscordOverwrite;
 use Discord\Parts\Channel\Webhook as DiscordWebhook;
 use Discord\Parts\Embed\Author as DiscordAuthor;
@@ -63,6 +64,7 @@ use JaxkDev\DiscordBot\Models\Messages\Embed\Video;
 use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Models\Messages\Reply as ReplyMessage;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
+use JaxkDev\DiscordBot\Models\Messages\Reaction;
 use JaxkDev\DiscordBot\Models\Permissions\ChannelPermissions;
 use JaxkDev\DiscordBot\Models\Permissions\RolePermissions;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
@@ -485,7 +487,10 @@ abstract class ModelConverter
             $discordChannel->nsfw ?? false,
             $discordChannel->rate_limit_per_user,
             $discordChannel->parent_id,
-            $discordChannel->id
+            $discordChannel->id,
+            $discordChannel->recipient_id,
+            $discordChannel->last_message_id,
+            array_keys($discordChannel->recipients->toArray()),
         ));
     }
     static public function genModelStickers(DiscordSticker $sticker): Stickers
@@ -504,7 +509,18 @@ abstract class ModelConverter
             $sticker->pack_id
         );
     }
-
+    static public function genModelReaction(DiscordReaction $react)
+    {
+        return new Reaction(
+            $react->message_id,
+            $react->channel_id,
+            self::genModelEmoji($react->emoji),
+            $react->guild_id,
+            $react->id,
+            $react->count,
+            $react->me
+        );
+    }
     static public function genModelMessage(DiscordMessage $discordMessage): Message
     {
         if ($discordMessage->author === null) {
@@ -694,7 +710,7 @@ abstract class ModelConverter
             $discordRole->icon,
             self::genModelRolePermission($discordRole->permissions),
             $discordRole->id
-           
+
         );
     }
 

@@ -12,6 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Models\Channels;
 
+use JaxkDev\DiscordBot\Plugin\Utils;
+
 class TextChannel extends ServerChannel
 {
 
@@ -23,6 +25,12 @@ class TextChannel extends ServerChannel
 
     /** @var ?int In seconds | null when disabled. */
     private $rate_limit = null;
+
+    /** @var string|null */
+    private $recipientId; //null if the channel isn't a dm or group channel.
+
+    /** @var string|null */
+    private $messageId; //null when creating.
 
     //Pins can be found via API::fetchPinnedMessages();
 
@@ -39,6 +47,8 @@ class TextChannel extends ServerChannel
      * @param int|null    $rate_limit
      * @param string|null $category_id
      * @param string|null $id
+     * @param string|null $recipient_id
+     * @param string|null $last_message_id
      */
     public function __construct(
         string $topic,
@@ -48,12 +58,16 @@ class TextChannel extends ServerChannel
         bool $nsfw = false,
         ?int $rate_limit = null,
         ?string $category_id = null,
-        ?string $id = null
+        ?string $id = null,
+        ?string $recipient_id = null,
+        ?string $last_message_id = null
     ) {
         parent::__construct($name, $position, $server_id, $category_id, $id);
         $this->setTopic($topic);
         $this->setNsfw($nsfw);
         $this->setRateLimit($rate_limit);
+        $this->setRecipientId($recipient_id);
+        $this->setLastMessageId($last_message_id);
     }
 
     public function getTopic(): string
@@ -91,7 +105,29 @@ class TextChannel extends ServerChannel
         }
         $this->rate_limit = $rate_limit;
     }
-
+    public function getRecipientId(): ?string{
+        return $this->recipientId;
+    }
+    public function setRecipientId(?string $recipient): void{
+        if($recipient !== null){
+            if(!Utils::validDiscordSnowflake($recipient)){
+                throw new \AssertionError("Recipient ID '{$recipient}' is invalid.");
+            }
+        }
+        $this->recipientId = $recipient;
+    }
+    
+    public function getLastMessageId(): ?string{
+        return $this->messageId;
+    }
+    public function setLastMessageId(?string $message_id): void{
+        if($message_id !== null){
+            if(!Utils::validDiscordSnowflake($message_id)){
+                throw new \AssertionError("Last Message ID: {$message_id} is invalid.");
+            }
+        }
+        $this->messageId = $message_id;
+    }
     //----- Serialization -----//
 
     public function serialize(): ?string
@@ -106,7 +142,9 @@ class TextChannel extends ServerChannel
             $this->topic,
             $this->nsfw,
             $this->rate_limit,
-            $this->category_id
+            $this->category_id,
+            $this->recipientId,
+            $this->messageId
         ]);
     }
 
@@ -122,7 +160,9 @@ class TextChannel extends ServerChannel
             $this->topic,
             $this->nsfw,
             $this->rate_limit,
-            $this->category_id
+            $this->category_id,
+            $this->recipientId,
+            $this->messageId
         ] = unserialize($data);
     }
 }

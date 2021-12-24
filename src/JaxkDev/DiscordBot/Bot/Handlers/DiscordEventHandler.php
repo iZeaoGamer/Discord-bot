@@ -421,14 +421,20 @@ array(5) {
     }
     public function onScheduleUserAdd(DiscordScheduledEvent $schedule, DiscordGuild $guild, DiscordUser $user): void
     {
-        $packet = new GuildScheduledEventUserAddPacket(ModelConverter::genModelScheduledEvent($schedule),
-    ModelConverter::genModelServer($guild), ModelConverter::genModelUser($user));
+        $packet = new GuildScheduledEventUserAddPacket(
+            ModelConverter::genModelScheduledEvent($schedule),
+            ModelConverter::genModelServer($guild),
+            ModelConverter::genModelUser($user)
+        );
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onScheduleUserRemove(DiscordScheduledEvent $schedule, DiscordGuild $guild, DiscordUser $user): void
     {
-        $packet = new GuildScheduledEventUserRemovePacket(ModelConverter::genModelScheduledEvent($schedule),
-    ModelConverter::genModelServer($guild), ModelConverter::genModelUser($user));
+        $packet = new GuildScheduledEventUserRemovePacket(
+            ModelConverter::genModelScheduledEvent($schedule),
+            ModelConverter::genModelServer($guild),
+            ModelConverter::genModelUser($user)
+        );
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onEmojiUpdate(DiscordEmoji $emoji): void
@@ -643,7 +649,7 @@ array(5) {
         }
         $scheduled = [];
         /** @var DiscordScheduledEvent $schedule */
-        foreach($guild->scheduled_events as $schedule){
+        foreach ($guild->scheduled_events as $schedule) {
             $scheduled[] = ModelConverter::genModelScheduledEvent($schedule);
         }
         if ($guild->region === null) {

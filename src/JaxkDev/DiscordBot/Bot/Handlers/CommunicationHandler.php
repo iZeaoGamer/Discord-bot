@@ -23,6 +23,7 @@ use Discord\Parts\Channel\Overwrite as DiscordOverwrite;
 use Discord\Parts\Channel\Webhook as DiscordWebhook;
 use Discord\Parts\Embed\Embed as DiscordEmbed;
 use Discord\Parts\Guild\Emoji as DiscordEmoji;
+use Discord\Parts\Channel\Reaction as DiscordReaction;
 use Discord\Parts\Guild\GuildTemplate as DiscordTemplate;
 use Discord\Parts\Channel\StageInstance as DiscordStage;
 use Discord\Parts\Interactions\Interaction as DiscordInteraction;
@@ -113,6 +114,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTemplateDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestScheduleDelete;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchReaction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateReaction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateReaction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteReaction;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
 use JaxkDev\DiscordBot\Plugin\Storage;
@@ -235,6 +240,10 @@ class CommunicationHandler
         elseif ($pk instanceof RequestScheduleCreate) $this->handleScheduleCreate($pk);
         elseif ($pk instanceof RequestScheduleUpdate) $this->handleScheduleUpdate($pk);
         elseif ($pk instanceof RequestScheduleDelete) $this->handleScheduleDelete($pk);
+        elseif ($pk instanceof RequestFetchReaction) $this->handleFetchReaction($pk);
+        elseif ($pk instanceof RequestCreateReaction) $this->handleCreateReaction($pk);
+        elseif ($pk instanceof RequestUpdateReaction) $this->handleUpdateReaction($pk);
+        elseif ($pk instanceof RequestDeleteReaction) $this->handleDeleteReaction($pk);
     }
     private function handleDelayReply(RequestDelayReply $pk): void
     {
@@ -720,6 +729,88 @@ class CommunicationHandler
             });
         });
     }
+    private function handleFetchReaction(RequestFetchReaction $pk): void
+    {
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $msg) use ($pk) {
+            $msg->reactions->fetch($pk->getReactionId())->done(function (DiscordReaction $reaction) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Fetched Reaction Message.", [ModelConverter::genModelReaction($reaction)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to fetch Reaction Message.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }
+    private function handleCreateReaction(RequestCreateReaction $pk)
+    {
+        $this->getMessage($pk, $pk->getReaction()->getChannelId(), $pk->getReaction()->getMessageId(), function (DiscordMessage $msg) use ($pk) {
+            $r = $pk->getReaction();
+            $dr = $msg->reactions->create([
+                "emoji" => $r->getEmoji()
+            ]);
+            $dr->messageId = $r->getMessageId();
+            $dr->channelId = $r->getChannelId();
+            if ($r->getServerId() !== null) {
+                $dr->guild_id = $r->getServerId();
+            }
+            if ($r->getCount() !== null) {
+                $dr->count = $r->getCount();
+            }
+            if ($r->isBotReacted() !== null) {
+                $dr->me = $r->isBotReacted();
+            }
+            if ($r->getId() !== null) {
+                $dr->id = $r->getId();
+            }
+            $msg->reactions->save($dr)->then(function (DiscordReaction $reaction) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Created Reaction.", [ModelConverter::genModelReaction($reaction)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to create reaction.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }
+    private function handleUpdateReaction(RequestUpdateReaction $pk)
+    {
+        if ($pk->getReaction()->getId() === null) {
+            $this->resolveRequest($pk->getUID(), false, "Reaction ID must be present!");
+            return;
+        }
+        $this->getMessage($pk, $pk->getReaction()->getChannelId(), $pk->getReaction()->getMessageId(), function (DiscordMessage $msg) use ($pk) {
+
+            $msg->reactions->fetch($pk->getReaction()->getID())->then(function (DiscordReaction $dr) use ($msg, $pk) {
+                $r = $pk->getReaction();
+
+                $dr->messageId = $r->getMessageId();
+                $dr->channelId = $r->getChannelId();
+                $dr->emoji = $r->getEmoji();
+                $dr->guild_id = $r->getServerId();
+                $dr->id = $r->getId();
+                $dr->count = $r->getCount();
+                $dr->me = $r->isBotReacted();
+                $msg->reactions->save($dr)->then(function (DiscordReaction $reaction) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Updated Reaction.", [ModelConverter::genModelReaction($reaction)]);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to update reaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                });
+            });
+        });
+    }
+    private function handleDeleteReaction(RequestDeleteReaction $pk)
+    {
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($pk) {
+            $message->reactions->fetch($pk->getReactionId())->done(function (DiscordReaction $reaction) use ($message, $pk) {
+                $message->reactions->delete($reaction)->then(function () use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Reaction deleted.");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to delete Reaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to delete Reaction ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            });
+        });
+    }
+
+
+
+
+
 
     private function handleCreateChannel(RequestCreateChannel $pk): void
     {
@@ -1158,30 +1249,30 @@ class CommunicationHandler
     private function handleVoiceChannelJoin(RequestJoinVoiceChannel $pk): void
     {
         $channel = $pk->getChannel();
-        if($channel->getId() === null){
+        if ($channel->getId() === null) {
             $this->resolveRequest($pk->getUID(), false, "Voice Channel ID must be present");
             return;
         }
-       $voiceChannel = $this->client->getDiscordClient()->getChannel($channel->getId());
-       if($voiceChannel === null){
-           $this->resolveRequest($pk->getUID(), false, "Voice Channel with ID: {$channel->getId()} does not exist!");
-           return;
-       }
-       if($voiceChannel->type !== $voiceChannel::TYPE_VOICE){
-           $this->resolveRequest($pk->getUID(), false, "Channel: {$channel->getId()} is not a voice channel, silly!");
-           return;
-       }
-     
-            $this->client->getDiscordClient()->joinVoiceChannel($voiceChannel, $pk->isMuted(), $pk->isDeafend(), null, true)->then(function() use ($voiceChannel, $channel, $pk){
+        $voiceChannel = $this->client->getDiscordClient()->getChannel($channel->getId());
+        if ($voiceChannel === null) {
+            $this->resolveRequest($pk->getUID(), false, "Voice Channel with ID: {$channel->getId()} does not exist!");
+            return;
+        }
+        if ($voiceChannel->type !== $voiceChannel::TYPE_VOICE) {
+            $this->resolveRequest($pk->getUID(), false, "Channel: {$channel->getId()} is not a voice channel, silly!");
+            return;
+        }
+
+        $this->client->getDiscordClient()->joinVoiceChannel($voiceChannel, $pk->isMuted(), $pk->isDeafend(), null, true)->then(function () use ($voiceChannel, $channel, $pk) {
             $this->resolveRequest($pk->getUID(), true, "Successfully joined Voice Channel ID: {$channel->getId()}", [ModelConverter::genModelVoiceChannel($voiceChannel)]);
-            }, function (\Throwable $e) use ($pk, $channel){
-                $this->resolveRequest($pk->getUID(), false, "Unable to Join Voice Channel ID: {$channel->getId()}", [$e->getMessage(), $e->getTraceAsString()]);
-            });
+        }, function (\Throwable $e) use ($pk, $channel) {
+            $this->resolveRequest($pk->getUID(), false, "Unable to Join Voice Channel ID: {$channel->getId()}", [$e->getMessage(), $e->getTraceAsString()]);
+        });
     }
     private function handleVoiceChannelLeave(RequestLeaveVoiceChannel $pk): void
     {
         $channel = $pk->getChannel();
-        if($channel->getId() === null){
+        if ($channel->getId() === null) {
             $this->resolveRequest($pk->getUID(), false, "Unable to leave Voice Channel.", ["ID Must be present!"]);
             return;
         }
@@ -1191,7 +1282,7 @@ class CommunicationHandler
                 $this->resolveRequest($pk->getUID(), false, "Bot isn't in a voice channel.");
                 return;
             }
-            if($voiceClient->getChannel()->type !== $voiceClient->getChannel()::TYPE_VOICE){
+            if ($voiceClient->getChannel()->type !== $voiceClient->getChannel()::TYPE_VOICE) {
                 $this->resolveRequest($pk->getUID(), false, "Unable to leave Voice Channel. Is this channel corrupted?");
                 return;
             }
@@ -1204,19 +1295,19 @@ class CommunicationHandler
     private function handleVoiceChannelMove(RequestMoveVoiceChannel $pk): void
     {
         $channel = $pk->getChannel();
-        if($channel->getId() === null){
+        if ($channel->getId() === null) {
             $this->resolveRequest($pk->getUID(), false, "Voice Channel ID must be present");
             return;
         }
-       $voiceChannel = $this->client->getDiscordClient()->getChannel($channel->getId());
-       if($voiceChannel === null){
-           $this->resolveRequest($pk->getUID(), false, "Voice Channel with ID: {$channel->getId()} does not exist!");
-           return;
-       }
-       if($voiceChannel->type !== $voiceChannel::TYPE_VOICE){
-           $this->resolveRequest($pk->getUID(), false, "Channel: {$channel->getId()} is not a voice channel, silly!");
-           return;
-       }
+        $voiceChannel = $this->client->getDiscordClient()->getChannel($channel->getId());
+        if ($voiceChannel === null) {
+            $this->resolveRequest($pk->getUID(), false, "Voice Channel with ID: {$channel->getId()} does not exist!");
+            return;
+        }
+        if ($voiceChannel->type !== $voiceChannel::TYPE_VOICE) {
+            $this->resolveRequest($pk->getUID(), false, "Channel: {$channel->getId()} is not a voice channel, silly!");
+            return;
+        }
         try {
             $voiceClient = $this->client->getDiscordClient()->getVoiceClient($channel->getServerID());
             if ($voiceClient === null) {
@@ -1237,7 +1328,7 @@ class CommunicationHandler
             return;
         }
         $this->getChannel($pk, $channel->getID(), function (DiscordChannel $discordChannel) use ($channel, $pk) {
-            if($discordChannel->type !== $discordChannel::TYPE_VOICE){
+            if ($discordChannel->type !== $discordChannel::TYPE_VOICE) {
                 $this->resolveRequest($pk->getUID(), false, "Channel {$channel->getId()} is not a voice channel.");
                 return;
             }
@@ -1256,7 +1347,7 @@ class CommunicationHandler
             return;
         }
         $this->getChannel($pk, $channel->getID(), function (DiscordChannel $discordChannel) use ($channel, $pk) {
-            if($discordChannel->type !== $discordChannel::TYPE_VOICE){
+            if ($discordChannel->type !== $discordChannel::TYPE_VOICE) {
                 $this->resolveRequest($pk->getUID(), false, "Channel ID: {$channel->getId()} is not a Voice Channel.");
                 return;
             }
@@ -1275,7 +1366,7 @@ class CommunicationHandler
             return;
         }
         $this->getChannel($pk, $channel->getID(), function (DiscordChannel $discordChannel) use ($channel, $pk) {
-            if($discordChannel->type !== $discordChannel::TYPE_VOICE){
+            if ($discordChannel->type !== $discordChannel::TYPE_VOICE) {
                 $this->resolveRequest($pk->getUID(), false, "Channel ID: {$channel->getId()} is not a Voice Channel.");
                 return;
             }
