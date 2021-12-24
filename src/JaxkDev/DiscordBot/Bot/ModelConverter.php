@@ -552,8 +552,8 @@ abstract class ModelConverter
                     array_keys($discordMessage->mention_roles->toArray()),
                     array_keys($discordMessage->mention_channels->toArray()),
                     array_keys($discordMessage->sticker_items->toArray()),
-                    ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null)
-
+                    ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null),
+                    $discordMessage->link
                 );
             } else {
                 $embeds = [];
@@ -577,7 +577,7 @@ abstract class ModelConverter
                     array_keys($discordMessage->mention_channels->toArray()),
                     array_keys($discordMessage->sticker_items->toArray()),
                     ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
-                    )
+                ), $discordMessage->link
                 );
             }
         } elseif ($discordMessage->type === DiscordMessage::TYPE_REPLY) {
@@ -605,7 +605,7 @@ abstract class ModelConverter
                 array_keys($discordMessage->mention_channels->toArray()),
                 array_keys($discordMessage->sticker_items->toArray()),
                 ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
-                )
+            ), $discordMessage->link
             );
         }
         throw new AssertionError("Discord message type not supported.");

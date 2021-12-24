@@ -62,6 +62,9 @@ class Message implements \Serializable
     /** @var Interaction|null */
     protected $interaction;
 
+    /** @var string|null */
+    protected $link;
+
     /**
      * Message constructor.
      *
@@ -79,6 +82,7 @@ class Message implements \Serializable
      * @param string[]     $channels_mentioned
      * @param string[]     $stickers
      * @param Interaction|null  $interaction
+     * @param string|null  $link
      */
     public function __construct(
         string $channel_id,
@@ -94,7 +98,8 @@ class Message implements \Serializable
         array $roles_mentioned = [],
         array $channels_mentioned = [],
         array $stickers = [],
-        ?Interaction $interaction = null
+        ?Interaction $interaction = null,
+        ?string $link = null
     ) {
         $this->setChannelId($channel_id);
         $this->setId($id);
@@ -110,6 +115,7 @@ class Message implements \Serializable
         $this->setChannelsMentioned($channels_mentioned);
         $this->setStickers($stickers);
         $this->setInteraction($interaction);
+        $this->setLink($link);
     }
 
     public function getId(): ?string
@@ -320,6 +326,19 @@ class Message implements \Serializable
     {
         $this->interaction = $interaction;
     }
+    public function getLink(): ?string
+    {
+        return $this->link;
+    }
+    public function setLink(?string $link): void
+    {
+        if ($link !== null) {
+            if (!str_starts_with($link, "https://discord.com/channels/")) {
+                throw new \AssertionError("Invalid Message Link URL: {$link}");
+            }
+        }
+        $this->link = $link;
+    }
 
     //----- Serialization -----//
 
@@ -339,7 +358,8 @@ class Message implements \Serializable
             $this->roles_mentioned,
             $this->channels_mentioned,
             $this->stickers,
-            $this->interaction
+            $this->interaction,
+            $this->link
         ]);
     }
 
@@ -359,7 +379,8 @@ class Message implements \Serializable
             $this->roles_mentioned,
             $this->channels_mentioned,
             $this->stickers,
-            $this->interaction
+            $this->interaction,
+            $this->link
 
         ] = unserialize($data);
     }
