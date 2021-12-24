@@ -1577,7 +1577,7 @@ class CommunicationHandler
                         $interaction = $msg->interaction;
                         print_r($interaction);
                         if ($interaction === null) {
-                            $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message (Data turned into Message model)", [ModelConverter::genModelMessage($msg)]);
+                            $this->resolveRequest($pk->getUID(), true, "Interaction was not found in message (Data turned into Message model)", [ModelConverter::genModelMessage($msg)]);
                             return;
                         }
                         $ephemeral = $pk->isEphemeral();
@@ -1597,7 +1597,7 @@ class CommunicationHandler
                     $interaction = $msg->interaction;
                     print_r($interaction);
                     if ($interaction === null) {
-                        $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
+                        $this->resolveRequest($pk->getUID(), true, "Interaction was not found in message (Data turned into Message model)", [ModelConverter::genModelMessage($msg)]);
                         return;
                     }
                     $ephemeral = $pk->isEphemeral();
