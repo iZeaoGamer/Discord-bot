@@ -472,6 +472,7 @@ class Message extends Part
         if ($this->id && $this->channel_id) {
             return 'https://discord.com/channels/' . ($this->guild_id ?? '@me') . '/' . $this->channel_id . '/' . $this->id;
         }
+        return null;
     }
 
     /**
