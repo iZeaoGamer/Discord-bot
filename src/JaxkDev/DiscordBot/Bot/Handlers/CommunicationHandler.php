@@ -1451,9 +1451,10 @@ class CommunicationHandler
                     foreach ($e->getFields() as $f) {
                         $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
                     }
-                    $builder = $builder->setEmbeds([$de]);
+                    $builder->setEmbeds([$de]);
                 }
             }
+            $builder = $builder->setContent($m->getContent());
             if ($m instanceof Reply) {
                 if ($m->getReferencedMessageId() === null) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", ["Reply message has no referenced message ID."]);
@@ -1562,6 +1563,7 @@ class CommunicationHandler
                     $builder->setEmbeds([$de]);
                 }
             }
+            $builder->setContent($m->getContent());
             if ($m instanceof Reply) {
                 if ($m->getReferencedMessageId() === null) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to send interaction.", ["Reply message has no referenced message ID."]);
@@ -1672,6 +1674,7 @@ class CommunicationHandler
                     $builder = $builder->setEmbeds([$de]);
                 }
             }
+            $builder = $builder->setContent($m->getContent());
 
             $button->setListener(function (DiscordInteraction $interaction) use ($channel, $builder, $pk) {
                 try {
@@ -1761,6 +1764,7 @@ class CommunicationHandler
                     $builder = $builder->setEmbeds([$de]);
                 }
             }
+            $builder = $builder->setContent($m->getContent());
             $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($channel, $builder, $pk) {
                 foreach ($options as $option) {
                     print_r($option->getValue() . PHP_EOL);
@@ -1852,6 +1856,7 @@ class CommunicationHandler
                     $builder = $builder->setEmbeds([$de]);
                 }
             }
+            $builder = $builder->setContent($m->getContent());
 
             $button->setListener(function (DiscordInteraction $interaction) use ($m, $channel, $builder, $pk) {
                 if ($pk->doNothing()) {
@@ -1948,6 +1953,7 @@ class CommunicationHandler
                     $builder = $builder->setEmbeds([$de]);
                 }
             }
+            $builder = $builder->setContent($m->getContent());
             $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($m, $channel, $builder, $pk) {
                 foreach ($options as $option) {
                     print_r($option->getValue() . PHP_EOL);
