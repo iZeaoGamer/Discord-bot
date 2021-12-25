@@ -1075,7 +1075,7 @@ class Discord
 
         $allowed = ['online', 'dnd', 'idle', 'invisible', 'offline'];
 
-		if (! in_array($status, $allowed)) {
+        if (!in_array($status, $allowed)) {
             $status = 'online';
         }
 

@@ -1455,14 +1455,14 @@ class CommunicationHandler
                 }
             }
             $builder = $builder->setContent($m->getContent());
-                $builder = $builder->setStickers($m->getStickers());
-         $roles = $m->getRolesMentioned();
-         $channels = $m->getChannelsMentioned();
-         $users = $m->getUsersMentioned();
-         $merge = array_merge($roles, $channels);
-         $merge = array_merge($users, $merge);
-         $builder = $builder->setAllowedMentions($merge);
-         $builder = $builder->setTTS($m->isTTS());
+            $builder = $builder->setStickers($m->getStickers());
+            $roles = $m->getRolesMentioned();
+            $channels = $m->getChannelsMentioned();
+            $users = $m->getUsersMentioned();
+            $merge = array_merge($roles, $channels);
+            $merge = array_merge($users, $merge);
+            $builder = $builder->setAllowedMentions($merge);
+            $builder = $builder->setTTS($m->isTTS());
             if ($m instanceof Reply) {
                 if ($m->getReferencedMessageId() === null) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", ["Reply message has no referenced message ID."]);
@@ -2094,10 +2094,10 @@ class CommunicationHandler
                 }
                 $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $pk, $de) {
                     $roles = $pk->getMessage()->getRolesMentioned();
-            $channels = $pk->getMessage()->getChannelsMentioned();
-            $users = $pk->getMessage()->getUsersMentioned();
-            $merge = array_merge($roles, $channels);
-            $merge = array_merge($users, $merge);
+                    $channels = $pk->getMessage()->getChannelsMentioned();
+                    $users = $pk->getMessage()->getUsersMentioned();
+                    $merge = array_merge($roles, $channels);
+                    $merge = array_merge($users, $merge);
                     $channel->sendMessage($pk->getMessage()->getContent(), $pk->getMessage()->isTTS(), $de, $merge, $msg)->done(function (DiscordMessage $msg) use ($pk) {
                         $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
                         $this->logger->debug("Sent message ({$pk->getUID()})");
@@ -2130,7 +2130,9 @@ class CommunicationHandler
             $this->resolveRequest($pk->getUID(), false, "No message ID provided.");
             return;
         }
-        $this->getMessage($pk, $message->getChannelId(), $message->getId(), function (DiscordMessage $dMessage) use ($pk, $message) {
+        $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+
+            $builder = MessageBuilder::new();
             $m = $pk->getMessage();
             if ($m instanceof WebhookMessage) {
                 $e = $m->getEmbeds();
@@ -2140,6 +2142,7 @@ class CommunicationHandler
             $de = null;
             if ($e !== null) {
                 if (is_array($e)) {
+                    $embeds = [];
                     foreach ($e as $embed) {
                         $de = new DiscordEmbed($this->client->getDiscordClient());
                         if ($embed->getType() !== null) $de->setType($embed->getType());
@@ -2155,7 +2158,9 @@ class CommunicationHandler
                         foreach ($embed->getFields() as $f) {
                             $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
                         }
+                        $embeds[] = $de;
                     }
+                    $builder = $builder->setEmbeds($embeds);
                 } else {
                     $embed = $e;
                     $de = new DiscordEmbed($this->client->getDiscordClient());
@@ -2172,23 +2177,28 @@ class CommunicationHandler
                     foreach ($e->getFields() as $f) {
                         $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
                     }
+                    $builder = $builder->setEmbeds([$de]);
                 }
             }
-            $dMessage->content = $message->getContent();
-            if ($de !== null) {
-                $dMessage->embeds->clear();
-                $dMessage->addEmbed($de);
-            }
-            $channel = $dMessage->channel;
-            if ($channel === null) {
-                return;
-            }
+            // $dMessage->content = $message->getContent();
+            $this->getMessage($pk, $m->getChannelId(), $m->getId(), function (DiscordMessage $msg) use ($m, $builder, $channel, $pk, $de) {
 
-            $channel->messages->save($dMessage)->done(function (DiscordMessage $dMessage) use ($pk) {
-                $this->resolveRequest($pk->getUID(), true, "Message edited.", [ModelConverter::genModelMessage($dMessage)]);
-            }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to edit message.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to edit message ({$pk->getUID()}) - {$e->getMessage()}");
+                $builder = $builder->setContent($m->getContent());
+                $builder = $builder->setStickers($m->getStickers());
+                $roles = $m->getRolesMentioned();
+                $channels = $m->getChannelsMentioned();
+                $users = $m->getUsersMentioned();
+                $merge = array_merge($roles, $channels);
+                $merge = array_merge($users, $merge);
+                $builder = $builder->setAllowedMentions($merge);
+                $builder = $builder->setTTS($m->isTTS());
+
+                $msg->edit($builder)->done(function (DiscordMessage $dMessage) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Message edited.", [ModelConverter::genModelMessage($dMessage)]);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to edit message.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to edit message ({$pk->getUID()}) - {$e->getMessage()}");
+                });
             });
         });
     }
