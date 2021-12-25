@@ -1434,7 +1434,7 @@ class CommunicationHandler
                         }
                         $embeds[] = $de;
                     }
-                    $builder->setEmbeds($embeds);
+                    $builder = $builder->setEmbeds($embeds);
                 } else {
                     $embed = $e;
                     $de = new DiscordEmbed($this->client->getDiscordClient());
@@ -1451,10 +1451,18 @@ class CommunicationHandler
                     foreach ($e->getFields() as $f) {
                         $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
                     }
-                    $builder->setEmbeds([$de]);
+                    $builder = $builder->setEmbeds([$de]);
                 }
             }
             $builder = $builder->setContent($m->getContent());
+                $builder = $builder->setStickers($m->getStickers());
+         $roles = $m->getRolesMentioned();
+         $channels = $m->getChannelsMentioned();
+         $users = $m->getUsersMentioned();
+         $merge = array_merge($roles, $channels);
+         $merge = array_merge($users, $merge);
+         $builder = $builder->setAllowedMentions($merge);
+         $builder = $builder->setTTS($m->isTTS());
             if ($m instanceof Reply) {
                 if ($m->getReferencedMessageId() === null) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", ["Reply message has no referenced message ID."]);
@@ -1543,7 +1551,7 @@ class CommunicationHandler
                         }
                         $embeds[] = $de;
                     }
-                    $builder->setEmbeds($embeds);
+                    $builder = $builder->setEmbeds($embeds);
                 } else {
                     $embed = $e;
                     $de = new DiscordEmbed($this->client->getDiscordClient());
@@ -1560,10 +1568,18 @@ class CommunicationHandler
                     foreach ($e->getFields() as $f) {
                         $de->addFieldValues($f->getName(), $f->getValue(), $f->isInline());
                     }
-                    $builder->setEmbeds([$de]);
+                    $builder = $builder->setEmbeds([$de]);
                 }
             }
-            $builder->setContent($m->getContent());
+            $builder = $builder->setContent($m->getContent());
+            $builder = $builder->setStickers($m->getStickers());
+            $roles = $m->getRolesMentioned();
+            $channels = $m->getChannelsMentioned();
+            $users = $m->getUsersMentioned();
+            $merge = array_merge($roles, $channels);
+            $merge = array_merge($users, $merge);
+            $builder = $builder->setAllowedMentions($merge);
+            $builder = $builder->setTTS($m->isTTS());
             if ($m instanceof Reply) {
                 if ($m->getReferencedMessageId() === null) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to send interaction.", ["Reply message has no referenced message ID."]);
@@ -1675,6 +1691,14 @@ class CommunicationHandler
                 }
             }
             $builder = $builder->setContent($m->getContent());
+            $builder = $builder->setStickers($m->getStickers());
+            $roles = $m->getRolesMentioned();
+            $channels = $m->getChannelsMentioned();
+            $users = $m->getUsersMentioned();
+            $merge = array_merge($roles, $channels);
+            $merge = array_merge($users, $merge);
+            $builder = $builder->setAllowedMentions($merge);
+            $builder = $builder->setTTS($m->isTTS());
 
             $button->setListener(function (DiscordInteraction $interaction) use ($channel, $builder, $pk) {
                 try {
@@ -1744,7 +1768,7 @@ class CommunicationHandler
                         }
                         $embeds[] = $de;
                     }
-                    $builde = $builder->setEmbeds($embeds);
+                    $builder = $builder->setEmbeds($embeds);
                 } else {
                     $embed = $e;
                     $de = new DiscordEmbed($this->client->getDiscordClient());
@@ -1765,6 +1789,14 @@ class CommunicationHandler
                 }
             }
             $builder = $builder->setContent($m->getContent());
+            $builder = $builder->setStickers($m->getStickers());
+            $roles = $m->getRolesMentioned();
+            $channels = $m->getChannelsMentioned();
+            $users = $m->getUsersMentioned();
+            $merge = array_merge($roles, $channels);
+            $merge = array_merge($users, $merge);
+            $builder = $builder->setAllowedMentions($merge);
+            $builder = $builder->setTTS($m->isTTS());
             $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($channel, $builder, $pk) {
                 foreach ($options as $option) {
                     print_r($option->getValue() . PHP_EOL);
@@ -1857,6 +1889,14 @@ class CommunicationHandler
                 }
             }
             $builder = $builder->setContent($m->getContent());
+            $builder = $builder->setStickers($m->getStickers());
+            $roles = $m->getRolesMentioned();
+            $channels = $m->getChannelsMentioned();
+            $users = $m->getUsersMentioned();
+            $merge = array_merge($roles, $channels);
+            $merge = array_merge($users, $merge);
+            $builder = $builder->setAllowedMentions($merge);
+            $builder = $builder->setTTS($m->isTTS());
 
             $button->setListener(function (DiscordInteraction $interaction) use ($m, $channel, $builder, $pk) {
                 if ($pk->doNothing()) {
@@ -1933,7 +1973,7 @@ class CommunicationHandler
                         }
                         $embeds[] = $de;
                     }
-                    $builde = $builder->setEmbeds($embeds);
+                    $builder = $builder->setEmbeds($embeds);
                 } else {
                     $embed = $e;
                     $de = new DiscordEmbed($this->client->getDiscordClient());
@@ -1954,6 +1994,14 @@ class CommunicationHandler
                 }
             }
             $builder = $builder->setContent($m->getContent());
+            $builder = $builder->setStickers($m->getStickers());
+            $roles = $m->getRolesMentioned();
+            $channels = $m->getChannelsMentioned();
+            $users = $m->getUsersMentioned();
+            $merge = array_merge($roles, $channels);
+            $merge = array_merge($users, $merge);
+            $builder = $builder->setAllowedMentions($merge);
+            $builder = $builder->setTTS($m->isTTS());
             $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($m, $channel, $builder, $pk) {
                 foreach ($options as $option) {
                     print_r($option->getValue() . PHP_EOL);
@@ -2045,7 +2093,12 @@ class CommunicationHandler
                     return;
                 }
                 $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $pk, $de) {
-                    $channel->sendMessage($pk->getMessage()->getContent(), false, $de, null, $msg)->done(function (DiscordMessage $msg) use ($pk) {
+                    $roles = $pk->getMessage()->getRolesMentioned();
+            $channels = $pk->getMessage()->getChannelsMentioned();
+            $users = $pk->getMessage()->getUsersMentioned();
+            $merge = array_merge($roles, $channels);
+            $merge = array_merge($users, $merge);
+                    $channel->sendMessage($pk->getMessage()->getContent(), $pk->getMessage()->isTTS(), $de, $merge, $msg)->done(function (DiscordMessage $msg) use ($pk) {
                         $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
                         $this->logger->debug("Sent message ({$pk->getUID()})");
                     }, function (\Throwable $e) use ($pk) {
@@ -2054,7 +2107,12 @@ class CommunicationHandler
                     });
                 });
             } else {
-                $channel->sendMessage($m->getContent(), false, $de)->done(function (DiscordMessage $msg) use ($pk) {
+                $roles = $pk->getMessage()->getRolesMentioned();
+                $channels = $pk->getMessage()->getChannelsMentioned();
+                $users = $pk->getMessage()->getUsersMentioned();
+                $merge = array_merge($roles, $channels);
+                $merge = array_merge($users, $merge);
+                $channel->sendMessage($m->getContent(), $m->isTTS(), $de, $merge)->done(function (DiscordMessage $msg) use ($pk) {
                     $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
                     $this->logger->debug("Sent message ({$pk->getUID()})");
                 }, function (\Throwable $e) use ($pk) {
@@ -2125,6 +2183,7 @@ class CommunicationHandler
             if ($channel === null) {
                 return;
             }
+
             $channel->messages->save($dMessage)->done(function (DiscordMessage $dMessage) use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Message edited.", [ModelConverter::genModelMessage($dMessage)]);
             }, function (\Throwable $e) use ($pk) {

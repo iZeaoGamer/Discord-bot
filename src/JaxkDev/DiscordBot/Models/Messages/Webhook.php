@@ -59,7 +59,9 @@ class Webhook extends Message
         array $roles_mentioned = [],
         array $channels_mentioned = [],
         array $stickers = [],
-        ?Interaction $interaction = null
+        ?Interaction $interaction = null,
+        ?string $link = null,
+        bool $tts = false
     ) {
         parent::__construct(
             $channel_id,
@@ -75,7 +77,9 @@ class Webhook extends Message
             $roles_mentioned,
             $channels_mentioned,
             $stickers,
-            $interaction
+            $interaction,
+            $link,
+            $tts
         );
         $this->setWebhookId($webhook_id);
         $this->setEmbeds($embeds);

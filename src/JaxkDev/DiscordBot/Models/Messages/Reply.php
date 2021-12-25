@@ -39,6 +39,8 @@ class Reply extends Message
      * @param string[]     $channels_mentioned
      * @param string[]     $stickers
      * @param Interaction|null $interaction 
+     * @param string|null $link
+     * @param bool $tts
      * */
     public function __construct(
         string $channel_id,
@@ -55,7 +57,9 @@ class Reply extends Message
         array $roles_mentioned = [],
         array $channels_mentioned = [],
         array $stickers = [],
-        ?Interaction $interaction = null
+        ?Interaction $interaction = null,
+        ?string $link = null,
+        bool $tts = false
     ) {
         parent::__construct(
             $channel_id,
@@ -71,7 +75,9 @@ class Reply extends Message
             $roles_mentioned,
             $channels_mentioned,
             $stickers,
-            $interaction
+            $interaction,
+            $link,
+            $tts
         );
         $this->setReferencedMessageId($referenced_message_id);
     }

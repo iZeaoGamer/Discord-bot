@@ -17,6 +17,7 @@ use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 use JaxkDev\DiscordBot\Plugin\Utils;
 
 
+
 class Message implements \Serializable
 {
 
@@ -65,6 +66,9 @@ class Message implements \Serializable
     /** @var string|null */
     protected $link;
 
+    /** @var bool */
+    protected $tts = false;
+
     /**
      * Message constructor.
      *
@@ -83,6 +87,7 @@ class Message implements \Serializable
      * @param string[]     $stickers
      * @param Interaction|null  $interaction
      * @param string|null  $link
+     * @param bool $tts
      */
     public function __construct(
         string $channel_id,
@@ -99,7 +104,8 @@ class Message implements \Serializable
         array $channels_mentioned = [],
         array $stickers = [],
         ?Interaction $interaction = null,
-        ?string $link = null
+        ?string $link = null,
+        bool $tts = false
     ) {
         $this->setChannelId($channel_id);
         $this->setId($id);
@@ -116,6 +122,7 @@ class Message implements \Serializable
         $this->setStickers($stickers);
         $this->setInteraction($interaction);
         $this->setLink($link);
+        $this->setTTS($tts);
     }
 
     public function getId(): ?string
@@ -339,6 +346,12 @@ class Message implements \Serializable
         }
         $this->link = $link;
     }
+    public function isTTS(): bool{
+        return $this->tts;
+    }
+    public function setTTS(bool $tts): void{
+        $this->tts = $tts;
+    }
 
     //----- Serialization -----//
 
@@ -359,7 +372,8 @@ class Message implements \Serializable
             $this->channels_mentioned,
             $this->stickers,
             $this->interaction,
-            $this->link
+            $this->link,
+            $this->tts
         ]);
     }
 
@@ -380,7 +394,8 @@ class Message implements \Serializable
             $this->channels_mentioned,
             $this->stickers,
             $this->interaction,
-            $this->link
+            $this->link,
+            $this->tts
 
         ] = unserialize($data);
     }
