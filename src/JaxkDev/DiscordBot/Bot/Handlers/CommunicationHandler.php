@@ -2180,7 +2180,6 @@ class CommunicationHandler
                     $builder = $builder->setEmbeds([$de]);
                 }
             }
-            // $dMessage->content = $message->getContent();
             $this->getMessage($pk, $m->getChannelId(), $m->getId(), function (DiscordMessage $msg) use ($m, $builder, $channel, $pk, $de) {
 
                 $builder = $builder->setContent($m->getContent());
