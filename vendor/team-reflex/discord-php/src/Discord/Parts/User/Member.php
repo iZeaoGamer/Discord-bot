@@ -149,7 +149,7 @@ class Member extends Part
         }
 
         // We don't want a double up on roles
-        if (false !== array_search($role, (array) $this->attributes['roles'])) {
+        if (in_array($role, (array) $this->attributes['roles'])) {
             return \React\Promise\reject(new \Exception('User already has role.'));
         }
 
@@ -169,7 +169,7 @@ class Member extends Part
             $role = $role->id;
         }
 
-        if (false !== array_search($role, $this->attributes['roles'])) {
+        if (in_array($role, $this->attributes['roles'])) {
             return $this->http->delete(Endpoint::bind(Endpoint::GUILD_MEMBER_ROLE, $this->guild_id, $this->id, $role));
         }
 
@@ -381,7 +381,7 @@ class Member extends Part
 
         if ($guild = $this->guild) {
             foreach ($guild->roles as $role) {
-                if (array_search($role->id, $this->attributes['roles'] ?? []) !== false) {
+                if (in_array($role->id, $this->attributes['roles'] ?? [])) {
                     $roles->push($role);
                 }
             }
@@ -417,14 +417,16 @@ class Member extends Part
      *
      * @return string|null The URL to the member avatar or null.
      */
-    public function getAvatarAttribute(string $format = 'jpg', int $size = 1024): ?string
+    public function getAvatarAttribute(string $format = 'webp', int $size = 1024): ?string
     {
         if (!isset($this->attributes['avatar'])) {
             return null;
         }
 
-        if (false === array_search($format, ['png', 'jpg', 'webp', 'gif'])) {
-            $format = 'jpg';
+        $allowed = ['png', 'jpg', 'webp', 'gif'];
+
+        if (! in_array(strtolower($format), $allowed)) {
+            $format = 'webp';
         }
 
         return "https://cdn.discordapp.com/guilds/{$this->guild_id}/users/{$this->id}/avatars/{$this->attributes['avatar']}.{$format}?size={$size}";
@@ -438,6 +440,38 @@ class Member extends Part
     protected function getAvatarHashAttribute(): ?string
     {
         return $this->attributes['avatar'] ?? null;
+    }
+      /**
+     * Returns the banner URL for the client.
+     *
+     * @param string $format The image format.
+     * @param int    $size   The size of the image.
+     *
+     * @return string|null The URL to the clients banner.
+     */
+    public function getBannerAttribute(string $format = 'png', int $size = 600): ?string
+    {
+        if (empty($this->attributes['banner'])) {
+            return null;
+        }
+
+        $allowed = ['png', 'jpg', 'webp', 'gif'];
+	
+        if (! in_array(strtolower($format), $allowed)) {
+            $format = 'png';
+        }
+
+        return "https://cdn.discordapp.com/banners/{$this->id}/{$this->attributes['banner']}.{$format}?size={$size}";
+    }
+
+    /**
+     * Returns the banner hash for the client.
+     *
+     * @return string The client banner's hash.
+     */
+    protected function getBannerHashAttribute(): string
+    {
+        return $this->attributes['banner'];
     }
 
     /**

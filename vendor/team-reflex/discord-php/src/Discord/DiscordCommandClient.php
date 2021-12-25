@@ -454,7 +454,7 @@ class DiscordCommandClient extends Discord
     {
         $allowed = ['commands', 'aliases'];
 
-        if (array_search($name, $allowed) !== false) {
+        if (in_array($name, $allowed)) {
             return $this->{$name};
         }
 
