@@ -56,8 +56,8 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestLeaveVoiceChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMoveMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMuteMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUnmuteMember;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildAuditLog;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildTransfer;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestServerAuditLog;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestServerTransfer;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestSearchMembers;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateButton;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateSelectMenu;
@@ -89,6 +89,7 @@ use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
+use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Models\Messages\Stickers;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
@@ -104,6 +105,8 @@ use JaxkDev\DiscordBot\Models\Role;
 use Discord\Builders\MessageBuilder;
 use Discord\Builders\Components\Button;
 use Discord\Builders\Components\SelectMenu;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateServerFromTemplate;
+
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 
 /**
@@ -1014,6 +1017,33 @@ class Api
         return ApiResolver::create($pk->getUID());
     }
 
+    /** Creates a guild from a guild template.
+     * @param Server $server
+     * @param string $server_name
+     * @param string|null $server_icon
+     * @return PromiseInterface Resolves with a new Server model. 
+     */
+    public function createServerFromTemplate(Server $server, string $template_code, string $server_name, ?string $server_icon = null): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($server->getId())) {
+            return rejectPromise(new ApiRejection("Invalid server ID: '{$server->getId()}'."));
+        }
+        if(!Utils::validDiscordSnowflake($template_code)){
+            return rejectPromise(new ApiRejection("Invalid Template Code: '{$template_code}'."));
+        }
+        if ($server_icon !== null) {
+            if (!str_starts_with($server_icon, "https://cdn.discordapp.com/icons/")) {
+                return rejectPromise(new ApiRejection("Server Icon '{$server_icon}' is invalid."));
+            }
+        }
+        if (strlen($server_name) < 2 or strlen($server_name > 100)) {
+            return rejectPromise(new ApiRejection("Server Name: " . strlen($server_name) . " is invalid. Must be somewhere from 2-100 characters long."));
+        }
+        $pk = new RequestCreateServerFromTemplate($server, $template_code, $server_name, $server_icon);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
     /**
      * Transfers Server Ownership to another user.
      * @param string $server_id
@@ -1028,7 +1058,7 @@ class Api
         if (!Utils::validDiscordSnowflake($user_id)) {
             return rejectPromise(new ApiRejection("Invalid user ID '$user_id'."));
         }
-        $pk = new RequestGuildTransfer($server_id, $user_id);
+        $pk = new RequestServerTransfer($server_id, $user_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1068,7 +1098,7 @@ class Api
         if (!Utils::validDiscordSnowflake($user_id)) {
             return rejectPromise(new ApiRejection("Invalid user ID '$user_id'."));
         }
-        $pk = new RequestGuildAuditLog($server_id, $user_id, $action_type, $before, $limit);
+        $pk = new RequestServerAuditLog($server_id, $user_id, $action_type, $before, $limit);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

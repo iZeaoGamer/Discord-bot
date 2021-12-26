@@ -92,8 +92,8 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestLeaveVoiceChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMoveMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMuteMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUnmuteMember;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildTransfer;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestGuildAuditLog;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestServerTransfer;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestServerAuditLog;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestSearchMembers;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateButton;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyButton;
@@ -137,6 +137,7 @@ use React\Promise\PromiseInterface;
 use function React\Promise\reject;
 
 use Discord\Builders\Components\Button;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateServerFromTemplate;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Models\Webhook;
 
@@ -219,8 +220,8 @@ class CommunicationHandler
         elseif ($pk instanceof RequestMoveMember) $this->handleMoveMember($pk);
         elseif ($pk instanceof RequestMuteMember) $this->handleMuteMember($pk);
         elseif ($pk instanceof RequestUnmuteMember) $this->handleUnmuteMember($pk);
-        elseif ($pk instanceof RequestGuildTransfer) $this->handleGuildTransfer($pk);
-        elseif ($pk instanceof RequestGuildAuditLog) $this->handleAuditLog($pk);
+        elseif ($pk instanceof RequestServerTransfer) $this->handleServerTransfer($pk);
+        elseif ($pk instanceof RequestServerAuditLog) $this->handleAuditLog($pk);
         elseif ($pk instanceof RequestSearchMembers) $this->handleSearchMembers($pk);
         elseif ($pk instanceof RequestCreateButton) $this->handleButtonCreate($pk);
         elseif ($pk instanceof RequestModifyButton) $this->handleButtonModify($pk);
@@ -233,7 +234,7 @@ class CommunicationHandler
         elseif ($pk instanceof RequestStageCreate) $this->handleStageCreate($pk);
         elseif ($pk instanceof RequestStageUpdate) $this->handleStageUpdate($pk);
         elseif ($pk instanceof RequestStageDelete) $this->handleStageDelete($pk);
-        elseif ($pk instanceof RequestEmojiUpdate) $this->handleGuildEmojiUpdate($pk);
+        elseif ($pk instanceof RequestEmojiUpdate) $this->handleServerEmojiUpdate($pk);
         elseif ($pk instanceof RequestTemplateCreate) $this->handleTemplateCreate($pk);
         elseif ($pk instanceof RequestTemplateUpdate) $this->handleTemplateUpdate($pk);
         elseif ($pk instanceof RequestTemplateDelete) $this->handleTemplateDelete($pk);
@@ -244,6 +245,7 @@ class CommunicationHandler
         elseif ($pk instanceof RequestCreateReaction) $this->handleCreateReaction($pk);
         elseif ($pk instanceof RequestUpdateReaction) $this->handleUpdateReaction($pk);
         elseif ($pk instanceof RequestDeleteReaction) $this->handleDeleteReaction($pk);
+        elseif ($pk instanceof RequestCreateServerFromTemplate) $this->handleCreateServerFromTemplate($pk);
     }
     private function handleDelayReply(RequestDelayReply $pk): void
     {
@@ -1144,7 +1146,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleGuildTransfer(RequestGuildTransfer $pk): void
+    private function handleServerTransfer(RequestServerTransfer $pk): void
     {
         $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
             $guild->transferOwnership($pk->getUserId())->then(function () use ($pk) {
@@ -1154,7 +1156,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleGuildEmojiUpdate(RequestEmojiUpdate $pk): void
+    private function handleServerEmojiUpdate(RequestEmojiUpdate $pk): void
     {
         $this->getServer($pk, $pk->getEmoji()->getServerId(), function (DiscordGuild $guild) use ($pk) {
             $guild->emojis->fetch($pk->getEmoji()->getId())->then(function (DiscordEmoji $emoji) use ($guild, $pk) {
@@ -1201,7 +1203,37 @@ class CommunicationHandler
             });
         });
     }
-    private function handleAuditLog(RequestGuildAuditLog $pk): void
+    private function handleCreateServerFromTemplate(RequestCreateServerFromTemplate $pk)
+    {
+        $icon = $pk->getServerIcon();
+        $name = $pk->getServerName();
+        $code = $pk->getTemplateCode();
+    //    $this->getServer($pk, $pk->getServer()->getId(), function (DiscordGuild $guild) use ($name, $icon, $pk) {
+    $this->getTemplate($pk, $code, $pk->getServer()->getId(), function (DiscordTemplate $template) use ($pk, $code, $name, $icon){
+$template->createGuild([
+    $name,
+    $icon
+])->done(function (DiscordGuild $newGuild) use ($pk, $name){
+        $this->resolveRequest($pk->getUID(), true, "Created new guild with name: {$name} successfully!", [ModelConverter::genModelServer($newGuild)]);
+    }, function (\Throwable $e) use ($name, $pk) {
+        $this->resolveRequest($pk->getUID(), false, "Failed to create new guild {$name}: {$e->getMessage()}", [$e->getMessage(), $e->getTraceAsString()]);
+    });
+});
+    }
+      /*  ->createGuild([
+                "name" => $name,
+                "icon" => $icon
+            ])->done(function (DiscordGuild $newGuild) use ($name, $pk) {
+                $this->resolveRequest($pk->getUID(), true, "Created new guild with name: {$name} successfully!", [ModelConverter::genModelServer($newGuild)]);
+            }, function (\Throwable $e) use ($name, $pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to create new guild {$name}: {$e->getMessage()}", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }*/
+
+
+
+    private function handleAuditLog(RequestServerAuditLog $pk): void
     {
         $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
             $guild->getAuditLog([
@@ -2296,6 +2328,14 @@ class CommunicationHandler
         }, function (\Throwable $e) use ($pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to fetch server.", [$e->getMessage(), $e->getTraceAsString()]);
             $this->logger->debug("Failed to process request (" . get_class($pk) . "|{$pk->getUID()}) - server error: {$e->getMessage()}");
+        });
+    }
+    private function getTemplate(Packet $pk, string $code, string $server_id, callable $cb): void
+    {
+        $this->getServer($pk, $server_id, function (DiscordGuild $guild) use ($code, $cb) {
+            $guild->templates->fetch($code)->done(function (DiscordTemplate $template) use ($cb) {
+                $cb($template);
+            });
         });
     }
     private function getStage(Packet $pk, string $server_id, string $stage_id, callable $cb): void

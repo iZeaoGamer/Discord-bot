@@ -14,7 +14,7 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestGuildAuditLog extends Packet
+class RequestServerAuditLog extends Packet
 {
 
     /** @var string */

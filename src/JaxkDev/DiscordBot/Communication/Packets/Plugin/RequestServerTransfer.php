@@ -14,7 +14,7 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestGuildTransfer extends Packet
+class RequestServerTransfer extends Packet
 {
 
     /** @var string */
