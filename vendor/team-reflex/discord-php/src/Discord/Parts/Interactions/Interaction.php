@@ -304,6 +304,25 @@ class Interaction extends Part
         }
 
         return $this->http->patch(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $this->message->id), $builder);
+       
+    }
+      /** 
+     * Deletes a follow up message.
+     * @param MessageBuilder $builder
+     * @return ExtendedPromiseInterface
+     */
+    public function deleteFollowUpMessage(MessageBuilder $builder): ExtendedPromiseInterface
+    {
+        if (!$this->responded) {
+            throw new RuntimeException('Cannot delete a follow-up message as the interaction has not been responded to.');
+        }
+        if ($builder->requiresMultipart()) {
+            $multipart = $builder->toMultipart();
+
+            return $this->http->delete(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $this->message->id), (string) $multipart, $multipart->getHeaders());
+        }
+
+        return $this->http->delete(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $this->message->id), $builder);
         //})()->then(function ($response) {
         //      return $this->factory->create(Message::class, $response, true);
     }

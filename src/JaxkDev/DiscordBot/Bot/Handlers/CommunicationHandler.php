@@ -1473,12 +1473,6 @@ class CommunicationHandler
             }
             $builder = $builder->setContent($m->getContent());
             $builder = $builder->setStickers($m->getStickers());
-            $roles = $m->getRolesMentioned();
-            $channels = $m->getChannelsMentioned();
-            $users = $m->getUsersMentioned();
-            $merge = array_merge($roles, $channels);
-            $merge = array_merge($users, $merge);
-            $builder = $builder->setAllowedMentions($merge);
             $builder = $builder->setTTS($m->isTTS());
             if ($m instanceof Reply) {
                 if ($m->getReferencedMessageId() === null) {
@@ -1590,12 +1584,6 @@ class CommunicationHandler
             }
             $builder = $builder->setContent($m->getContent());
             $builder = $builder->setStickers($m->getStickers());
-            $roles = $m->getRolesMentioned();
-            $channels = $m->getChannelsMentioned();
-            $users = $m->getUsersMentioned();
-            $merge = array_merge($roles, $channels);
-            $merge = array_merge($users, $merge);
-            $builder = $builder->setAllowedMentions($merge);
             $builder = $builder->setTTS($m->isTTS());
             if ($m instanceof Reply) {
                 if ($m->getReferencedMessageId() === null) {
@@ -1709,12 +1697,6 @@ class CommunicationHandler
             }
             $builder = $builder->setContent($m->getContent());
             $builder = $builder->setStickers($m->getStickers());
-            $roles = $m->getRolesMentioned();
-            $channels = $m->getChannelsMentioned();
-            $users = $m->getUsersMentioned();
-            $merge = array_merge($roles, $channels);
-            $merge = array_merge($users, $merge);
-            $builder = $builder->setAllowedMentions($merge);
             $builder = $builder->setTTS($m->isTTS());
 
             $button->setListener(function (DiscordInteraction $interaction) use ($channel, $builder, $pk) {
@@ -1807,12 +1789,6 @@ class CommunicationHandler
             }
             $builder = $builder->setContent($m->getContent());
             $builder = $builder->setStickers($m->getStickers());
-            $roles = $m->getRolesMentioned();
-            $channels = $m->getChannelsMentioned();
-            $users = $m->getUsersMentioned();
-            $merge = array_merge($roles, $channels);
-            $merge = array_merge($users, $merge);
-            $builder = $builder->setAllowedMentions($merge);
             $builder = $builder->setTTS($m->isTTS());
             $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($channel, $builder, $pk) {
                 foreach ($options as $option) {
@@ -1907,12 +1883,6 @@ class CommunicationHandler
             }
             $builder = $builder->setContent($m->getContent());
             $builder = $builder->setStickers($m->getStickers());
-            $roles = $m->getRolesMentioned();
-            $channels = $m->getChannelsMentioned();
-            $users = $m->getUsersMentioned();
-            $merge = array_merge($roles, $channels);
-            $merge = array_merge($users, $merge);
-            $builder = $builder->setAllowedMentions($merge);
             $builder = $builder->setTTS($m->isTTS());
 
             $button->setListener(function (DiscordInteraction $interaction) use ($m, $channel, $builder, $pk) {
@@ -2012,12 +1982,6 @@ class CommunicationHandler
             }
             $builder = $builder->setContent($m->getContent());
             $builder = $builder->setStickers($m->getStickers());
-            $roles = $m->getRolesMentioned();
-            $channels = $m->getChannelsMentioned();
-            $users = $m->getUsersMentioned();
-            $merge = array_merge($roles, $channels);
-            $merge = array_merge($users, $merge);
-            $builder = $builder->setAllowedMentions($merge);
             $builder = $builder->setTTS($m->isTTS());
             $select->setListener(function (DiscordInteraction $interaction, Collection $options) use ($m, $channel, $builder, $pk) {
                 foreach ($options as $option) {
@@ -2110,12 +2074,8 @@ class CommunicationHandler
                     return;
                 }
                 $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $pk, $de) {
-                    $roles = $pk->getMessage()->getRolesMentioned();
-                    $channels = $pk->getMessage()->getChannelsMentioned();
-                    $users = $pk->getMessage()->getUsersMentioned();
-                    $merge = array_merge($roles, $channels);
-                    $merge = array_merge($users, $merge);
-                    $channel->sendMessage($pk->getMessage()->getContent(), $pk->getMessage()->isTTS(), $de, $merge, $msg)->done(function (DiscordMessage $msg) use ($pk) {
+                   
+                    $channel->sendMessage($pk->getMessage()->getContent(), $pk->getMessage()->isTTS(), $de, null, $msg)->done(function (DiscordMessage $msg) use ($pk) {
                         $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
                         $this->logger->debug("Sent message ({$pk->getUID()})");
                     }, function (\Throwable $e) use ($pk) {
@@ -2201,12 +2161,6 @@ class CommunicationHandler
 
                 $builder = $builder->setContent($m->getContent());
                 $builder = $builder->setStickers($m->getStickers());
-                $roles = $m->getRolesMentioned();
-                $channels = $m->getChannelsMentioned();
-                $users = $m->getUsersMentioned();
-                $merge = array_merge($roles, $channels);
-                $merge = array_merge($users, $merge);
-                $builder = $builder->setAllowedMentions($merge);
                 $builder = $builder->setTTS($m->isTTS());
 
                 $msg->edit($builder)->done(function (DiscordMessage $dMessage) use ($pk) {
