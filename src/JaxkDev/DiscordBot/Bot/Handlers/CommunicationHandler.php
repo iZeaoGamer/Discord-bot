@@ -1006,14 +1006,12 @@ class CommunicationHandler
     private function handleMessageStartThread(RequestThreadMessageCreate $pk): void
     {
         $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), function (DiscordMessage $message) use ($pk) {
-            //     $guild->channels->fetch($pk->getChannel()->getID())->then(function (DiscordChannel $discord) use ($pk){
-            $message->startThread($pk->getName(), $pk->getDuration(), $pk->getReason())->then(function () use ($message, $pk) {
+           $message->startThread($pk->getName(), $pk->getDuration(), $pk->getReason())->then(function () use ($message, $pk) {
                 $this->resolveRequest($pk->getUID(), false, "Successfully created thread message.", [ModelConverter::genModelMessage($message)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages..", [$e->getMessage(), $e->getTraceAsString()]);
             });
         });
-        //  });
     }
     private function handleCrossPost(RequestCrossPostMessage $pk): void
     {
@@ -1025,9 +1023,7 @@ class CommunicationHandler
             $this->resolveRequest($pk->getUID(), false, "Failed to create cross post.", ["Message ID must be present!"]);
             return;
         }
-        //$this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($pk){
-        // $guild->messages->fetch($pk->getChannel()->getID())->then(function (DiscordMessage $discord) use ($pk){
-        //    $discord->startThread($pk->getChannel()->getName(), $pk->isPrivate(), $pk->getDuration())->then(function () use ($pk){
+
         $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), function (DiscordMessage $discord) use ($pk) {
             $discord->crosspost()->done(function (DiscordMessage $message) use ($pk) {
                 $this->resolveRequest($pk->getUID());
