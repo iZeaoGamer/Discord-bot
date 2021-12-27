@@ -13,49 +13,30 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
-use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\User;
 
-class GuildScheduledEventUserAdd extends Packet
+class ServerScheduledEventCreate extends Packet
 {
 
     /** @var ServerScheduledEvent */
     private $event;
 
-    /** @var Server */
-    private $server;
-
-    /** @var User */
-    private $user;
-
-    public function __construct(ServerScheduledEvent $event, Server $server, User $user)
+    public function __construct(ServerScheduledEvent $event)
     {
         parent::__construct();
         $this->event = $event;
-        $this->server = $server;
-        $this->user = $user;
     }
 
     public function getScheduledEvent(): ServerScheduledEvent
     {
         return $this->event;
     }
-    public function getServer(): Server{
-        return $this->server;
-    }
-    public function getUser(): User{
-        return $this->user;
-    }
-
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->event,
-            $this->server,
-            $this->user
+            $this->event
         ]);
     }
 
@@ -63,9 +44,7 @@ class GuildScheduledEventUserAdd extends Packet
     {
         [
             $this->UID,
-            $this->event,
-            $this->server,
-            $this->user
+            $this->event
         ] = unserialize($data);
     }
 }

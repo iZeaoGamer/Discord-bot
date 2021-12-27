@@ -12,27 +12,26 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Emoji;
+use JaxkDev\DiscordBot\Models\Messages\Stickers;
 use pocketmine\plugin\Plugin;
 
 /**
- * Emitted when an guild emoji gets updated.
+ * Emitted when an guild sticker gets updated.
  * 
- * @see InviteDeleted
  */
-class GuildEmojiUpdated extends DiscordBotEvent
+class ServerStickerUpdated extends DiscordBotEvent
 {
 
-    /** @var Emoj */
-    private $emoji;
+    /** @var Stickers */
+    private $sticker;
 
-    public function __construct(Plugin $plugin, Emoji $emoji)
+    public function __construct(Plugin $plugin, Stickers $sticker)
     {
         parent::__construct($plugin);
-        $this->emoji = $emoji;
+        $this->sticker = $sticker;
     }
-    public function getSticker(): Emoji
+    public function getSticker(): Stickers
     {
-        return $this->emoji;
+        return $this->sticker;
     }
 }

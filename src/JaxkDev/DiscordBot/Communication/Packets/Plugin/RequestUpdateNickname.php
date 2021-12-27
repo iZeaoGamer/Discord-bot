@@ -26,12 +26,16 @@ class RequestUpdateNickname extends Packet
     /** @var string|null */
     private $nickname;
 
-    public function __construct(string $server_id, string $user_id, ?string $nickname = null)
+    /** @var string|null */
+    private $reason;
+
+    public function __construct(string $server_id, string $user_id, ?string $nickname = null, ?string $reason = null)
     {
         parent::__construct();
         $this->server_id = $server_id;
         $this->user_id = $user_id;
         $this->nickname = $nickname;
+        $this->reason = $reason;
     }
 
     public function getServerId(): string
@@ -48,14 +52,17 @@ class RequestUpdateNickname extends Packet
     {
         return $this->nickname;
     }
-
+    public function getReason(): ?string{
+        return $this->reason;
+    }
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
             $this->server_id,
             $this->user_id,
-            $this->nickname
+            $this->nickname,
+            $this->reason
         ]);
     }
 
@@ -65,7 +72,8 @@ class RequestUpdateNickname extends Packet
             $this->UID,
             $this->server_id,
             $this->user_id,
-            $this->nickname
+            $this->nickname,
+            $this->reason
         ] = unserialize($data);
     }
 }

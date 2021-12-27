@@ -23,11 +23,15 @@ class RequestMessageBulkDelete extends Packet
     /** @var string */
     private $channelID;
 
-    public function __construct(string $channelID, int $amount)
+    /** @var string|null */
+    private $reason;
+
+    public function __construct(string $channelID, int $amount, ?string $reason = null)
     {
         parent::__construct();
         $this->channelID = $channelID;
         $this->amount = $amount;
+        $this->reason = $reason;
     }
 
     public function getValue(): int
@@ -39,13 +43,18 @@ class RequestMessageBulkDelete extends Packet
     {
         return $this->channelID;
     }
+    public function getReason(): ?string
+    {
+        return $this->reason;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
             $this->channelID,
-            $this->amount
+            $this->amount,
+            $this->reason
         ]);
     }
 
@@ -54,7 +63,8 @@ class RequestMessageBulkDelete extends Packet
         [
             $this->UID,
             $this->channelID,
-            $this->amount
+            $this->amount,
+            $this->reason
         ] = unserialize($data);
     }
 }

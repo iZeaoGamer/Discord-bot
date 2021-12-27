@@ -163,18 +163,22 @@ class Role implements \Serializable
         }
         $this->server_id = $server_id;
     }
-    public function isManaged(): bool{
+    public function isManaged(): bool
+    {
         return $this->managed;
     }
-    public function setManaged(bool $managed): void{
+    public function setManaged(bool $managed): void
+    {
         $this->managed = $managed;
     }
-    public function getIconURL(): ?string{
+    public function getIconURL(): ?string
+    {
         return $this->icon;
     }
-    public function setIconURL(?string $url): void{
-        if($url !== null){
-            if(!str_starts_with($url, "https://cdn.discordapp.com/role-icons/")){
+    public function setIconURL(?string $url): void
+    {
+        if ($url !== null) {
+            if (!str_starts_with($url, "https://cdn.discordapp.com/role-icons/")) {
                 throw new \AssertionError("Invalid Role Icon URL: {$url}");
             }
         }
@@ -196,7 +200,7 @@ class Role implements \Serializable
             $this->server_id,
             $this->managed,
             $this->icon
-            
+
         ]);
     }
 

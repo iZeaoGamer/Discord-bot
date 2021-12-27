@@ -346,10 +346,12 @@ class Message implements \Serializable
         }
         $this->link = $link;
     }
-    public function isTTS(): bool{
+    public function isTTS(): bool
+    {
         return $this->tts;
     }
-    public function setTTS(bool $tts): void{
+    public function setTTS(bool $tts): void
+    {
         $this->tts = $tts;
     }
 

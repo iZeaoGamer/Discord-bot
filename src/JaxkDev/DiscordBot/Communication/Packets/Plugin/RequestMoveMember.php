@@ -24,7 +24,10 @@ class RequestMoveMember extends Packet
     /** @var string */
     private $userId;
 
-    public function __construct(string $user_id, VoiceChannel $channel)
+    /** @var string|null */
+    private $reason;
+
+    public function __construct(string $user_id, VoiceChannel $channel, ?string $reason = null)
     {
         parent::__construct();
         $this->userId = $user_id;
@@ -39,6 +42,10 @@ class RequestMoveMember extends Packet
     {
         return $this->channel;
     }
+    public function getReason(): ?string
+    {
+        return $this->reason;
+    }
 
 
     public function serialize(): ?string
@@ -46,7 +53,8 @@ class RequestMoveMember extends Packet
         return serialize([
             $this->UID,
             $this->userId,
-            $this->channel
+            $this->channel,
+            $this->reason
         ]);
     }
 
@@ -55,7 +63,8 @@ class RequestMoveMember extends Packet
         [
             $this->UID,
             $this->userId,
-            $this->channel
+            $this->channel,
+            $this->reason
         ] = unserialize($data);
     }
 }

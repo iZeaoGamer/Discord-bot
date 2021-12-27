@@ -23,11 +23,15 @@ class RequestServerTransfer extends Packet
     /** @var string */
     private $user_id;
 
-    public function __construct(string $server_id, string $user_id)
+    /** @var string|null */
+    private $reason;
+
+    public function __construct(string $server_id, string $user_id, ?string $reason = null)
     {
         parent::__construct();
         $this->server_id = $server_id;
         $this->user_id = $user_id;
+        $this->reason = $reason;
     }
 
     public function getServerId(): string
@@ -38,13 +42,18 @@ class RequestServerTransfer extends Packet
     {
         return $this->user_id;
     }
+    public function getReason(): ?string
+    {
+        return $this->reason;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
             $this->server_id,
-            $this->user_id
+            $this->user_id,
+            $this->reason
         ]);
     }
 
@@ -53,7 +62,8 @@ class RequestServerTransfer extends Packet
         [
             $this->UID,
             $this->server_id,
-            $this->user_id
+            $this->user_id,
+            $this->reason
         ] = unserialize($data);
     }
 }

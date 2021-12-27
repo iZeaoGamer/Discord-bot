@@ -15,7 +15,7 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class GuildScheduledEventUpdate extends Packet
+class ServerScheduledEventUpdate extends Packet
 {
 
     /** @var ServerScheduledEvent */

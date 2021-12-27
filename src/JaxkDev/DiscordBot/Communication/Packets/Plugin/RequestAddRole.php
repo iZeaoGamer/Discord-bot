@@ -26,7 +26,10 @@ class RequestAddRole extends Packet
     /** @var string */
     private $role_id;
 
-    public function __construct(string $server_id, string $user_id, string $role_id)
+    /** @var string|null */
+    private $reason;
+
+    public function __construct(string $server_id, string $user_id, string $role_id, ?string $reason = null)
     {
         parent::__construct();
         $this->server_id = $server_id;
@@ -48,6 +51,11 @@ class RequestAddRole extends Packet
     {
         return $this->role_id;
     }
+    public function getReason(): ?string
+    {
+        return $this->reason;
+    }
+
 
     public function serialize(): ?string
     {
@@ -55,7 +63,8 @@ class RequestAddRole extends Packet
             $this->UID,
             $this->server_id,
             $this->user_id,
-            $this->role_id
+            $this->role_id,
+            $this->reason
         ]);
     }
 
@@ -65,7 +74,8 @@ class RequestAddRole extends Packet
             $this->UID,
             $this->server_id,
             $this->user_id,
-            $this->role_id
+            $this->role_id,
+            $this->reason
         ] = unserialize($data);
     }
 }

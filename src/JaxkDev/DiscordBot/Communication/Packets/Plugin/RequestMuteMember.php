@@ -24,11 +24,15 @@ class RequestMuteMember extends Packet
     /** @var string */
     private $userId;
 
-    public function __construct(string $user_id, VoiceChannel $channel)
+    /** @var string|null */
+    private $reason;
+
+    public function __construct(string $user_id, VoiceChannel $channel, ?string $reason = null)
     {
         parent::__construct();
         $this->userId = $user_id;
         $this->channel = $channel;
+        $this->reason = $reason;
     }
     public function getUserId(): string
     {
@@ -39,6 +43,10 @@ class RequestMuteMember extends Packet
     {
         return $this->channel;
     }
+    public function getReason(): ?string
+    {
+        return $this->reason;
+    }
 
 
     public function serialize(): ?string
@@ -46,7 +54,8 @@ class RequestMuteMember extends Packet
         return serialize([
             $this->UID,
             $this->userId,
-            $this->channel
+            $this->channel,
+            $this->reason
         ]);
     }
 
@@ -55,7 +64,8 @@ class RequestMuteMember extends Packet
         [
             $this->UID,
             $this->userId,
-            $this->channel
+            $this->channel,
+            $this->reason
         ] = unserialize($data);
     }
 }

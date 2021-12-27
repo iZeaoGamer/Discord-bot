@@ -34,7 +34,7 @@ use Discord\Parts\WebSockets\TypingStart as DiscordTypingStart;
 use Discord\Parts\Channel\StageInstance as DiscordStageInstance;
 use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
 use Discord\Parts\Guild\Emoji as DiscordEmoji;
-use Discord\WebSockets\Events\GuildScheduledEventCreate;
+use Discord\WebSockets\Events\ServerScheduledEventCreated;
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;
@@ -72,16 +72,16 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdat
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\TypingStart as TypingStartPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\InteractionCreate as InteractionCreatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildStickersUpdate as GuildStickersUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerStickersUpdate as ServerStickersUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageCreate as StageCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageUpdate as StageUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageDelete as StageDeletePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildEmojiUpdate as GuildEmojiUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventCreate as GuildScheduledEventCreatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUpdate as GuildScheduledEventUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventDelete as GuildScheduledEventDeletePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUserAdd as GuildScheduledEventUserAddPacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUserRemove as GuildScheduledEventUserRemovePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerEmojiUpdate as ServerEmojiUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventCreate as ServerScheduledEventCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUpdate as ServerScheduledEventUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventDelete as ServerScheduledEventDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserAdd as ServerScheduledEventUserAddPacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserRemove as ServerScheduledEventUserRemovePacket;
 
 use JaxkDev\DiscordBot\Plugin\Utils;
 use Monolog\Logger;
@@ -406,22 +406,22 @@ array(5) {
     }
     public function onScheduleCreate(DiscordScheduledEvent $schedule): void
     {
-        $packet = new GuildScheduledEventCreatePacket(ModelConverter::genModelScheduledEvent($schedule));
+        $packet = new ServerScheduledEventCreatePacket(ModelConverter::genModelScheduledEvent($schedule));
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onScheduleUpdate(DiscordScheduledEvent $schedule): void
     {
-        $packet = new GuildScheduledEventUpdatePacket(ModelConverter::genModelScheduledEvent($schedule));
+        $packet = new ServerScheduledEventUpdatePacket(ModelConverter::genModelScheduledEvent($schedule));
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onScheduleDelete(DiscordScheduledEvent $schedule): void
     {
-        $packet = new GuildScheduledEventDeletePacket(ModelConverter::genModelScheduledEvent($schedule));
+        $packet = new ServerScheduledEventDeletePacket(ModelConverter::genModelScheduledEvent($schedule));
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onScheduleUserAdd(DiscordScheduledEvent $schedule, DiscordGuild $guild, DiscordUser $user): void
     {
-        $packet = new GuildScheduledEventUserAddPacket(
+        $packet = new ServerScheduledEventUserAddPacket(
             ModelConverter::genModelScheduledEvent($schedule),
             ModelConverter::genModelServer($guild),
             ModelConverter::genModelUser($user)
@@ -430,7 +430,7 @@ array(5) {
     }
     public function onScheduleUserRemove(DiscordScheduledEvent $schedule, DiscordGuild $guild, DiscordUser $user): void
     {
-        $packet = new GuildScheduledEventUserRemovePacket(
+        $packet = new ServerScheduledEventUserRemovePacket(
             ModelConverter::genModelScheduledEvent($schedule),
             ModelConverter::genModelServer($guild),
             ModelConverter::genModelUser($user)
@@ -439,7 +439,7 @@ array(5) {
     }
     public function onEmojiUpdate(DiscordEmoji $emoji): void
     {
-        $packet = new GuildEmojiUpdatePacket(ModelConverter::genModelEmoji($emoji));
+        $packet = new ServerEmojiUpdatePacket(ModelConverter::genModelEmoji($emoji));
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onStageCreate(DiscordStageInstance $stage): void
@@ -459,7 +459,7 @@ array(5) {
     }
     public function onStickersUpdate(DiscordSticker $sticker): void
     {
-        $packet = new GuildStickersUpdatePacket(ModelConverter::genModelStickers($sticker));
+        $packet = new ServerStickersUpdatePacket(ModelConverter::genModelStickers($sticker));
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onVoiceStateUpdate(DiscordVoiceStateUpdate $ds): void

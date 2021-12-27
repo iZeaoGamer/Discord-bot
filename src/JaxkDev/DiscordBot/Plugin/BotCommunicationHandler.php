@@ -12,8 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Plugin;
 
-use Discord\WebSockets\Events\GuildScheduledEventCreate;
-use Discord\WebSockets\Events\GuildScheduledEventUpdate;
+use Discord\WebSockets\Events\ServerScheduledEventCreated as ServerScheduledEventCreatedEvent;
+use Discord\WebSockets\Events\ServerScheduledEventUpdated as ServerScheduledEventUpdatedEvent;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution as ResolutionPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordDataDump as DiscordDataDumpPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\BanAdd as BanAddPacket;
@@ -50,16 +50,16 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdat
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\TypingStart as TypingStartPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\InteractionCreate as InteractionCreatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildStickersUpdate as GuildStickersUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerStickersUpdate as ServerStickersUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageCreate as StageCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageUpdate as StageUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageDelete as StageDeletePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildEmojiUpdate as GuildEmojiUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventCreate as GuildScheduledEventCreatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUpdate as GuildScheduledEventUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventDelete as GuildScheduledEventDeletePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUserAdd as GuildScheduledEventUserAddPacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildScheduledEventUserRemove as GuildScheduledEventUserRemovePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerEmojiUpdate as ServerEmojiUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventCreate as ServerScheduledEventCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUpdate as ServerScheduledEventUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventDelete as ServerScheduledEventDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserAdd as ServerScheduledEventUserAddPacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserRemove as ServerScheduledEventUserRemovePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat as HeartbeatPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Activity;
@@ -102,11 +102,11 @@ use JaxkDev\DiscordBot\Plugin\Events\ChannelCreated as ChannelCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\MessageBulkDeleted as MessageBulkDeletedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\TypingStart as TypingStartEvent;
 use JaxkDev\DiscordBot\Plugin\Events\InteractionCreated as InteractionCreatedEvent;
-use JaxkDev\DiscordBot\Plugin\Events\GuildStickerUpdated as GuildStickerUpdatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\ServerStickerUpdated as ServerStickerUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\StageCreated as StageCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\StageDeleted as StageDeletedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\StageUpdated as StageUpdatedEvent;
-use JaxkDev\DiscordBot\Plugin\Events\GuildEmojiUpdated as GuildEmojiUpdatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\ServerEmojiUpdated as ServerEmojiUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledCreated as ServerScheduledCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledUpdated as ServerScheduledUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledDeleted as ServerScheduledDeletedEvent;
@@ -174,16 +174,16 @@ class BotCommunicationHandler
         elseif ($packet instanceof TypingStartPacket) $this->handleTypingStart($packet);
         elseif ($packet instanceof InteractionCreatePacket) $this->handleInteraction($packet);
         elseif ($packet instanceof DiscordDataDumpPacket) $this->handleDataDump($packet);
-        elseif ($packet instanceof GuildStickersUpdatePacket) $this->handleGuildSticker($packet);
+        elseif ($packet instanceof ServerStickersUpdatePacket) $this->handleServerSticker($packet);
         elseif ($packet instanceof StageCreatePacket) $this->handleStageCreate($packet);
         elseif ($packet instanceof StageUpdatePacket) $this->handleStageUpdate($packet);
         elseif ($packet instanceof StageDeletePacket) $this->handleStageDelete($packet);
-        elseif ($packet instanceof GuildEmojiUpdatePacket) $this->handleEmojiUpdate($packet);
-        elseif ($packet instanceof GuildScheduledEventCreatePacket) $this->handleScheduleCreate($packet);
-        elseif ($packet instanceof GuildScheduledEventUpdatePacket) $this->handleScheduleUpdate($packet);
-        elseif ($packet instanceof GuildScheduledEventDeletePacket) $this->handleScheduleDelete($packet);
-        elseif($packet instanceof GuildScheduledEventUserAddPacket) $this->handleScheduleAddUser($packet);
-        elseif($packet instanceof GuildScheduledEventUserRemovePacket) $this->handleScheduleRemoveUser($packet);
+        elseif ($packet instanceof ServerEmojiUpdatePacket) $this->handleEmojiUpdate($packet);
+        elseif ($packet instanceof ServerScheduledEventCreatePacket) $this->handleScheduleCreate($packet);
+        elseif ($packet instanceof ServerScheduledEventUpdatePacket) $this->handleScheduleUpdate($packet);
+        elseif ($packet instanceof ServerScheduledEventDeletePacket) $this->handleScheduleDelete($packet);
+        elseif($packet instanceof ServerScheduledEventUserAddPacket) $this->handleScheduleAddUser($packet);
+        elseif($packet instanceof ServerScheduledEventUserRemovePacket) $this->handleScheduleRemoveUser($packet);
         elseif ($packet instanceof DiscordReadyPacket) $this->handleReady();
     }
 
@@ -197,36 +197,36 @@ class BotCommunicationHandler
 
         (new DiscordReadyEvent($this->plugin))->call();
     }
-    private function handleScheduleCreate(GuildScheduledEventCreatePacket $packet): void
+    private function handleScheduleCreate(ServerScheduledEventCreatePacket $packet): void
     {
         (new ServerScheduledCreatedEvent($this->plugin, $packet->getScheduledEvent()))->call();
         Storage::addSchedule($packet->getScheduledEvent());
     }
-    private function handleScheduleUpdate(GuildScheduledEventUpdatePacket $packet): void
+    private function handleScheduleUpdate(ServerScheduledEventUpdatePacket $packet): void
     {
         (new ServerScheduledUpdatedEvent($this->plugin, $packet->getScheduledEvent()))->call();
         Storage::updateSchedule($packet->getScheduledEvent());
     }
-    private function handleScheduleDelete(GuildScheduledEventDeletePacket $packet): void
+    private function handleScheduleDelete(ServerScheduledEventDeletePacket $packet): void
     {
         (new ServerScheduledDeletedEvent($this->plugin, $packet->getScheduledEvent()))->call();
-        Storage::removeSchedule($packet->getScheduledEvent());
+        Storage::removeSchedule($packet->getScheduledEvent()->getId());
     }
-    private function handleScheduleAddUser(GuildScheduledEventUserAddPacket $packet): void{
-        (new ServerScheduledUserAddedEvent($packet->getScheduledEvent(), $packet->getServer(), $packet->getUser()))->call();
+    private function handleScheduleAddUser(ServerScheduledEventUserAddPacket $packet): void{
+        (new ServerScheduledUserAddedEvent($this->plugin, $packet->getScheduledEvent(), $packet->getServer(), $packet->getUser()))->call();
     }
-    private function handleScheduleRemoveUser(GuildScheduledEventUserRemovePacket $packet): void{
-        (new ServerScheduledUserRemovedEvent($packet->getScheduledEvent(), $packet->getServer(), $packet->getUser()));
+    private function handleScheduleRemoveUser(ServerScheduledEventUserRemovePacket $packet): void{
+        (new ServerScheduledUserRemovedEvent($this->plugin, $packet->getScheduledEvent(), $packet->getServer(), $packet->getUser()));
 
     }
     
-    private function handleEmojiUpdate(GuildEmojiUpdatePacket $packet): void
+    private function handleEmojiUpdate(ServerEmojiUpdatePacket $packet): void
     {
-        (new GuildEmojiUpdatedEvent($this->plugin, $packet->getEmoji()))->call();
+        (new ServerEmojiUpdatedEvent($this->plugin, $packet->getEmoji()))->call();
     }
-    private function handleGuildSticker(GuildStickersUpdatePacket $packet): void
+    private function handleServerSticker(ServerStickersUpdatePacket $packet): void
     {
-        (new GuildStickerUpdatedEvent($this->plugin, $packet->getSticker()))->call();
+        (new ServerStickerUpdatedEvent($this->plugin, $packet->getSticker()))->call();
     }
     private function handleInteraction(InteractionCreatePacket $packet): void
     {

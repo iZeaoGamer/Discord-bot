@@ -606,7 +606,7 @@ class CommunicationHandler
                 $data[$k + $diff] = $v;
             }
             //save
-            $guild->updateRolePositions($data)->then(function (DiscordGuild $guild) use ($promise) {
+            $guild->updateRolePositions($data, "Updated roles")->then(function (DiscordGuild $guild) use ($promise) {
                 $promise->resolve();
             }, function (\Throwable $e) use ($promise) {
                 $promise->reject(new ApiRejection("Failed to update role positions.", [$e->getMessage(), $e->getTraceAsString()]));
@@ -675,7 +675,7 @@ class CommunicationHandler
     private function handleRemoveRole(RequestRemoveRole $pk): void
     {
         $this->getMember($pk, $pk->getServerId(), $pk->getUserId(), function (DiscordMember $dMember) use ($pk) {
-            $dMember->removeRole($pk->getRoleId())->done(function () use ($pk) {
+            $dMember->removeRole($pk->getRoleId(), $pk->getReason())->done(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Removed role.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to remove role.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -687,7 +687,7 @@ class CommunicationHandler
     private function handleAddRole(RequestAddRole $pk): void
     {
         $this->getMember($pk, $pk->getServerId(), $pk->getUserId(), function (DiscordMember $dMember) use ($pk) {
-            $dMember->addRole($pk->getRoleId())->done(function () use ($pk) {
+            $dMember->addRole($pk->getRoleId(), $pk->getReason())->done(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Added role.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to add role.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -922,7 +922,7 @@ class CommunicationHandler
     private function handleBulkDelete(RequestMessageBulkDelete $pk): void
     {
         $this->getChannel($pk, $pk->getChannelID(), function (DiscordChannel $channel) use ($pk) {
-            $channel->limitDelete($pk->getValue())->done(function () use ($pk) {
+            $channel->limitDelete($pk->getValue(), $pk->getReason())->done(function () use ($pk) {
                 $this->resolveRequest($pk->getUID());
                 $this->logger->debug("Message Bulk - success ({$pk->getUID()})");
             }, function (\Throwable $e) use ($pk) {
@@ -950,7 +950,7 @@ class CommunicationHandler
 
             $c = $pk->getChannel();
 
-            $dc->startThread($pk->getChannel()->getName(), $pk->isPrivate(), $pk->getDuration())->then(function () use ($pk) {
+            $dc->startThread($pk->getChannel()->getName(), $pk->isPrivate(), $pk->getDuration(), $pk->getReason())->then(function () use ($pk) {
                 $this->resolveRequest($pk->getUID());
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to create thread.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1007,7 +1007,7 @@ class CommunicationHandler
     {
         $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), function (DiscordMessage $message) use ($pk) {
             //     $guild->channels->fetch($pk->getChannel()->getID())->then(function (DiscordChannel $discord) use ($pk){
-            $message->startThread($pk->getName(), $pk->getDuration())->then(function () use ($message, $pk) {
+            $message->startThread($pk->getName(), $pk->getDuration(), $pk->getReason())->then(function () use ($message, $pk) {
                 $this->resolveRequest($pk->getUID(), false, "Successfully created thread message.", [ModelConverter::genModelMessage($message)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages..", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1138,7 +1138,7 @@ class CommunicationHandler
     private function handleUpdateNickname(RequestUpdateNickname $pk): void
     {
         $this->getMember($pk, $pk->getServerId(), $pk->getUserId(), function (DiscordMember $dMember) use ($pk) {
-            $dMember->setNickname($pk->getNickname())->done(function () use ($pk) {
+            $dMember->setNickname($pk->getNickname(), $pk->getReason())->done(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Updated nickname.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to update nickname.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1149,7 +1149,7 @@ class CommunicationHandler
     private function handleServerTransfer(RequestServerTransfer $pk): void
     {
         $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
-            $guild->transferOwnership($pk->getUserId())->then(function () use ($pk) {
+            $guild->transferOwnership($pk->getUserId(), $pk->getReason())->then(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Transferred guild.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to transfer guild.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1208,28 +1208,17 @@ class CommunicationHandler
         $icon = $pk->getServerIcon();
         $name = $pk->getServerName();
         $code = $pk->getTemplateCode();
-    //    $this->getServer($pk, $pk->getServer()->getId(), function (DiscordGuild $guild) use ($name, $icon, $pk) {
-    $this->getTemplate($pk, $code, $pk->getServer()->getId(), function (DiscordTemplate $template) use ($pk, $code, $name, $icon){
-$template->createGuild([
-    $name,
-    $icon
-])->done(function (DiscordGuild $newGuild) use ($pk, $name){
-        $this->resolveRequest($pk->getUID(), true, "Created new guild with name: {$name} successfully!", [ModelConverter::genModelServer($newGuild)]);
-    }, function (\Throwable $e) use ($name, $pk) {
-        $this->resolveRequest($pk->getUID(), false, "Failed to create new guild {$name}: {$e->getMessage()}", [$e->getMessage(), $e->getTraceAsString()]);
-    });
-});
-    }
-      /*  ->createGuild([
-                "name" => $name,
-                "icon" => $icon
-            ])->done(function (DiscordGuild $newGuild) use ($name, $pk) {
+              $this->getTemplate($pk, $code, $pk->getServer()->getId(), function (DiscordTemplate $template) use ($pk, $code, $name, $icon) {
+            $template->createGuild([
+                $name,
+                $icon
+            ])->done(function (DiscordGuild $newGuild) use ($pk, $name) {
                 $this->resolveRequest($pk->getUID(), true, "Created new guild with name: {$name} successfully!", [ModelConverter::genModelServer($newGuild)]);
             }, function (\Throwable $e) use ($name, $pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to create new guild {$name}: {$e->getMessage()}", [$e->getMessage(), $e->getTraceAsString()]);
             });
         });
-    }*/
+    }
 
 
 
@@ -1364,7 +1353,7 @@ $template->createGuild([
                 $this->resolveRequest($pk->getUID(), false, "Channel {$channel->getId()} is not a voice channel.");
                 return;
             }
-            $discordChannel->moveMember($pk->getUserId())->then(function () use ($discordChannel, $pk, $channel) {
+            $discordChannel->moveMember($pk->getUserId(), $pk->getReason())->then(function () use ($discordChannel, $pk, $channel) {
                 $this->resolveRequest($pk->getUID(), true, "Succcessfully moved member to {$channel->getID()}!", [ModelConverter::genModelVoiceChannel($discordChannel)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to move member.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1383,7 +1372,7 @@ $template->createGuild([
                 $this->resolveRequest($pk->getUID(), false, "Channel ID: {$channel->getId()} is not a Voice Channel.");
                 return;
             }
-            $discordChannel->muteMember($pk->getUserId())->then(function () use ($pk, $discordChannel, $channel) {
+            $discordChannel->muteMember($pk->getUserId(), $pk->getReason())->then(function () use ($pk, $discordChannel, $channel) {
                 $this->resolveRequest($pk->getUID(), true, "Succcessfully moved member to {$channel->getID()}!", [ModelConverter::genModelVoiceChannel($discordChannel)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to move member.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1402,7 +1391,7 @@ $template->createGuild([
                 $this->resolveRequest($pk->getUID(), false, "Channel ID: {$channel->getId()} is not a Voice Channel.");
                 return;
             }
-            $discordChannel->unmuteMember($pk->getUserId())->then(function () use ($pk, $discordChannel, $channel) {
+            $discordChannel->unmuteMember($pk->getUserId(), $pk->getReason())->then(function () use ($pk, $discordChannel, $channel) {
                 $this->resolveRequest($pk->getUID(), true, "Succcessfully unmuted member in {$channel->getID()}!", [ModelConverter::genModelVoiceChannel($discordChannel)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to unmute member.", [$e->getMessage(), $e->getTraceAsString()]);

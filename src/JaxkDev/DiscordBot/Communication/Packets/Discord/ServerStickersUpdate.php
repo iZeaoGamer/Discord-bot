@@ -12,31 +12,32 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
-use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
+use JaxkDev\DiscordBot\Models\Messages\Stickers;
 
-class GuildScheduledEventCreate extends Packet
+class ServerStickersUpdate extends Packet
 {
 
-    /** @var ServerScheduledEvent */
-    private $event;
+    /** @var Stickers */
+    private $sticker;
 
-    public function __construct(ServerScheduledEvent $event)
+    /** @param Stickers $sticker */
+    public function __construct(Stickers $sticker)
     {
         parent::__construct();
-        $this->event = $event;
+        $this->sticker = $sticker;
     }
 
-    public function getScheduledEvent(): ServerScheduledEvent
+    public function getSticker(): Stickers
     {
-        return $this->event;
+        return $this->sticker;
     }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->event
+            $this->sticker
         ]);
     }
 
@@ -44,7 +45,7 @@ class GuildScheduledEventCreate extends Packet
     {
         [
             $this->UID,
-            $this->event
+            $this->sticker
         ] = unserialize($data);
     }
 }

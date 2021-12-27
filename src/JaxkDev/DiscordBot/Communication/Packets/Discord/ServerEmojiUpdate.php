@@ -13,31 +13,31 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\Messages\Stickers;
+use JaxkDev\DiscordBot\Models\Emoji;
 
-class GuildStickersUpdate extends Packet
+class ServerEmojiUpdate extends Packet
 {
 
-    /** @var Stickers */
-    private $sticker;
+    /** @var Emoji */
+    private $emoji;
 
-    /** @param Stickers $sticker */
-    public function __construct(Stickers $sticker)
+    /** @param Emoji $sticker */
+    public function __construct(Emoji $emoji)
     {
         parent::__construct();
-        $this->sticker = $sticker;
+        $this->emoji = $emoji;
     }
 
-    public function getSticker(): Stickers
+    public function getEmoji(): Emoji
     {
-        return $this->sticker;
+        return $this->emoji;
     }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->sticker
+            $this->emoji
         ]);
     }
 
@@ -45,7 +45,7 @@ class GuildStickersUpdate extends Packet
     {
         [
             $this->UID,
-            $this->sticker
+            $this->emoji
         ] = unserialize($data);
     }
 }

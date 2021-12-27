@@ -17,7 +17,7 @@ use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\User;
 
-class GuildScheduledEventUserRemove extends Packet
+class ServerScheduledEventUserAdd extends Packet
 {
 
     /** @var ServerScheduledEvent */

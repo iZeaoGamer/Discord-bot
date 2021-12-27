@@ -686,9 +686,11 @@ class Api
      *
      * @param string $member_id
      * @param string $role_id
+     * @param string|null $reason
+     * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function removeRole(string $member_id, string $role_id): PromiseInterface
+    public function removeRole(string $member_id, string $role_id, ?string $reason = null): PromiseInterface
     {
         [$sid, $uid] = explode(".", $member_id);
         if (!Utils::validDiscordSnowflake($sid) or !Utils::validDiscordSnowflake($uid)) {
@@ -697,7 +699,7 @@ class Api
         if (!Utils::validDiscordSnowflake($role_id)) {
             return rejectPromise(new ApiRejection("Invalid role ID '$role_id'."));
         }
-        $pk = new RequestRemoveRole($sid, $uid, $role_id);
+        $pk = new RequestRemoveRole($sid, $uid, $role_id, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -707,9 +709,11 @@ class Api
      *
      * @param string $member_id
      * @param string $role_id
+     * @param string|null $reason
+     * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function addRole(string $member_id, string $role_id): PromiseInterface
+    public function addRole(string $member_id, string $role_id, ?string $reason = null): PromiseInterface
     {
         [$sid, $uid] = explode(".", $member_id);
         if (!Utils::validDiscordSnowflake($sid) or !Utils::validDiscordSnowflake($uid)) {
@@ -718,7 +722,7 @@ class Api
         if (!Utils::validDiscordSnowflake($role_id)) {
             return rejectPromise(new ApiRejection("Invalid role ID '$role_id'."));
         }
-        $pk = new RequestAddRole($sid, $uid, $role_id);
+        $pk = new RequestAddRole($sid, $uid, $role_id, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -973,9 +977,11 @@ class Api
      *
      * @param string $channel_id
      * @param int $deleteLimit
+     * @param string|null $reason
+     * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function bulkDelete(string $channel_id, int $deleteLimit): PromiseInterface
+    public function bulkDelete(string $channel_id, int $deleteLimit, ?string $reason = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -1048,9 +1054,11 @@ class Api
      * Transfers Server Ownership to another user.
      * @param string $server_id
      * @param string $user_id
+     * @param string|null $reason
+     * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function transferOwnership(string $server_id, string $user_id): PromiseInterface
+    public function transferOwnership(string $server_id, string $user_id, ?string $reason): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($server_id)) {
             return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
@@ -1058,7 +1066,7 @@ class Api
         if (!Utils::validDiscordSnowflake($user_id)) {
             return rejectPromise(new ApiRejection("Invalid user ID '$user_id'."));
         }
-        $pk = new RequestServerTransfer($server_id, $user_id);
+        $pk = new RequestServerTransfer($server_id, $user_id, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1156,9 +1164,10 @@ class Api
      * Moves a member to another voice channel. Moved to Voice Channel ID Must be present.
      * @param string $userID
      * @param VoiceChannel $channel
+     * @param string|null $reason
      * @return PromiseInterface Resolves with a Voice Channel Model.
      */
-    public function moveMember(string $userID, VoiceChannel $channel): PromiseInterface
+    public function moveMember(string $userID, VoiceChannel $channel, ?string $reason = null): PromiseInterface
     {
         if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
@@ -1166,7 +1175,7 @@ class Api
         if (!Utils::validDiscordSnowflake($userID)) {
             return rejectPromise(new ApiRejection("Invalid Member ID '$userID'."));
         }
-        $pk = new RequestMoveMember($userID, $channel);
+        $pk = new RequestMoveMember($userID, $channel, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1175,9 +1184,10 @@ class Api
      * Mutes a member that's in the current Voice Channel. Muted member's Voice Channel ID must be present.
      * @param string $userID
      * @param VoiceChannel $channel
+     * @param string|null $reason
      * @return PromiseInterface Resolves with a VoiceChannel Model.
      */
-    public function muteMember(string $userID, VoiceChannel $channel): PromiseInterface
+    public function muteMember(string $userID, VoiceChannel $channel, ?string $reason = null): PromiseInterface
     {
         if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
@@ -1186,7 +1196,7 @@ class Api
         if (!Utils::validDiscordSnowflake($userID)) {
             return rejectPromise(new ApiRejection("Invalid Member ID '$userID'."));
         }
-        $pk = new RequestMuteMember($userID, $channel);
+        $pk = new RequestMuteMember($userID, $channel, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1196,11 +1206,13 @@ class Api
      * Starts a thread in a channel.
      * 
      * @param ThreadChannel $channel
+     * @param string|null $reason
+     * 
      * @return PromiseInterface Resolves with a Thread Channel model.
      */
-    public function startChannelThread(ThreadChannel $channel): PromiseInterface
+    public function startChannelThread(ThreadChannel $channel, ?string $reason = null): PromiseInterface
     {
-        $pk = new RequestThreadCreate($channel);
+        $pk = new RequestThreadCreate($channel, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1212,9 +1224,10 @@ class Api
      * @param string $channel_id
      * @param string $name
      * @param int $duration
+     * @param string|null $reason
      * @return PromiseInterface Resolves with a Message Model.
      */
-    public function startMessageThread(string $message_id, string $channel_id, string $name, int $duration): PromiseInterface
+    public function startMessageThread(string $message_id, string $channel_id, string $name, int $duration, ?string $reason = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
@@ -1222,7 +1235,7 @@ class Api
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
         }
-        $pk = new RequestThreadMessageCreate($message_id, $channel_id, $name, $duration);
+        $pk = new RequestThreadMessageCreate($message_id, $channel_id, $name, $duration, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1315,15 +1328,16 @@ class Api
      *
      * @param string $member_id
      * @param null|string $nickname Null to remove nickname.
+     * @param string|null $reason
      * @return PromiseInterface Resolves with no data.
      */
-    public function updateNickname(string $member_id, ?string $nickname = null): PromiseInterface
+    public function updateNickname(string $member_id, ?string $nickname = null, ?string $reason = null): PromiseInterface
     {
         [$sid, $uid] = explode(".", $member_id);
         if (!Utils::validDiscordSnowflake($sid) or !Utils::validDiscordSnowflake($uid)) {
             return rejectPromise(new ApiRejection("Invalid member ID '$member_id'."));
         }
-        $pk = new RequestUpdateNickname($sid, $uid, $nickname);
+        $pk = new RequestUpdateNickname($sid, $uid, $nickname, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

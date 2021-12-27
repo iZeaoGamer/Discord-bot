@@ -86,8 +86,15 @@ use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Models\Emoji;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 
+use JaxkDev\DiscordBot\Models\Channels\Overwrite;
+
 abstract class ModelConverter
 {
+    static public function genOverwrite(DiscordOverwrite $overwrite): Overwrite
+    {
+        return new Overwrite($overwrite->channel_id, $overwrite->type, new ChannelPermissions($overwrite->allow->bitwise),
+        new ChannelPermissions($overwrite->deny->bitwise, $overwrite->id));
+    }
     static public function genModelAuditLog(DiscordAuditLog $log): AuditLog
     {
         /** @var WebHook[] $webhooks */
