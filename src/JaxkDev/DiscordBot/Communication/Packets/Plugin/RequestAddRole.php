@@ -35,6 +35,7 @@ class RequestAddRole extends Packet
         $this->server_id = $server_id;
         $this->user_id = $user_id;
         $this->role_id = $role_id;
+        $this->reason = $reason;
     }
 
     public function getServerId(): string

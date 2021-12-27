@@ -32,6 +32,7 @@ class RequestMoveMember extends Packet
         parent::__construct();
         $this->userId = $user_id;
         $this->channel = $channel;
+        $this->reason = $reason;
     }
     public function getUserId(): string
     {
