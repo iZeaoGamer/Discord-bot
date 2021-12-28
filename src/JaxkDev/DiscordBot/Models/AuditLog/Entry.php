@@ -186,7 +186,7 @@ class Entry implements \Serializable
     {
         return $this->actionType;
     }
-    public function setActionType(int $action_type)
+    public function setActionType(int $action_type): void
     {
         if (!in_array($action_type, self::VALID_ACTION_TYPES)) {
             throw new \AssertionError("Action type: {$action_type} does not exist. Are you sure this is the correct action type you're requiring?");

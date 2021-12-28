@@ -29,13 +29,17 @@ class RequestSendFile extends Packet
     /** @var string */
     private $message;
 
-    public function __construct(string $channel_id, string $file_name, string $file_path, string $message)
+    /** @var bool */
+    private $tts;
+
+    public function __construct(string $channel_id, string $file_name, string $file_path, string $message, bool $tts = false)
     {
         parent::__construct();
         $this->channel_id = $channel_id;
         $this->file_name = $file_name;
         $this->file_path = $file_path;
         $this->message = $message;
+        $this->ttts = $tts;
     }
 
     public function getChannelId(): string
@@ -57,6 +61,10 @@ class RequestSendFile extends Packet
     {
         return $this->message;
     }
+    public function isTTS(): bool
+    {
+        return $this->tts;
+    }
 
     public function serialize(): ?string
     {
@@ -65,7 +73,8 @@ class RequestSendFile extends Packet
             $this->channel_id,
             $this->file_name,
             $this->file_path,
-            $this->message
+            $this->message,
+            $this->tts
         ]);
     }
 
@@ -76,7 +85,8 @@ class RequestSendFile extends Packet
             $this->channel_id,
             $this->file_name,
             $this->file_path,
-            $this->message
+            $this->message,
+            $this->tts
         ] = unserialize($data);
     }
 }

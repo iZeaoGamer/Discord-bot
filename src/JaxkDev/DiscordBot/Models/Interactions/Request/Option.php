@@ -34,29 +34,29 @@ class Option implements \Serializable
         $this->setType($type);
         $this->setValue($value);
     }
-    public function setName(string $name): void
-    {
-        $this->name = $name;
-    }
     public function getName(): string
     {
         return $this->name;
     }
-    public function setType(int $type): void
+    public function setName(string $name): void
     {
-        $this->type = $type;
+        $this->name = $name;
     }
     public function getType(): int
     {
         return $this->type;
     }
-    public function setValue(mixed $value)
+    public function setType(int $type): void
     {
-        $this->value = $value;
+        $this->type = $type;
     }
     public function getValue(): mixed
     {
         return $this->value;
+    }
+    public function setValue(mixed $value)
+    {
+        $this->value = $value;
     }
 
     //----- Serialization -----//

@@ -14,6 +14,7 @@ namespace Discord\Parts\Guild;
 use Carbon\Carbon;
 use Discord\Helpers\Collection;
 use Discord\Http\Endpoint;
+use Discord\Http\Exceptions\NoPermissionsException;
 use Discord\Parts\Channel\StageInstance;
 use Discord\Parts\Part;
 use Discord\Parts\User\Member;
@@ -77,6 +78,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * @property int                $max_video_channel_users                  Maximum amount of users allowed in a video channel.
  * @property int                $approximate_member_count
  * @property int                $approximate_presence_count
+ * @property WelcomeScreen      welcome_screen
  * @property int                $nsfw_level                               The guild NSFW level.
  * @property bool               $premium_progress_bar_enabled             Whether the guild has the boost progress bar enabled.
  * @property bool               $feature_animated_icon                    guild has access to set an animated guild icon.
@@ -298,7 +300,7 @@ class Guild extends Part
      */
     public function getIconAttribute(string $format = null, int $size = 1024)
     {
-        if (is_null($this->attributes['icon'])) {
+        if (!isset($this->attributes['icon'])) {
             return null;
         }
 
@@ -336,7 +338,7 @@ class Guild extends Part
      */
     public function getSplashAttribute(string $format = 'webp', int $size = 2048)
     {
-        if (is_null($this->attributes['splash'])) {
+        if (!isset($this->attributes['splash'])) {
             return null;
         }
 
@@ -494,13 +496,11 @@ class Guild extends Part
      */
     public function createRole(array $data = []): ExtendedPromiseInterface
     {
-        $rolePart = $this->factory->create(Role::class);
-
-        return $this->roles->save($rolePart)->then(function ($role) use ($data) {
-            $role->fill((array) $data);
-
-            return $this->roles->save($role);
-        });
+        $botperms = $this->members->offsetGet($this->discord->id)->getPermissions();
+        if (! $botperms->manage_roles) {
+            return \React\Promise\reject(new NoPermissionsException('You do not have permission to manage roles in the specified guild.'));
+        }
+        return $this->roles->save($this->factory->create(Role::class, $data));
     }
 
     /**

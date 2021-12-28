@@ -72,7 +72,7 @@ class Emoji implements \Serializable
     {
         return $this->name;
     }
-    public function setName(string $name)
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
@@ -80,7 +80,7 @@ class Emoji implements \Serializable
     {
         return $this->serverId;
     }
-    public function setServerId(string $serverId)
+    public function setServerId(string $serverId): void
     {
         $this->serverId = $serverId;
     }
@@ -88,7 +88,7 @@ class Emoji implements \Serializable
     {
         return $this->managed;
     }
-    public function setManaged(bool $managed)
+    public function setManaged(bool $managed): void
     {
         $this->managed = $managed;
     }
@@ -96,7 +96,7 @@ class Emoji implements \Serializable
     {
         return $this->id;
     }
-    public function setId(?string $id)
+    public function setId(?string $id): void
     {
         $this->id = $id;
     }
@@ -104,7 +104,7 @@ class Emoji implements \Serializable
     {
         return $this->requireColons;
     }
-    public function setRequireColons(bool $require_colons)
+    public function setRequireColons(bool $require_colons): void
     {
         $this->requireColons = $require_colons;
     }
@@ -112,7 +112,7 @@ class Emoji implements \Serializable
     {
         return $this->roles;
     }
-    public function setRoles(array $roles)
+    public function setRoles(array $roles): void
     {
         foreach ($roles as $id) {
             if (!Utils::validDiscordSnowflake($id)) {
@@ -125,7 +125,7 @@ class Emoji implements \Serializable
     {
         return $this->user;
     }
-    public function setUser(?User $user)
+    public function setUser(?User $user): void
     {
         $this->user = $user;
     }
@@ -133,7 +133,7 @@ class Emoji implements \Serializable
     {
         return $this->animated;
     }
-    public function setAnimated(bool $animated)
+    public function setAnimated(bool $animated): void
     {
         $this->animated = $animated;
     }
@@ -141,7 +141,7 @@ class Emoji implements \Serializable
     {
         return $this->available;
     }
-    public function setAvailable(bool $available)
+    public function setAvailable(bool $available): void
     {
         $this->available = $available;
     }

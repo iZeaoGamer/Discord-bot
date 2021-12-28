@@ -111,6 +111,8 @@ class Reply extends Message
             $this->channels_mentioned,
             $this->stickers,
             $this->interaction,
+            $this->link,
+            $this->tts,
             $this->referenced_message_id
         ]);
     }
@@ -132,6 +134,8 @@ class Reply extends Message
             $this->channels_mentioned,
             $this->stickers,
             $this->interaction,
+            $this->link,
+            $this->tts,
             $this->referenced_message_id
         ] = unserialize($data);
     }

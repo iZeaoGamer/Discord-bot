@@ -91,7 +91,7 @@ class Stickers implements \Serializable
     {
         return $this->available;
     }
-    public function setAvailable(?bool $available)
+    public function setAvailable(?bool $available): void
     {
         $this->available = $available;
     }
@@ -99,7 +99,7 @@ class Stickers implements \Serializable
     {
         return $this->serverId;
     }
-    public function setServerId(?string $serverId)
+    public function setServerId(?string $serverId): void
     {
         $this->serverId = $serverId;
     }
@@ -107,7 +107,7 @@ class Stickers implements \Serializable
     {
         return $this->user;
     }
-    public function setUser(?User $user)
+    public function setUser(?User $user): void
     {
         $this->user = $user;
     }
@@ -115,7 +115,7 @@ class Stickers implements \Serializable
     {
         return $this->sortValue;
     }
-    public function setSortValue(?int $sortValue)
+    public function setSortValue(?int $sortValue): void
     {
         $this->sortValue = $sortValue;
     }

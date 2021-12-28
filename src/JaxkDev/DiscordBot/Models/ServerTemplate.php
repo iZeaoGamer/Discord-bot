@@ -60,7 +60,7 @@ class ServerTemplate implements \Serializable
     {
         return $this->name;
     }
-    public function setName(string $name)
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
@@ -68,7 +68,7 @@ class ServerTemplate implements \Serializable
     {
         return $this->description;
     }
-    public function setDescription(string $description)
+    public function setDescription(string $description): void
     {
         if (strlen($description) > 120) {
             throw new \AssertionError("Description limit reached. Must be atleast 120 characters long.");
@@ -100,7 +100,7 @@ class ServerTemplate implements \Serializable
     {
         return $this->usage_count;
     }
-    public function setUsageCount(int $usage_count)
+    public function setUsageCount(int $usage_count): void
     {
         $this->usage_count = $usage_count;
     }

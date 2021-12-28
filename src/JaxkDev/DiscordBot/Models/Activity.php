@@ -330,31 +330,6 @@ class Activity implements \Serializable
     {
         $this->small_text = $small_text;
     }
-
-    /*public function getJoinSecret(): ?string{
-        return $this->join_secret;
-    }
-
-    public function setJoinSecret(?string $join_secret): void{
-        $this->join_secret = $join_secret;
-    }
-
-    public function getSpectateSecret(): ?string{
-        return $this->spectate_secret;
-    }
-
-    public function setSpectateSecret(?string $spectate_secret): void{
-        $this->spectate_secret = $spectate_secret;
-    }
-
-    public function getMatchSecret(): ?string{
-        return $this->match_secret;
-    }
-
-    public function setMatchSecret(?string $match_secret): void{
-        $this->match_secret = $match_secret;
-    }*/
-
     public function getInstance(): ?bool
     {
         return $this->instance;
@@ -397,9 +372,6 @@ class Activity implements \Serializable
             $this->large_text,
             $this->small_image,
             $this->small_text,
-            /*$this->join_secret,
-            $this->spectate_secret,
-            $this->match_secret,*/
             $this->instance,
             $this->flags
         ]);
@@ -425,9 +397,6 @@ class Activity implements \Serializable
             $this->large_text,
             $this->small_image,
             $this->small_text,
-            /*$this->join_secret,
-            $this->spectate_secret,
-            $this->match_secret,*/
             $this->instance,
             $this->flags
         ] = unserialize($data);

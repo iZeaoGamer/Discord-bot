@@ -23,11 +23,15 @@ class RequestUnpinMessage extends Packet
     /** @var string */
     private $message_id;
 
-    public function __construct(string $channel_id, string $message_id)
+    /** @var string|null */
+    private $reason;
+
+    public function __construct(string $channel_id, string $message_id, ?string $reason = null)
     {
         parent::__construct();
         $this->message_id = $message_id;
         $this->channel_id = $channel_id;
+        $this->reason = $reason;
     }
 
     public function getMessageId(): string
@@ -39,13 +43,18 @@ class RequestUnpinMessage extends Packet
     {
         return $this->channel_id;
     }
+    public function getReason(): ?string
+    {
+        return $this->reason;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
             $this->message_id,
-            $this->channel_id
+            $this->channel_id,
+            $this->reason
         ]);
     }
 
@@ -54,7 +63,8 @@ class RequestUnpinMessage extends Packet
         [
             $this->UID,
             $this->message_id,
-            $this->channel_id
+            $this->channel_id,
+            $this->reason
         ] = unserialize($data);
     }
 }

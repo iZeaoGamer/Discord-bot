@@ -45,6 +45,9 @@ class Server implements \Serializable
     /** @var int */
     private $member_count;
 
+    /** @var WelcomeScreen|null */
+    private $welcomeScreen; //null when welcome screen is disabled.
+
     public function __construct(
         string $id,
         string $name,
@@ -52,7 +55,8 @@ class Server implements \Serializable
         string $owner_id,
         bool $large,
         int $member_count,
-        ?string $icon_url = null
+        ?string $icon_url = null,
+        ?WelcomeScreen $screen = null
     ) {
         $this->setId($id);
         $this->setName($name);
@@ -61,6 +65,7 @@ class Server implements \Serializable
         $this->setLarge($large);
         $this->setMemberCount($member_count);
         $this->setIconUrl($icon_url);
+        $this->setWelcomeScreen($screen);
     }
 
     public function getId(): string
@@ -143,6 +148,12 @@ class Server implements \Serializable
     {
         $this->member_count = $member_count;
     }
+    public function getWelcomeScreen(): ?WelcomeScreen{
+        return $this->welcomeScreen;
+    }
+    public function setWelcomeScreen(?WelcomeScreen $screen){
+        $this->welcomeScreen = $screen;
+    }
 
     //----- Serialization -----//
 
@@ -155,7 +166,8 @@ class Server implements \Serializable
             $this->region,
             $this->owner_id,
             $this->large,
-            $this->member_count
+            $this->member_count,
+            $this->welcomeScreen
         ]);
     }
 
@@ -168,7 +180,8 @@ class Server implements \Serializable
             $this->region,
             $this->owner_id,
             $this->large,
-            $this->member_count
+            $this->member_count,
+            $this->welcomeScreen
         ] = unserialize($data);
     }
 }

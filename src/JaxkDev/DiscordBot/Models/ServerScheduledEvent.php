@@ -88,7 +88,7 @@ class ServerScheduledEvent implements \Serializable
     {
         return $this->name;
     }
-    public function setName(string $name)
+    public function setName(string $name): void
     {
         if (strlen($name) > 100) {
             throw new \AssertionError("The Scheduled Event Name limit reached. Must be atleast 100 characters long.");
@@ -140,7 +140,7 @@ class ServerScheduledEvent implements \Serializable
     {
         return $this->description;
     }
-    public function setDescription(string $description)
+    public function setDescription(string $description): void
     {
         if (strlen($description) > 1000) {
             throw new \AssertionError("Description limit reached. Must be atleast 1000 characters long.");
@@ -167,7 +167,7 @@ class ServerScheduledEvent implements \Serializable
     {
         return $this->privacyLevel;
     }
-    public function setPrivacyLevel(int $type)
+    public function setPrivacyLevel(int $type): void
     {
         if ($type !== 2) {
             throw new \AssertionError("Privacy level must be PRIVACY_LEVEL_GUILD_ONLY  (2).");

@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Models\Channels;
 
-class Stage
+class Stage  implements \Serializable
 {
 
     /** @var string */
@@ -34,17 +34,17 @@ class Stage
     private $disableDiscovery;
 
     /**
-     * TextChannel constructor.
+     * Stage constructor.
      *
      * @param string      $server_id
      * @param string      $channel_id
      * @param int         $topic
-     * @param string|null      $id
+     * @param string|null $id
      * @param int         $privacy_level
-     * @param bool    $disableDiscovery
+     * @param bool        $disableDiscovery
      */
     public function __construct(
-        string $server_id, 
+        string $server_id,
         string $channel_id,
         string $topic,
         ?string $id = null,
@@ -58,16 +58,20 @@ class Stage
         $this->setPrivacyLevel($privacy_level);
         $this->setDisableDiscovery($disableDiscovery);
     }
-    public function getServerId(): string{
+    public function getServerId(): string
+    {
         return $this->serverId;
     }
-    public function setServerId(string $server_id){
+    public function setServerId(string $server_id): void
+    {
         $this->serverId = $server_id;
     }
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channelId;
     }
-    public function setChannelId(string $channelId){
+    public function setChannelId(string $channelId): void
+    {
         $this->channelId = $channelId;
     }
 
@@ -80,25 +84,31 @@ class Stage
     {
         $this->topic = $topic;
     }
-    public function getId(): ?string{
+    public function getId(): ?string
+    {
         return $this->id;
     }
-    public function setId(?string $id): void{
+    public function setId(?string $id): void
+    {
         $this->id = $id;
     }
-    public function getPrivacyLevel(): int{
+    public function getPrivacyLevel(): int
+    {
         return $this->privacyLevel;
     }
-    public function setPrivacyLevel(int $privacyLevel): void{
-        if($privacyLevel < 1 or $privacyLevel > 2){
+    public function setPrivacyLevel(int $privacyLevel): void
+    {
+        if ($privacyLevel < 1 or $privacyLevel > 2) {
             throw new \AssertionError("Privacy Level {$privacyLevel} is invalid. It must be between type 1 and type 2.");
         }
         $this->privacyLevel = $privacyLevel;
     }
-    public function isDisabled(): bool{
+    public function isDisabled(): bool
+    {
         return $this->disableDiscovery;
     }
-    public function setDisableDiscovery(bool $disable){
+    public function setDisableDiscovery(bool $disable): void
+    {
         $this->disableDiscovery = $disable;
     }
     //----- Serialization -----//

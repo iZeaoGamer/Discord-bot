@@ -46,9 +46,8 @@ class ThreadChannel
     //Webhooks can be found via API::fetchWebhooks();
 
     /**
-     * TextChannel constructor.
+     * ThreadChannel constructor.
      *
-     * @param string      $id
      * @param string      $name
      * @param string      $server_id
      * @param string      $threadOwner
@@ -56,6 +55,7 @@ class ThreadChannel
      * @param int         $duration
      * @param int|null    $rate_limit
      * @param string|null $userID
+     * @param string|null $id
      */
     public function __construct(
         string $name,
@@ -79,22 +79,12 @@ class ThreadChannel
         $this->setUserID($userID);
         $this->setID($id);
     }
-
-    /** 
-     * @param string|null $id
-     * @return void
+      /**
+     * @return string
      */
-    public function setID(?string $id): void
+    public function getName(): string
     {
-        $this->id = $id;
-    }
-
-    /** 
-     * @return string|null
-     */
-    public function getID(): ?string
-    {
-        return $this->id;
+        return $this->name;
     }
     /** Sets a thread name.
      * 
@@ -106,14 +96,14 @@ class ThreadChannel
         $this->name = $name;
     }
 
-    /**
+
+     /** 
      * @return string
      */
-    public function getName(): string
+    public function getServerID(): string
     {
-        return $this->name;
+        return $this->server_id;
     }
-
     /** 
      * @param string $server_id
      * @return void
@@ -123,14 +113,13 @@ class ThreadChannel
         $this->server_id = $server_id;
     }
 
-    /** 
-     * @return string
+    /** Checks if the given thread is private.
+     * @return bool
      */
-    public function getServerID(): string
+    public function isPrivate(): bool
     {
-        return $this->server_id;
+        return $this->private;
     }
-
     /** Creates a boolean for privating a thread. 
      * 
      * @param bool $private
@@ -141,23 +130,15 @@ class ThreadChannel
     {
         $this->private = $private;
     }
-
-    /** Checks if the given thread is private.
-     * @return bool
-     */
-    public function isPrivate(): bool
-    {
-        return $this->private;
-    }
-    /** @return void */
-    public function setDuration(int $duration): void
-    {
-        $this->duration = $duration;
-    }
     /** @return int */
     public function getDuration(): int
     {
         return $this->duration;
+    }
+
+    public function setDuration(int $duration): void
+    {
+        $this->duration = $duration;
     }
 
     /** Get's the rate limit (Slowmode) in seconds for the given thread.
@@ -179,6 +160,11 @@ class ThreadChannel
         $this->rate_limit = $rate_limit;
     }
 
+    /** @return string */
+    public function getOwner(): string
+    {
+        return $this->threadOwner;
+    }
     /** Sets a thread owner.
      * @param string $threadOwner
      * @return void
@@ -188,11 +174,12 @@ class ThreadChannel
         $this->threadOwner = $threadOwner;
     }
 
-    /** @return string */
-    public function getOwner(): string
+    /** @return string|null */
+    public function getUserID(): ?string
     {
-        return $this->threadOwner;
+        return $this->user_id;
     }
+
     /**
      * @param string|null $user_id
      * @return void
@@ -201,9 +188,50 @@ class ThreadChannel
     {
         $this->user_id = $user_id;
     }
-    /** @return string|null */
-    public function getUserID(): ?string
+     /** 
+     * @return string|null
+     */
+    public function getID(): ?string
     {
-        return $this->user_id;
+        return $this->id;
+    }
+    
+    /** 
+     * @param string|null $id
+     * @return void
+     */
+    public function setID(?string $id): void
+    {
+        $this->id = $id;
+    }
+
+    //----- Serialization -----//
+
+    public function serialize(): ?string
+    {
+        return serialize([
+            $this->name,
+            $this->server_id,
+            $this->private,
+            $this->duration,
+            $this->rate_limit,
+            $this->threadOwner,
+            $this->user_id,
+            $this->id
+        ]);
+    }
+
+    public function unserialize($data): void
+    {
+        [
+            $this->name,
+            $this->server_id,
+            $this->private,
+            $this->duration,
+            $this->rate_limit,
+            $this->threadOwner,
+            $this->user_id,
+            $this->id
+        ] = unserialize($data);
     }
 }

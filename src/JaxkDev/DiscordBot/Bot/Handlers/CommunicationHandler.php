@@ -28,6 +28,7 @@ use Discord\Parts\Guild\GuildTemplate as DiscordTemplate;
 use Discord\Parts\Channel\StageInstance as DiscordStage;
 use Discord\Parts\Interactions\Interaction as DiscordInteraction;
 use Discord\Parts\Guild\Guild as DiscordGuild;
+use Discord\Parts\Guild\WelcomeScreen as DiscordWelcomeScreen;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\User\Activity as DiscordActivity;
@@ -138,6 +139,9 @@ use function React\Promise\reject;
 
 use Discord\Builders\Components\Button;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateServerFromTemplate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchWelcomeScreen;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAddWelcomeChannel;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWelcomeScreen;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Models\Webhook;
 
@@ -246,6 +250,8 @@ class CommunicationHandler
         elseif ($pk instanceof RequestUpdateReaction) $this->handleUpdateReaction($pk);
         elseif ($pk instanceof RequestDeleteReaction) $this->handleDeleteReaction($pk);
         elseif ($pk instanceof RequestCreateServerFromTemplate) $this->handleCreateServerFromTemplate($pk);
+        elseif($pk instanceof RequestFetchWelcomeScreen) $this->handleFetchWelcomeScreen($pk);
+        elseif($pk instanceof RequestUpdateWelcomeScreen) $this->handleUpdateWelcomeScreen($pk);
     }
     private function handleDelayReply(RequestDelayReply $pk): void
     {
@@ -495,7 +501,7 @@ class CommunicationHandler
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
             $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($channel, $pk) {
-                $channel->unpinMessage($message)->then(function () use ($pk) {
+                $channel->unpinMessage($message, $pk->getReason())->then(function () use ($pk) {
                     $this->resolveRequest($pk->getUID(), true, "Successfully unpinned the message.");
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to unpin the message.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -509,8 +515,8 @@ class CommunicationHandler
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
             $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($channel, $pk) {
-                $channel->pinMessage($message)->then(function () use ($pk) {
-                    $this->resolveRequest($pk->getUID(), true, "Successfully pinned the message.");
+                $channel->pinMessage($message, $pk->getReason())->then(function (DiscordMessage $message) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Successfully pinned the message.", [ModelConverter::genModelMessage($message)]);
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to pin the message.", [$e->getMessage(), $e->getTraceAsString()]);
                     $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
@@ -1006,7 +1012,7 @@ class CommunicationHandler
     private function handleMessageStartThread(RequestThreadMessageCreate $pk): void
     {
         $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), function (DiscordMessage $message) use ($pk) {
-           $message->startThread($pk->getName(), $pk->getDuration(), $pk->getReason())->then(function () use ($message, $pk) {
+            $message->startThread($pk->getName(), $pk->getDuration(), $pk->getReason())->then(function () use ($message, $pk) {
                 $this->resolveRequest($pk->getUID(), false, "Successfully created thread message.", [ModelConverter::genModelMessage($message)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages..", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1204,7 +1210,7 @@ class CommunicationHandler
         $icon = $pk->getServerIcon();
         $name = $pk->getServerName();
         $code = $pk->getTemplateCode();
-              $this->getTemplate($pk, $code, $pk->getServer()->getId(), function (DiscordTemplate $template) use ($pk, $code, $name, $icon) {
+        $this->getTemplate($pk, $code, $pk->getServer()->getId(), function (DiscordTemplate $template) use ($pk, $code, $name, $icon) {
             $template->createGuild([
                 $name,
                 $icon
@@ -1230,6 +1236,31 @@ class CommunicationHandler
                 $this->resolveRequest($pk->getUID(), true, "Searched AuditLog with success!.", [ModelConverter::genModelAuditLog($log)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to search audit log.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }
+    private function handleFetchWelcomeScreen(RequestFetchWelcomeScreen $pk): void
+    {
+        $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
+            $guild->getWelcomeScreen()->then(function (DiscordWelcomeScreen $screen) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Fetched Welcome Screen!", [ModelConverter::genModelWelcomeScreen($screen)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to fetch Welcome Screen!", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        });
+    }
+    private function handleUpdateWelcomeScreen(RequestUpdateWelcomeScreen $pk): void
+    {
+        $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
+            $guild->updateWelcomeScreen([
+                'enabled' => $pk->isEnabled(),
+                'welcome_channels' =>
+                $pk->getOptions(),
+                'description' => $pk->getDescription()
+            ])->then(function (DiscordWelcomeScreen $screen) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Updated Welcome Screen to server {$pk->getServerId()} with success", [ModelConverter::genModelWelcomeScreen($screen)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to update Welcome Screen!", [$e->getMessage(), $e->getTraceAsString()]);
             });
         });
     }
@@ -1405,8 +1436,9 @@ class CommunicationHandler
                 return;
             }
             $builder = MessageBuilder::new();
-            $builder->addFile($pk->getFilePath(), $pk->getFileName());
-            $builder->setContent($pk->getMessage());
+            $builder = $builder->addFile($pk->getFilePath(), $pk->getFileName());
+            $builder = $builder->setContent($pk->getMessage());
+            $builder = $builder->setTTS($pk->isTTS());
             $channel->sendMessage($builder)->then(function (DiscordMessage $message) use ($pk) {
 
                 $this->resolveRequest($pk->getUID(), true, "Successfully sent file.", [ModelConverter::genModelMessage($message)]);
@@ -2074,7 +2106,7 @@ class CommunicationHandler
                     return;
                 }
                 $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $pk, $de) {
-                   
+
                     $channel->sendMessage($pk->getMessage()->getContent(), $pk->getMessage()->isTTS(), $de, null, $msg)->done(function (DiscordMessage $msg) use ($pk) {
                         $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
                         $this->logger->debug("Sent message ({$pk->getUID()})");
@@ -2084,12 +2116,7 @@ class CommunicationHandler
                     });
                 });
             } else {
-                $roles = $pk->getMessage()->getRolesMentioned();
-                $channels = $pk->getMessage()->getChannelsMentioned();
-                $users = $pk->getMessage()->getUsersMentioned();
-                $merge = array_merge($roles, $channels);
-                $merge = array_merge($users, $merge);
-                $channel->sendMessage($m->getContent(), $m->isTTS(), $de, $merge)->done(function (DiscordMessage $msg) use ($pk) {
+                $channel->sendMessage($m->getContent(), $m->isTTS(), $de)->done(function (DiscordMessage $msg) use ($pk) {
                     $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
                     $this->logger->debug("Sent message ({$pk->getUID()})");
                 }, function (\Throwable $e) use ($pk) {
@@ -2227,7 +2254,10 @@ class CommunicationHandler
         $this->getChannel($pk, $invite->getChannelId(), function (DiscordChannel $channel) use ($pk, $invite) {
             /** @phpstan-ignore-next-line Poorly documented function on discord.php's side. */
             $channel->createInvite([
-                "max_age" => $invite->getMaxAge(), "max_uses" => $invite->getMaxUses(), "temporary" => $invite->isTemporary(), "unique" => true
+                "max_age" => $invite->getMaxAge(),
+                "max_uses" => $invite->getMaxUses(),
+                "temporary" => $invite->isTemporary(),
+                "unique" => true
             ])->done(function (DiscordInvite $dInvite) use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Invite initialised.", [ModelConverter::genModelInvite($dInvite)]);
                 $this->logger->debug("Invite initialised ({$pk->getUID()})");

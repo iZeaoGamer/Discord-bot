@@ -44,6 +44,8 @@ use Discord\Parts\Guild\GuildTemplate as DiscordGuildTemplate;
 use Discord\Parts\Guild\AuditLog\AuditLog as DiscordAuditLog;
 use Discord\Parts\Guild\AuditLog\Entry as DiscordEntryLog;
 use Discord\Parts\Guild\AuditLog\Options as DiscordEntryOptions;
+use Discord\Parts\Guild\WelcomeScreen as DiscordWelcomeScreen;
+use Discord\Parts\Guild\WelcomeChannel as DiscordWelcomeChannel;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
@@ -85,11 +87,31 @@ use JaxkDev\DiscordBot\Models\Messages\Stickers;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Models\Emoji;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
+use JaxkDev\DiscordBot\Models\WelcomeScreen;
+use JaxkDev\DiscordBot\Models\WelcomeChannel;
 
 use JaxkDev\DiscordBot\Models\Channels\Overwrite;
 
 abstract class ModelConverter
 {
+    static public function genModelWelcomeScreen(DiscordWelcomeScreen $screen): WelcomeScreen{
+        $channels = [];
+        foreach($screen->welcome_channels as $welcome){
+            $channels[] = self::genModelWelcomeChannel($welcome);
+        }
+        return new WelcomeScreen(
+            $screen->description,
+            $channels
+        );
+        }
+    static public function genModelWelcomeChannel(DiscordWelcomeChannel $channel){
+        return new WelcomeChannel(
+            $channel->channel_id,
+            $channel->description,
+            $channel->emoji_id,
+            $channel->emoji_name
+        );
+    }
     static public function genOverwrite(DiscordOverwrite $overwrite): Overwrite
     {
         return new Overwrite($overwrite->channel_id, $overwrite->type, new ChannelPermissions($overwrite->allow->bitwise),
@@ -378,7 +400,8 @@ abstract class ModelConverter
             $discordServer->owner_id,
             $discordServer->large,
             $discordServer->member_count,
-            $discordServer->icon
+            $discordServer->icon,
+            self::genModelWelcomeScreen($discordServer->welcome_screen)
         );
     }
 

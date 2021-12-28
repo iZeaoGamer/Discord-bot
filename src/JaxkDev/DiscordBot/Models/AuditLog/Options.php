@@ -84,7 +84,7 @@ class Options implements \Serializable
     {
         return $this->channelId;
     }
-    public function setChannelId(?string $channel_id)
+    public function setChannelId(?string $channel_id): void
     {
         if ($channel_id !== null) {
             if (!Utils::validDiscordSnowflake($channel_id)) {
@@ -97,7 +97,7 @@ class Options implements \Serializable
     {
         return $this->messageId;
     }
-    public function setMessageId(?string $message_id)
+    public function setMessageId(?string $message_id): void
     {
         if ($message_id !== null) {
             if (!Utils::validDiscordSnowflake($message_id)) {
@@ -110,7 +110,7 @@ class Options implements \Serializable
     {
         return $this->count;
     }
-    public function setCount(?string $count)
+    public function setCount(?string $count): void
     {
         $this->count = $count;
     }
@@ -145,7 +145,7 @@ class Options implements \Serializable
     {
         return $this->roleName;
     }
-    public function setRoleName(?string $roleName)
+    public function setRoleName(?string $roleName): void
     {
         $this->roleName = $roleName;
     }

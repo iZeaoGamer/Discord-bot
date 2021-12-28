@@ -42,45 +42,45 @@ class InteractionData implements \Serializable
         $this->setSelected($values);
         $this->setCustomId($custom_id);
     }
-    public function setName(?string $name): void
-    {
-        $this->name = $name;
-    }
     public function getName(): ?string
     {
         return $this->name;
     }
-    public function setId(?string $id): void
+    public function setName(?string $name): void
     {
-        $this->id = $id;
+        $this->name = $name;
     }
     public function getId(): ?string
     {
         return $this->id;
     }
-    public function setSelected(?array $values): void
+    public function setId(?string $id): void
     {
-        $this->values = $values;
+        $this->id = $id;
     }
     public function getSelected(): ?array
     {
         return $this->values;
     }
-    public function setCustomId(?string $custom_id): void
+    public function setSelected(?array $values): void
     {
-        $this->customId = $custom_id;
+        $this->values = $values;
     }
     public function getCustomId(): ?string
     {
         return $this->customId;
     }
-    public function setType(?int $type): void
+    public function setCustomId(?string $custom_id): void
     {
-        $this->type = $type;
+        $this->customId = $custom_id;
     }
     public function getType(): ?int
     {
         return $this->type;
+    }
+    public function setType(?int $type): void
+    {
+        $this->type = $type;
     }
     //----- Serialization -----//
 

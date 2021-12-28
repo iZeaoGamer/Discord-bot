@@ -75,85 +75,85 @@ class Interaction implements \Serializable
         $this->setMessage($message);
     }
 
-    public function setApplicationId(string $application_id): void
-    {
-        $this->application_id = $application_id;
-    }
     public function getApplicationID(): string
     {
         return $this->application_id;
     }
-    public function setType(int $type): void
+    public function setApplicationId(string $application_id): void
     {
-        $this->type = $type;
+        $this->application_id = $application_id;
     }
     public function getType(): int
     {
         return $this->type;
     }
-    public function setUser(User $user): void
+    public function setType(int $type): void
     {
-        $this->user = $user;
+        $this->type = $type;
     }
     public function getUser(): User
     {
         return $this->user;
     }
-    public function setServerId(?string $serverId): void
+    public function setUser(User $user): void
     {
-        $this->serverId = $serverId;
+        $this->user = $user;
     }
     public function getServerId(): ?string
     {
         return $this->serverId;
     }
-    public function setChannelId(?string $channel_id): void
+    public function setServerId(?string $serverId): void
     {
-        $this->channelId = $channel_id;
+        $this->serverId = $serverId;
     }
     public function getChannelId(): ?string
     {
         return $this->channelId;
     }
-    public function setId(?string $id): void
+    public function setChannelId(?string $channel_id): void
     {
-        $this->id = $id;
+        $this->channelId = $channel_id;
     }
     public function getId(): ?string
     {
         return $this->id;
     }
-    public function setInteractionData(?InteractionData $data): void
+    public function setId(?string $id): void
     {
-        $this->data = $data;
+        $this->id = $id;
     }
     public function getInteractionData(): ?InteractionData
     {
         return $this->data;
     }
-    public function setToken(?string $token): void
+    public function setInteractionData(?InteractionData $data): void
     {
-        $this->token = $token;
+        $this->data = $data;
     }
     public function getToken(): ?string
     {
         return $this->token;
     }
-    public function setVersion(?int $version): void
+    public function setToken(?string $token): void
     {
-        $this->version = $version;
+        $this->token = $token;
     }
     public function getVersion(): ?int
     {
         return $this->version;
     }
-    public function setMessage(?Message $message): void
+    public function setVersion(?int $version): void
     {
-        $this->message = $message;
+        $this->version = $version;
     }
     public function getMessage(): ?Message
     {
         return $this->message;
+    }
+    public function setMessage(?Message $message): void
+    {
+        $this->message = $message;
     }
     //----- Serialization -----//
 

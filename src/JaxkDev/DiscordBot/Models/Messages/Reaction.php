@@ -91,7 +91,7 @@ class Reaction implements \Serializable
     {
         return $this->serverId;
     }
-    public function setServerId(?string $server_id)
+    public function setServerId(?string $server_id): void
     {
         if ($server_id !== null) {
             if (!Utils::validDiscordSnowflake($server_id)) {

@@ -82,6 +82,8 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateReaction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateReaction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteReaction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchReaction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchWelcomeScreen;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWelcomeScreen;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -126,8 +128,36 @@ class Api
         $this->plugin = $plugin;
     }
 
+    /** Fetches a server's welcome screen.
+     * @param string $server_id
+     * 
+     * @return PromiseInterface Resolves with a Welcome Screen Model.
+     */
+    public function fetchWelcomeScreen(string $server_id): PromiseInterface{
+        $pk = new RequestFetchWelcomeScreen($server_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    /** Updates a server's welcome screen.
+     * @param string $server_id
+     * @param bool $enabled
+     * @param array{"channel_id": string, "description": string, "emoji_id": ?string, "emoji_name": ?string} $options
+     * @param string $description
+     * 
+     * @return PromiseInterface Resolves with a Welcome Screen Model.
+     */
+    public function updateWelcomeScreen(string $server_id, bool $enabled, array $options, string $description): PromiseInterface{
+        if(strlen($description) > 140){
+            return rejectPromise(new ApiRejection("Description must be below 140 characters long."));
+        }
+        $pk = new RequestUpdateWelcomeScreen($server_id, $enabled, $options, $description);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
     /** Creates a reaction.
      * @param Reaction $reaction
+     * 
      * @return PromiseInterface Resolves with a Reaction Model.
      */
     public function createReaction(Reaction $reaction): PromiseInterface
@@ -139,6 +169,7 @@ class Api
 
     /** Updates a reaction.
      * @param Reaction $reaction
+     * 
      * @return PromiseInterface Resolves with a Reaction Model.
      */
     public function updateReaction(Reaction $reaction): PromiseInterface
@@ -155,6 +186,7 @@ class Api
      * @param string $channel_id
      * @param string $message_id
      * @param string $reaction_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function deleteReaction(string $channel_id, string $message_id, string $reaction_id): PromiseInterface
@@ -168,6 +200,7 @@ class Api
      * @param string $channel_id
      * @param string $message_id
      * @param string $reaction_id
+     * 
      * @return PromiseInterface Resolves with a Reaction Model.
      */
     public function fetchReaction(string $channel_id, string $message_id, string $reaction_id): PromiseInterface
@@ -179,6 +212,7 @@ class Api
 
     /** Creates a scheduled event within a guild.
      * @param ServerScheduledEvent
+     * 
      * @return PromiseInterface Resolves with a ServerScheduledEvent Model.
      */
     public function createEvent(ServerScheduledEvent $schedule): PromiseInterface
@@ -190,6 +224,7 @@ class Api
 
     /** Updates a scheduled event within a guild.
      * @param ServerScheduledEvent
+     * 
      * @return PromiseInterface Resolves with a ServerScheduledEvent Model.
      */
     public function updateEvent(ServerScheduledEvent $schedule): PromiseInterface
@@ -205,6 +240,7 @@ class Api
     /** Deletes a scheduled event within a guild.
      * @param string $serverId
      * @param string $id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function deleteEvent(string $serverId, string $id): PromiseInterface
@@ -216,6 +252,7 @@ class Api
 
     /** Creates a server template within a guild. 
      * @param ServerTemplate
+     * 
      * @return PromiseInterface Resolves with a ServerTemplate model.
      */
     public function createTemplate(ServerTemplate $template): PromiseInterface
@@ -226,6 +263,7 @@ class Api
     }
     /** Updates a server template within a guild. 
      * @param ServerTemplate
+     * 
      * @return PromiseInterface Resolves with a ServerTemplate model.
      */
     public function updateTemplate(ServerTemplate $template): PromiseInterface
@@ -240,6 +278,7 @@ class Api
     /**  Deletes a server template using server Id and Template code. 
      * @param string $server_id
      * @param string $code
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function deleteTemplate(string $server_id, string $code): PromiseInterface
@@ -250,6 +289,7 @@ class Api
     }
     /** Updates a emoji within a guild.
      * @param Emoji $emoji
+     * 
      * @return PromiseInterface Resolves with a Emoji Model.
      */
     public function updateEmoji(Emoji $emoji): PromiseInterface
@@ -264,6 +304,7 @@ class Api
 
     /** Creates a stage channel.
      * @param Stage $stage
+     * 
      * @return PromiseInterface Resolves with a Stage Model.
      */
     public function createStage(Stage $stage): PromiseInterface
@@ -289,6 +330,7 @@ class Api
     /** Deletes a stage channel.
      * @param string $server_id
      * @param string $stage_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function deleteStage(string $server_id, string $stage_id): PromiseInterface
@@ -302,6 +344,7 @@ class Api
 
     /** Updates a sticker.
      * @param Stickers $sticker
+     * 
      * @return PromiseInterface Resolves with a Sticker Model.
      */
     public function updateSticker(Stickers $sticker): PromiseInterface
@@ -314,6 +357,7 @@ class Api
     /** Creates a reply delay
      * @param Message $message
      * @param int $delay (In seconds)
+     * 
      * @return PromiseInterface Resolves with a Message model.
      */
     public function delayReply(Message $message, int $delay): PromiseInterface
@@ -327,6 +371,7 @@ class Api
      * @param string $message_id
      * @param string $channel_id
      * @param int $delay (In seconds)
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function delayDelete(string $message_id, string $channel_id, int $delay): PromiseInterface
@@ -381,6 +426,7 @@ class Api
      * @param Message $message
      * @param string $channelId
      * @param Button $button
+     * 
      * @return PromiseInterface Resolves with a Interaction Model.
      */
     public function modifyButton(MessageBuilder $builder, Message $message, string $channelId, Button $button, bool $ephemeral = false, bool $doNothing = false): PromiseInterface
@@ -398,6 +444,7 @@ class Api
     /** Modifys an interaction.
      * @param MessageBuilder $builder
      * @param Message $message
+     * 
      * @return PromiseInterface Resolves with a Interaction Model.
      */
     public function modifyInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false): PromiseInterface
@@ -456,6 +503,7 @@ class Api
      * Creates a normal webhook inside a channel.
      *
      * @param Webhook $webhook
+     * 
      * @return PromiseInterface Resolves with a Webhook model.
      */
     public function createWebhook(Webhook $webhook): PromiseInterface
@@ -478,6 +526,7 @@ class Api
      * Update a webhooks name or avatar.
      *
      * @param Webhook $webhook
+     * 
      * @return PromiseInterface Resolves with a Webhook model.
      */
     public function updateWebhook(Webhook $webhook): PromiseInterface
@@ -501,6 +550,7 @@ class Api
      *
      * @param string $channel_id
      * @param string $webhook_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function deleteWebhook(string $channel_id, string $webhook_id): PromiseInterface
@@ -522,6 +572,7 @@ class Api
      * Leave a discord server.
      *
      * @param string $server_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function leaveServer(string $server_id): PromiseInterface
@@ -538,6 +589,7 @@ class Api
      * Fetch all webhooks that are linked to a channel.
      *
      * @param string $channel_id
+     * 
      * @return PromiseInterface Resolves with an array of Webhook models.
      */
     public function fetchWebhooks(string $channel_id): PromiseInterface
@@ -556,6 +608,7 @@ class Api
      * Note you could fetch individual messages by id using fetchMessage from channel::pins but this is easier.
      *
      * @param string $channel_id
+     * 
      * @return PromiseInterface Resolves with an array of Message models.
      */
     public function fetchPinnedMessages(string $channel_id): PromiseInterface
@@ -573,6 +626,7 @@ class Api
      *
      * @param string $channel_id
      * @param string $message_id
+     * 
      * @return PromiseInterface Resolves with a Message model.
      */
     public function fetchMessage(string $channel_id, string $message_id): PromiseInterface
@@ -593,9 +647,11 @@ class Api
      *
      * @param string $channel_id
      * @param string $message_id
-     * @return PromiseInterface Resolves with no data.
+     * @param string|null $reason
+     * 
+     * @return PromiseInterface Resolves with a Message Model.
      */
-    public function pinMessage(string $channel_id, string $message_id): PromiseInterface
+    public function pinMessage(string $channel_id, string $message_id, ?string $reason = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -603,7 +659,7 @@ class Api
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
         }
-        $pk = new RequestPinMessage($channel_id, $message_id);
+        $pk = new RequestPinMessage($channel_id, $message_id, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -613,9 +669,11 @@ class Api
      *
      * @param string $channel_id
      * @param string $message_id
+     * @param string|null $reason
+     * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function unpinMessage(string $channel_id, string $message_id): PromiseInterface
+    public function unpinMessage(string $channel_id, string $message_id, ?string $reason = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -623,7 +681,7 @@ class Api
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
         }
-        $pk = new RequestUnpinMessage($channel_id, $message_id);
+        $pk = new RequestUnpinMessage($channel_id, $message_id, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -632,6 +690,7 @@ class Api
      * Create a role.
      *
      * @param Role $role
+     * 
      * @return PromiseInterface Resolves with Role model.
      */
     public function createRole(Role $role): PromiseInterface
@@ -649,6 +708,7 @@ class Api
      * If hoisted position changed, all roles that move to account for the change will emit an updated event.
      *
      * @param Role $role
+     * 
      * @return PromiseInterface Resolves with a Role model.
      */
     public function updateRole(Role $role): PromiseInterface
@@ -666,6 +726,7 @@ class Api
      *
      * @param string $server_id
      * @param string $role_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function deleteRole(string $server_id, string $role_id): PromiseInterface
@@ -734,6 +795,7 @@ class Api
      * @param string $message_id
      * @param string $user_id
      * @param string $emoji Raw emoji eg '👍'
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function removeReaction(string $channel_id, string $message_id, string $user_id, string $emoji): PromiseInterface
@@ -758,7 +820,8 @@ class Api
      * @param string      $channel_id
      * @param string      $message_id
      * @param string|null $emoji If no emoji specified ALL reactions by EVERYONE will be deleted,
-     *                           if specified everyone's reaction with that emoji will be removed.
+     *                                  if specified everyone's reaction with that emoji will be removed.
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function removeAllReactions(string $channel_id, string $message_id, ?string $emoji = null): PromiseInterface
@@ -781,7 +844,8 @@ class Api
      *
      * @param string $channel_id
      * @param string $message_id
-     * @param string $emoji            MUST BE THE ACTUAL EMOJI CHARACTER, (Custom/Private emoji's not yet supported) eg '👍'
+     * @param string $emoji            MUST BE THE ACTUAL EMOJI CHARACTER eg '👍'
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function addReaction(string $channel_id, string $message_id, string $emoji): PromiseInterface
@@ -805,6 +869,7 @@ class Api
      * DO NOT ABUSE THIS.
      *
      * @param string $channel_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function broadcastTyping(string $channel_id): PromiseInterface
@@ -822,6 +887,7 @@ class Api
      *
      * @param Activity $activity
      * @param string $status See Member::STATUS_ constants.
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function updateBotPresence(Activity $activity, string $status = Member::STATUS_ONLINE): PromiseInterface
@@ -838,6 +904,7 @@ class Api
      * Attempt to ban a member.
      *
      * @param Ban $ban
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function initialiseBan(Ban $ban): PromiseInterface
@@ -852,6 +919,7 @@ class Api
      *
      * @param string $server_id
      * @param string $user_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function revokeBan(string $server_id, string $user_id): PromiseInterface
@@ -871,6 +939,7 @@ class Api
      * Attempt to kick a member.
      *
      * @param string $member_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function kickMember(string $member_id): PromiseInterface
@@ -888,6 +957,7 @@ class Api
      * Sends the Message to discord.
      *
      * @param Message $message
+     * 
      * @return PromiseInterface Resolves with a Message model.
      */
     public function sendMessage(Message $message): PromiseInterface
@@ -911,6 +981,7 @@ class Api
      * @param string      $file_path Full file path on disk.
      * @param string      $message   Optional text/message to send with the file
      * @param string|null $file_name Optional file_name to show in discord, Prefix with 'SPOILER_' to make as spoiler.
+     * 
      * @return PromiseInterface Resolves with a Message model.
      */
     public function sendFile(string $channel_id, string $file_path, string $message = "", string $file_name = null): PromiseInterface
@@ -938,6 +1009,7 @@ class Api
      * Note you can't convert a 'REPLY' message to a normal 'MESSAGE'.
      *
      * @param Message $message
+     * 
      * @return PromiseInterface Resolves with a Message model.
      */
     public function editMessage(Message $message): PromiseInterface
@@ -958,6 +1030,7 @@ class Api
      *
      * @param string $message_id
      * @param string $channel_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function deleteMessage(string $message_id, string $channel_id): PromiseInterface
@@ -996,6 +1069,7 @@ class Api
      * Create a server channel.
      *
      * @param ServerChannel $channel CategoryChannel, TextChannel or VoiceChannel.
+     * 
      * @return PromiseInterface Resolves with a Channel model.
      */
     public function createChannel(ServerChannel $channel): PromiseInterface
@@ -1014,6 +1088,7 @@ class Api
      * @see Api::unpinMessage()
      *
      * @param ServerChannel $channel
+     * 
      * @return PromiseInterface Resolves with a Channel model.
      */
     public function updateChannel(ServerChannel $channel): PromiseInterface
@@ -1027,6 +1102,7 @@ class Api
      * @param Server $server
      * @param string $server_name
      * @param string|null $server_icon
+     * 
      * @return PromiseInterface Resolves with a new Server model. 
      */
     public function createServerFromTemplate(Server $server, string $template_code, string $server_name, ?string $server_icon = null): PromiseInterface
@@ -1034,7 +1110,7 @@ class Api
         if (!Utils::validDiscordSnowflake($server->getId())) {
             return rejectPromise(new ApiRejection("Invalid server ID: '{$server->getId()}'."));
         }
-        if(!Utils::validDiscordSnowflake($template_code)){
+        if (!Utils::validDiscordSnowflake($template_code)) {
             return rejectPromise(new ApiRejection("Invalid Template Code: '{$template_code}'."));
         }
         if ($server_icon !== null) {
@@ -1076,6 +1152,7 @@ class Api
      * @param string $server_id
      * @param string $user_id
      * @param int $limit
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function searchMembers(string $server_id, string $user_id, int $limit): PromiseInterface
@@ -1096,6 +1173,7 @@ class Api
      * @param int $action_type
      * @param string $before
      * @param int $limit
+     * 
      * @return PromiseInterface Resolves with a AuditLog Model.
      */
     public function searchAuditLog(string $server_id, string $user_id, int $action_type, string $before, int $limit): PromiseInterface
@@ -1117,6 +1195,7 @@ class Api
      * Joins a voice channel. ID must be present!
      * 
      * @param VoiceChannel $channel
+     * 
      * @return PromiseInterface Resolves with a Voice Channel model.
      */
     public function joinVoiceChannel(VoiceChannel $channel, bool $isDeafened, bool $isMuted): PromiseInterface
@@ -1132,6 +1211,7 @@ class Api
     /**
      * Leaves a voice channel. Left Voice channel ID must be present.
      * @param VoiceChannel $channel
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function leaveVoiceChannel(VoiceChannel $channel): PromiseInterface
@@ -1148,6 +1228,7 @@ class Api
      * Moves to another voice channel. Moved Voice Channel ID must be present.
      * 
      * @param VoiceChannel $channel
+     * 
      * @return PromiseInterface Resolves with a Voice Channel Model.
      */
     public function moveVoiceChannel(VoiceChannel $channel): PromiseInterface
@@ -1165,6 +1246,7 @@ class Api
      * @param string $userID
      * @param VoiceChannel $channel
      * @param string|null $reason
+     * 
      * @return PromiseInterface Resolves with a Voice Channel Model.
      */
     public function moveMember(string $userID, VoiceChannel $channel, ?string $reason = null): PromiseInterface
@@ -1185,6 +1267,7 @@ class Api
      * @param string $userID
      * @param VoiceChannel $channel
      * @param string|null $reason
+     * 
      * @return PromiseInterface Resolves with a VoiceChannel Model.
      */
     public function muteMember(string $userID, VoiceChannel $channel, ?string $reason = null): PromiseInterface
@@ -1225,6 +1308,7 @@ class Api
      * @param string $name
      * @param int $duration
      * @param string|null $reason
+     * 
      * @return PromiseInterface Resolves with a Message Model.
      */
     public function startMessageThread(string $message_id, string $channel_id, string $name, int $duration, ?string $reason = null): PromiseInterface
@@ -1244,6 +1328,7 @@ class Api
      * Updates a thread.
      * 
      * @param ThreadChannel $channel
+     * 
      * @return PromiseInterface Resolves with a Thread Channel Model.
      */
     public function updateThread(ThreadChannel $channel)
@@ -1258,6 +1343,7 @@ class Api
      * 
      * @param string $server_id
      * @param string $channel_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function deleteThread(string $server_id, string $channel_id)
@@ -1278,6 +1364,7 @@ class Api
      *
      * @param string $server_id
      * @param string $channel_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function deleteChannel(string $server_id, string $channel_id): PromiseInterface
@@ -1297,6 +1384,7 @@ class Api
      * Initialise if possible the given invite.
      *
      * @param Invite $invite
+     * 
      * @return PromiseInterface Resolves with a Invite model.
      */
     public function initialiseInvite(Invite $invite): PromiseInterface
@@ -1311,6 +1399,7 @@ class Api
      *
      * @param string $server_id
      * @param string $invite_code
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function revokeInvite(string $server_id, string $invite_code): PromiseInterface
@@ -1329,6 +1418,7 @@ class Api
      * @param string $member_id
      * @param null|string $nickname Null to remove nickname.
      * @param string|null $reason
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function updateNickname(string $member_id, ?string $nickname = null, ?string $reason = null): PromiseInterface
