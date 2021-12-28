@@ -12,7 +12,6 @@
 
 namespace JaxkDev\DiscordBot\Models\Interactions\Request;
 
-use JaxkDev\DiscordBot\Models\Messages\Message;
 
 
 class Option implements \Serializable

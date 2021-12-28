@@ -17,23 +17,23 @@ use JaxkDev\DiscordBot\Communication\Packets\Packet;
 class RequestCrossPostMessage extends Packet
 {
 
-    /** @var null|string */
+    /** @var string */
     private $message_id;
 
-    /** @var null|string */
+    /** @var string */
     private $channel_id;
 
-    public function __construct(?string $message_id, ?string $channel_id)
+    public function __construct(string $message_id, string $channel_id)
     {
         parent::__construct();
         $this->message_id = $message_id;
         $this->channel_id = $channel_id;
     }
-    public function getMessageID(): ?string
+    public function getMessageID(): string
     {
         return $this->message_id;
     }
-    public function getChannelID(): ?string
+    public function getChannelID(): string
     {
         return $this->channel_id;
     }

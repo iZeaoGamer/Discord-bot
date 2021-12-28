@@ -12,7 +12,6 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use Discord\WebSockets\Events\MessageReactionRemove;
 use JaxkDev\DiscordBot\Models\Channels\Channel;
 use JaxkDev\DiscordBot\Models\Member;
 use pocketmine\plugin\Plugin;

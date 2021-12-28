@@ -38,7 +38,6 @@ use Discord\Parts\User\User as DiscordUser;
 use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
 use Discord\Repository\Channel\WebhookRepository as DiscordWebhookRepository;
 use Discord\Repository\Guild\InviteRepository as DiscordInviteRepository;
-use Discord\Repository\Guild\StageInstanceRepository as DiscordStageRepository;
 use Discord\Parts\Channel\Sticker as DiscordSticker;
 
 use Discord\Builders\MessageBuilder;
@@ -121,7 +120,6 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateReaction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteReaction;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
-use JaxkDev\DiscordBot\Plugin\Storage;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
 use JaxkDev\DiscordBot\Models\Channels\TextChannel;
@@ -132,18 +130,14 @@ use JaxkDev\DiscordBot\Models\Messages\Reply;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Plugin\ApiRejection;
 use Monolog\Logger;
-use JaxkDev\DiscordBot\Plugin\Utils;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function React\Promise\reject;
 
-use Discord\Builders\Components\Button;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateServerFromTemplate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchWelcomeScreen;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAddWelcomeChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWelcomeScreen;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
-use JaxkDev\DiscordBot\Models\Webhook;
 
 class CommunicationHandler
 {
@@ -1015,26 +1009,18 @@ class CommunicationHandler
             $message->startThread($pk->getName(), $pk->getDuration(), $pk->getReason())->then(function () use ($message, $pk) {
                 $this->resolveRequest($pk->getUID(), false, "Successfully created thread message.", [ModelConverter::genModelMessage($message)]);
             }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages..", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages.", [$e->getMessage(), $e->getTraceAsString()]);
             });
         });
     }
     private function handleCrossPost(RequestCrossPostMessage $pk): void
     {
-        if ($pk->getChannelID() === null) {
-            $this->resolveRequest($pk->getUID(), false, "Failed to create cross post.", ["Channel ID must be present!"]);
-            return;
-        }
-        if ($pk->getMessageID() === null) {
-            $this->resolveRequest($pk->getUID(), false, "Failed to create cross post.", ["Message ID must be present!"]);
-            return;
-        }
 
         $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), function (DiscordMessage $discord) use ($pk) {
             $discord->crosspost()->done(function (DiscordMessage $message) use ($pk) {
-                $this->resolveRequest($pk->getUID());
+                $this->resolveRequest($pk->getUID(), true, "Cross posted with success!", [ModelConverter::genModelMessage($message)]);
             }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to bulk delete messages..", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->resolveRequest($pk->getUID(), false, "Failed to Cross post message.", [$e->getMessage(), $e->getTraceAsString()]);
             });
         });
     }

@@ -34,7 +34,6 @@ use Discord\Parts\WebSockets\TypingStart as DiscordTypingStart;
 use Discord\Parts\Channel\StageInstance as DiscordStageInstance;
 use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
 use Discord\Parts\Guild\Emoji as DiscordEmoji;
-use Discord\WebSockets\Events\ServerScheduledEventCreated;
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;

@@ -14,7 +14,6 @@ namespace JaxkDev\DiscordBot\Models\Messages;
 
 use JaxkDev\DiscordBot\Plugin\Utils;
 
-use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\Emoji;
 
 

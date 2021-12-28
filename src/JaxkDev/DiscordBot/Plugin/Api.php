@@ -44,7 +44,6 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateNickname;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateRole;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWebhook;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCrossPostMessage;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMessageBulkDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestJoinVoiceChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestMoveVoiceChannel;
@@ -84,6 +83,8 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteReaction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchReaction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchWelcomeScreen;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWelcomeScreen;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateServerFromTemplate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCrossPostMessage;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -107,7 +108,6 @@ use JaxkDev\DiscordBot\Models\Role;
 use Discord\Builders\MessageBuilder;
 use Discord\Builders\Components\Button;
 use Discord\Builders\Components\SelectMenu;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateServerFromTemplate;
 
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 
@@ -127,6 +127,25 @@ class Api
     {
         $this->plugin = $plugin;
     }
+
+    /** Cross posts a message to the followed servers.
+     * @param string $message_id
+     * @param string $channel_id
+     * 
+     * @return PromiseInterface Resolves with a Message Model.
+     */
+    public function crossPostMessage(string $message_id, string $channel_id): PromiseInterface{
+        if(!Utils::validDiscordSnowflake($message_id)){
+            return rejectPromise(new ApiRejection("Message ID: '{$message_id}' is invalid!"));
+        }
+        if(!Utils::validDiscordSnowflake($channel_id)){
+            return rejectPromise(new ApiRejection("Channel ID: '{$channel_id}' is invalid!"));
+        }
+        $pk = new RequestCrossPostMessage($message_id, $channel_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
 
     /** Fetches a server's welcome screen.
      * @param string $server_id

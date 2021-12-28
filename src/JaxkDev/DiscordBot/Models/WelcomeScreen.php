@@ -12,8 +12,6 @@
 
 namespace JaxkDev\DiscordBot\Models;
 
-use JaxkDev\DiscordBot\Plugin\Utils;
-
 class WelcomeScreen implements \Serializable
 {
 

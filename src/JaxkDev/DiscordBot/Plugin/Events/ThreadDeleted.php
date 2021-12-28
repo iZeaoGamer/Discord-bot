@@ -12,8 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use pocketmine\plugin\Plugin;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use pocketmine\plugin\Plugin;
 
 /**
  * Emitted when a thread gets deleted.
