@@ -401,7 +401,7 @@ abstract class ModelConverter
             $discordServer->large,
             $discordServer->member_count,
             $discordServer->icon,
-            self::genModelWelcomeScreen($discordServer->welcome_screen)
+            ($discordServer->welcome_screen !== null ? self::genModelWelcomeScreen($discordServer->welcome_screen) : null)
         );
     }
 
