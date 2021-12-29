@@ -865,7 +865,7 @@ class Api
      * @param string $message_id
      * @param string $emoji            MUST BE THE ACTUAL EMOJI CHARACTER eg '👍'
      * 
-     * @return PromiseInterface Resolves with no data.
+     * @return PromiseInterface Resolves with a Message Model.
      */
     public function addReaction(string $channel_id, string $message_id, string $emoji): PromiseInterface
     {

@@ -723,8 +723,8 @@ class CommunicationHandler
     private function handleAddReaction(RequestAddReaction $pk): void
     {
         $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $msg) use ($pk) {
-            $msg->react($pk->getEmoji())->then(function () use ($pk) {
-                $this->resolveRequest($pk->getUID(), true, "Reaction added.");
+            $msg->react($pk->getEmoji())->then(function () use ($msg, $pk) {
+                $this->resolveRequest($pk->getUID(), true, "Reaction added.", [ModelConverter::genModelMessage($msg)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to react to message.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to react to message ({$pk->getUID()}) - {$e->getMessage()}");
