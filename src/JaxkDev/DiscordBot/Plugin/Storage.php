@@ -556,7 +556,7 @@ class Storage
     public static function removeMessage(string $message_id): void
     {
         $message = self::getMessage($message_id);
-        if (!$message_id instanceof Message) return; //Already deleted or not added.
+        if (!$message instanceof Message) return; //Already deleted or not added.
         unset(self::$message_map[$message_id]);
         $server_id = $message->getServerId();
         $i = array_search($message_id, self::$message_server_map[$server_id], true);
