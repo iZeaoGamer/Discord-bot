@@ -16,6 +16,7 @@ use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
+use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
@@ -45,6 +46,9 @@ class ServerJoin extends Packet
     /** @var ServerScheduledEvent[] */
     private $events;
 
+    /** @var Message[] */
+    private $messages;
+
     /**
      * ServerJoin constructor.
      *
@@ -55,8 +59,9 @@ class ServerJoin extends Packet
      * @param Role[]          $roles
      * @param ServerTemplate[] $templates
      * @param ServerScheduledEvent[] $events
+     * @param Message[] $messages
      */
-    public function __construct(Server $server, array $threads, array $channels, array $members, array $roles, array $templates, array $events)
+    public function __construct(Server $server, array $threads, array $channels, array $members, array $roles, array $templates, array $events, array $messages)
     {
         parent::__construct();
         $this->server = $server;
@@ -66,6 +71,7 @@ class ServerJoin extends Packet
         $this->roles = $roles;
         $this->templates = $templates;
         $this->events = $events;
+        $this->messages = $messages;
     }
 
     public function getServer(): Server
@@ -109,6 +115,12 @@ class ServerJoin extends Packet
         return $this->events;
     }
 
+    /** @return Message[] */
+    public function getMessages(): array
+    {
+        return $this->messages;
+    }
+
     public function serialize(): ?string
     {
         return serialize([
@@ -119,7 +131,8 @@ class ServerJoin extends Packet
             $this->members,
             $this->roles,
             $this->templates,
-            $this->events
+            $this->events,
+            $this->messages
         ]);
     }
 
@@ -133,7 +146,8 @@ class ServerJoin extends Packet
             $this->members,
             $this->roles,
             $this->templates,
-            $this->events
+            $this->events,
+            $this->messages
         ] = unserialize($data);
     }
 }

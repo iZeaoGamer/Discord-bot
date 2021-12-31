@@ -23,6 +23,7 @@ use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\Messages\Message;
 
 class DiscordDataDump extends Packet
 {
@@ -56,6 +57,9 @@ class DiscordDataDump extends Packet
 
     /** @var ServerScheduledEvent[] */
     private $scheduledEvents = [];
+
+    /** @var Message[] */
+    private $messages = [];
 
     /** @var null|User */
     private $bot_user = null;
@@ -171,11 +175,22 @@ class DiscordDataDump extends Packet
     {
         $this->templates[] = $template;
     }
-    public function getScheduledEvents(): array{
+    public function getScheduledEvents(): array
+    {
         return $this->scheduledEvents;
     }
-    public function addSchedule(ServerScheduledEvent $scheduled){
+    public function addSchedule(ServerScheduledEvent $scheduled)
+    {
         $this->scheduledEvents[] = $scheduled;
+    }
+    /** @return Message[] */
+    public function getMessages(): array
+    {
+        return $this->messages;
+    }
+    public function addMessage(Message $message): void
+    {
+        $this->messages[] = $message;
     }
 
     public function getBotUser(): ?User
@@ -201,7 +216,7 @@ class DiscordDataDump extends Packet
     public function getSize(): int
     {
         return sizeof($this->servers) + sizeof($this->threads) + sizeof($this->channels) + sizeof($this->roles) + sizeof($this->members)
-            + sizeof($this->users) + sizeof($this->bans) + sizeof($this->invites) + sizeof($this->templates) + sizeof($this->scheduledEvents);
+            + sizeof($this->users) + sizeof($this->bans) + sizeof($this->invites) + sizeof($this->templates) + sizeof($this->scheduledEvents) + sizeof($this->messages);
     }
 
     public function serialize(): ?string
@@ -218,6 +233,7 @@ class DiscordDataDump extends Packet
             $this->users,
             $this->templates,
             $this->scheduledEvents,
+            $this->messages,
             $this->bot_user,
             $this->timestamp
         ]);
@@ -237,6 +253,7 @@ class DiscordDataDump extends Packet
             $this->users,
             $this->templates,
             $this->scheduledEvents,
+            $this->messages,
             $this->bot_user,
             $this->timestamp
         ] = unserialize($data);

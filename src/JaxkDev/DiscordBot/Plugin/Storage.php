@@ -20,6 +20,7 @@ use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\Invite;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Role;
+use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
@@ -34,8 +35,20 @@ use JaxkDev\DiscordBot\Models\Channels\Stage;
 class Storage
 {
 
-    /** @var Array<string, Server> */
+    /** @var Server[] */
     private static $server_map = [];
+
+    /** @var Array<string, Message> */
+    private static $message_map = [];
+
+    /** @var Array<string, string[]> */
+    private static $message_server_map = [];
+
+    /** @var Array<string, string[]> */
+    private static $message_channel_map = [];
+
+    /** @var Array<string, string[]> */
+    private static $message_user_map = [];
 
     /** @var Array<string, ServerChannel> */
     private static $channel_map = [];
@@ -109,15 +122,19 @@ class Storage
     /** @var int */
     private static $timestamp = 0;
 
+    /** @param string $id
+     * @return ServerScheduledEvent|null
+     */
     public static function getSchedule(string $id): ?ServerScheduledEvent
     {
         return self::$scheduled_map[$id] ?? null;
     }
-    /** @return ServerTemplate[] */
+    /** @return ServerScheduledEvent[] */
     public static function getScheduledEvents(): array
     {
         return array_values(self::$scheduled_map);
     }
+
     public static function addSchedule(ServerScheduledEvent $schedule): void
     {
         if ($schedule->getId() === null) {
@@ -294,6 +311,7 @@ class Storage
         self::$stage_server_map[$id] = [];
         self::$template_server_map[$id] = [];
         self::$scheduled_server_map[$id] = [];
+        self::$message_server_map[$id] = [];
     }
 
     public static function updateServer(Server $server): void
@@ -350,6 +368,9 @@ class Storage
         }
         foreach (self::$scheduled_server_map[$server_id] as $sid) {
             unset(self::$scheduled_map[$sid]);
+        }
+        foreach (self::$message_server_map[$server_id] as $mid) {
+            unset(self::$message_map[$mid]);
         }
         unset(self::$ban_server_map[$server_id]);
     }
@@ -503,7 +524,136 @@ class Storage
         }
         return $channels;
     }
+    public static function addMessage(Message $message): void
+    {
+        if ($message->getId() === null) {
+            throw new \AssertionError("Failed to add message to storage, ID not found.");
+        }
+        if (isset(self::$message_map[$message->getId()])) return;
+        if ($message->getServerId() !== null) {
+            self::$member_server_map[$message->getServerId()][] = $message->getId();
+        }
+        self::$message_channel_map[$message->getChannelId()][] = $message->getId();
+        if ($message->getAuthorId() !== null) {
+            $member = self::getMember($message->getAuthorId());
+            if ($member !== null) {
+                self::$message_user_map[$member->getUserId()][] = $message->getId();
+            }
+        }
+        self::$message_map[$message->getId()] = $message;
+    }
+    public static function updateMessage(Message $message): void
+    {
+        if ($message->getId() === null) {
+            throw new \AssertionError("Failed to update message in storage, ID not found.");
+        }
+        if (!isset(self::$message_map[$message->getId()])) {
+            self::addMessage($message);
+        } else {
+            self::$message_map[$message->getId()] = $message;
+        }
+    }
+    public static function removeMessage(string $message_id): void
+    {
+        $message = self::getMessage($message_id);
+        if (!$message_id instanceof Message) return; //Already deleted or not added.
+        unset(self::$message_map[$message_id]);
+        $server_id = $message->getServerId();
+        $i = array_search($message_id, self::$message_server_map[$server_id], true);
+        if ($i === false || is_string($i)) return; //Not in this servers message map.
+        array_splice(self::$message_server_map[$server_id], $i, 1);
 
+        $channel_id = $message->getChannelId();
+        $i = array_search($message_id, self::$message_channel_map[$channel_id], true);
+        if ($i === false || is_string($i)) return; //Not in this channels message map.
+        array_splice(self::$message_channel_map[$channel_id], $i, 1);
+
+
+        if ($message->getAuthorId() !== null) {
+            $member = self::getMember($message->getAuthorId());
+            if ($member !== null) {
+                $user_id = $member->getUserId();
+                $i = array_search($message_id, self::$message_user_map[$user_id], true);
+                if ($i === false || is_string($i)) return; //Not in this users message map.
+                array_splice(self::$message_user_map[$user_id], $i, 1);
+            }
+        }
+    }
+
+    /** 
+     * @param string $channel_id
+     * @param int $limit
+     * @return void
+     */
+    public static function bulkRemove(string $channel_id, int $limit): void
+    {
+        $deleted = 0;
+        
+        foreach (self::getMessagesByChannel($channel_id) as $message) {
+            $deleted += 1;
+            if ($deleted <= $limit) {
+                Main::get()->getAPI()->deleteMessage($message->getID(), $channel_id)->then(function(ApiResolution $approve) use ($message){
+                self::removeMessage($message->getId());
+                });
+
+            }
+        }
+    }
+
+
+
+
+    /** @param string $message_id
+     * @return Message|null
+     */
+    public static function getMessage(string $message_id): ?Message
+    {
+        return self::$message_map[$message_id] ?? null;
+    }
+
+    /** @param string $channel_id
+     * @return Message[]
+     */
+    public static function getMessagesByChannel(string $channel_id): array
+    {
+        $messages = [];
+        foreach ((self::$message_channel_map[$channel_id] ?? []) as $id) {
+            $m = self::getMessage($id);
+            if ($m !== null) $messages[] = $m;
+        }
+        return $messages;
+    }
+
+    /** @param string $server_id
+     * @return Message[]
+     */
+    public static function getMessagesByServer(string $server_id): array
+    {
+        $messages = [];
+        foreach ((self::$message_server_map[$server_id] ?? []) as $id) {
+            $m = self::getMessage($id);
+            if ($m !== null) $messages[] = $m;
+        }
+        return $messages;
+    }
+
+    /** @param string $user_id
+     * @return Message[]
+     */
+    public static function getMessagesByUser(string $user_id): array
+    {
+        $messages = [];
+        foreach ((self::$message_user_map[$user_id] ?? []) as $id) {
+            $m = self::getMessage($id);
+            if ($m !== null) $messages[] = $m;
+        }
+        return $messages;
+    }
+    /** @return Message[] */
+    public static function getMessages(): array
+    {
+        return array_values(self::$message_map);
+    }
     public static function addChannel(ServerChannel $channel): void
     {
         if ($channel->getId() === null) {

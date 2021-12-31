@@ -50,6 +50,9 @@ class Main extends PluginBase
     /** @var array */
     private $config;
 
+    /** @var Main */
+    private $instance;
+
 
     public function onLoad()
     {
@@ -88,6 +91,7 @@ class Main extends PluginBase
 
     public function onEnable()
     {
+        self::$instance = $this;
         $this->checkEnable();
     }
     public function checkEnable(): void
@@ -328,6 +332,11 @@ META);
     public function getApi(): Api
     {
         return $this->api;
+    }
+
+    /** @return Main */
+    public static function get(): self{
+        return self::$instance;
     }
 
     /**

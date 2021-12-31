@@ -295,6 +295,13 @@ array(5) {
 
             /** @var DiscordChannel $channel */
             foreach ($guild->channels as $channel) {
+                if ($channel->type === $channel::TYPE_TEXT) {
+                    /** @var DiscordMessage $message */
+                    foreach ($channel->messages as $message) {
+                        $msg = ModelConverter::genModelMessage($message);
+                        $pk->addMessage($msg);
+                    }
+                }
                 $c = ModelConverter::genModelChannel($channel);
                 if ($c !== null) $pk->addChannel($c);
             }
@@ -651,12 +658,24 @@ array(5) {
         foreach ($guild->scheduled_events as $schedule) {
             $scheduled[] = ModelConverter::genModelScheduledEvent($schedule);
         }
+        $messages = [];
+        /** @var DiscordChannel $channel */
+        foreach ($guild->channels as $channel) {
+            if ($channel->type === $channel::TYPE_TEXT) {
+                /** @var DiscordMessage $message */
+                foreach ($channel->messages as $message) {
+                    $m = ModelConverter::genModelMessage($message);
+                    if ($m !== null) $messages[] = $m;
+                }
+            }
+        }
+
         if ($guild->region === null) {
             return;
         }
 
 
-        $packet = new ServerJoinPacket(ModelConverter::genModelServer($guild), $threads, $channels, $members, $roles, $templates, $scheduled);
+        $packet = new ServerJoinPacket(ModelConverter::genModelServer($guild), $threads, $channels, $members, $roles, $templates, $scheduled, $messages);
         $this->client->getThread()->writeOutboundData($packet);
     }
 

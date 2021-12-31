@@ -114,6 +114,7 @@ use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledUserAdded as ServerScheduled
 use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledUserRemoved as ServerScheduledUserRemovedEvent;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Messages\Message;
 
 class BotCommunicationHandler
 {
@@ -322,6 +323,16 @@ class BotCommunicationHandler
         $member->setActivities($packet->getActivities());
         Storage::updateMember($member);
     }
+
+    /** @deprecated You can now bulk delete messages without this event.
+     * @see Storage::getMessages() for all messages in total.
+     * @see Storage::getMessagesByServer() for all messages per server.
+     * @see Storage::getMessagesByChannel() for all messages per channel.
+     * @see Storage::getMessagesByUser() for all messages per user
+     * @see Storage::bulkRemove() for bulk removing messages, and the limit.
+     * In future updates, this event may be removed, and replaced by handleMessageDelete event.
+     * 
+     */
     private function handleMessageBulkDelete(MessageBulkDeletePacket $packet): void
     {
         (new MessageBulkDeletedEvent($this->plugin, $packet->getMessage()))->call();
@@ -330,16 +341,26 @@ class BotCommunicationHandler
     private function handleMessageSent(MessageSentPacket $packet): void
     {
         (new MessageSentEvent($this->plugin, $packet->getMessage()))->call();
+        Storage::addMessage($packet->getMessage());
     }
 
     private function handleMessageUpdate(MessageUpdatePacket $packet): void
     {
         (new MessageUpdatedEvent($this->plugin, $packet->getMessage()))->call();
+        Storage::updateMessage($packet->getMessage());
     }
 
     private function handleMessageDelete(MessageDeletePacket $packet): void
     {
         (new MessageDeletedEvent($this->plugin, $packet->getMessage()))->call();
+        $message = $packet->getMessage();
+        if($message instanceof Message){
+            $id = $message->getId();
+        }else{
+            $id = (string)$message["message_id"];
+        }
+
+        Storage::removeMessage($id);
     }
     private function handleTypingStart(TypingStartPacket $packet): void
     {
@@ -541,6 +562,7 @@ class BotCommunicationHandler
             $packet->getMembers(),
             $packet->getTemplates(),
             $packet->getScheduledEvents(),
+            $packet->getMessages(),
         ))->call();
 
         Storage::addServer($packet->getServer());
@@ -561,6 +583,9 @@ class BotCommunicationHandler
         }
         foreach($packet->getScheduledEvents() as $scheduled){
             Storage::addSchedule($scheduled);
+        }
+        foreach($packet->getMessages() as $message){
+            Storage::addMessage($message);
         }
     }
 
@@ -606,6 +631,16 @@ class BotCommunicationHandler
         foreach ($packet->getUsers() as $user) {
             Storage::addUser($user);
         }
+        foreach($packet->getTemplates() as $template){
+            Storage::addTemplate($template);
+        }
+        foreach($packet->getScheduledEvents() as $schedule){
+            Storage::addSchedule($schedule);
+        }
+        foreach($packet->getMessages() as $message){
+            Storage::addMessage($message);
+        }
+
         if ($packet->getBotUser() !== null) {
             Storage::setBotUser($packet->getBotUser());
         }
