@@ -676,6 +676,7 @@ class CommunicationHandler
     {
         $this->getMember($pk, $pk->getServerId(), $pk->getUserId(), function (DiscordMember $dMember) use ($pk) {
             $dMember->removeRole($pk->getRoleId(), $pk->getReason())->done(function () use ($pk) {
+
                 $this->resolveRequest($pk->getUID(), true, "Removed role.");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to remove role.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -687,8 +688,13 @@ class CommunicationHandler
     private function handleAddRole(RequestAddRole $pk): void
     {
         $this->getMember($pk, $pk->getServerId(), $pk->getUserId(), function (DiscordMember $dMember) use ($pk) {
-            $dMember->addRole($pk->getRoleId(), $pk->getReason())->done(function () use ($pk) {
-                $this->resolveRequest($pk->getUID(), true, "Added role.");
+            $dMember->addRole($pk->getRoleId(), $pk->getReason())->done(function () use ($dMember, $pk) {
+                foreach($dMember->roles as $role){
+                    if($role->id === $pk->getRoleId()){
+
+                $this->resolveRequest($pk->getUID(), true, "Added role.", [ModelConverter::genModelRole($role)]);
+                    }
+                }
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to add role.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to add role ({$pk->getUID()}) - {$e->getMessage()}");

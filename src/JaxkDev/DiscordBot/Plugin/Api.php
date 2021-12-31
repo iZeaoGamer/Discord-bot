@@ -710,7 +710,7 @@ class Api
      *
      * @param Role $role
      * 
-     * @return PromiseInterface Resolves with Role model.
+     * @return PromiseInterface Resolves with a Role model.
      */
     public function createRole(Role $role): PromiseInterface
     {
@@ -791,7 +791,7 @@ class Api
      * @param string $role_id
      * @param string|null $reason
      * 
-     * @return PromiseInterface Resolves with no data.
+     * @return PromiseInterface Resolves with a Role Model.
      */
     public function addRole(string $member_id, string $role_id, ?string $reason = null): PromiseInterface
     {
@@ -1117,7 +1117,7 @@ class Api
         return ApiResolver::create($pk->getUID());
     }
 
-    /** Creates a guild from a guild template.
+    /** Creates a server from a server template.
      * @param Server $server
      * @param string $server_name
      * @param string|null $server_icon
@@ -1153,7 +1153,7 @@ class Api
      * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function transferOwnership(string $server_id, string $user_id, ?string $reason): PromiseInterface
+    public function transferOwnership(string $server_id, string $user_id, ?string $reason = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($server_id)) {
             return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
