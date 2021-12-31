@@ -12,68 +12,93 @@
 
 namespace JaxkDev\DiscordBot\Models\Permissions;
 
+
+use Discord\Helpers\Bitwise;
+
 abstract class Permissions implements \Serializable
 {
 
-    const VOICE_PERMISSIONS = [
-        "priority_speaker" => 256,
-        "stream" => 512,
-        "connect" => 1048576,
-        "speak" => 2097152,
-        "mute_members" => 4194304,
-        "deafen_members" => 8388608,
-        "move_members" => 16777216,
-        "use_vad" => 33554432,
-        "request_to_speak" => 4294967296,
-        "start_embedded_activities" => 549755813888,
+        /**
+     * Array of permissions that only apply to voice channels.
+     *
+     * @var array
+     */
+    public const VOICE_PERMISSIONS = [
+        'priority_speaker' => 8,
+        'stream' => 9,
+        'connect' => 20,
+        'speak' => 21,
+        'mute_members' => 22,
+        'deafen_members' => 23,
+        'move_members' => 24,
+        'use_vad' => 25,
+        'request_to_speak' => 32,
+        'manage_events' => 33,
+        'start_embedded_activities' => 39,
     ];
 
-    const TEXT_PERMISSIONS = [
-        "add_reactions" => 64,
-        "send_messages" => 2048,
-        "send_tts_messages" => 4096,
-        "manage_messages" => 8192,
-        "embed_links" => 16384,
-        "attach_files" => 32768,
-        "read_message_history" => 65536,
-        "mention_everyone" => 131072,
-        "use_external_emojis" => 262144,
-        "use_slash_commands" => 2147483648,
-        "manage_threads" => 17179869184,
-        "use_public_thread" => 34359738368,
-        "use_private_threads" => 68719476736,
-        "use_external_stickers" => 137438953472,
-        "manage_events" => 8589934592,
-        "send_messages_in_threads" => 274877906944,
+    /**
+     * Array of permissions that only apply to text channels.
+     *
+     * @var array
+     */
+    public const TEXT_PERMISSIONS = [
+        'add_reactions' => 6,
+        'send_messages' => 11,
+        'send_tts_messages' => 12,
+        'manage_messages' => 13,
+        'embed_links' => 14,
+        'attach_files' => 15,
+        'read_message_history' => 16,
+        'mention_everyone' => 17,
+        'use_external_emojis' => 18,
+        'use_application_commands' => 31,
+        'manage_threads' => 34,
+        'create_public_threads' => 35,
+        'create_private_threads' => 36,
+        'use_external_stickers' => 37,
+        'send_messages_in_threads' => 38,
     ];
 
-    const ROLE_PERMISSIONS = [
-        "kick_members" => 2,
-        "ban_members" => 4,
-        "administrator" => 8,
-        "manage_guild" => 32,
-        "view_audit_log" => 128,
-        "view_guild_insights" => 524288,
-        "change_nickname" => 67108864,
-        "manage_nicknames" => 134217728,
-        "manage_emojis" => 1073741824,
+    /**
+     * Array of permissions that can only be applied to roles.
+     *
+     * @var array
+     */
+    public const ROLE_PERMISSIONS = [
+        'kick_members' => 1,
+        'ban_members' => 2,
+        'administrator' => 3,
+        'manage_guild' => 5,
+        'view_audit_log' => 7,
+        'view_guild_insights' => 19,
+        'change_nickname' => 26,
+        'manage_nicknames' => 27,
+        'manage_emojis_and_stickers' => 30,
+        'manage_events' => 33,
+        'moderate_members' => 40,
     ];
 
-    const ALL_PERMISSIONS = [
-        "create_instant_invite" => 1,
-        "manage_channels" => 16,
-        "view_channel" => 1024,
-        "manage_roles" => 268435456,
-        "manage_webhooks" => 536870912,
+    /**
+     * Array of permissions for all roles.
+     *
+     * @var array
+     */
+    public const ALL_PERMISSIONS = [
+        'create_instant_invite' => 0,
+        'manage_channels' => 4,
+        'view_channel' => 10,
+        'manage_roles' => 28,
+        'manage_webhooks' => 29,
     ];
 
-    /** @var int */
-    private $bitwise = 0;
+    /** @var int|string */
+    private $bitwise;
 
     /** @var Array<string, bool> */
     private $permissions = [];
 
-    public function __construct(int $bitwise = 0)
+    public function __construct($bitwise = 0)
     {
         $this->setBitwise($bitwise);
     }
@@ -94,7 +119,7 @@ abstract class Permissions implements \Serializable
      */
     public function getPermissions(): array
     {
-        if (sizeof($this->permissions) === 0 and $this->bitwise > 0) {
+        if (sizeof($this->permissions) === 0) {
             $this->recalculatePermissions();
         }
         return $this->permissions;
@@ -102,7 +127,7 @@ abstract class Permissions implements \Serializable
 
     public function getPermission(string $permission): ?bool
     {
-        if (sizeof($this->permissions) === 0 and $this->bitwise > 0) {
+        if (sizeof($this->permissions) === 0) {
             $this->recalculatePermissions();
         }
         return $this->permissions[$permission] ?? null;
@@ -110,7 +135,7 @@ abstract class Permissions implements \Serializable
 
     public function setPermission(string $permission, bool $state = true): Permissions
     {
-        if (sizeof($this->permissions) === 0 and $this->bitwise > 0) {
+        if (sizeof($this->permissions) === 0) {
             $this->recalculatePermissions();
         }
         $permission = strtolower($permission);
@@ -122,8 +147,8 @@ abstract class Permissions implements \Serializable
 
         if ($this->permissions[$permission] === $state) return $this;
         $this->permissions[$permission] = $state;
-        $this->bitwise ^= $posPermissions[$permission];
-        return $this;
+        $this->bitwise ^= $posPermissions[$permission]; //todo test this first.
+      return $this;
     }
 
     /**
@@ -131,10 +156,13 @@ abstract class Permissions implements \Serializable
      */
     private function recalculatePermissions(): void
     {
+        if($this->bitwise < 0){
+            throw new \AssertionError("Bitwise cannot be negative numbers.");
+        }
         $this->permissions = [];
         $possiblePerms = $this->getPossiblePermissions();
         foreach ($possiblePerms as $name => $v) {
-            $this->permissions[$name] = (($this->bitwise & $v) !== 0);
+            $this->permissions[$name] = (Bitwise::test($this->bitwise, $v));
         }
     }
 

@@ -91,6 +91,8 @@ use JaxkDev\DiscordBot\Models\WelcomeScreen;
 use JaxkDev\DiscordBot\Models\WelcomeChannel;
 
 use JaxkDev\DiscordBot\Models\Channels\Overwrite;
+use Discord\Helpers\Bitwise;
+use JaxkDev\DiscordBot\Models\Permissions\Permissions;
 
 abstract class ModelConverter
 {
@@ -362,7 +364,7 @@ abstract class ModelConverter
 
         //O(2n) -> O(n) by using same loop for permissions to add roles.
         if ($discordMember->guild->owner_id === $discordMember->id) {
-            $bitwise |= 0x8; // Add administrator permission
+            $bitwise = Bitwise::set($bitwise, Permissions::ROLE_PERMISSIONS['administrator']); // Add administrator permission
             foreach ($discordMember->roles ?? [] as $role) {
                 $roles[] = $role->id;
             }
@@ -370,11 +372,11 @@ abstract class ModelConverter
             /* @var DiscordRole */
             foreach ($discordMember->roles ?? [] as $role) {
                 $roles[] = $role->id;
-                $bitwise |= $role->permissions->bitwise;
+                $bitwise = Bitwise::or($bitwise, $role->permissions->bitwise);
             }
         }
-
-        $m->setPermissions(new RolePermissions((($bitwise & RolePermissions::ROLE_PERMISSIONS["administrator"]) !== 0) ? 2147483647 : $bitwise));
+        $bitwise = Bitwise::and($bitwise, RolePermissions::ROLE_PERMISSIONS["administrator"]); // Add administrator permission
+        $m->setPermissions(new RolePermissions($bitwise));
         $m->setRoles($roles);
         return $m;
     }
