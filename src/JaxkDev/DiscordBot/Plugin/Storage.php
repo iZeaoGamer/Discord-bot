@@ -531,7 +531,7 @@ class Storage
         }
         if (isset(self::$message_map[$message->getId()])) return;
         if ($message->getServerId() !== null) {
-            self::$member_server_map[$message->getServerId()][] = $message->getId();
+            self::$message_server_map[$message->getServerId()][] = $message->getId();
         }
         self::$message_channel_map[$message->getChannelId()][] = $message->getId();
         if ($message->getAuthorId() !== null) {

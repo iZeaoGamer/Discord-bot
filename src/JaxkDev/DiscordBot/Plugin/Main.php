@@ -51,7 +51,7 @@ class Main extends PluginBase
     private $config;
 
     /** @var Main */
-    private $instance;
+    private static $instance;
 
 
     public function onLoad()
