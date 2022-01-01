@@ -35,6 +35,7 @@ class MessageRepository extends AbstractRepository
         'get' => Endpoint::CHANNEL_MESSAGE,
         'update' => Endpoint::CHANNEL_MESSAGE,
         'delete' => Endpoint::CHANNEL_MESSAGE,
+        'all' => EndPoint::CHANNEL_MESSAGES,
     ];
 
     /**

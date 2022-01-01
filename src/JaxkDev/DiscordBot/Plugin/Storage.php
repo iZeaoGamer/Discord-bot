@@ -27,6 +27,8 @@ use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 
+use JaxkDev\DiscordBot\Plugin\Events\MessageDeleted as MessageDeletedEvent;
+
 /*
  * Notes:
  * unset() on the removes doesnt destroy the objects until all references are unset....
@@ -592,9 +594,13 @@ class Storage
         foreach (self::getMessagesByChannel($channel_id) as $message) {
             $deleted += 1;
             if ($deleted <= $limit) {
-                Main::get()->getAPI()->deleteMessage($message->getID(), $channel_id)->then(function(ApiResolution $approve) use ($message){
-                self::removeMessage($message->getId());
-                });
+               Main::get()->getAPI()->bulkDelete($channel_id, $limit);
+                $ev = new MessageDeletedEvent(Main::get(), $message);
+                $ev->call();
+                Storage::removeMessage($message->getId());
+                Main::get()->getLogger()->info("Message deleted event has been called.");
+                print_r($message);
+
 
             }
         }
