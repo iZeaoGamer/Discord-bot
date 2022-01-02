@@ -461,7 +461,30 @@ abstract class ModelConverter
             $discordServer->large,
             $discordServer->member_count,
             $discordServer->icon,
-            ($discordServer->welcome_screen !== null ? self::genModelWelcomeScreen($discordServer->welcome_screen) : null)
+            ($discordServer->welcome_screen !== null ? self::genModelWelcomeScreen($discordServer->welcome_screen) : null),
+            $discordServer->afk_channel_id,
+            $discordServer->afk_timeout,
+            $discordServer->splash,
+            $discordServer->discovery_splash,
+            $discordServer->verification_level,
+            $discordServer->default_message_notifications,
+            $discordServer->explicit_content_filter,
+            $discordServer->mfa_level,
+            $discordServer->application_id,
+            $discordServer->widget_enabled,
+            $discordServer->widget_channel_id,
+            $discordServer->system_channel_id,
+            $discordServer->system_channel_flags,
+            $discordServer->rules_channel_id,
+            $discordServer->vanity_url_code,
+            $discordServer->description,
+            $discordServer->banner,
+            $discordServer->premium_tier,
+            $discordServer->premium_subscription_count,
+            $discordServer->preferred_locale,
+            $discordServer->public_updates_channel_id,
+            $discordServer->nsfw_level,
+            $discordServer->premium_progress_bar_enabled
         );
     }
 
