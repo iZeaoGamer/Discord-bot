@@ -978,7 +978,7 @@ class Api
         return ApiResolver::create($pk->getUID());
     }
      /**
-     * Attempt to kick a member.
+     * Attempt to timeout a member.
      *
      * @param string $member_id
      * 
