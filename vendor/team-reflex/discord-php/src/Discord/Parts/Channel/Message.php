@@ -47,7 +47,6 @@ use function React\Promise\reject;
  * @property Collection|User[]    $mentions               A collection of the users mentioned in the message.
  * @property User|null            $author                 The author of the message. Will be a webhook if sent from one.
  * @property Member|null          $member                 The member that sent this message, or null if it was in a private message.
- * @property User|null            $user                   The user that sent this message. Will be a webhook if sent from one.
  * @property string               $user_id                The user id of the author.
  * @property bool                 $mention_everyone       Whether the message contained an @everyone mention.
  * @property Carbon               $timestamp              A timestamp of when the message was sent.
