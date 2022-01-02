@@ -139,6 +139,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateServerFromTempl
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchWelcomeScreen;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTimedOutMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWelcomeScreen;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateDMChannel;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateDMChannel;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteDMChannel;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Plugin\Utils;
 
@@ -251,6 +254,9 @@ class CommunicationHandler
         elseif ($pk instanceof RequestUpdateWelcomeScreen) $this->handleUpdateWelcomeScreen($pk);
         elseif ($pk instanceof RequestTimedOutMember) $this->handleTimedOutMember($pk);
         elseif ($pk instanceof RequestStickerUpdate) $this->handleStickerUpdate($pk);
+        elseif ($pk instanceof RequestCreateDMChannel) $this->handleCreateDMChannel($pk);
+        elseif ($pk instanceof RequestUpdateDMChannel) $this->handleUpdateDMChannel($pk);
+        elseif ($pk instanceof RequestDeleteDMChannel) $this->handleDeleteDMChannel($pk);
     }
     private function handleDelayReply(RequestDelayReply $pk): void
     {
@@ -824,57 +830,6 @@ class CommunicationHandler
 
 
 
-
-    private function handleCreateChannel(RequestCreateChannel $pk): void
-    {
-        $this->getServer($pk, $pk->getChannel()->getServerId(), function (DiscordGuild $guild) use ($pk) {
-            $c = $pk->getChannel();
-            /** @var DiscordChannel $dc */
-            $dc = $guild->channels->create([
-                'name' => $c->getName(),
-                'position' => $c->getPosition(),
-                'guild_id' => $guild->id
-            ]);
-            if ($c->getCategoryId() !== null) {
-                $dc->parent_id = $c->getCategoryId();
-            }
-            foreach ($c->getAllMemberPermissions() as $id => [$allowed, $denied]) {
-                $dc->overwrites->push($dc->overwrites->create([
-                    'id' => $id,
-                    "type" => DiscordOverwrite::TYPE_MEMBER,
-                    "allow" => strval($allowed === null ? 0 : $allowed->getBitwise()),
-                    "deny" => strval($denied === null ? 0 : $denied->getBitwise())
-                ]));
-            }
-            foreach ($c->getAllRolePermissions() as $id => [$allowed, $denied]) {
-                $dc->overwrites->push($dc->overwrites->create([
-                    'id' => $id,
-                    "type" => DiscordOverwrite::TYPE_ROLE,
-                    "allow" => strval($allowed === null ? 0 : $allowed->getBitwise()),
-                    "deny" => strval($denied === null ? 0 : $denied->getBitwise())
-                ]));
-            }
-            if ($c instanceof CategoryChannel) {
-                $dc->type = DiscordChannel::TYPE_CATEGORY;
-            } elseif ($c instanceof VoiceChannel) {
-                $dc->type = DiscordChannel::TYPE_VOICE;
-                $dc->bitrate = $c->getBitrate();
-                $dc->user_limit = $c->getMemberLimit();
-            } elseif ($c instanceof TextChannel) {
-                $dc->topic = $c->getTopic();
-                $dc->nsfw = $c->isNsfw();
-                $dc->rate_limit_per_user = $c->getRateLimit() ?? 0;
-            } else {
-                throw new \AssertionError("What channel type is this ?? '" . get_class($c) . "'");
-            }
-            $guild->channels->save($dc)->then(function (DiscordChannel $channel) use ($pk) {
-                $this->resolveRequest($pk->getUID(), true, "Created channel.", [ModelConverter::genModelChannel($channel)]);
-            }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to create channel.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to create channel ({$pk->getUID()}) - {$e->getMessage()}");
-            });
-        });
-    }
     private function handleStageCreate(RequestStageCreate $pk): void
     {
         $this->getServer($pk, $pk->getStage()->getServerId(), function (DiscordGuild $guild) use ($pk) {
@@ -1036,9 +991,116 @@ class CommunicationHandler
         });
     }
 
+    /** DM Channel creation/modification/deletion */
+    private function handleCreateDMChannel(RequestCreateDMChannel $pk){
+        $c = $pk->getChannel();
+
+        $privatechannels = $this->client->getDiscordClient()->private_channels;
+        $dc = $privatechannels->create([
+            'owner_id' => $c->getOwnerId(),
+            'recipient_id' => $c->getRecipientId()
+        ]);
+        $dc->type = DiscordChannel::TYPE_DM;
+        if($c->getApplicationId() !== null){
+            $dc->application_id = $c->getApplicationId();
+        }
+        $privatechannels->save($dc)->then(function (DiscordChannel $channel) use ($pk) {
+            $this->resolveRequest($pk->getUID(), true, "Created channel.", [ModelConverter::genModelDMChannel($channel)]);
+        }, function (\Throwable $e) use ($pk) {
+            $this->resolveRequest($pk->getUID(), false, "Failed to create channel.", [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->debug("Failed to create channel ({$pk->getUID()}) - {$e->getMessage()}");
+        });
+    }
+    private function handleUpdateDMChannel(RequestUpdateDMChannel $pk){
+        $privatechannels = $this->client->getDiscordClient()->private_channels;
+        $privatechannels->fetch($pk->getChannel()->getId())->then(function(DiscordChannel $dc) use ($privatechannels, $pk){
+            $channel = $pk->getChannel();
+            if ($dc->type !== DiscordChannel::TYPE_DM) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to update channel.", ["Channel type change is not allowed."]);
+                return;
+            }
+            $dc->owner_id = $channel->getOwnerId();
+            $dc->recipient_id = $channel->getRecipientId();
+            if($channel->getApplicationId() !== null){
+                $dc->application_id = $channel->getApplicationId();
+            }
+            $privatechannels->save($dc)->then(function (DiscordChannel $channel) use ($pk) {
+                $model = ModelConverter::genModelDMChannel($channel);
+                if($model === null){
+                    $this->resolveRequest($pk->getUID(), false, "Failed to update DM Channel.", []);
+                }else{
+                $this->resolveRequest($pk->getUID(), true, "Updated channel.", [$model]);
+                }
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to update channel.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to update channel ({$pk->getUID()}) - {$e->getMessage()}");
+            });
+        });
+    }
+    private function handleDeleteDMChannel(RequestDeleteDMChannel $pk){
+        $client = $this->client->getDiscordClient();
+        $client->private_channels->fetch($pk->getChannelId())->then(function(DiscordChannel $channel) use ($pk, $client){
+        $client->private_channels->delete($channel)->then(function () use ($pk) {
+            $this->resolveRequest($pk->getUID(), true, "Channel deleted.");
+        }, function (\Throwable $e) use ($pk) {
+            $this->resolveRequest($pk->getUID(), false, "Failed to delete channel.", [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->debug("Failed to delete channel ({$pk->getUID()}) - {$e->getMessage()}");
+        });
+    });
+}
+            
 
 
-
+    private function handleCreateChannel(RequestCreateChannel $pk): void
+    {
+        $this->getServer($pk, $pk->getChannel()->getServerId(), function (DiscordGuild $guild) use ($pk) {
+            $c = $pk->getChannel();
+            /** @var DiscordChannel $dc */
+            $dc = $guild->channels->create([
+                'name' => $c->getName(),
+                'position' => $c->getPosition(),
+                'guild_id' => $guild->id
+            ]);
+            if ($c->getCategoryId() !== null) {
+                $dc->parent_id = $c->getCategoryId();
+            }
+            foreach ($c->getAllMemberPermissions() as $id => [$allowed, $denied]) {
+                $dc->overwrites->push($dc->overwrites->create([
+                    'id' => $id,
+                    "type" => DiscordOverwrite::TYPE_MEMBER,
+                    "allow" => strval($allowed === null ? 0 : $allowed->getBitwise()),
+                    "deny" => strval($denied === null ? 0 : $denied->getBitwise())
+                ]));
+            }
+            foreach ($c->getAllRolePermissions() as $id => [$allowed, $denied]) {
+                $dc->overwrites->push($dc->overwrites->create([
+                    'id' => $id,
+                    "type" => DiscordOverwrite::TYPE_ROLE,
+                    "allow" => strval($allowed === null ? 0 : $allowed->getBitwise()),
+                    "deny" => strval($denied === null ? 0 : $denied->getBitwise())
+                ]));
+            }
+            if ($c instanceof CategoryChannel) {
+                $dc->type = DiscordChannel::TYPE_CATEGORY;
+            } elseif ($c instanceof VoiceChannel) {
+                $dc->type = DiscordChannel::TYPE_VOICE;
+                $dc->bitrate = $c->getBitrate();
+                $dc->user_limit = $c->getMemberLimit();
+            } elseif ($c instanceof TextChannel) {
+                $dc->topic = $c->getTopic();
+                $dc->nsfw = $c->isNsfw();
+                $dc->rate_limit_per_user = $c->getRateLimit() ?? 0;
+            } else {
+                throw new \AssertionError("What channel type is this ?? '" . get_class($c) . "'");
+            }
+            $guild->channels->save($dc)->then(function (DiscordChannel $channel) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Created channel.", [ModelConverter::genModelChannel($channel)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to create channel.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to create channel ({$pk->getUID()}) - {$e->getMessage()}");
+            });
+        });
+    }
     private function handleUpdateChannel(RequestUpdateChannel $pk): void
     {
         if ($pk->getChannel()->getId() === null) {

@@ -25,7 +25,7 @@ use Discord\Parts\User\User;
  * @property string   $invite_url  The invite URL to invite the bot to a guild.
  * @property string[] $rpc_origins An array of RPC origin URLs.
  * @property int      $flags       ?
- * @property User     $owner       The owner of the OAuth application.
+ * @property User|null     $owner       The owner of the OAuth application.
  */
 class Application extends Part
 {
@@ -37,7 +37,7 @@ class Application extends Part
     /**
      * Returns the owner of the application.
      *
-     * @return User       Owner of the application.
+     * @return User|null       Owner of the application.
      * @throws \Exception
      */
     protected function getOwnerAttribute(): ?User
@@ -47,6 +47,37 @@ class Application extends Part
         }
 
         return null;
+    }
+    /**
+     * Returns the avatar URL for the application.
+     *
+     * @param string|null $format The image format.
+     * @param int         $size   The size of the image.
+     *
+     * @return string The URL to the clients avatar.
+     */
+    public function getIconAttribute(string $format = null, int $size = 1024): string
+    {
+        if (empty($this->attributes['icon'])) {
+            $user = $this->getOwnerAttribute();
+            if (isset($user)) {
+                $avatarDiscrim = (int) $user->discriminator % 5;
+
+                return "https://cdn.discordapp.com/embed/avatars/{$avatarDiscrim}.png?size={$size}";
+            }
+        }
+        if (isset($format)) {
+            $allowed = ['png', 'jpg', 'webp', 'gif'];
+            if (!in_array(strtolower($format), $allowed)) {
+                $format = 'webp';
+            }
+        } elseif (strpos($this->attributes['icon'], 'a_') === 0) {
+            $format = 'gif';
+        } else {
+            $format = 'jpg';
+        }
+
+        return "https://cdn.discordapp.com/app-icons/application_id/{$this->attributes['icon']}.{$format}?size={$size}";
     }
 
     /**

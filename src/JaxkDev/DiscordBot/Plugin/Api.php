@@ -91,6 +91,7 @@ use JaxkDev\DiscordBot\Models\Ban;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Channels\DMChannel;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
@@ -109,7 +110,9 @@ use Discord\Builders\MessageBuilder;
 use Discord\Builders\Components\Button;
 use Discord\Builders\Components\SelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTimedOutMember;
-
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateDMChannel;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateDMChannel;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteDMChannel;
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 
 /**
@@ -1142,6 +1145,69 @@ class Api
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+    /**
+     * Delete a channel in a server, you cannot delete private channels (DM's)
+     *
+     * @param string $server_id
+     * @param string $channel_id
+     * 
+     * @return PromiseInterface Resolves with no data.
+     */
+    public function deleteChannel(string $server_id, string $channel_id): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($server_id)) {
+            return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
+        }
+        if (!Utils::validDiscordSnowflake($channel_id)) {
+            return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
+        }
+        $pk = new RequestDeleteChannel($server_id, $channel_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    /**
+     * Create a DM channel.
+     *
+     * @param DMChannel $channel
+     * 
+     * @return PromiseInterface Resolves with a Channel model.
+     */
+    public function createDMChannel(DMChannel $channel): PromiseInterface
+    {
+        $pk = new RequestCreateDMChannel($channel);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /**
+     * Update a DM channel, ID Must be present.
+     *
+     * @param DMChannel $channel
+     * 
+     * @return PromiseInterface Resolves with a Channel model.
+     */
+    public function updateDMChannel(DMChannel $channel): PromiseInterface
+    {
+        $pk = new RequestUpdateDMChannel($channel);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    /**
+     * Delete a channel in a server
+     *
+     * @param string $channel_id
+     * 
+     * @return PromiseInterface Resolves with no data.
+     */
+    public function deleteDMChannel(string $channel_id): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($channel_id)) {
+            return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
+        }
+        $pk = new RequestDeleteDMChannel($channel_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
 
     /** Creates a server from a server template.
      * @param Server $server
@@ -1400,27 +1466,6 @@ class Api
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
         }
         $pk = new RequestThreadDelete($channel_id, $server_id);
-        $this->plugin->writeOutboundData($pk);
-        return ApiResolver::create($pk->getUID());
-    }
-
-    /**
-     * Delete a channel in a server, you cannot delete private channels (DM's)
-     *
-     * @param string $server_id
-     * @param string $channel_id
-     * 
-     * @return PromiseInterface Resolves with no data.
-     */
-    public function deleteChannel(string $server_id, string $channel_id): PromiseInterface
-    {
-        if (!Utils::validDiscordSnowflake($server_id)) {
-            return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
-        }
-        if (!Utils::validDiscordSnowflake($channel_id)) {
-            return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
-        }
-        $pk = new RequestDeleteChannel($server_id, $channel_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

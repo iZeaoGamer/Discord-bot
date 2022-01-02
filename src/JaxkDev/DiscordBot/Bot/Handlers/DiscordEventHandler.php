@@ -44,6 +44,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\BanRemove as BanRemovePacke
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ChannelCreate as ChannelCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ChannelDelete as ChannelDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ChannelUpdate as ChannelUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\DMChannelCreate as DMChannelCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\DMChannelUpdate as DMChannelUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\DMChannelDelete as DMChannelDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\InviteCreate as InviteCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\InviteDelete as InviteDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\MemberJoin as MemberJoinPacket;
@@ -107,7 +110,7 @@ class DiscordEventHandler
         $discord = $this->client->getDiscordClient();
         $discord->on("MESSAGE_CREATE", [$this, "onMessageCreate"]);
         $discord->on("MESSAGE_DELETE", [$this, "onMessageDelete"]);
-       // $discord->on("MESSAGE_DELETE_BULK", [$this, "onMessageBulkDelete"]);
+        // $discord->on("MESSAGE_DELETE_BULK", [$this, "onMessageBulkDelete"]);
         $discord->on("MESSAGE_UPDATE", [$this, "onMessageUpdate"]);  //AKA Edit
 
         $discord->on("GUILD_MEMBER_ADD", [$this, "onMemberJoin"]);
@@ -294,27 +297,27 @@ array(5) {
             }
             /** @var DiscordChannel $channel */
             foreach ($guild->channels as $channel) {
-            if($permissions->read_message_history){
-               
-                $channel->messages->freshen()->done(function () use ($channel, $guild) {
-                    $this->logger->debug("Successfully fetched " . sizeof($channel->messages) . " total Messages from server '" .
-                        $guild->name . "' (" . $guild->id . ")");
-            
+                if ($permissions->read_message_history) {
+
+                    $channel->messages->freshen()->done(function () use ($channel, $guild) {
+                        $this->logger->debug("Successfully fetched " . sizeof($channel->messages) . " total Messages from server '" .
+                            $guild->name . "' (" . $guild->id . ")");
+
                         if (sizeof($channel->messages) === 0) return;
                         $pk = new DiscordDataDumpPacket();
-                    $pk->setTimestamp(time());
-                    /** @var DiscordMessage $message */
-                    foreach ($channel->messages as $message) {
-                        $msg = ModelConverter::genModelMessage($message);
-                        $pk->addMessage($msg);
-                    }
-                }, function (\Throwable $e) use ($guild) {
-                    $this->logger->warning("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
-                });
-            } else {
-                $this->logger->notice("Cannot fetch Messages from server '" . $guild->name . "' (" . $guild->id .
-                    "), Bot does not have 'read_message_history' permission.");
-            }
+                        $pk->setTimestamp(time());
+                        /** @var DiscordMessage $message */
+                        foreach ($channel->messages as $message) {
+                            $msg = ModelConverter::genModelMessage($message);
+                            $pk->addMessage($msg);
+                        }
+                    }, function (\Throwable $e) use ($guild) {
+                        $this->logger->warning("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
+                    });
+                } else {
+                    $this->logger->notice("Cannot fetch Messages from server '" . $guild->name . "' (" . $guild->id .
+                        "), Bot does not have 'read_message_history' permission.");
+                }
                 $c = ModelConverter::genModelChannel($channel);
                 if ($c !== null) $pk->addChannel($c);
             }
@@ -555,7 +558,7 @@ array(5) {
      * @param Discord                  $discord
      * @return void
      */
-  /*  public function onMessageBulkDelete($data, Discord $discord): void
+    /*  public function onMessageBulkDelete($data, Discord $discord): void
     {
         if ($data instanceof DiscordMessage) {
             $message = ModelConverter::genModelMessage($data);
@@ -706,24 +709,43 @@ array(5) {
 
     public function onChannelCreate(DiscordChannel $channel, Discord $discord): void
     {
-        $c = ModelConverter::genModelChannel($channel);
-        if ($c === null) return;
-        $packet = new ChannelCreatePacket($c);
-        $this->client->getThread()->writeOutboundData($packet);
+        if ($channel->type === $channel::TYPE_DM) {
+            $c = ModelConverter::genModelDMChannel($channel);
+            if ($c === null) return;
+            $packet = new DMChannelCreatePacket($c);
+            $this->client->getThread()->writeOutboundData($packet);
+        } else {
+            $c = ModelConverter::genModelChannel($channel);
+            if ($c === null) return;
+            $packet = new ChannelCreatePacket($c);
+            $this->client->getThread()->writeOutboundData($packet);
+        }
     }
 
     public function onChannelUpdate(DiscordChannel $channel, Discord $discord): void
     {
-        $c = ModelConverter::genModelChannel($channel);
-        if ($c === null) return;
-        $packet = new ChannelUpdatePacket($c);
-        $this->client->getThread()->writeOutboundData($packet);
+        if ($channel->type === $channel::TYPE_DM) {
+            $c = ModelConverter::genModelDMChannel($channel);
+            if ($c === null) return;
+            $packet = new DMChannelUpdatePacket($c);
+            $this->client->getThread()->writeOutboundData($packet);
+        } else {
+            $c = ModelConverter::genModelChannel($channel);
+            if ($c === null) return;
+            $packet = new ChannelUpdatePacket($c);
+            $this->client->getThread()->writeOutboundData($packet);
+        }
     }
 
     public function onChannelDelete(DiscordChannel $channel, Discord $discord): void
     {
-        $packet = new ChannelDeletePacket($channel->id);
-        $this->client->getThread()->writeOutboundData($packet);
+        if ($channel->type === $channel::TYPE_DM) {
+            $packet = new DMChannelDeletePacket($channel->id);
+            $this->client->getThread()->writeOutboundData($packet);
+        } else {
+            $packet = new ChannelDeletePacket($channel->id);
+            $this->client->getThread()->writeOutboundData($packet);
+        }
     }
     public function onThreadCreate(DiscordThread $channel, Discord $discord): void
     {

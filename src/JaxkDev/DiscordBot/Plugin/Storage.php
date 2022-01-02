@@ -26,6 +26,7 @@ use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
+use JaxkDev\DiscordBot\Models\Channels\DMChannel;
 
 use JaxkDev\DiscordBot\Plugin\Events\MessageDeleted as MessageDeletedEvent;
 
@@ -54,6 +55,9 @@ class Storage
 
     /** @var Array<string, ServerChannel> */
     private static $channel_map = [];
+
+     /** @var Array<string, DMChannel> */
+     private static $dm_channel_map = [];
 
     /** @var Array<string, string[]> */
     private static $channel_server_map = [];
@@ -252,7 +256,7 @@ class Storage
         self::$stage_server_map[$stage->getServerId()][] = $stage->getId();
         self::$stage_map[$stage->getId()] = $stage;
     }
-    public function updateStage(Stage $stage)
+    public static function updateStage(Stage $stage)
     {
         if ($stage->getId() === null) {
             throw new \AssertionError("Failed to update stage channel in storage, ID not found.");
@@ -458,6 +462,70 @@ class Storage
         array_splice(self::$thread_server_map[$server_id], $i, 1);
         //  }
     }
+      /** @param string $id
+     * @return DMChannel|null
+     */
+    public static function getDMChannel(string $id): ?DMChannel
+    {
+        return self::$dm_channel_map[$id] ?? null;
+    }
+
+    /** @return DMChannel[] */
+    public static function getDMChannels(): array
+    {
+        return array_values(self::$dm_channel_map);
+    }
+
+    /** 
+     * Checks if the given channel ID is a dm-type of channel.
+     * 
+     * @param string $id
+     * @return bool
+     */
+    public static function isDMChannel(string $id): bool
+    {
+        $channel = Storage::getChannel($id);
+        if ($channel instanceof ServerChannel) {
+            return false;
+        }
+        $thread = Storage::getThread($id);
+        if ($thread instanceof ThreadChannel) {
+            return false;
+        }
+        $dm = Storage::getDMChannel($id);
+        if(!$dm instanceof DMChannel){
+            return false;
+        }
+        return true;
+    }
+    public static function addDMChannel(DMChannel $channel): void
+    {
+        if ($channel->getId() === null) {
+            throw new \AssertionError("Failed to add DM channel to storage, ID not found.");
+        }
+        if (isset(self::$dm_channel_map[$channel->getId()])) return;
+        self::$dm_channel_map[$channel->getId()] = $channel;
+    }
+
+    public static function updateDMChannel(DMChannel $channel): void
+    {
+        if ($channel->getId() === null) {
+            throw new \AssertionError("Failed to update DM channel in storage, ID not found.");
+        }
+        if (!isset(self::$dm_channel_map[$channel->getId()])) {
+            self::addDMChannel($channel);
+        } else {
+            self::$dm_channel_map[$channel->getId()] = $channel;
+        }
+    }
+
+    public static function removeDMChannel(string $channel_id): void
+    {
+        $channel = self::getDMChannel($channel_id);
+        if (!$channel instanceof DMChannel) return; //Already deleted or not added.
+        unset(self::$dm_channel_map[$channel_id]);
+    }
+
 
 
     /** @param string $id

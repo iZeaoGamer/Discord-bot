@@ -48,6 +48,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBulkDelete as Messag
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\DMChannelCreate as DMChannelCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\DMChannelUpdate as DMChannelUpdatePacket;
+use Jaxkdev\DiscordBot\Communication\Packets\Discord\DMChannelDelete as DMChannelDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\TypingStart as TypingStartPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\InteractionCreate as InteractionCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerStickersUpdate as ServerStickersUpdatePacket;
@@ -98,6 +101,9 @@ use JaxkDev\DiscordBot\Plugin\Events\VoiceStateUpdated as VoiceStateUpdatedEvent
 use JaxkDev\DiscordBot\Plugin\Events\ThreadCreated as ThreadCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ThreadUpdated as ThreadUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ThreadDeleted as ThreadDeletedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\DMChannelCreated as DMChannelCreatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\DMChannelUpdated as DMChannelUpdatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\DMChannelDeleted as DMChannelDeletedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ChannelCreated as ChannelCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\MessageBulkDeleted as MessageBulkDeletedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\TypingStart as TypingStartEvent;
@@ -114,6 +120,7 @@ use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledUserAdded as ServerScheduled
 use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledUserRemoved as ServerScheduledUserRemovedEvent;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Channels\DMChannel;
 use JaxkDev\DiscordBot\Models\Messages\Message;
 
 class BotCommunicationHandler
@@ -161,6 +168,9 @@ class BotCommunicationHandler
         elseif ($packet instanceof ChannelCreatePacket) $this->handleChannelCreate($packet);
         elseif ($packet instanceof ChannelUpdatePacket) $this->handleChannelUpdate($packet);
         elseif ($packet instanceof ChannelDeletePacket) $this->handleChannelDelete($packet);
+        elseif ($packet instanceof DMChannelCreatePacket) $this->handleDMChannelCreate($packet);
+        elseif ($packet instanceof DMChannelUpdatePacket) $this->handleDMChannelUpdate($packet);
+        elseif ($packet instanceof DMChannelDeletePacket) $this->handleDMChannelDelete($packet);
         elseif ($packet instanceof ChannelPinsUpdatePacket) $this->handleChannelPinsUpdate($packet);
         elseif ($packet instanceof RoleCreatePacket) $this->handleRoleCreate($packet);
         elseif ($packet instanceof RoleUpdatePacket) $this->handleRoleUpdate($packet);
@@ -236,14 +246,17 @@ class BotCommunicationHandler
     private function handleStageCreate(StageCreatePacket $packet)
     {
         (new StageCreatedEvent($this->plugin, $packet->getStage()))->call();
+        Storage::addStage($packet->getStage());
     }
     private function handleStageUpdate(StageUpdatePacket $packet)
     {
         (new StageUpdatedEvent($this->plugin, $packet->getStage()))->call();
+        Storage::updateStage($packet->getStage());
     }
     private function handleStageDelete(StageDeletePacket $packet)
     {
         (new StageDeletedEvent($this->plugin, $packet->getStage()))->call();
+        Storage::removeStage($packet->getStage()->getId());
     }
 
 
@@ -411,11 +424,7 @@ class BotCommunicationHandler
         (new MessageReactionRemoveEmojiEvent($this->plugin, $packet->getEmoji(), $packet->getMessageId(), $channel))->call();
     }
 
-    private function handleChannelCreate(ChannelCreatePacket $packet): void
-    {
-        (new ChannelCreatedEvent($this->plugin, $packet->getChannel()))->call();
-        Storage::addChannel($packet->getChannel());
-    }
+   
     private function handleThreadCreate(ThreadCreatePacket $packet): void
     {
         (new ThreadCreatedEvent($this->plugin, $packet->getChannel()))->call();
@@ -435,10 +444,35 @@ class BotCommunicationHandler
         (new ThreadDeletedEvent($this->plugin, $c))->call();
         Storage::removeThread($packet->getChannelID());
     }
+    private function handleDMChannelCreate(DMChannelCreatePacket $packet): void
+    {
+        (new DMChannelCreatedEvent($this->plugin, $packet->getChannel()))->call();
+        Storage::addDMChannel($packet->getChannel());
+    }
+    private function handleDMChannelUpdate(DMChannelUpdatePacket $packet): void
+    {
+        (new DMChannelUpdatedEvent($this->plugin, $packet->getChannel()))->call();
+        Storage::updateDMChannel($packet->getChannel());
+    }
+    private function handleDMChannelDelete(DMChannelDeletePacket $packet): void
+    {
+        $c = Storage::getDMChannel($packet->getChannelId());
+        if (!$c instanceof DMChannel) {
+            throw new \AssertionError("DM Channel '{$packet->getChannelId()} not found in storage.");
+        }
+        (new DMChannelDeletedEvent($this->plugin, $c))->call();
+        Storage::removeDMChannel($packet->getChannelID());
+    }
+    private function handleChannelCreate(ChannelCreatePacket $packet): void
+    {
+        (new ChannelCreatedEvent($this->plugin, $packet->getChannel()))->call();
+        Storage::addChannel($packet->getChannel());
+    }
 
     private function handleChannelUpdate(ChannelUpdatePacket $packet): void
     {
         (new ChannelUpdatedEvent($this->plugin, $packet->getChannel()))->call();
+        
         Storage::updateChannel($packet->getChannel());
     }
 

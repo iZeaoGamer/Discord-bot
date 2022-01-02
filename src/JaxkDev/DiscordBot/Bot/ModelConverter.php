@@ -46,12 +46,15 @@ use Discord\Parts\Guild\AuditLog\Entry as DiscordEntryLog;
 use Discord\Parts\Guild\AuditLog\Options as DiscordEntryOptions;
 use Discord\Parts\Guild\WelcomeScreen as DiscordWelcomeScreen;
 use Discord\Parts\Guild\WelcomeChannel as DiscordWelcomeChannel;
+use Discord\Parts\OAuth\Application as DiscordApplication;
+use Discord\Parts\User\Client as DiscordClient;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\TextChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
+use JaxkDev\DiscordBot\Models\Channels\DMChannel;
 use JaxkDev\DiscordBot\Models\Invite;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Messages\Attachment;
@@ -89,6 +92,8 @@ use JaxkDev\DiscordBot\Models\Emoji;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\WelcomeScreen;
 use JaxkDev\DiscordBot\Models\WelcomeChannel;
+use JaxkDev\DiscordBot\Models\OAuth\Application;
+use Jaxkdev\DiscordBot\Models\Client;
 
 use JaxkDev\DiscordBot\Models\Channels\Overwrite;
 use Discord\Helpers\Bitwise;
@@ -96,17 +101,57 @@ use JaxkDev\DiscordBot\Models\Permissions\Permissions;
 
 abstract class ModelConverter
 {
-    static public function genModelWelcomeScreen(DiscordWelcomeScreen $screen): WelcomeScreen{
+    static function genModelClient(DiscordClient $client): Client{
+        $servers = [];
+        /** @var DiscordServer $server */
+        foreach($client->guilds as $server){
+            $servers[] = self::genModelServer($server);
+        }
+        $users = [];
+        /** @var DiscordUser $user */
+        foreach($client->users as $user){
+            $users[] = self::genModelUser($user);
+        }
         $channels = [];
-        foreach($screen->welcome_channels as $welcome){
+        return new Client(
+            $client->id,
+            $client->username,
+            $client->discriminator,
+            $client->avatar,
+            $client->bot ?? false,
+            self::genModelApplication($client->application),
+            $servers,
+            $users
+
+
+        );
+    }
+    static function genModelApplication(DiscordApplication $application): Application
+    {
+        return new Application(
+            $application->name,
+            $application->description,
+            $application->invite_url,
+            $application->id,
+            $application->icon,
+            $application->rpc_origins,
+            ($application->owner !== null ? self::genModelUser($application->owner) : null
+            )
+        );
+    }
+    static public function genModelWelcomeScreen(DiscordWelcomeScreen $screen): WelcomeScreen
+    {
+        $channels = [];
+        foreach ($screen->welcome_channels as $welcome) {
             $channels[] = self::genModelWelcomeChannel($welcome);
         }
         return new WelcomeScreen(
             $screen->description,
             $channels
         );
-        }
-    static public function genModelWelcomeChannel(DiscordWelcomeChannel $channel){
+    }
+    static public function genModelWelcomeChannel(DiscordWelcomeChannel $channel)
+    {
         return new WelcomeChannel(
             $channel->channel_id,
             $channel->description,
@@ -116,8 +161,12 @@ abstract class ModelConverter
     }
     static public function genOverwrite(DiscordOverwrite $overwrite): Overwrite
     {
-        return new Overwrite($overwrite->channel_id, $overwrite->type, new ChannelPermissions($overwrite->allow->bitwise),
-        new ChannelPermissions($overwrite->deny->bitwise, $overwrite->id));
+        return new Overwrite(
+            $overwrite->channel_id,
+            $overwrite->type,
+            new ChannelPermissions($overwrite->allow->bitwise),
+            new ChannelPermissions($overwrite->deny->bitwise, $overwrite->id)
+        );
     }
     static public function genModelAuditLog(DiscordAuditLog $log): AuditLog
     {
@@ -430,6 +479,25 @@ abstract class ModelConverter
         }
         return $c;
     }
+    
+    static function genModelDMChannel(DiscordChannel $channel): ?DMChannel{
+        switch($channel->type){
+            case DiscordChannel::TYPE_DM:
+                $users = [];
+                /** @var DiscordUser $user */
+                foreach($channel->recipients as $user){
+                    $users[] = self::genModelUser($user);
+                }
+                return new DMChannel($channel->recipient_id, $channel->owner_id,
+                $channel->id,
+                $users,
+                $channel->application_id
+            );
+            default:
+            return null;
+        }
+    }
+
 
     /**
      * Generates a model based on whatever type $channel is. (Excludes game store/group type)
@@ -610,8 +678,9 @@ abstract class ModelConverter
                     array_keys($discordMessage->mention_channels->toArray()),
                     array_keys($discordMessage->sticker_items->toArray()),
                     ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
-                ), $discordMessage->link,
-                $discordMessage->tts
+                    ),
+                    $discordMessage->link,
+                    $discordMessage->tts
                 );
             }
         } elseif ($discordMessage->type === DiscordMessage::TYPE_REPLY) {
@@ -639,8 +708,9 @@ abstract class ModelConverter
                 array_keys($discordMessage->mention_channels->toArray()),
                 array_keys($discordMessage->sticker_items->toArray()),
                 ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
-            ), $discordMessage->link,
-            $discordMessage->tts
+                ),
+                $discordMessage->link,
+                $discordMessage->tts
             );
         }
         throw new AssertionError("Discord message type not supported.");

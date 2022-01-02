@@ -27,9 +27,6 @@ class TextChannel extends ServerChannel
     private $rate_limit = null;
 
     /** @var string|null */
-    private $recipientId; //null if the channel isn't a dm or group channel.
-
-    /** @var string|null */
     private $messageId; //null when creating.
 
     //Pins can be found via API::fetchPinnedMessages();

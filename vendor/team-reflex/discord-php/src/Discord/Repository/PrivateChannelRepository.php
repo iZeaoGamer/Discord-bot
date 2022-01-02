@@ -11,7 +11,9 @@
 
 namespace Discord\Repository;
 
+use Discord\Http\Endpoint;
 use Discord\Parts\Channel\Channel;
+
 
 /**
  * Contains private channels and groups that the user has access to.
@@ -28,7 +30,13 @@ class PrivateChannelRepository extends AbstractRepository
     /**
      * @inheritdoc
      */
-    protected $endpoints = [];
+    protected $endpoints = [
+        'all' => Endpoint::USER_CURRENT_CHANNELS,
+        'get' => Endpoint::CHANNEL,
+        'create' => Endpoint::USER_CURRENT_CHANNELS,
+        'update' => Endpoint::CHANNEL,
+        'delete' => Endpoint::CHANNEL,
+    ];
 
     /**
      * @inheritdoc
