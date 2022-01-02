@@ -56,8 +56,8 @@ class Storage
     /** @var Array<string, ServerChannel> */
     private static $channel_map = [];
 
-     /** @var Array<string, DMChannel> */
-     private static $dm_channel_map = [];
+    /** @var Array<string, DMChannel> */
+    private static $dm_channel_map = [];
 
     /** @var Array<string, string[]> */
     private static $channel_server_map = [];
@@ -462,7 +462,7 @@ class Storage
         array_splice(self::$thread_server_map[$server_id], $i, 1);
         //  }
     }
-      /** @param string $id
+    /** @param string $id
      * @return DMChannel|null
      */
     public static function getDMChannel(string $id): ?DMChannel
@@ -493,7 +493,7 @@ class Storage
             return false;
         }
         $dm = Storage::getDMChannel($id);
-        if(!$dm instanceof DMChannel){
+        if (!$dm instanceof DMChannel) {
             return false;
         }
         return true;
@@ -658,18 +658,16 @@ class Storage
     public static function bulkRemove(string $channel_id, int $limit): void
     {
         $deleted = 0;
-        
+
         foreach (self::getMessagesByChannel($channel_id) as $message) {
             $deleted += 1;
             if ($deleted <= $limit) {
-               Main::get()->getAPI()->bulkDelete($channel_id, $limit);
+                Main::get()->getAPI()->bulkDelete($channel_id, $limit);
                 $ev = new MessageDeletedEvent(Main::get(), $message);
                 $ev->call();
                 Storage::removeMessage($message->getId());
                 Main::get()->getLogger()->info("Message deleted event has been called.");
                 print_r($message);
-
-
             }
         }
     }

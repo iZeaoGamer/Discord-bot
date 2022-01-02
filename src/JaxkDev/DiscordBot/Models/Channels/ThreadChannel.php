@@ -79,7 +79,7 @@ class ThreadChannel
         $this->setUserID($userID);
         $this->setID($id);
     }
-      /**
+    /**
      * @return string
      */
     public function getName(): string
@@ -97,7 +97,7 @@ class ThreadChannel
     }
 
 
-     /** 
+    /** 
      * @return string
      */
     public function getServerID(): string
@@ -188,14 +188,14 @@ class ThreadChannel
     {
         $this->user_id = $user_id;
     }
-     /** 
+    /** 
      * @return string|null
      */
     public function getID(): ?string
     {
         return $this->id;
     }
-    
+
     /** 
      * @param string|null $id
      * @return void

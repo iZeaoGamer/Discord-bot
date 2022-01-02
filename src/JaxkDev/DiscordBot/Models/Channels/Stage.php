@@ -31,7 +31,7 @@ class Stage  implements \Serializable
     private $privacyLevel; //leave empty to make it public.
 
     /** @var bool */
-    private $disableDiscovery;
+    private $disableDiscovery = false;
 
     /**
      * Stage constructor.

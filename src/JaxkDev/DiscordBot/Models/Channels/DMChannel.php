@@ -23,10 +23,10 @@ class DMChannel implements \Serializable
     /** @var string */
     protected $recipient_id;
 
-      /** @var string */
-      protected $owner_id; 
+    /** @var string */
+    protected $owner_id;
 
-        /** @var string|null */
+    /** @var string|null */
     protected $id; //null when creating channel.
 
     /** @var User[] */
@@ -48,20 +48,24 @@ class DMChannel implements \Serializable
         $this->setUsers($users);
         $this->setApplicationId($application_id);
     }
-    public function getRecipientId(): string{
+    public function getRecipientId(): string
+    {
         return $this->recipient_id;
     }
-    public function setRecipientId(string $recipient_id): void{
-        if(!Utils::validDiscordSnowflake($recipient_id)) {
+    public function setRecipientId(string $recipient_id): void
+    {
+        if (!Utils::validDiscordSnowflake($recipient_id)) {
             throw new \AssertionError("Recipient ID '$recipient_id' is invalid.");
         }
         $this->recipient_id = $recipient_id;
     }
-    public function getOwnerId(): string{
+    public function getOwnerId(): string
+    {
         return $this->owner_id;
     }
-    public function setOwnerId(string $owner_id): void{
-        if(!Utils::validDiscordSnowflake($owner_id)) {
+    public function setOwnerId(string $owner_id): void
+    {
+        if (!Utils::validDiscordSnowflake($owner_id)) {
             throw new \AssertionError("Owner ID '$owner_id' is invalid.");
         }
         $this->owner_id = $owner_id;
@@ -80,13 +84,15 @@ class DMChannel implements \Serializable
         $this->id = $id;
     }
     /** @return User[] */
-    public function getUsers(): array{
+    public function getUsers(): array
+    {
         return $this->users;
     }
-    public function setUsers(array $users): void{
+    public function setUsers(array $users): void
+    {
         /** @var User $user */
-        foreach($users as $user){
-            if(!Utils::validDiscordSnowflake($user->getId())){
+        foreach ($users as $user) {
+            if (!Utils::validDiscordSnowflake($user->getId())) {
                 throw new \AssertionError("User ID '{$user->getId()}' is invalid.");
             }
         }
@@ -109,11 +115,11 @@ class DMChannel implements \Serializable
     public function serialize(): ?string
     {
         return serialize([
-           $this->recipient_id,
-           $this->owner_id,
-           $this->id,
-           $this->users,
-           $this->application_id
+            $this->recipient_id,
+            $this->owner_id,
+            $this->id,
+            $this->users,
+            $this->application_id
         ]);
     }
 

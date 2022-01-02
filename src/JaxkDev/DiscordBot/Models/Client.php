@@ -16,6 +16,7 @@ use JaxkDev\DiscordBot\Plugin\Utils;
 
 use JaxkDev\DiscordBot\Models\OAuth\Application;
 use JaxkDev\DiscordBot\Models\Server;
+use JaxkDev\DiscordBot\Models\Channels\DMChannel;
 
 class Client implements \Serializable
 {
@@ -34,16 +35,19 @@ class Client implements \Serializable
     private $avatar_url;
 
     /** @var bool */
-    private $bot;
+    private $bot = false;
 
-   /** @var Application */
-   private $application;
+    /** @var Application */
+    private $application;
 
-   /** @var Server[] */
-   private $servers = [];
+    /** @var Server[] */
+    private $servers = [];
 
-   /** @var User[] */
-   private $users = [];
+    /** @var User[] */
+    private $users = [];
+
+    /** @var DMChannel[] */
+    private $channels = [];
 
 
     /** @var Array<string, bool> */
@@ -57,7 +61,8 @@ class Client implements \Serializable
         bool $bot,
         Application $application,
         array $servers = [],
-        array $users = []
+        array $users = [],
+        array $channels = []
 
     ) {
         $this->setId($id);
@@ -68,6 +73,7 @@ class Client implements \Serializable
         $this->setApplication($application);
         $this->setServers($servers);
         $this->setUsers($users);
+        $this->setChannels($channels);
     }
 
     public function getId(): string
@@ -131,42 +137,64 @@ class Client implements \Serializable
         $this->bot = $bot;
     }
 
-   public function getApplication(): Application{
-       return $this->application;
-   }
-   public function setApplication(Application $application): void{
-       $this->application = $application;
-   }
-
-   /** @return Server[] */
-   public function getServers(): array{
-       return $this->servers;
-   }
-   public function setServers(array $servers): void{
-    /** @var Server $server */   
-    foreach($servers as $server){
-        if(!Utils::validDiscordSnowflake($server->getId())){
-            throw new \AssertionError("Server ID: '{$server->getId()}' is invalid.");
-        }
-        //todo
+    public function getApplication(): Application
+    {
+        return $this->application;
     }
-    $this->servers = $servers;
-}
-
-/** @return User[] */
-public function getUsers(): array{
-    return $this->users;
-}
-public function setUsers(array $users): void{
-    /** @var User $user */
-    foreach($users as $user){
-        if(!Utils::validDiscordSnowflake($user->getId())){
-            throw new \AssertionError("User ID: {$user->getId()} is invalid.");
-        }
-        //todo
+    public function setApplication(Application $application): void
+    {
+        $this->application = $application;
     }
-    $this->users = $users;
-}
+
+    /** @return Server[] */
+    public function getServers(): array
+    {
+        return $this->servers;
+    }
+    public function setServers(array $servers): void
+    {
+        /** @var Server $server */
+        foreach ($servers as $server) {
+            if (!Utils::validDiscordSnowflake($server->getId())) {
+                throw new \AssertionError("Server ID: '{$server->getId()}' is invalid.");
+            }
+            //todo
+        }
+        $this->servers = $servers;
+    }
+
+    /** @return User[] */
+    public function getUsers(): array
+    {
+        return $this->users;
+    }
+    public function setUsers(array $users): void
+    {
+        /** @var User $user */
+        foreach ($users as $user) {
+            if (!Utils::validDiscordSnowflake($user->getId())) {
+                throw new \AssertionError("User ID: {$user->getId()} is invalid.");
+            }
+            //todo
+        }
+        $this->users = $users;
+    }
+    /** @return DMChannel[] */
+    public function getChannels(): array
+    {
+        return $this->channels;
+    }
+    public function setChannels(array $channels): void
+    {
+        /** @var DMChannel $channel */
+        foreach ($channels as $channel) {
+            if (!Utils::validDiscordSnowflake($channel->getId())) {
+                throw new \AssertionError("User ID: {$channel->getId()} is invalid.");
+            }
+            //todo
+        }
+        $this->channels = $channels;
+    }
     //----- Serialization -----//
 
     public function serialize(): ?string

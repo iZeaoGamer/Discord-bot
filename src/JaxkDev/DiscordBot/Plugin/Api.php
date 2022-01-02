@@ -980,7 +980,7 @@ class Api
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
-     /**
+    /**
      * Attempt to timeout a member.
      *
      * @param string $member_id
@@ -993,7 +993,7 @@ class Api
         if (!Utils::validDiscordSnowflake($sid) or !Utils::validDiscordSnowflake($uid)) {
             return rejectPromise(new ApiRejection("Invalid member ID '$member_id'."));
         }
-        if($seconds <= 0){
+        if ($seconds <= 0) {
             return rejectPromise(new ApiRejection("Invalid time: '{$seconds}'."));
         }
         $pk = new RequestTimedOutMember($sid, $uid, $seconds);

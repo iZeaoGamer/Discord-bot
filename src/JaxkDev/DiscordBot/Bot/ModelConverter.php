@@ -101,18 +101,26 @@ use JaxkDev\DiscordBot\Models\Permissions\Permissions;
 
 abstract class ModelConverter
 {
-    static function genModelClient(DiscordClient $client): Client{
+    static function genModelClient(DiscordClient $client): Client
+    {
         $servers = [];
         /** @var DiscordServer $server */
-        foreach($client->guilds as $server){
+        foreach ($client->guilds as $server) {
             $servers[] = self::genModelServer($server);
         }
         $users = [];
         /** @var DiscordUser $user */
-        foreach($client->users as $user){
+        foreach ($client->users as $user) {
             $users[] = self::genModelUser($user);
         }
         $channels = [];
+        /** @var DiscordChannel $channel */
+        foreach ($client->private_channels as $channel) {
+            $c = self::genModelDMChannel($channel);
+            if ($c !== null) {
+                $channels[] = $c;
+            }
+        }
         return new Client(
             $client->id,
             $client->username,
@@ -121,7 +129,8 @@ abstract class ModelConverter
             $client->bot ?? false,
             self::genModelApplication($client->application),
             $servers,
-            $users
+            $users,
+            $channels
 
 
         );
@@ -323,7 +332,7 @@ abstract class ModelConverter
     }
     static public function genModelVoiceState(DiscordVoiceStateUpdate $stateUpdate): VoiceState
     {
-        if ($stateUpdate->guild_id === null) {
+        if ($stateUpdate->guild_id === null) { //todo add dm channels support.
             throw new AssertionError("Not handling DM Voice states.");
         }
         return new VoiceState(
@@ -479,22 +488,25 @@ abstract class ModelConverter
         }
         return $c;
     }
-    
-    static function genModelDMChannel(DiscordChannel $channel): ?DMChannel{
-        switch($channel->type){
+
+    static function genModelDMChannel(DiscordChannel $channel): ?DMChannel
+    {
+        switch ($channel->type) {
             case DiscordChannel::TYPE_DM:
                 $users = [];
                 /** @var DiscordUser $user */
-                foreach($channel->recipients as $user){
+                foreach ($channel->recipients as $user) {
                     $users[] = self::genModelUser($user);
                 }
-                return new DMChannel($channel->recipient_id, $channel->owner_id,
-                $channel->id,
-                $users,
-                $channel->application_id
-            );
-            default:
-            return null;
+                return new DMChannel(
+                    $channel->recipient_id,
+                    $channel->owner_id,
+                    $channel->id,
+                    $users,
+                    $channel->application_id
+                );
+            default: //todo add group dm support
+                return null;
         }
     }
 
@@ -588,7 +600,6 @@ abstract class ModelConverter
             $discordChannel->rate_limit_per_user,
             $discordChannel->parent_id,
             $discordChannel->id,
-            $discordChannel->recipient_id,
             $discordChannel->last_message_id,
             array_keys($discordChannel->recipients->toArray()),
         ));

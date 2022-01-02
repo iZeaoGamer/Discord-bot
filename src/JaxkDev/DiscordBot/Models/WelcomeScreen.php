@@ -32,7 +32,7 @@ class WelcomeScreen implements \Serializable
     }
     public function setDescription(string $description): void
     {
-        if(strlen($description) > 140){
+        if (strlen($description) > 140) {
             throw new \AssertionError("Invalid Description {$description} - Must be below 140 characters.");
         }
         $this->description = $description;

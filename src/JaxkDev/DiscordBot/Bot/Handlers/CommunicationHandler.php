@@ -992,7 +992,8 @@ class CommunicationHandler
     }
 
     /** DM Channel creation/modification/deletion */
-    private function handleCreateDMChannel(RequestCreateDMChannel $pk){
+    private function handleCreateDMChannel(RequestCreateDMChannel $pk)
+    {
         $c = $pk->getChannel();
 
         $privatechannels = $this->client->getDiscordClient()->private_channels;
@@ -1001,7 +1002,7 @@ class CommunicationHandler
             'recipient_id' => $c->getRecipientId()
         ]);
         $dc->type = DiscordChannel::TYPE_DM;
-        if($c->getApplicationId() !== null){
+        if ($c->getApplicationId() !== null) {
             $dc->application_id = $c->getApplicationId();
         }
         $privatechannels->save($dc)->then(function (DiscordChannel $channel) use ($pk) {
@@ -1011,9 +1012,10 @@ class CommunicationHandler
             $this->logger->debug("Failed to create channel ({$pk->getUID()}) - {$e->getMessage()}");
         });
     }
-    private function handleUpdateDMChannel(RequestUpdateDMChannel $pk){
+    private function handleUpdateDMChannel(RequestUpdateDMChannel $pk)
+    {
         $privatechannels = $this->client->getDiscordClient()->private_channels;
-        $privatechannels->fetch($pk->getChannel()->getId())->then(function(DiscordChannel $dc) use ($privatechannels, $pk){
+        $privatechannels->fetch($pk->getChannel()->getId())->then(function (DiscordChannel $dc) use ($privatechannels, $pk) {
             $channel = $pk->getChannel();
             if ($dc->type !== DiscordChannel::TYPE_DM) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to update channel.", ["Channel type change is not allowed."]);
@@ -1021,15 +1023,15 @@ class CommunicationHandler
             }
             $dc->owner_id = $channel->getOwnerId();
             $dc->recipient_id = $channel->getRecipientId();
-            if($channel->getApplicationId() !== null){
+            if ($channel->getApplicationId() !== null) {
                 $dc->application_id = $channel->getApplicationId();
             }
             $privatechannels->save($dc)->then(function (DiscordChannel $channel) use ($pk) {
                 $model = ModelConverter::genModelDMChannel($channel);
-                if($model === null){
+                if ($model === null) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to update DM Channel.", []);
-                }else{
-                $this->resolveRequest($pk->getUID(), true, "Updated channel.", [$model]);
+                } else {
+                    $this->resolveRequest($pk->getUID(), true, "Updated channel.", [$model]);
                 }
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to update channel.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -1037,18 +1039,19 @@ class CommunicationHandler
             });
         });
     }
-    private function handleDeleteDMChannel(RequestDeleteDMChannel $pk){
+    private function handleDeleteDMChannel(RequestDeleteDMChannel $pk)
+    {
         $client = $this->client->getDiscordClient();
-        $client->private_channels->fetch($pk->getChannelId())->then(function(DiscordChannel $channel) use ($pk, $client){
-        $client->private_channels->delete($channel)->then(function () use ($pk) {
-            $this->resolveRequest($pk->getUID(), true, "Channel deleted.");
-        }, function (\Throwable $e) use ($pk) {
-            $this->resolveRequest($pk->getUID(), false, "Failed to delete channel.", [$e->getMessage(), $e->getTraceAsString()]);
-            $this->logger->debug("Failed to delete channel ({$pk->getUID()}) - {$e->getMessage()}");
+        $client->private_channels->fetch($pk->getChannelId())->then(function (DiscordChannel $channel) use ($pk, $client) {
+            $client->private_channels->delete($channel)->then(function () use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Channel deleted.");
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to delete channel.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to delete channel ({$pk->getUID()}) - {$e->getMessage()}");
+            });
         });
-    });
-}
-            
+    }
+
 
 
     private function handleCreateChannel(RequestCreateChannel $pk): void

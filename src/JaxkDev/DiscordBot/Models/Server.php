@@ -148,10 +148,12 @@ class Server implements \Serializable
     {
         $this->member_count = $member_count;
     }
-    public function getWelcomeScreen(): ?WelcomeScreen{
+    public function getWelcomeScreen(): ?WelcomeScreen
+    {
         return $this->welcomeScreen;
     }
-    public function setWelcomeScreen(?WelcomeScreen $screen){
+    public function setWelcomeScreen(?WelcomeScreen $screen)
+    {
         $this->welcomeScreen = $screen;
     }
 

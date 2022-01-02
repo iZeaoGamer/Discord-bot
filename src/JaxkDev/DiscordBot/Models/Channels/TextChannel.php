@@ -44,7 +44,6 @@ class TextChannel extends ServerChannel
      * @param int|null    $rate_limit
      * @param string|null $category_id
      * @param string|null $id
-     * @param string|null $recipient_id
      * @param string|null $last_message_id
      */
     public function __construct(
@@ -56,14 +55,12 @@ class TextChannel extends ServerChannel
         ?int $rate_limit = null,
         ?string $category_id = null,
         ?string $id = null,
-        ?string $recipient_id = null,
         ?string $last_message_id = null
     ) {
         parent::__construct($name, $position, $server_id, $category_id, $id);
         $this->setTopic($topic);
         $this->setNsfw($nsfw);
         $this->setRateLimit($rate_limit);
-        $this->setRecipientId($recipient_id);
         $this->setLastMessageId($last_message_id);
     }
 
@@ -102,24 +99,15 @@ class TextChannel extends ServerChannel
         }
         $this->rate_limit = $rate_limit;
     }
-    public function getRecipientId(): ?string{
-        return $this->recipientId;
-    }
-    public function setRecipientId(?string $recipient): void{
-        if($recipient !== null){
-            if(!Utils::validDiscordSnowflake($recipient)){
-                throw new \AssertionError("Recipient ID '{$recipient}' is invalid.");
-            }
-        }
-        $this->recipientId = $recipient;
-    }
-    
-    public function getLastMessageId(): ?string{
+
+    public function getLastMessageId(): ?string
+    {
         return $this->messageId;
     }
-    public function setLastMessageId(?string $message_id): void{
-        if($message_id !== null){
-            if(!Utils::validDiscordSnowflake($message_id)){
+    public function setLastMessageId(?string $message_id): void
+    {
+        if ($message_id !== null) {
+            if (!Utils::validDiscordSnowflake($message_id)) {
                 throw new \AssertionError("Last Message ID: {$message_id} is invalid.");
             }
         }
@@ -140,7 +128,6 @@ class TextChannel extends ServerChannel
             $this->nsfw,
             $this->rate_limit,
             $this->category_id,
-            $this->recipientId,
             $this->messageId
         ]);
     }
@@ -158,7 +145,6 @@ class TextChannel extends ServerChannel
             $this->nsfw,
             $this->rate_limit,
             $this->category_id,
-            $this->recipientId,
             $this->messageId
         ] = unserialize($data);
     }

@@ -193,8 +193,8 @@ class BotCommunicationHandler
         elseif ($packet instanceof ServerScheduledEventCreatePacket) $this->handleScheduleCreate($packet);
         elseif ($packet instanceof ServerScheduledEventUpdatePacket) $this->handleScheduleUpdate($packet);
         elseif ($packet instanceof ServerScheduledEventDeletePacket) $this->handleScheduleDelete($packet);
-        elseif($packet instanceof ServerScheduledEventUserAddPacket) $this->handleScheduleAddUser($packet);
-        elseif($packet instanceof ServerScheduledEventUserRemovePacket) $this->handleScheduleRemoveUser($packet);
+        elseif ($packet instanceof ServerScheduledEventUserAddPacket) $this->handleScheduleAddUser($packet);
+        elseif ($packet instanceof ServerScheduledEventUserRemovePacket) $this->handleScheduleRemoveUser($packet);
         elseif ($packet instanceof DiscordReadyPacket) $this->handleReady();
     }
 
@@ -223,14 +223,15 @@ class BotCommunicationHandler
         (new ServerScheduledDeletedEvent($this->plugin, $packet->getScheduledEvent()))->call();
         Storage::removeSchedule($packet->getScheduledEvent()->getId());
     }
-    private function handleScheduleAddUser(ServerScheduledEventUserAddPacket $packet): void{
+    private function handleScheduleAddUser(ServerScheduledEventUserAddPacket $packet): void
+    {
         (new ServerScheduledUserAddedEvent($this->plugin, $packet->getScheduledEvent(), $packet->getServer(), $packet->getUser()))->call();
     }
-    private function handleScheduleRemoveUser(ServerScheduledEventUserRemovePacket $packet): void{
+    private function handleScheduleRemoveUser(ServerScheduledEventUserRemovePacket $packet): void
+    {
         (new ServerScheduledUserRemovedEvent($this->plugin, $packet->getScheduledEvent(), $packet->getServer(), $packet->getUser()));
-
     }
-    
+
     private function handleEmojiUpdate(ServerEmojiUpdatePacket $packet): void
     {
         (new ServerEmojiUpdatedEvent($this->plugin, $packet->getEmoji()))->call();
@@ -367,9 +368,9 @@ class BotCommunicationHandler
     {
         (new MessageDeletedEvent($this->plugin, $packet->getMessage()))->call();
         $message = $packet->getMessage();
-        if($message instanceof Message){
+        if ($message instanceof Message) {
             $id = $message->getId();
-        }else{
+        } else {
             $id = (string)$message["message_id"];
         }
 
@@ -424,7 +425,7 @@ class BotCommunicationHandler
         (new MessageReactionRemoveEmojiEvent($this->plugin, $packet->getEmoji(), $packet->getMessageId(), $channel))->call();
     }
 
-   
+
     private function handleThreadCreate(ThreadCreatePacket $packet): void
     {
         (new ThreadCreatedEvent($this->plugin, $packet->getChannel()))->call();
@@ -472,7 +473,7 @@ class BotCommunicationHandler
     private function handleChannelUpdate(ChannelUpdatePacket $packet): void
     {
         (new ChannelUpdatedEvent($this->plugin, $packet->getChannel()))->call();
-        
+
         Storage::updateChannel($packet->getChannel());
     }
 
@@ -615,10 +616,10 @@ class BotCommunicationHandler
         foreach ($packet->getTemplates() as $template) {
             Storage::addTemplate($template);
         }
-        foreach($packet->getScheduledEvents() as $scheduled){
+        foreach ($packet->getScheduledEvents() as $scheduled) {
             Storage::addSchedule($scheduled);
         }
-        foreach($packet->getMessages() as $message){
+        foreach ($packet->getMessages() as $message) {
             Storage::addMessage($message);
         }
     }
@@ -665,13 +666,13 @@ class BotCommunicationHandler
         foreach ($packet->getUsers() as $user) {
             Storage::addUser($user);
         }
-        foreach($packet->getTemplates() as $template){
+        foreach ($packet->getTemplates() as $template) {
             Storage::addTemplate($template);
         }
-        foreach($packet->getScheduledEvents() as $schedule){
+        foreach ($packet->getScheduledEvents() as $schedule) {
             Storage::addSchedule($schedule);
         }
-        foreach($packet->getMessages() as $message){
+        foreach ($packet->getMessages() as $message) {
             Storage::addMessage($message);
         }
 
