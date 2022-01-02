@@ -108,6 +108,7 @@ use JaxkDev\DiscordBot\Models\Role;
 use Discord\Builders\MessageBuilder;
 use Discord\Builders\Components\Button;
 use Discord\Builders\Components\SelectMenu;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTimedOutMember;
 
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 
@@ -134,11 +135,12 @@ class Api
      * 
      * @return PromiseInterface Resolves with a Message Model.
      */
-    public function crossPostMessage(string $message_id, string $channel_id): PromiseInterface{
-        if(!Utils::validDiscordSnowflake($message_id)){
+    public function crossPostMessage(string $message_id, string $channel_id): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Message ID: '{$message_id}' is invalid!"));
         }
-        if(!Utils::validDiscordSnowflake($channel_id)){
+        if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Channel ID: '{$channel_id}' is invalid!"));
         }
         $pk = new RequestCrossPostMessage($message_id, $channel_id);
@@ -152,7 +154,8 @@ class Api
      * 
      * @return PromiseInterface Resolves with a Welcome Screen Model.
      */
-    public function fetchWelcomeScreen(string $server_id): PromiseInterface{
+    public function fetchWelcomeScreen(string $server_id): PromiseInterface
+    {
         $pk = new RequestFetchWelcomeScreen($server_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -165,8 +168,9 @@ class Api
      * 
      * @return PromiseInterface Resolves with a Welcome Screen Model.
      */
-    public function updateWelcomeScreen(string $server_id, bool $enabled, array $options, string $description): PromiseInterface{
-        if(strlen($description) > 140){
+    public function updateWelcomeScreen(string $server_id, bool $enabled, array $options, string $description): PromiseInterface
+    {
+        if (strlen($description) > 140) {
             return rejectPromise(new ApiRejection("Description must be below 140 characters long."));
         }
         $pk = new RequestUpdateWelcomeScreen($server_id, $enabled, $options, $description);
@@ -453,8 +457,10 @@ class Api
         if (!Utils::validDiscordSnowflake($channelId)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
         }
-        if (!Utils::validDiscordSnowflake($message->getId())) {
-            return rejectPromise(new APIRejection("Invalid Message ID: {$message->getId()}"));
+        if ($message->getId() !== null) {
+            if (!Utils::validDiscordSnowflake($message->getId())) {
+                return rejectPromise(new APIRejection("Invalid Message ID: {$message->getId()}"));
+            }
         }
         $pk = new RequestModifyButton($builder, $message, $channelId, $button, $ephemeral, $doNothing);
         $this->plugin->writeOutboundData($pk);
@@ -968,6 +974,26 @@ class Api
             return rejectPromise(new ApiRejection("Invalid member ID '$member_id'."));
         }
         $pk = new RequestKickMember($sid, $uid);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+     /**
+     * Attempt to kick a member.
+     *
+     * @param string $member_id
+     * 
+     * @return PromiseInterface Resolves with no data.
+     */
+    public function timeoutMember(string $member_id, int $seconds): PromiseInterface
+    {
+        [$sid, $uid] = explode(".", $member_id);
+        if (!Utils::validDiscordSnowflake($sid) or !Utils::validDiscordSnowflake($uid)) {
+            return rejectPromise(new ApiRejection("Invalid member ID '$member_id'."));
+        }
+        if($seconds <= 0){
+            return rejectPromise(new ApiRejection("Invalid time: '{$seconds}'."));
+        }
+        $pk = new RequestTimedOutMember($sid, $uid, $seconds);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }

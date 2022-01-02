@@ -16,7 +16,22 @@ namespace Discord\Helpers;
  */
 class Bitwise
 {
-    public static bool $is_32_gmp = false;
+    private static bool $is_32_gmp = false;
+
+    /**
+     * Run a single check whether the GMP extension is loaded, internally used
+     * during Discord class construct
+     *
+     * @return bool true if GMP extension is loaded
+     */
+    public static function init(): bool
+    {
+        if (extension_loaded('gmp')) {
+            self::$is_32_gmp = true;
+        }
+
+        return self::$is_32_gmp;
+    }
 
     /**
      * @param \GMP|int|string $a
@@ -74,7 +89,7 @@ class Bitwise
             return \gmp_neg(self::floatCast($a));
         }
 
-        return ~ $a;
+        return ~$a;
     }
 
     /**
@@ -131,7 +146,9 @@ class Bitwise
     public static function set($a, int $b)
     {
         if (self::$is_32_gmp) {
-            return \gmp_setbit(\gmp_init(self::floatCast($a)), $b);
+            $gmp = \gmp_init(self::floatCast($a));
+            \gmp_setbit($gmp, $b);
+            return $gmp;
         }
 
         return $a |= (1 << $b);
@@ -149,7 +166,7 @@ class Bitwise
     public static function floatCast($value)
     {
         // Discard non float
-        if (! is_float($value)) return $value;
+        if (!is_float($value)) return $value;
 
         $currentLocale = setlocale(LC_NUMERIC, '0');
         setlocale(LC_NUMERIC, 'C');
@@ -159,5 +176,13 @@ class Bitwise
         setlocale(LC_NUMERIC, $currentLocale);
 
         return $result;
+    }
+
+    /**
+     * @return bool Whether the GMP extension is loaded
+     */
+    public static function is32BitWithGMP(): bool
+    {
+        return self::$is_32_gmp;
     }
 }

@@ -15,6 +15,7 @@
 
 namespace JaxkDev\DiscordBot\Bot\Handlers;
 
+use Carbon\Carbon;
 use Discord\Helpers\Collection;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Thread\Thread as DiscordThread;
@@ -136,8 +137,10 @@ use function React\Promise\reject;
 
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateServerFromTemplate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchWelcomeScreen;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTimedOutMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWelcomeScreen;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
+use JaxkDev\DiscordBot\Plugin\Utils;
 
 class CommunicationHandler
 {
@@ -244,8 +247,10 @@ class CommunicationHandler
         elseif ($pk instanceof RequestUpdateReaction) $this->handleUpdateReaction($pk);
         elseif ($pk instanceof RequestDeleteReaction) $this->handleDeleteReaction($pk);
         elseif ($pk instanceof RequestCreateServerFromTemplate) $this->handleCreateServerFromTemplate($pk);
-        elseif($pk instanceof RequestFetchWelcomeScreen) $this->handleFetchWelcomeScreen($pk);
-        elseif($pk instanceof RequestUpdateWelcomeScreen) $this->handleUpdateWelcomeScreen($pk);
+        elseif ($pk instanceof RequestFetchWelcomeScreen) $this->handleFetchWelcomeScreen($pk);
+        elseif ($pk instanceof RequestUpdateWelcomeScreen) $this->handleUpdateWelcomeScreen($pk);
+        elseif ($pk instanceof RequestTimedOutMember) $this->handleTimedOutMember($pk);
+        elseif ($pk instanceof RequestStickerUpdate) $this->handleStickerUpdate($pk);
     }
     private function handleDelayReply(RequestDelayReply $pk): void
     {
@@ -689,10 +694,10 @@ class CommunicationHandler
     {
         $this->getMember($pk, $pk->getServerId(), $pk->getUserId(), function (DiscordMember $dMember) use ($pk) {
             $dMember->addRole($pk->getRoleId(), $pk->getReason())->done(function () use ($dMember, $pk) {
-                foreach($dMember->roles as $role){
-                    if($role->id === $pk->getRoleId()){
+                foreach ($dMember->roles as $role) {
+                    if ($role->id === $pk->getRoleId()) {
 
-                $this->resolveRequest($pk->getUID(), true, "Added role.", [ModelConverter::genModelRole($role)]);
+                        $this->resolveRequest($pk->getUID(), true, "Added role.", [ModelConverter::genModelRole($role)]);
                     }
                 }
             }, function (\Throwable $e) use ($pk) {
@@ -747,7 +752,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleCreateReaction(RequestCreateReaction $pk)
+    private function handleCreateReaction(RequestCreateReaction $pk): void
     {
         $this->getMessage($pk, $pk->getReaction()->getChannelId(), $pk->getReaction()->getMessageId(), function (DiscordMessage $msg) use ($pk) {
             $r = $pk->getReaction();
@@ -775,7 +780,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleUpdateReaction(RequestUpdateReaction $pk)
+    private function handleUpdateReaction(RequestUpdateReaction $pk): void
     {
         if ($pk->getReaction()->getId() === null) {
             $this->resolveRequest($pk->getUID(), false, "Reaction ID must be present!");
@@ -801,7 +806,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleDeleteReaction(RequestDeleteReaction $pk)
+    private function handleDeleteReaction(RequestDeleteReaction $pk): void
     {
         $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($pk) {
             $message->reactions->fetch($pk->getReactionId())->done(function (DiscordReaction $reaction) use ($message, $pk) {
@@ -1197,7 +1202,7 @@ class CommunicationHandler
             });
         });
     }
-    private function handleCreateServerFromTemplate(RequestCreateServerFromTemplate $pk)
+    private function handleCreateServerFromTemplate(RequestCreateServerFromTemplate $pk): void
     {
         $icon = $pk->getServerIcon();
         $name = $pk->getServerName();
@@ -2213,6 +2218,32 @@ class CommunicationHandler
                 $this->resolveRequest($pk->getUID(), false, "Failed to kick member.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to kick member ({$pk->getUID()}) - {$e->getMessage()}");
             });
+        });
+    }
+    private function handleTimedOutMember(RequestTimedOutMember $pk): void
+    {
+        $this->getMember($pk, $pk->getServerId(), $pk->getUserId(), function (DiscordMember $member, DiscordGuild $guild) use ($pk) {
+            $seconds = $pk->getSeconds();
+
+            $time = Carbon::createSafe(
+                Utils::toYears($seconds),
+                Utils::toMonths($seconds),
+                Utils::toDays($seconds),
+
+                Utils::toHours($seconds),
+                Utils::toMinutes($seconds),
+                $seconds
+            );
+            if ($time !== false) {
+                $member->timeoutMember($time)->then(function () use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Member Timedout.");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to timeout member.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to timeout member ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            } else {
+                $this->resolveRequest($pk->getUID(), false, "Failed to create carbon timestamp.");
+            }
         });
     }
 
