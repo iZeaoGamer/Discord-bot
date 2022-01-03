@@ -413,6 +413,22 @@ class Api
         return ApiResolver::create($pk->getUID());
     }
 
+    /** Responds to an interaction.
+     * 
+     * @param MessageBuilder $builder
+     * @param Message $message
+     * @param string $message_id
+     * @param string $channel_id
+     * 
+     * @return void
+     */
+    public function respondInteraction(MessageBuilder $builder, Message $message, string $message_id, string $channel_id): void{
+        $this->createInteraction($builder, $message);
+        $this->deleteMessage($message_id, $channel_id);
+    }
+
+
+
     /** Creates an interaction. 
      * 
      * @param MessageBuilder $builder

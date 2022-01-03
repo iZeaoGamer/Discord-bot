@@ -258,6 +258,7 @@ class CommunicationHandler
         elseif ($pk instanceof RequestUpdateDMChannel) $this->handleUpdateDMChannel($pk);
         elseif ($pk instanceof RequestDeleteDMChannel) $this->handleDeleteDMChannel($pk);
     }
+
     private function handleDelayReply(RequestDelayReply $pk): void
     {
         $message = $pk->getMessage();
