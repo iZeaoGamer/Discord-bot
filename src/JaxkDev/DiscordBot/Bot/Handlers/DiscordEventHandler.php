@@ -299,6 +299,9 @@ array(5) {
             foreach ($guild->channels as $channel) {
                 if ($permissions->read_message_history) {
 
+                    if ($channel->type !== DiscordChannel::TYPE_TEXT) {
+                        continue;
+                    }
                     $channel->messages->freshen()->done(function () use ($channel, $guild) {
                         $this->logger->debug("Successfully fetched " . sizeof($channel->messages) . " total Messages from server '" .
                             $guild->name . "' (" . $guild->id . ")");
@@ -311,6 +314,7 @@ array(5) {
                             $msg = ModelConverter::genModelMessage($message);
                             $pk->addMessage($msg);
                         }
+                        $this->client->getThread()->writeOutboundData($pk);
                     }, function (\Throwable $e) use ($guild) {
                         $this->logger->warning("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
                     });
