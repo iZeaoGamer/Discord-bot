@@ -11,9 +11,10 @@
 
 namespace Discord\WebSockets\Events;
 
+use Discord\Helpers\Collection;
 use Discord\WebSockets\Event;
 use Discord\Helpers\Deferred;
-use Discord\Parts\Channel\Emoji;
+use Discord\Parts\Guild\Emoji;
 
 class GuildEmojisUpdate extends Event
 {
@@ -22,18 +23,22 @@ class GuildEmojisUpdate extends Event
      */
     public function handle(Deferred &$deferred, $data): void
     {
-        $adata = (array) $data->emojis;
-        $adata['guild_id'] = $data->guild_id;
+        $oldParts = Collection::for(Emoji::class);
+        $emojiParts = Collection::for(Emoji::class);
 
-        $emojiPart = $this->factory->create(Emoji::class, $adata, true);
-
-        if ($guild = $this->discord->guilds->get('id', $emojiPart->guild_id)) {
-            $old = $guild->emojis->get('id', $emojiPart->id);
-            $guild->emojis->push($emojiPart);
-        } else {
-            $old = null;
+        if ($guild = $this->discord->guilds->get('id', $data->guild_id)) {
+            // Will not contain removed emoji
+            foreach ($data->emojis as $emoji) {
+                $oldParts->pushItem($guild->emojis->get('id', $emoji->id));
+            }
         }
 
-        $deferred->resolve([$emojiPart, $old]);
+        foreach ($data->emojis as $emoji) {
+            $emojiPart = $this->factory->create(Emoji::class, $emoji, true);
+            $guild->emojis->offsetSet($emoji->id, $emojiPart);
+            $emojiParts->pushItem($emojiPart);
+        }
+
+        $deferred->resolve([$emojiParts, $oldParts]);
     }
 }
