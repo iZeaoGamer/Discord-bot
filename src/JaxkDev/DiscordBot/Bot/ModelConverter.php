@@ -471,20 +471,20 @@ abstract class ModelConverter
             $discordServer->explicit_content_filter,
             $discordServer->mfa_level,
             $discordServer->application_id,
-            $discordServer->widget_enabled,
-            $discordServer->widget_channel_id,
-            $discordServer->system_channel_id,
-            $discordServer->system_channel_flags,
-            $discordServer->rules_channel_id,
-            $discordServer->vanity_url_code,
-            $discordServer->description,
-            $discordServer->banner,
-            $discordServer->premium_tier,
-            $discordServer->premium_subscription_count,
+            $discordServer->widget_enabled ?? false,
+            $discordServer->widget_channel_id ?? null,
+            $discordServer->system_channel_id ?? null,
+            $discordServer->system_channel_flags ?? 1,
+            $discordServer->rules_channel_id ?? null,
+            $discordServer->vanity_url_code ?? null,
+            $discordServer->description ?? null,
+            $discordServer->banner ?? null,
+            $discordServer->premium_tier ?? 0,
+            $discordServer->premium_subscription_count ?? 0,
             $discordServer->preferred_locale,
-            $discordServer->public_updates_channel_id,
-            $discordServer->nsfw_level,
-            $discordServer->premium_progress_bar_enabled
+            $discordServer->public_updates_channel_id ?? null,
+            $discordServer->nsfw_level ?? 0,
+            $discordServer->premium_progress_bar_enabled ?? false
         );
     }
 

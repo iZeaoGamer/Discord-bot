@@ -458,7 +458,7 @@ class Server implements \Serializable
         if ($flags > self::TOTAL_FLAGS) {
             throw new \AssertionError("Channel Flag: {$flags} is over the Total Flags limit: " . self::TOTAL_FLAGS);
         }
-        if ($flags < self::SUPPRESS_JOIN_NOTIFICATIONS) {
+        if ($flags < 0) {
             throw new \AssertionError("Channel Flag: {$flags} is invalid.");
         }
         $this->flags = $flags;
@@ -533,11 +533,11 @@ class Server implements \Serializable
     {
         $this->preferred_locale = $locale;
     }
-    public function getPublicUpdatesChannelId(): string
+    public function getPublicUpdatesChannelId(): ?string
     {
         return $this->public_updates_channel_id;
     }
-    public function setPublicUpdatesChannelId(string $channel_id): void
+    public function setPublicUpdatesChannelId(?string $channel_id): void
     {
         if ($channel_id !== null) {
             if (!Utils::validDiscordSnowflake($channel_id)) {
