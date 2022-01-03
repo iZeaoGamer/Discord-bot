@@ -420,11 +420,12 @@ class Api
      * @param string $message_id
      * @param string $channel_id
      * 
-     * @return void
+     * @return PromiseInterface Resolves with a Interaction Model. If Interaction not found, returns a Message Model instead.
      */
-    public function respondInteraction(MessageBuilder $builder, Message $message, string $message_id, string $channel_id): void{
-        $this->createInteraction($builder, $message);
+    public function respondInteraction(MessageBuilder $builder, Message $message, string $message_id, string $channel_id): PromiseInterface{
         $this->deleteMessage($message_id, $channel_id);
+        return $this->createInteraction($builder, $message);
+       
     }
 
 
@@ -434,7 +435,7 @@ class Api
      * @param MessageBuilder $builder
      * @param Message $message
      * 
-     * @return PromiseInterface Resolves with a Interaction Model
+     * @return PromiseInterface Resolves with a Interaction Model. If Interaction not found, returns a Message Model instead.
      */
     public function createInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false): PromiseInterface
     {
@@ -489,7 +490,7 @@ class Api
      * @param MessageBuilder $builder
      * @param Message $message
      * 
-     * @return PromiseInterface Resolves with a Interaction Model.
+     * @return PromiseInterface Resolves with a Interaction Model. If Interaction not found, returns a Message Model instead.
      */
     public function modifyInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false): PromiseInterface
     {

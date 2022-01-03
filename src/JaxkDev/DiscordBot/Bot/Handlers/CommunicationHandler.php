@@ -1582,7 +1582,7 @@ class CommunicationHandler
                         $interaction = $msg->interaction;
                         print_r($interaction);
                         if ($interaction === null) {
-                            $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
+                            $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message. (Data turned into Message Model)", [ModelConverter::genModelMessage($msg)]);
                             return;
                         }
                         $ephemeral = $pk->isEphemeral();
@@ -1599,7 +1599,7 @@ class CommunicationHandler
                     $interaction = $msg->interaction;
                     print_r($interaction);
                     if ($interaction === null) {
-                        $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message. (Turned into Message");
+                        $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message. (Data turned into Message Model)", [ModelConverter::genModelMessage($msg)]);
                         return;
                     }
                     $ephemeral = $pk->isEphemeral();
@@ -1610,11 +1610,11 @@ class CommunicationHandler
                     $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - {$e->getMessage()}");
                 });
             }
-            $message->edit($builder)->done(function (DiscordMessage $message) use ($pk) {
-                $interaction = $message->interaction;
+            $message->edit($builder)->done(function (DiscordMessage $msg) use ($pk) {
+                $interaction = $msg->interaction;
                 print_r($interaction);
                 if ($interaction === null) {
-                    $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message.");
+                    $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message. (Data turned into Message Model)", [ModelConverter::genModelMessage($msg)]);
                     return;
                 }
                 $ephemeral = $pk->isEphemeral();
