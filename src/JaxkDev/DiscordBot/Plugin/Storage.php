@@ -648,11 +648,11 @@ class Storage
             $seconds = Utils::toSeconds($message->getTimestamp() ?? 0.00);
             $days = Utils::toDays($seconds);
             if($days < 14){
-                Main::get()->getLogger()->debug("Days for {$message->getId()} is {$days} days worth.");
+          //      Main::get()->getLogger()->debug("Days for {$message->getId()} is {$days} days worth.");
                 continue;
             } 
             $more = 14 - $days;
-            Main::get()->getLogger()->debug("Days for {$message->getId()} is {$more} more days than total: {$days} days.");
+        //    Main::get()->getLogger()->debug("Days for {$message->getId()} is {$more} more days than total: {$days} days.");
             Storage::removeMessage($message->getId());
         }
     }
