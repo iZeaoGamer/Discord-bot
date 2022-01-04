@@ -649,30 +649,37 @@ class Storage
     public static function bulkRemove(string $channel_id, int $limit): void
     {
         $deleted = 0;
-
+        Main::get()->getAPI()->bulKDelete($channel_id, $limit);
+        /** @var Message[] $msgs */
+        $msgs = [];
         foreach (self::getMessagesByChannel($channel_id) as $message) {
             $deleted += 1;
             if ($deleted <= $limit) {
-                Main::get()->getAPI()->deleteMessage($message->getId(), $channel_id);
-                $ev = new MessageDeletedEvent(Main::get(), $message);
-                $ev->call();
-                self::removeMessage($message->getId());
-                Main::get()->getLogger()->info("Message deleted event has been called.");
-                print_r($message);
+                /** @var Message[] $msgs */
+                $msgs[] = $message;
             }
         }
-    }
 
+        $ev = new MessageDeletedEvent(Main::get(), $msgs);
+        $ev->call();
+        foreach ($msgs as $message) {
+            self::removeMessage($message->getId());
+
+
+            Main::get()->getLogger()->info("Message deleted event has been called.");
+            print_r($message);
+        }
+    }
     /**
      * @param Message $message
      * @return bool
      */
     public static function isOldMessage(Message $message): bool
     {
-            $seconds = Utils::toSeconds($message->getTimestamp());
-            $days = Utils::toDays($seconds);
-            if ($days < 14) {
-                return false;
+        $seconds = Utils::toSeconds($message->getTimestamp());
+        $days = Utils::toDays($seconds);
+        if ($days < 14) {
+            return false;
         }
         return true;
     }
@@ -695,7 +702,7 @@ class Storage
         $messages = [];
         foreach (self::getMessages() as $message) {
             if ($channel_id === $message->getChannelId()) {
-                
+
                 $messages[] = $message;
             }
         }

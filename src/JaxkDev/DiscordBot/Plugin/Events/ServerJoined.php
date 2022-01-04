@@ -16,6 +16,7 @@ use JaxkDev\DiscordBot\Models\Channels\Channel;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Server;
+use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use pocketmine\plugin\Plugin;
 
@@ -43,6 +44,9 @@ class ServerJoined extends DiscordBotEvent
     /** @var Member[] */
     private $members;
 
+    /** @var Message[] */
+    private $messages;
+
     /**
      * @param Plugin    $plugin
      * @param Server    $server
@@ -50,8 +54,9 @@ class ServerJoined extends DiscordBotEvent
      * @param Role[]    $roles
      * @param Channel[] $channels
      * @param Member[]  $members
+     * @param Message[]
      */
-    public function __construct(Plugin $plugin, Server $server, array $threads, array $roles, array $channels, array $members)
+    public function __construct(Plugin $plugin, Server $server, array $threads, array $roles, array $channels, array $members, array $messages)
     {
         parent::__construct($plugin);
         $this->server = $server;
@@ -59,6 +64,7 @@ class ServerJoined extends DiscordBotEvent
         $this->roles = $roles;
         $this->channels = $channels;
         $this->members = $members;
+        $this->messages = $messages;
     }
 
     public function getServer(): Server
@@ -88,5 +94,10 @@ class ServerJoined extends DiscordBotEvent
     public function getMembers(): array
     {
         return $this->members;
+    }
+
+    /** @return Message[] */
+    public function getMessages(): array{
+        return $this->messages;
     }
 }

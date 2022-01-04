@@ -29,13 +29,13 @@ class MessageDeleted extends DiscordBotEvent
 {
 
     /**
-     * @var Message|array{"message_id": string, "channel_id": string, "server_id": string}
+     * @var Message|Message[]|array{"message_id": string, "channel_id": string, "server_id": string}
      */
     private $message;
 
     /**
      * @param Plugin                                                                            $plugin
-     * @param Message|array{"message_id": string, "channel_id": string, "server_id": string}    $message
+     * @param Message|Message[]|array{"message_id": string, "channel_id": string, "server_id": string}    $message
      */
     public function __construct(Plugin $plugin, $message)
     {
@@ -44,7 +44,7 @@ class MessageDeleted extends DiscordBotEvent
     }
 
     /**
-     * @return Message|array{"message_id": string, "channel_id": string, "server_id": string}
+     * @return Message|Message[]|array{"message_id": string, "channel_id": string, "server_id": string}
      */
     public function getMessage()
     {

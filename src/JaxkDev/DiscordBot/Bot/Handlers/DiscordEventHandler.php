@@ -295,13 +295,20 @@ array(5) {
                 $this->logger->notice("Cannot fetch bans from server '" . $guild->name . "' (" . $guild->id .
                     "), Bot does not have 'ban_members' permission.");
             }
-            /** @var DiscordChannel $channel */
-            foreach ($guild->channels as $channel) {
+             /** @var DiscordChannel $channel */
+             foreach ($guild->channels as $channel) {
+                /** @var DiscordThread $thread */
+                foreach ($channel->threads as $thread) {
+                    $c = ModelConverter::genModelThread($thread);
+                    $pk->addThread($c);
+                }
+            }
+              /** @var DiscordChannel $channel */
+              foreach($guild->channels as $channel){
+                  
+                $c = ModelConverter::genModelChannel($channel);
+                if ($c !== null) $pk->addChannel($c);
                 if ($permissions->read_message_history) {
-
-                    if ($channel->type !== DiscordChannel::TYPE_TEXT) {
-                        continue;
-                    }
                     $channel->messages->freshen()->done(function () use ($channel, $guild) {
                         $this->logger->debug("Successfully fetched " . sizeof($channel->messages) . " total Messages from server '" .
                             $guild->name . "' (" . $guild->id . ")");
@@ -309,11 +316,12 @@ array(5) {
                         if (sizeof($channel->messages) === 0) return;
                         $pk = new DiscordDataDumpPacket();
                         $pk->setTimestamp(time());
-                        /** @var DiscordMessage $message */
+                /** @var DiscordMessage $message */
                         foreach ($channel->messages as $message) {
                             $msg = ModelConverter::genModelMessage($message);
                             $pk->addMessage($msg);
-                        }
+                            continue;
+                    }
                         $this->client->getThread()->writeOutboundData($pk);
                     }, function (\Throwable $e) use ($guild) {
                         $this->logger->warning("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
@@ -322,17 +330,8 @@ array(5) {
                     $this->logger->notice("Cannot fetch Messages from server '" . $guild->name . "' (" . $guild->id .
                         "), Bot does not have 'read_message_history' permission.");
                 }
-                $c = ModelConverter::genModelChannel($channel);
-                if ($c !== null) $pk->addChannel($c);
             }
-            /** @var DiscordChannel $channel */
-            foreach ($guild->channels as $channel) {
-                /** @var DiscordThread $thread */
-                foreach ($channel->threads as $thread) {
-                    $c = ModelConverter::genModelThread($thread);
-                    $pk->addThread($c);
-                }
-            }
+           
 
             /** @var DiscordRole $role */
             foreach ($guild->roles as $role) {
