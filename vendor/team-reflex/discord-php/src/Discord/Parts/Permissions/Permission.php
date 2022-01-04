@@ -12,7 +12,7 @@
 namespace Discord\Parts\Permissions;
 
 use Discord\Discord;
-use Discord\Helpers\Bitwise;
+use JaxkDev\DiscordBot\Plugin\Bitwise;
 use Discord\Parts\Part;
 
 /**

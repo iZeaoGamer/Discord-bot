@@ -96,7 +96,7 @@ use JaxkDev\DiscordBot\Models\OAuth\Application;
 use Jaxkdev\DiscordBot\Models\Client;
 
 use JaxkDev\DiscordBot\Models\Channels\Overwrite;
-use Discord\Helpers\Bitwise;
+use JaxkDev\DiscordBot\Plugin\Bitwise;
 use JaxkDev\DiscordBot\Models\Permissions\Permissions;
 
 abstract class ModelConverter

@@ -13,7 +13,7 @@
 namespace JaxkDev\DiscordBot\Models\Permissions;
 
 
-use Discord\Helpers\Bitwise;
+use JaxkDev\DiscordBot\Plugin\Bitwise;
 
 abstract class Permissions implements \Serializable
 {
