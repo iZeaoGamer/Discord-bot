@@ -14,16 +14,26 @@ namespace JaxkDev\DiscordBot\Plugin;
 
 abstract class Utils
 {
+    /** 
+     * Converts timestamps to seconds.
+     * @param int $timestamp
+     * @return int
+     */
+    public static function toSeconds(int $timestamp): int
+    {
+        $timediff = time() - $timestamp;
+        return $timediff;
+    }
 
-     /** Converts seconds to years.
+    /** Converts seconds to years.
      * @param int $seconds
      * @return int
      */
-    static function toYears(int $seconds): int
+    public static function toYears(int $seconds): int
     {
-        if($seconds >= 31557600){
-        $unit = floor($seconds / 31557600);
-        }else{
+        if ($seconds >= 31557600) {
+            $unit = floor($seconds / 31557600);
+        } else {
             $unit = 0;
         }
         return $unit;
@@ -33,7 +43,7 @@ abstract class Utils
      * @param int $year
      * @return int
      */
-    static function fromYears(int $year): int
+    public static function fromYears(int $year): int
     {
         $seconds = $year * 3155760000;
         return $seconds;
@@ -43,11 +53,11 @@ abstract class Utils
      * @param int $seconds
      * @return int
      */
-    static function toMonths(int $seconds): int
+    public static function toMonths(int $seconds): int
     {
-        if($seconds >= 2628288){
-        $unit = floor($seconds / 2628288);
-        }else{
+        if ($seconds >= 2628288) {
+            $unit = floor($seconds / 2628288);
+        } else {
             $unit = 0;
         }
         return $unit;
@@ -57,7 +67,7 @@ abstract class Utils
      * @param int $month
      * @return int
      */
-    static function fromMonths(int $month): int
+    public static function fromMonths(int $month): int
     {
         $seconds = $month * 2628288;
         return $seconds;
@@ -68,11 +78,11 @@ abstract class Utils
      * @param int $seconds
      * @return int
      */
-    static function toWeeks(int $seconds): int
+    public static function toWeeks(int $seconds): int
     {
-        if($seconds >= 604800){
-        $unit = floor($seconds / 604800);
-        }else{
+        if ($seconds >= 604800) {
+            $unit = floor($seconds / 604800);
+        } else {
             $unit = 0;
         }
         return $unit;
@@ -82,7 +92,7 @@ abstract class Utils
      * @param int $week
      * @return int
      */
-    static function fromWeeks(int $week): int
+    public static function fromWeeks(int $week): int
     {
         $seconds = $week * 604800;
         return $seconds;
@@ -92,11 +102,11 @@ abstract class Utils
      * @param int $seconds
      * @return int
      */
-    static function toDays(int $seconds): int
+    public static function toDays(int $seconds): int
     {
-        if($seconds >= 86400){
-        $unit = floor($seconds / 86400);
-        }else{
+        if ($seconds >= 86400) {
+            $unit = floor($seconds / 86400);
+        } else {
             $unit = 0;
         }
         return $unit;
@@ -106,7 +116,7 @@ abstract class Utils
      * @param int $day
      * @return int
      */
-    static function fromDays(int $day): int
+    public static function fromDays(int $day): int
     {
         $seconds = $day * 86400;
         return $seconds;
@@ -116,11 +126,11 @@ abstract class Utils
      * @param int $seconds
      * @return int
      */
-    static function toHours(int $seconds): int
+    public static function toHours(int $seconds): int
     {
-        if($seconds >= 3600){
-        $unit = floor($seconds / 3600);
-        }else{
+        if ($seconds >= 3600) {
+            $unit = floor($seconds / 3600);
+        } else {
             $unit = 0;
         }
         return $unit;
@@ -130,7 +140,7 @@ abstract class Utils
      * @param int $hour
      * @return int
      */
-    static function fromHours(int $hour): int
+    public static function fromHours(int $hour): int
     {
         $seconds = $hour * 3600;
         return $seconds;
@@ -140,11 +150,11 @@ abstract class Utils
      * @param int $seconds
      * @return int
      */
-    static function toMinutes(int $seconds): int
+    public static function toMinutes(int $seconds): int
     {
-        if($seconds >= 60){
-        $unit = floor($seconds / 60);
-        }else{
+        if ($seconds >= 60) {
+            $unit = floor($seconds / 60);
+        } else {
             $unit = 0;
         }
         return $unit;
@@ -154,7 +164,7 @@ abstract class Utils
      * @param int $minute
      * @return int
      */
-    static function fromMinutes(int $minute): int
+    public static function fromMinutes(int $minute): int
     {
         $seconds = $minute * 60;
         return $seconds;
@@ -174,7 +184,8 @@ abstract class Utils
         if ($timestamp > time() + 86400 or $timestamp <= 1420070400) return false; //+86400 (24h for any timezone problems)
         return true;
     }
-    public static function validUserDiscriminator(string $discriminator): bool{
+    public static function validUserDiscriminator(string $discriminator): bool
+    {
         return strlen($discriminator) === 4;
     }
     /**

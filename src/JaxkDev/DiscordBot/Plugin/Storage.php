@@ -48,9 +48,6 @@ class Storage
     private static $message_server_map = [];
 
     /** @var Array<string, string[]> */
-    private static $message_channel_map = [];
-
-    /** @var Array<string, string[]> */
     private static $message_user_map = [];
 
     /** @var Array<string, ServerChannel> */
@@ -603,7 +600,6 @@ class Storage
         if ($message->getServerId() !== null) {
             self::$message_server_map[$message->getServerId()][] = $message->getId();
         }
-        self::$message_channel_map[$message->getChannelId()][] = $message->getId();
         if ($message->getAuthorId() !== null) {
             $member = self::getMember($message->getAuthorId());
             if ($member !== null) {
@@ -633,11 +629,6 @@ class Storage
         if ($i === false || is_string($i)) return; //Not in this servers message map.
         array_splice(self::$message_server_map[$server_id], $i, 1);
 
-        $channel_id = $message->getChannelId();
-        $i = array_search($message_id, self::$message_channel_map[$channel_id], true);
-        if ($i === false || is_string($i)) return; //Not in this channels message map.
-        array_splice(self::$message_channel_map[$channel_id], $i, 1);
-
 
         if ($message->getAuthorId() !== null) {
             $member = self::getMember($message->getAuthorId());
@@ -662,15 +653,31 @@ class Storage
         foreach (self::getMessagesByChannel($channel_id) as $message) {
             $deleted += 1;
             if ($deleted <= $limit) {
-                Main::get()->getAPI()->bulkDelete($channel_id, $limit);
+                Main::get()->getAPI()->deleteMessage($message->getId(), $channel_id);
                 $ev = new MessageDeletedEvent(Main::get(), $message);
                 $ev->call();
-                Storage::removeMessage($message->getId());
+                self::removeMessage($message->getId());
                 Main::get()->getLogger()->info("Message deleted event has been called.");
                 print_r($message);
             }
         }
     }
+
+    /**
+     * @param string $channel_id
+     * @return bool
+     */
+    public static function isOldMessage(string $channel_id): bool{
+        foreach(self::getMessagesByChannel($channel_id) as $message){
+                $seconds = Utils::toSeconds($message->getTimestamp());
+                $days = Utils::toDays($seconds);
+                if($days > 14){
+                    return true;
+            }
+        }
+        return false;
+    }
+            
 
 
 
@@ -683,15 +690,14 @@ class Storage
         return self::$message_map[$message_id] ?? null;
     }
 
-    /** @param string $channel_id
-     * @return Message[]
-     */
+    /** @return Message[] */
     public static function getMessagesByChannel(string $channel_id): array
     {
         $messages = [];
-        foreach ((self::$message_channel_map[$channel_id] ?? []) as $id) {
-            $m = self::getMessage($id);
-            if ($m !== null) $messages[] = $m;
+        foreach (self::getMessages() as $message) {
+            if ($channel_id === $message->getChannelId()) {
+                $messages[] = $message;
+            }
         }
         return $messages;
     }
