@@ -127,7 +127,6 @@ class Main extends PluginBase
         $this->config["discord"]["token"] = preg_replace('([a-zA-Z0-9])', '*', $this->config["discord"]["token"]);
 
         $this->tickTask = $this->getScheduler()->scheduleRepeatingTask(new ClosureTask(function (int $currentTick): void {
-            Storage::removeOldMessage();
             $this->tick($currentTick);
         }), 1);
     }
