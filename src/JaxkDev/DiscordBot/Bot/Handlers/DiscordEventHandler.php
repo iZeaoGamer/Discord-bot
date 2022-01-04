@@ -380,14 +380,14 @@ array(5) {
                     "), Bot does not have 'manage_guild' permission.");
             }
             if ($permissions->manage_guild) {
-                $guild->scheduled_events->freshen(true)->done(function () use ($guild) {
-                    $this->logger->debug("Successfully fetched " . sizeof($guild->scheduled_events) .
+                $guild->guild_scheduled_events->freshen(true)->done(function () use ($guild) {
+                    $this->logger->debug("Successfully fetched " . sizeof($guild->guild_scheduled_events) .
                         " scheduled events from server '" . $guild->name . "' (" . $guild->id . ")");
-                    if (sizeof($guild->scheduled_events) === 0) return;
+                    if (sizeof($guild->guild_scheduled_events) === 0) return;
                     $pk = new DiscordDataDumpPacket();
                     $pk->setTimestamp(time());
                     /** @var DiscordScheduledEvent $scheduled */
-                    foreach ($guild->scheduled_events as $scheduled) {
+                    foreach ($guild->guild_scheduled_events as $scheduled) {
                         $pk->addSchedule(ModelConverter::genModelScheduledEvent($scheduled));
                     }
                     $this->client->getThread()->writeOutboundData($pk);
@@ -674,7 +674,7 @@ array(5) {
         }
         $scheduled = [];
         /** @var DiscordScheduledEvent $schedule */
-        foreach ($guild->scheduled_events as $schedule) {
+        foreach ($guild->guild_scheduled_events as $schedule) {
             $scheduled[] = ModelConverter::genModelScheduledEvent($schedule);
         }
         $messages = [];

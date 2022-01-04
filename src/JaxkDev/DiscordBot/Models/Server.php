@@ -14,6 +14,12 @@ namespace JaxkDev\DiscordBot\Models;
 
 use JaxkDev\DiscordBot\Plugin\Utils;
 
+use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
+use JaxkDev\DiscordBot\Models\Member;
+use JaxkDev\DiscordBot\Models\Role;
+use JaxkDev\DiscordBot\Models\ServerTemplate;
+
 class Server implements \Serializable
 {
 
@@ -152,6 +158,21 @@ class Server implements \Serializable
     /** @var bool */
     private $progressBar;
 
+    /** @var ServerScheduledEvent[] */
+    private $schedules = [];
+
+    /** @var ServerTemplate[] */
+    private $templates = [];
+
+    /** @var Role[] */
+    private $roles = [];
+
+    /** @var ServerChannel[] */
+    private $channels = [];
+
+    /** @var Member[] */
+    private $members = [];
+
 
     /** @var WelcomeScreen|null */
     private $welcomeScreen; //null when welcome screen is disabled.
@@ -187,7 +208,12 @@ class Server implements \Serializable
         string $preferred_locale = "en-US",
         ?string $public_updates_channel_id = null,
         int $nsfw_level = self::NSFW_DEFAULT,
-        bool $premium_progress_bar_enabled = false
+        bool $premium_progress_bar_enabled = false,
+        array $schedules = [],
+        array $templates = [],
+        array $roles = [],
+        array $channels = [],
+        array $members = []
 
 
 
@@ -226,6 +252,11 @@ class Server implements \Serializable
         $this->setPublicUpdatesChannelID($public_updates_channel_id);
         $this->setNSFWLevel($nsfw_level);
         $this->setProgressBar($premium_progress_bar_enabled);
+        $this->setSchedules($schedules);
+        $this->setTemplates($templates);
+        $this->setRoles($roles);
+        $this->setChannels($channels);
+        $this->setMembers($members);
     }
 
     public function getId(): string
@@ -565,6 +596,55 @@ class Server implements \Serializable
     {
         $this->progressBar = $progressBar;
     }
+      /** @return ServerScheduledEvent[] */
+      public function getSchedules(): array{
+        return $this->schedules;
+    }
+
+    /** @param ServerScheduledEvent[] $schedules*/
+    public function setSchedules(array $schedules): void{
+        $this->schedules = $schedules; 
+    }
+
+    /** @return ServerTemplate[] */
+    public function getTemplates(): array{
+        return $this->templates;
+    }
+
+    /** @param ServerTemplate[] $templates */
+    public function setTemplates(array $templates): void{
+        $this->templates = $templates; 
+    }
+
+    /** @return Role[] */
+    public function getRoles(): array{
+        return $this->roles;
+    }
+
+    /** @param Role[] $roles */
+    public function setRoles(array $roles): void{
+        $this->roles = $roles; 
+    }
+
+    /** @return ServerChannel[] */
+    public function getChannels(): array{
+        return $this->channels;
+    }
+
+    /** @param ServerChannel[] $channels */
+    public function setChannels(array $channels): void{
+        $this->channels = $channels; 
+    }
+
+    /** @return Member[] */
+    public function getMembers(): array{
+        return $this->members;
+    }
+
+    /** @param Member[] $members */
+    public function setMembers(array $members): void{
+        $this->members = $members; 
+    }
     public function getCreationTimestamp(): float
     {
         return Utils::getDiscordSnowflakeTimestamp($this->id);
@@ -605,7 +685,12 @@ class Server implements \Serializable
             $this->preferred_locale,
             $this->public_updates_channel_id,
             $this->nsfwLevel,
-            $this->progressBar
+            $this->progressBar,
+            $this->schedules,
+            $this->templates,
+            $this->roles,
+            $this->channels,
+            $this->members
 
 
 
@@ -645,7 +730,12 @@ class Server implements \Serializable
             $this->preferred_locale,
             $this->public_updates_channel_id,
             $this->nsfwLevel,
-            $this->progressBar
+            $this->progressBar,
+            $this->schedules,
+            $this->templates,
+            $this->roles,
+            $this->channels,
+            $this->members
         ] = unserialize($data);
     }
 }

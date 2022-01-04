@@ -40,7 +40,7 @@ use Discord\Parts\Guild\Guild as DiscordServer;
 use Discord\Parts\Interactions\Interaction as DiscordInteraction;
 use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
 use Discord\Parts\Channel\StageInstance as DiscordStage;
-use Discord\Parts\Guild\GuildTemplate as DiscordGuildTemplate;
+use Discord\Parts\Guild\GuildTemplate as DiscordServerTemplate;
 use Discord\Parts\Guild\AuditLog\AuditLog as DiscordAuditLog;
 use Discord\Parts\Guild\AuditLog\Entry as DiscordEntryLog;
 use Discord\Parts\Guild\AuditLog\Options as DiscordEntryOptions;
@@ -173,8 +173,13 @@ abstract class ModelConverter
         return new Overwrite(
             $overwrite->channel_id,
             $overwrite->type,
-            new ChannelPermissions($overwrite->allow->bitwise),
-            new ChannelPermissions($overwrite->deny->bitwise, $overwrite->id)
+            new ChannelPermissions(
+                $overwrite->allow->bitwise
+            ),
+            new ChannelPermissions(
+                $overwrite->deny->bitwise,
+                $overwrite->id
+            )
         );
     }
     static public function genModelAuditLog(DiscordAuditLog $log): AuditLog
@@ -257,7 +262,7 @@ abstract class ModelConverter
             $emoji->available
         );
     }
-    static public function genModelServerTemplate(DiscordGuildTemplate $template): ServerTemplate
+    static public function genModelServerTemplate(DiscordServerTemplate $template): ServerTemplate
     {
         return new ServerTemplate(
             $template->name,
@@ -275,7 +280,6 @@ abstract class ModelConverter
     {
         return new ServerScheduledEvent(
             $schedule->guild_id,
-            $schedule->name,
             $schedule->id,
             $schedule->channel_id,
             $schedule->creator_id,
@@ -453,10 +457,42 @@ abstract class ModelConverter
 
     static public function genModelServer(DiscordServer $discordServer): Server
     {
+        $schedules = [];
+        /** @var DiscordScheduledEvent */
+        foreach ($discordServer->guild_scheduled_events as $schedule) {
+            $schedules[] = self::genModelScheduledEvent($schedule);
+        }
+
+        $templates = [];
+        /** @var DiscordServerTemplate $template */
+        foreach ($discordServer->templates as $template) {
+            $templates[] = self::genModelServerTemplate($template);
+        }
+        $roles = [];
+        /** @var DiscordRole $role */
+        foreach ($discordServer->roles as $role) {
+            $roles[] = self::genModelRole($role);
+        }
+        $channels = [];
+        /** @var DiscordChannel $channel */
+        foreach ($discordServer->channels as $channel) {
+            $serverChannel = self::genModelChannel($channel);
+            if ($serverChannel) {
+                $channels[] = $serverChannel;
+            }
+        }
+
+        $members = [];
+        /** @var DiscordMember $member */
+        foreach($discordServer->members as $member){
+            $members[] = self::genModelMember($member);
+        }
+        //todo
+
         return new Server(
             $discordServer->id,
             $discordServer->name,
-            $discordServer->region,
+            $discordServer->region, // deprecated (//todo remove)
             $discordServer->owner_id,
             $discordServer->large,
             $discordServer->member_count,
@@ -484,7 +520,12 @@ abstract class ModelConverter
             $discordServer->preferred_locale,
             $discordServer->public_updates_channel_id ?? null,
             $discordServer->nsfw_level ?? 0,
-            $discordServer->premium_progress_bar_enabled ?? false
+            $discordServer->premium_progress_bar_enabled ?? false,
+            $schedules,
+            $templates,
+            $roles,
+            $channels,
+            $members
         );
     }
 

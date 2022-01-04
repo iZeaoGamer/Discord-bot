@@ -416,7 +416,7 @@ class CommunicationHandler
     private function handleScheduleCreate(RequestScheduleCreate $pk): void
     {
         $this->getServer($pk, $pk->getScheduledEvent()->getServerId(), function (DiscordGuild $guild) use ($pk) {
-            $guild->scheduled_events->save($guild->scheduled_events->create([
+            $guild->guild_scheduled_events->save($guild->scheduled_events->create([
                 'description' => $pk->getScheduledEvent()->getDescription()
             ]))->then(function (DiscordScheduledEvent $schedule) use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Successfully created Guild Scheduled Event.", [ModelConverter::genModelScheduledEvent($schedule)]);
@@ -431,10 +431,10 @@ class CommunicationHandler
             throw new \AssertionError("Guild Schedule ID must be present.");
         }
         $this->getServer($pk, $pk->getScheduledEvent()->getServerId(), function (DiscordGuild $guild) use ($pk) {
-            $guild->scheduled_events->fetch($pk->getScheduledEvent()->getId())->then(function (DiscordScheduledEvent $schedule) use ($guild, $pk) {
+            $guild->guild_scheduled_events->fetch($pk->getScheduledEvent()->getId())->then(function (DiscordScheduledEvent $schedule) use ($guild, $pk) {
                 $schedule->description = $pk->getScheduledEvent()->getDescription();
                 /** @phpstan-ignore-line avatar can be null. */
-                $guild->scheduled_events->save($schedule)->then(function (DiscordScheduledEvent $schedule) use ($pk) {
+                $guild->guild_scheduled_events->save($schedule)->then(function (DiscordScheduledEvent $schedule) use ($pk) {
                     $this->resolveRequest($pk->getUID(), true, "Successfully updated Schedule Event.", [ModelConverter::genModelScheduledEvent($schedule)]);
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to update Scheduled Event.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -449,8 +449,8 @@ class CommunicationHandler
     private function handleScheduleDelete(RequestScheduleDelete $pk): void
     {
         $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
-            $guild->scheduled_events->fetch($pk->getId())->then(function (DiscordScheduledEvent $schedule) use ($guild, $pk) {
-                $guild->scheduled_events->delete($schedule)->then(function () use ($pk) {
+            $guild->guild_scheduled_events->fetch($pk->getId())->then(function (DiscordScheduledEvent $schedule) use ($guild, $pk) {
+                $guild->guild_scheduled_events->delete($schedule)->then(function () use ($pk) {
                     $this->resolveRequest($pk->getUID(), true, "Successfully deleted Scheduled Event.");
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to delete Scheduled Event.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -889,7 +889,28 @@ class CommunicationHandler
     private function handleBulkDelete(RequestMessageBulkDelete $pk): void
     {
         $this->getChannel($pk, $pk->getChannelID(), function (DiscordChannel $channel) use ($pk) {
-            $channel->limitDelete($pk->getValue(), $pk->getReason())->done(function () use ($pk) {
+            //  $channel->limitDelete($pk->getValue(), $pk->getReason())->done(function () use ($pk) {
+            $channel->getMessageHistory([
+                "limit" => $pk->getValue()
+            ])->then(function ($messages) use ($pk, $channel) {
+                /** @var DiscordMessage[] */
+                $msgs = [];
+                foreach ($messages as $message) {
+                    print_r($message);
+                    if ($message instanceof DiscordMessage) {
+                        $msgs[] = $message;
+                    }
+                }
+                $filter = array_filter($msgs, function (DiscordMessage $message): bool {
+                    $model = ModelConverter::genModelMessage($message);
+                    $days = Utils::toDays(Utils::toSeconds($model->getTimestamp()));
+                    return $days < 14;
+                });
+                $channel->deleteMessages($filter, $pk->getReason());
+
+
+
+
                 $this->resolveRequest($pk->getUID());
                 $this->logger->debug("Message Bulk - success ({$pk->getUID()})");
             }, function (\Throwable $e) use ($pk) {

@@ -14,6 +14,7 @@ namespace Discord\Parts\Guild;
 use Discord\Helpers\Collection;
 use Discord\Parts\Part;
 use Discord\Parts\User\User;
+
 /**
  * An emoji object represents a custom emoji.
  *
@@ -106,6 +107,25 @@ class Emoji extends Part
         return $this->name;
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function getCreatableAttributes(): array
+    {
+        return [];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getUpdatableAttributes(): array
+    {
+        return [
+            'name' => $this->name,
+            'roles' => $this->attributes['roles'],
+        ];
+    }
+    
     /**
      * @inheritdoc
      */

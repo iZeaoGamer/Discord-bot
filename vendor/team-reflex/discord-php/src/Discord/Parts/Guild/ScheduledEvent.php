@@ -24,7 +24,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * A representation of a scheduled event in a guild.
  *
  * @property string       $id                   The id of the scheduled event.
- * @property string       $name                 the name of the scheduled event (1-100 characters)
  * @property Guild        $guild                The guild which the scheduled event belongs to.
  * @property string       $guild_id             The guild id which the scheduled event belongs to.
  * @property Channel|null $channel              The channel in which the scheduled event will be hosted, or null.
@@ -92,7 +91,7 @@ class ScheduledEvent extends Part
 
         $options = $resolver->resolve($options);
         if (isset($options['before'], $options['after'])) {
-            return \React\Promise\reject(new \Exception("Can only specify one of before after."));
+            return \React\Promise\reject(new \Exception('Can only specify one of before after.'));
         }
 
         $endpoint = Endpoint::bind(Endpoint::GUILD_SCHEDULED_EVENT_USERS, $this->guild_id, $this->id);
