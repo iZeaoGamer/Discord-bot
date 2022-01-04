@@ -640,6 +640,22 @@ class Storage
             }
         }
     }
+    /** Removes any messages that were created since 14 days or above.
+     * @return void
+    */
+    public static function removeOldMessage(): void{
+        foreach(Storage::getMessages() as $message){
+            $seconds = Utils::toSeconds($message->getTimestamp() ?? 0.00);
+            $days = Utils::toDays($seconds);
+            if($days < 14){
+                Main::get()->getLogger()->debug("Days for {$message->getId()} is {$days} days worth.");
+                continue;
+            } 
+            $more = 14 - $days;
+            Main::get()->getLogger()->debug("Days for {$message->getId()} is {$more} more days than total: {$days} days.");
+            Storage::removeMessage($message->getId());
+        }
+    }
 
     /** 
      * @param string $channel_id
@@ -667,17 +683,18 @@ class Storage
      * @param string $channel_id
      * @return bool
      */
-    public static function isOldMessage(string $channel_id): bool{
-        foreach(self::getMessagesByChannel($channel_id) as $message){
-                $seconds = Utils::toSeconds($message->getTimestamp());
-                $days = Utils::toDays($seconds);
-                if($days > 14){
-                    return true;
+    public static function isOldMessage(string $channel_id): bool
+    {
+        foreach (self::getMessagesByChannel($channel_id) as $message) {
+            $seconds = Utils::toSeconds($message->getTimestamp());
+            $days = Utils::toDays($seconds);
+            if ($days < 14) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
-            
+
 
 
 
@@ -696,6 +713,7 @@ class Storage
         $messages = [];
         foreach (self::getMessages() as $message) {
             if ($channel_id === $message->getChannelId()) {
+                
                 $messages[] = $message;
             }
         }
