@@ -625,10 +625,10 @@ class Storage
         if (!$message instanceof Message) return; //Already deleted or not added.
         unset(self::$message_map[$message_id]);
         $server_id = $message->getServerId();
-        if($server_id !== null){
-        $i = array_search($message_id, self::$message_server_map[$server_id], true);
-        if ($i === false || is_string($i)) return; //Not in this servers message map.
-        array_splice(self::$message_server_map[$server_id], $i, 1);
+        if ($server_id !== null) {
+            $i = array_search($message_id, self::$message_server_map[$server_id], true);
+            if ($i === false || is_string($i)) return; //Not in this servers message map.
+            array_splice(self::$message_server_map[$server_id], $i, 1);
         }
 
 
@@ -1100,7 +1100,6 @@ class Storage
     //Disabled for public, this should ONLY be used by active developers of DiscordBot.
     /*public static function loadStorage(string $file): bool{
         MainLogger::getLogger()->debug("[DiscordBot] Loading storage from '$file'...");
-
         $data = file_get_contents($file);
         if($data === false) return false;
         $data = unserialize($data);
@@ -1122,7 +1121,6 @@ class Storage
         self::$channel_server_map = $storage["channel_server_map"];
         self::$channel_map = $storage["channel_map"];
         self::$server_map = $storage["server_map"];
-
         MainLogger::getLogger()->debug("[DiscordBot] Successfully loaded storage from '$file'.");
         return true;
     }*/
