@@ -420,7 +420,7 @@ array(5) {
         ]);
         $messages->done(function(Collection $msgs) use ($guild, $channel){
             //   $channel->messages->freshen()->done(function () use ($channel, $guild) {
-                   $this->logger->info("Successfully fetched " . sizeof($msgs->toArray()) . " Messages from channel: {$channel->name} in server '" .
+                   $this->logger->debug("Successfully fetched " . sizeof($msgs->toArray()) . " Messages from channel: {$channel->name} in server '" .
                        $guild->name . "' (" . $guild->id . ")");
                    $pk = new DiscordDataDumpPacket();
                    $pk->setTimestamp(time());
@@ -433,7 +433,7 @@ array(5) {
                    }
                    $this->client->getThread()->writeOutboundData($pk);
                }, function (\Throwable $e) use ($guild) {
-                   $this->logger->info("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
+                   $this->logger->debug("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
                });
            }
     public function onScheduleCreate(DiscordScheduledEvent $schedule): void
