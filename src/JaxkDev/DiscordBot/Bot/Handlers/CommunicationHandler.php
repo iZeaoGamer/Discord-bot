@@ -889,14 +889,13 @@ class CommunicationHandler
     private function handleBulkDelete(RequestMessageBulkDelete $pk): void
     {
         $this->getChannel($pk, $pk->getChannelID(), function (DiscordChannel $channel) use ($pk) {
-            //  $channel->limitDelete($pk->getValue(), $pk->getReason())->done(function () use ($pk) {
             $channel->getMessageHistory([
                 "limit" => $pk->getValue()
             ])->then(function ($messages) use ($pk, $channel) {
                 /** @var DiscordMessage[] */
                 $msgs = [];
                 foreach ($messages as $message) {
-                    print_r($message);
+         
                     if ($message instanceof DiscordMessage) {
                         $msgs[] = $message;
                     }
@@ -1601,7 +1600,7 @@ class CommunicationHandler
                     $msg->edit($builder)->done(function (DiscordMessage $msg) use ($pk) {
 
                         $interaction = $msg->interaction;
-                        print_r($interaction);
+                   
                         if ($interaction === null) {
                             $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message. (Data turned into Message Model)", [ModelConverter::genModelMessage($msg)]);
                             return;
@@ -1618,7 +1617,7 @@ class CommunicationHandler
 
                 $message->edit($pk->getMessageBuilder())->done(function (DiscordMessage $msg) use ($pk) {
                     $interaction = $msg->interaction;
-                    print_r($interaction);
+               
                     if ($interaction === null) {
                         $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message. (Data turned into Message Model)", [ModelConverter::genModelMessage($msg)]);
                         return;
@@ -1633,7 +1632,7 @@ class CommunicationHandler
             }
             $message->edit($builder)->done(function (DiscordMessage $msg) use ($pk) {
                 $interaction = $msg->interaction;
-                print_r($interaction);
+            
                 if ($interaction === null) {
                     $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message. (Data turned into Message Model)", [ModelConverter::genModelMessage($msg)]);
                     return;
@@ -1714,7 +1713,7 @@ class CommunicationHandler
                     }
                     $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
                         $interaction = $msg->interaction;
-                        print_r($interaction);
+                 
                         if ($interaction === null) {
                             $this->resolveRequest($pk->getUID(), true, "Interaction was not found in message (Data turned into Message model)", [ModelConverter::genModelMessage($msg)]);
                             return;
@@ -1734,7 +1733,7 @@ class CommunicationHandler
                 }
                 $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
                     $interaction = $msg->interaction;
-                    print_r($interaction);
+              
                     if ($interaction === null) {
                         $this->resolveRequest($pk->getUID(), true, "Interaction was not found in message (Data turned into Message model)", [ModelConverter::genModelMessage($msg)]);
                         return;

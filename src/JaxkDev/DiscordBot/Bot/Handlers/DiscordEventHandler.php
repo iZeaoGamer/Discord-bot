@@ -84,8 +84,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUpdate 
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventDelete as ServerScheduledEventDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserAdd as ServerScheduledEventUserAddPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserRemove as ServerScheduledEventUserRemovePacket;
-
+use React\Promise\ExtendedPromiseInterface;
 use JaxkDev\DiscordBot\Plugin\Utils;
+use Discord\Helpers\Collection;
+use JaxkDev\DiscordBot\Models\Server;
 use Monolog\Logger;
 
 class DiscordEventHandler
@@ -105,7 +107,6 @@ class DiscordEventHandler
 
     public function registerEvents(): void
     {
-        print_r("Registering discord events..");
 
         $discord = $this->client->getDiscordClient();
         $discord->on("MESSAGE_CREATE", [$this, "onMessageCreate"]);
@@ -203,7 +204,6 @@ array(5) {
     int(259)
   }
 }
-
 array(5) {
   ["server"]=>
   array(2) {
@@ -295,43 +295,28 @@ array(5) {
                 $this->logger->notice("Cannot fetch bans from server '" . $guild->name . "' (" . $guild->id .
                     "), Bot does not have 'ban_members' permission.");
             }
-             /** @var DiscordChannel $channel */
-             foreach ($guild->channels as $channel) {
+            /** @var DiscordChannel $channel */
+            foreach ($guild->channels as $channel) {
                 /** @var DiscordThread $thread */
                 foreach ($channel->threads as $thread) {
                     $c = ModelConverter::genModelThread($thread);
                     $pk->addThread($c);
                 }
             }
-              /** @var DiscordChannel $channel */
-              foreach($guild->channels as $channel){
-                  
+            /** @var DiscordChannel $channel */
+            foreach ($guild->channels as $channel) {
+
                 $c = ModelConverter::genModelChannel($channel);
                 if ($c !== null) $pk->addChannel($c);
                 if ($permissions->read_message_history) {
-                    $channel->messages->freshen()->done(function () use ($channel, $guild) {
-                        $this->logger->debug("Successfully fetched " . sizeof($channel->messages) . " total Messages from server '" .
-                            $guild->name . "' (" . $guild->id . ")");
-
-                        if (sizeof($channel->messages) === 0) return;
-                        $pk = new DiscordDataDumpPacket();
-                        $pk->setTimestamp(time());
-                /** @var DiscordMessage $message */
-                        foreach ($channel->messages as $message) {
-                            $msg = ModelConverter::genModelMessage($message);
-                            $pk->addMessage($msg);
-                            continue;
-                    }
-                        $this->client->getThread()->writeOutboundData($pk);
-                    }, function (\Throwable $e) use ($guild) {
-                        $this->logger->warning("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
-                    });
+            
+                    $this->fetchAllMessages(100, $guild, $channel);
                 } else {
-                    $this->logger->notice("Cannot fetch Messages from server '" . $guild->name . "' (" . $guild->id .
+                    $this->logger->debug("Cannot fetch Messages from server '" . $guild->name . "' (" . $guild->id .
                         "), Bot does not have 'read_message_history' permission.");
                 }
             }
-           
+
 
             /** @var DiscordRole $role */
             foreach ($guild->roles as $role) {
@@ -429,6 +414,28 @@ array(5) {
         $this->client->getThread()->writeOutboundData(new DiscordReadyPacket());
         $this->client->getCommunicationHandler()->sendHeartbeat();
     }
+    public function fetchAllMessages(int $limit, DiscordGuild $guild, DiscordChannel $channel){
+        $messages = $channel->getMessageHistory([
+            "limit" => $limit
+        ]);
+        $messages->done(function(Collection $msgs) use ($guild, $channel){
+            //   $channel->messages->freshen()->done(function () use ($channel, $guild) {
+                   $this->logger->info("Successfully fetched " . sizeof($msgs->toArray()) . " Messages from channel: {$channel->name} in server '" .
+                       $guild->name . "' (" . $guild->id . ")");
+                   $pk = new DiscordDataDumpPacket();
+                   $pk->setTimestamp(time());
+                   
+                   /** @var DiscordMessage $message */
+                   foreach($msgs as $message){
+                 //  foreach ($channel->messages as $message) {
+                       $msg = ModelConverter::genModelMessage($message);
+                       $pk->addMessage($msg);
+                   }
+                   $this->client->getThread()->writeOutboundData($pk);
+               }, function (\Throwable $e) use ($guild) {
+                   $this->logger->info("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
+               });
+           }
     public function onScheduleCreate(DiscordScheduledEvent $schedule): void
     {
         $packet = new ServerScheduledEventCreatePacket(ModelConverter::genModelScheduledEvent($schedule));
@@ -568,16 +575,11 @@ array(5) {
             $packet = new MessageBulkDeletePacket($message);
             $this->client->getThread()->writeOutboundData($packet);
         } else {
-
-
             $result = Utils::objectToArray($data);
-
             $messageID = [];
             foreach ($result as $key => $value) {
                 $messageID[] = implode(",", $value);
             }
-
-
             $packet = new MessageBulkDeletePacket($messageID);
             $this->client->getThread()->writeOutboundData($packet);
         }

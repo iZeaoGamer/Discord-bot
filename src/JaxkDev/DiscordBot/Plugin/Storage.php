@@ -625,9 +625,11 @@ class Storage
         if (!$message instanceof Message) return; //Already deleted or not added.
         unset(self::$message_map[$message_id]);
         $server_id = $message->getServerId();
+        if($server_id !== null){
         $i = array_search($message_id, self::$message_server_map[$server_id], true);
         if ($i === false || is_string($i)) return; //Not in this servers message map.
         array_splice(self::$message_server_map[$server_id], $i, 1);
+        }
 
 
         if ($message->getAuthorId() !== null) {
@@ -649,7 +651,13 @@ class Storage
     public static function bulkRemove(string $channel_id, int $limit): void
     {
         $deleted = 0;
-        Main::get()->getAPI()->bulKDelete($channel_id, $limit);
+        for ($i = $limit; $i > 0; $i -= 100) {
+            if ($i > 100) {
+                Main::get()->getAPI()->bulkDelete($channel_id, 100);
+            } else {
+                Main::get()->getAPI()->bulkDelete($channel_id, $i);
+            }
+        }
         /** @var Message[] $msgs */
         $msgs = [];
         foreach (self::getMessagesByChannel($channel_id) as $message) {
@@ -667,9 +675,9 @@ class Storage
 
 
             Main::get()->getLogger()->info("Message deleted event has been called.");
-            print_r($message);
         }
     }
+
     /**
      * @param Message $message
      * @return bool
