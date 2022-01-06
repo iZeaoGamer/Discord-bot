@@ -59,7 +59,6 @@ class Webhook extends Message
         array $roles_mentioned = [],
         array $channels_mentioned = [],
         array $stickers = [],
-        ?Interaction $interaction = null,
         ?string $link = null,
         bool $tts = false
     ) {
@@ -77,7 +76,6 @@ class Webhook extends Message
             $roles_mentioned,
             $channels_mentioned,
             $stickers,
-            $interaction,
             $link,
             $tts
         );
@@ -138,7 +136,6 @@ class Webhook extends Message
             $this->roles_mentioned,
             $this->channels_mentioned,
             $this->stickers,
-            $this->interaction,
             $this->webhook_id
         ]);
     }
@@ -159,7 +156,6 @@ class Webhook extends Message
             $this->roles_mentioned,
             $this->channels_mentioned,
             $this->stickers,
-            $this->interaction,
             $this->webhook_id
         ] = unserialize($data);
     }
