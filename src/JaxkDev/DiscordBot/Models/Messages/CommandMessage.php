@@ -14,18 +14,20 @@ namespace JaxkDev\DiscordBot\Models\Messages;
 
 use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
+use JaxkDev\DiscordBot\Plugin\Utils;
 
-class Reply extends Message
+
+
+class CommandMessage extends Message implements \Serializable
 {
 
-    /** @var ?string ID of message replying to. */
-    private $referenced_message_id;
+    /** @var Interaction|null */
+    protected $interaction;
 
     /**
-     * Reply constructor.
+     * Message constructor.
      *
      * @param string       $channel_id
-     * @param string|null  $referenced_message_id
      * @param string|null  $id
      * @param string       $content
      * @param Embed|null   $embed
@@ -38,12 +40,12 @@ class Reply extends Message
      * @param string[]     $roles_mentioned
      * @param string[]     $channels_mentioned
      * @param string[]     $stickers
-     * @param string|null $link
+     * @param string|null  $link
      * @param bool $tts
-     * */
+     * @param Interaction|null $interaction
+     */
     public function __construct(
         string $channel_id,
-        ?string $referenced_message_id = null,
         ?string $id = null,
         string $content = "",
         ?Embed $embed = null,
@@ -57,7 +59,8 @@ class Reply extends Message
         array $channels_mentioned = [],
         array $stickers = [],
         ?string $link = null,
-        bool $tts = false
+        bool $tts = false,
+        ?Interaction $interaction = null
     ) {
         parent::__construct(
             $channel_id,
@@ -76,19 +79,17 @@ class Reply extends Message
             $link,
             $tts
         );
-        $this->setReferencedMessageId($referenced_message_id);
+        $this->setInteraction($interaction);
     }
-
-    public function getReferencedMessageId(): ?string
+    /** @return Interaction|null */
+    public function getInteraction(): ?Interaction
     {
-        return $this->referenced_message_id;
+        return $this->interaction;
     }
-
-    public function setReferencedMessageId(?string $referenced_message_id): void
+    public function setInteraction(?Interaction $interaction): void
     {
-        $this->referenced_message_id = $referenced_message_id;
+        $this->interaction = $interaction;
     }
-
     //----- Serialization -----//
 
     public function serialize(): ?string
@@ -109,10 +110,9 @@ class Reply extends Message
             $this->stickers,
             $this->link,
             $this->tts,
-            $this->referenced_message_id
+            $this->interaction
         ]);
     }
-
     public function unserialize($data): void
     {
         [
@@ -131,7 +131,7 @@ class Reply extends Message
             $this->stickers,
             $this->link,
             $this->tts,
-            $this->referenced_message_id
-        ] = unserialize($data);
+            $this->interaction
+            ] = unserialize($data);
     }
 }

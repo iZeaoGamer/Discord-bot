@@ -12,12 +12,13 @@
 
 namespace JaxkDev\DiscordBot\Models\Interactions\Request;
 
+use JaxkDev\DiscordBot\Models\Interactions\Command\Resolved;
 
+use JaxkDev\DiscordBot\Plugin\Utils;
 
 class InteractionData implements \Serializable
 
 {
-
     /** @var string|null */
     private $name; //null when not using slash commands.
 
@@ -33,13 +34,33 @@ class InteractionData implements \Serializable
     /** @var string|null */
     private $customId; //null when using slash commands
 
-    public function __construct(?string $name, ?int $type, ?string $id = null, ?array $values = null, ?string $custom_id = null)
-    {
+    /** @var Resolved|null */
+    private $resolved;
+
+    /** @var string|null */
+    private $target_id;
+
+    /** @var string|null */
+    private $server_id;
+
+    public function __construct(
+        ?string $name,
+        ?int $type,
+        ?string $id = null,
+        ?array $values = null,
+        ?string $custom_id = null,
+        ?Resolved $resolved = null,
+        ?string $target_id = null,
+        ?string $server_id = null
+    ) {
         $this->setName($name);
         $this->setType($type);
         $this->setId($id);
         $this->setSelected($values);
         $this->setCustomId($custom_id);
+        $this->setResolved($resolved);
+        $this->setTargetId($target_id);
+        $this->setServerId($server_id);
     }
     public function getName(): ?string
     {
@@ -81,6 +102,41 @@ class InteractionData implements \Serializable
     {
         $this->type = $type;
     }
+    public function getResolved(): ?Resolved
+    {
+        return $this->resolved;
+    }
+    public function setResolved(?Resolved $resolve): void
+    {
+        $this->resolved = $resolve;
+    }
+    public function getTargetId(): ?string
+    {
+        return $this->target_id;
+    }
+    public function setTargetId(?string $target_id): void
+    {
+        if ($target_id) {
+            if (!Utils::validDiscordSnowflake($target_id)) {
+                throw new \AssertionError("Target ID: {$target_id} is invalid.");
+            }
+        }
+        $this->target_id = $target_id;
+    }
+    public function getServerId(): ?string
+    {
+        return $this->server_id;
+    }
+    public function setServerId(?string $server_id): void
+    {
+        if ($server_id) {
+            if (!Utils::validDiscordSnowflake($server_id)) {
+                throw new \AssertionError("Server ID: {$server_id} is invalid!");
+            }
+        }
+        $this->server_id = $server_id;
+    }
+
     //----- Serialization -----//
 
     public function serialize(): ?string
@@ -90,7 +146,10 @@ class InteractionData implements \Serializable
             $this->type,
             $this->id,
             $this->values,
-            $this->customId
+            $this->customId,
+            $this->resolved,
+            $this->target_id,
+            $this->server_id
         ]);
     }
 
@@ -101,7 +160,10 @@ class InteractionData implements \Serializable
             $this->type,
             $this->id,
             $this->values,
-            $this->customId
+            $this->customId,
+            $this->resolved,
+            $this->target_id,
+            $this->server_id
         ] = unserialize($data);
     }
 }

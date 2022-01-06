@@ -10,74 +10,58 @@
  * Email   :: JaxkDev@gmail.com
  */
 
-namespace JaxkDev\DiscordBot\Models\Interactions\Request;
+namespace JaxkDev\DiscordBot\Models\Interactions\Command;
 
 
+use JaxkDev\DiscordBot\Plugin\Utils;
 
-class Option implements \Serializable
-
+class Choice implements \Serializable
 {
-
     /** @var string */
     private $name;
-
-    /** @var int */
-    private $type;
 
     /** @var mixed */
     private $value;
 
-    /** @var bool */
-    private $focused;
-
-    public function __construct(string $name, int $type, mixed $value, bool $focused)
+    /** 
+     * Choice Constructor
+     * @param string $name
+     * @param mixed $value
+     */
+    public function __construct(string $name, mixed $value)
     {
         $this->setName($name);
-        $this->setType($type);
         $this->setValue($value);
-        $this->setFocused($focused);
     }
+
     public function getName(): string
     {
         return $this->name;
     }
     public function setName(string $name): void
     {
+        if (strlen($name) > 100) {
+            throw new \AssertionError("Choice name: {$name} cannot be more than 100 characters long.");
+        }
         $this->name = $name;
-    }
-    public function getType(): int
-    {
-        return $this->type;
-    }
-    public function setType(int $type): void
-    {
-        $this->type = $type;
     }
     public function getValue(): mixed
     {
         return $this->value;
     }
-    public function setValue(mixed $value)
+    public function setValue(mixed $value): void
     {
+        if (is_string($value) && strlen($value) > 100) {
+            throw new \AssertionError("Choice Value: {$value} cannot be more than 100 characters long.");
+        }
         $this->value = $value;
     }
-    public function isFocused(): bool{
-        return $this->focused;
-    }
-    public function setFocused(bool $focused): void
-    {
-        $this->focused = $focused;
-    }
-
     //----- Serialization -----//
-
     public function serialize(): ?string
     {
         return serialize([
             $this->name,
-            $this->type,
-            $this->value,
-            $this->focused,
+            $this->value
         ]);
     }
 
@@ -85,9 +69,7 @@ class Option implements \Serializable
     {
         [
             $this->name,
-            $this->type,
-            $this->value,
-            $this->focused,
+            $this->value
         ] = unserialize($data);
     }
 }

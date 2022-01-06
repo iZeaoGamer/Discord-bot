@@ -47,6 +47,12 @@ use Discord\Parts\Guild\AuditLog\Options as DiscordEntryOptions;
 use Discord\Parts\Guild\WelcomeScreen as DiscordWelcomeScreen;
 use Discord\Parts\Guild\WelcomeChannel as DiscordWelcomeChannel;
 use Discord\Parts\OAuth\Application as DiscordApplication;
+use Discord\Parts\Interactions\Command\Choice as DiscordChoice;
+use Discord\Parts\Interactions\Command\Command as DiscordCommand;
+use Discord\Parts\Interactions\Command\Option as DiscordCommandOption;
+use Discord\Parts\Interactions\Command\Overwrite as DiscordCommandOverwrite;
+use Discord\Parts\Interactions\Command\Permission as DiscordCommandPermission;
+use Discord\Parts\Interactions\Request\Resolved as DiscordResolved;
 use Discord\Parts\User\Client as DiscordClient;
 use JaxkDev\DiscordBot\Models\Activity;
 use JaxkDev\DiscordBot\Models\Ban;
@@ -67,6 +73,7 @@ use JaxkDev\DiscordBot\Models\Messages\Embed\Footer;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Image;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Video;
 use JaxkDev\DiscordBot\Models\Messages\Message;
+use JaxkDev\DiscordBot\Models\Messages\CommandMessage;
 use JaxkDev\DiscordBot\Models\Messages\Reply as ReplyMessage;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Models\Messages\Reaction;
@@ -94,6 +101,12 @@ use JaxkDev\DiscordBot\Models\WelcomeScreen;
 use JaxkDev\DiscordBot\Models\WelcomeChannel;
 use JaxkDev\DiscordBot\Models\OAuth\Application;
 use Jaxkdev\DiscordBot\Models\Client;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Choice;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Option as CommandOption;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Overwrite as CommandOverwrite;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Permission as CommandPermission;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Resolved;
 
 use JaxkDev\DiscordBot\Models\Channels\Overwrite;
 use JaxkDev\DiscordBot\Plugin\Bitwise;
@@ -101,7 +114,124 @@ use JaxkDev\DiscordBot\Models\Permissions\Permissions;
 
 abstract class ModelConverter
 {
-    static function genModelClient(DiscordClient $client): Client
+    static public function genModelChoice(DiscordChoice $choice): Choice{
+        return new Choice($choice->name, $choice->value);
+    }
+    static public function genModelCommandOption(DiscordCommandOption $option): CommandOption{
+        $choices = [];
+        foreach($option->choices as $choice){
+            $choices[] = self::genModelChoice($choice);
+        }
+        $options = [];
+        foreach($option->options as $option){
+            $options[] = new CommandOption(
+                $option->type,
+                $option->name,
+                $option->description,
+                $option->required,
+                $choices,
+                $options,
+                $option->channel_types,
+                $option->min_value,
+                $option->max_value,
+            $option->autocomplete);
+            }
+        return new CommandOption(
+            $option->type,
+            $option->name,
+            $option->description,
+            $option->required,
+            $choices,
+            $options,
+            $option->channel_types,
+            $option->min_value,
+            $option->max_value,
+            $option->autoComplete
+        );
+    }
+    static public function genModelCommandOverwrite(DiscordCommandOverwrite $overwrite): CommandOverwrite{
+        $permissions = [];
+        foreach($overwrite->permissions as $permission){
+            $permissions[] = self::genModelCommandPermission($permission);
+        }
+        return new CommandOverwrite($overwrite->id,
+        $overwrite->application_id,
+        $overwrite->server_id,
+        $permissions);
+    }
+    static public function genModelCommandPermission(DiscordCommandPermission $permission): CommandPermission{
+        return new CommandPermission(
+            $permission->id,
+            $permission->type,
+            $permission->permission
+        );
+    }
+    static public function genModelCommand(DiscordCommand $command): Command{
+        $options = [];
+        foreach($command->options ?? [] as $option){
+            if($option){
+                $options[] = self::genModelCommandOption($option);
+            }
+        }
+        return new Command(
+            $command->type,
+            $command->name,
+            $command->description,
+            $command->default_permission,
+            $options,
+            $command->id,
+            $command->application_id,
+            $command->server_id,
+            $command->version
+        );
+    }
+    static public function genModelResolved(DiscordResolved $resolve): Resolved
+    {
+        $users = [];
+        if($resolve->users){
+        foreach($resolve->users as $snowflake => $user){
+            $users[$snowflake][] = self::genModelUser($user);
+        }
+    }
+        $members = [];
+        if($resolve->members){
+        foreach($resolve->members as $snowflake => $member){
+            $members[$snowflake][] = self::genModelMember($member);
+        }
+    }
+        $roles = [];
+        if($resolve->roles){
+            foreach($resolve->roles as $snowflake => $role){
+                $roles[$snowflake][] = self::genModelRole($role);
+            }
+        }
+        $channels = [];
+        if($resolve->channels){
+            foreach($resolve->channels as $snowflake => $channel){
+                if($channel instanceof DiscordThread){
+                    $channels[$snowflake][] = self::genModelThread($channel);
+                }
+                if($channel instanceof DiscordChannel){
+                    $channels[$snowflake][] = self::genModelChannel($channel);
+                }
+            }
+        }
+        $messages = [];
+        if($resolve->messages){
+            foreach($resolve->messages as $snowflake => $message){
+                $messages[$snowflake][] = self::genModelMessage($message);
+            }
+        }
+        return new Resolved(
+            $users,
+            $members,
+            $roles,
+            $channels,
+            $messages,
+            $resolve->guild_id
+        );
+    }
+    static public function genModelClient(DiscordClient $client): Client
     {
         $servers = [];
         /** @var DiscordServer $server */
@@ -135,7 +265,7 @@ abstract class ModelConverter
 
         );
     }
-    static function genModelApplication(DiscordApplication $application): Application
+    static public function genModelApplication(DiscordApplication $application): Application
     {
         return new Application(
             $application->name,
@@ -293,16 +423,8 @@ abstract class ModelConverter
             $schedule->user_count
         );
     }
-    static public function genModelInteraction(DiscordInteraction $interact, MessageBuilder $builder = null, bool $ephemeral = false): Interaction
+    static public function genModelInteraction(DiscordInteraction $interact): Interaction
     {
-
-        if ($builder !== null) {
-            try {
-                $interact->updateMessage($builder);
-            } catch (\Throwable $e) {
-                $interact->editFollowUpMessage($builder);
-            }
-        }
         return new Interaction(
             $interact->application_id,
             $interact->type,
@@ -318,12 +440,14 @@ abstract class ModelConverter
     }
     static public function genModelData(DiscordInteractData $data): InteractionData
     {
+        $resolved = ($data->resolved ? self::genModelResolved($data->resolved) : null);
         return new InteractionData(
             $data->name,
             $data->component_type,
             $data->id,
             $data->values,
-            $data->custom_id
+            $data->custom_id,
+            $resolved, $data->target_id, $data->guild_id
         );
     }
     static function genModelOption(DiscordInteractOption $option): Option
@@ -331,7 +455,8 @@ abstract class ModelConverter
         return new Option(
             $option->name,
             $option->type,
-            $option->value
+            $option->value,
+            $option->focused
         );
     }
     static public function genModelVoiceState(DiscordVoiceStateUpdate $stateUpdate): VoiceState
@@ -706,6 +831,7 @@ abstract class ModelConverter
             $attachments[] = self::genModelAttachment($attachment);
         }
         $guild_id = $discordMessage->guild_id ?? ($discordMessage->author instanceof DiscordMember ? $discordMessage->author->guild_id : null);
+            $author = $guild_id === null ? $discordMessage->author->id : $guild_id . "." . $discordMessage->author->id;
         if ($discordMessage->type === DiscordMessage::TYPE_NORMAL) {
             if ($discordMessage->webhook_id === null) {
                 $e = $discordMessage->embeds->first();
@@ -727,7 +853,6 @@ abstract class ModelConverter
                     array_keys($discordMessage->mention_roles->toArray()),
                     array_keys($discordMessage->mention_channels->toArray()),
                     array_keys($discordMessage->sticker_items->toArray()),
-                    ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null),
                     $discordMessage->link,
                     $discordMessage->tts
                 );
@@ -752,12 +877,11 @@ abstract class ModelConverter
                     array_keys($discordMessage->mention_roles->toArray()),
                     array_keys($discordMessage->mention_channels->toArray()),
                     array_keys($discordMessage->sticker_items->toArray()),
-                    ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
-                    ),
                     $discordMessage->link,
                     $discordMessage->tts
                 );
             }
+            
         } elseif ($discordMessage->type === DiscordMessage::TYPE_REPLY) {
             if ($discordMessage->referenced_message === null) {
                 throw new AssertionError("No referenced message on a REPLY message.");
@@ -787,6 +911,29 @@ abstract class ModelConverter
                 $discordMessage->link,
                 $discordMessage->tts
             );
+        }elseif($discordMessage->type === DiscordMessage::TYPE_APPLICATION_COMMAND){
+            $e = $discordMessage->embeds->first();
+            if ($e !== null) {
+                $e = self::genModelEmbed($e);
+            }
+                return new CommandMessage(
+                    $discordMessage->channel_id,
+                    $discordMessage->id,
+                    $discordMessage->content,
+                    $e,
+                    $author,
+                    $guild_id,
+                    $discordMessage->timestamp->getTimestamp(),
+                    $attachments,
+                    $discordMessage->mention_everyone,
+                    array_keys($discordMessage->mentions->toArray()),
+                    array_keys($discordMessage->mention_roles->toArray()),
+                    array_keys($discordMessage->mention_channels->toArray()),
+                    array_keys($discordMessage->sticker_items->toArray()),
+                    $discordMessage->link,
+                    $discordMessage->tts,
+                    ($discordMessage->interaction !== null ? self::genModelInteraction($discordMessage->interaction) : null)
+                );
         }
         throw new AssertionError("Discord message type not supported.");
     }

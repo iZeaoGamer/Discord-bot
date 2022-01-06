@@ -85,7 +85,6 @@ class Message implements \Serializable
      * @param string[]     $roles_mentioned
      * @param string[]     $channels_mentioned
      * @param string[]     $stickers
-     * @param Interaction|null  $interaction
      * @param string|null  $link
      * @param bool $tts
      */
@@ -103,7 +102,6 @@ class Message implements \Serializable
         array $roles_mentioned = [],
         array $channels_mentioned = [],
         array $stickers = [],
-        ?Interaction $interaction = null,
         ?string $link = null,
         bool $tts = false
     ) {
@@ -120,7 +118,6 @@ class Message implements \Serializable
         $this->setRolesMentioned($roles_mentioned);
         $this->setChannelsMentioned($channels_mentioned);
         $this->setStickers($stickers);
-        $this->setInteraction($interaction);
         $this->setLink($link);
         $this->setTTS($tts);
     }
@@ -324,15 +321,7 @@ class Message implements \Serializable
         }
         $this->stickers = $stickers;
     }
-    /** @return Interaction|null */
-    public function getInteraction(): ?Interaction
-    {
-        return $this->interaction;
-    }
-    public function setInteraction(?Interaction $interaction): void
-    {
-        $this->interaction = $interaction;
-    }
+   
     public function getLink(): ?string
     {
         return $this->link;
@@ -373,7 +362,6 @@ class Message implements \Serializable
             $this->roles_mentioned,
             $this->channels_mentioned,
             $this->stickers,
-            $this->interaction,
             $this->link,
             $this->tts
         ]);
@@ -395,7 +383,6 @@ class Message implements \Serializable
             $this->roles_mentioned,
             $this->channels_mentioned,
             $this->stickers,
-            $this->interaction,
             $this->link,
             $this->tts
 

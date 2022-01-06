@@ -39,9 +39,18 @@ use Discord\Parts\User\User as DiscordUser;
 use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
 use Discord\Repository\Channel\WebhookRepository as DiscordWebhookRepository;
 use Discord\Repository\Guild\InviteRepository as DiscordInviteRepository;
+use Discord\Repository\Guild\GuildCommandRepository as DiscordGuildCommandRepository;
+use Discord\Repository\Interaction\GlobalCommandRepository as DiscordGlobalCommandRepository;
 use Discord\Parts\Channel\Sticker as DiscordSticker;
+use Discord\Parts\OAuth\Application as DiscordApplication;
+use Discord\Parts\Interactions\Command\Command as DiscordCommand;
+use Discord\Parts\Interactions\Command\Option as DiscordCommandOption;
+use Discord\Parts\Interactions\Command\Choice as DiscordChoice;
+use Discord\Parts\Interactions\Command\Overwrite as DiscordCommandOverwrite;
+use Discord\Parts\Interactions\Command\Permission as DiscordCommandPermission;
 
 use Discord\Builders\MessageBuilder;
+use Discord\Builders\CommandBuilder;
 use Discord\Builders\Components\ActionRow;
 use Discord\Builders\Components\Option;
 use Discord\Builders\Components\SelectMenu;
@@ -142,6 +151,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWelcomeScreen;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateDMChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateDMChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteDMChannel;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateCommand;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateCommand;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteCommand;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Plugin\Utils;
 
@@ -257,8 +270,330 @@ class CommunicationHandler
         elseif ($pk instanceof RequestCreateDMChannel) $this->handleCreateDMChannel($pk);
         elseif ($pk instanceof RequestUpdateDMChannel) $this->handleUpdateDMChannel($pk);
         elseif ($pk instanceof RequestDeleteDMChannel) $this->handleDeleteDMChannel($pk);
+        elseif ($pk instanceof RequestCreateCommand) $this->handleCreateCommand($pk);
+        elseif ($pk instanceof RequestUpdateCommand) $this->handleUpdateCommand($pk);
+        elseif ($pk instanceof RequestDeleteCommand) $this->handleDeleteCommand($pk);
+        elseif ($pk instanceof RequestFetchCommands) $this->handleFetchCommands($pk);
     }
+    private function handleCreateCommand(RequestCreateCommand $pk): void
+    {
+        $command = $pk->getCommand();
+        if ($command->getServerId()) {
+            $this->getServer($pk, $command->getServerId(), function (DiscordGuild $guild) use ($pk, $command) {
+                /** @var DiscordCommand $c */
+                $c = $guild->commands->create([
+                    "name" => $command->getName()
+                ]);
+                $c->type = $command->getType();
+                if ($command->getApplicationId()) {
+                    $c->application_id = $command->getApplicationId();
+                }
+                if (!empty($command->getDescription())) {
+                    $c->description = $command->getDescription();
+                }
+                if ($command->getServerId()) {
+                    $c->guild_id = $command->getServerId();
+                }
+                $options = [];
+                foreach ($command->getOptions() as $option) {
 
+                    $do = new DiscordCommandOption($this->client->getDiscordClient());
+                    $do = $do->setType($option->getType());
+                    $do = $do->setName($option->getName());
+                    $do = $do->setDescription($option->getDescription());
+                    $do = $do->setRequired($option->isRequired());
+                    $do = $do->setChannelTypes($option->getChannelTypes());
+                    $do = $do->setAutoComplete($option->isAutoComplete());
+                    foreach ($option->getChoices() as $choice) {
+                        $ch = new DiscordChoice($this->client->getDiscordClient());
+                        $ch = $ch->setName($choice->getName());
+                        $ch = $ch->setValue($choice->getValue());
+                        $do = $do->addChoice($ch);
+                    }
+                    $options[] = $do;
+                }
+                /** @var DiscordCommandOption[] $subs */
+                $subs = [];
+                foreach ($option->getSubOptions() as $sub) {
+                    $do2 = new DiscordCommandOption($this->client->getDiscordClient());
+                    $do2 = $do2->setType($sub->getType());
+                    $do2 = $do2->setName($sub->getName());
+                    $do2 = $do2->setDescription($sub->getDescription());
+                    $do2 = $do2->setRequired($sub->isRequired());
+                    $do2 = $do2->setChannelTypes($sub->getChannelTypes());
+                    $do2 = $do2->setAutoComplete($sub->isAutoComplete());
+                    foreach ($option->getChoices() as $choice) {
+                        $ch = new DiscordChoice($this->client->getDiscordClient());
+                        $ch = $ch->setName($choice->getName());
+                        $ch = $ch->setValue($choice->getValue());
+                        $do2 = $do2->addChoice($ch);
+                    }
+                    /** @var DiscordCommandOption[] $subs */
+                    $subs[] = $do2;
+                }
+                $c->options = $options;
+
+                /** @var DiscordCommandOption $subOption */
+                foreach ($options as $subOption) {
+                    $subOption->options = $subs;
+                }
+                $c->default_permission = $command->isDefaultPermission();
+                $guild->commands->save($c)->then(function (DiscordCommand $command) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Created Command with success!", [ModelConverter::genModelCommand($command)]);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to create command.", [$e->getMessage(), $e->getTraceAsString()]);
+                });
+            });
+        } else {
+            $app = $this->getApplication();
+
+            /** @var DiscordCommand $c */
+            $c = $app->commands->create([
+                "name" => $command->getName()
+            ]);
+            $c->type = $command->getType();
+            if ($command->getApplicationId()) {
+                $c->application_id = $command->getApplicationId();
+            }
+            if (!empty($command->getDescription())) {
+                $c->description = $command->getDescription();
+            }
+            $options = [];
+            foreach ($command->getOptions() as $option) {
+                $do = new DiscordCommandOption($this->client->getDiscordClient());
+                $do = $do->setType($option->getType());
+                $do = $do->setName($option->getName());
+                $do = $do->setDescription($option->getDescription());
+                $do = $do->setRequired($option->isRequired());
+                $do = $do->setChannelTypes($option->getChannelTypes());
+                $do = $do->setAutoComplete($option->isAutoComplete());
+                foreach ($option->getChoices() as $choice) {
+                    $ch = new DiscordChoice($this->client->getDiscordClient());
+                    $ch = $ch->setName($choice->getName());
+                    $ch = $ch->setValue($choice->getValue());
+                    $do = $do->addChoice($ch);
+                }
+                $options[] = $do;
+            }
+            $subs = [];
+            foreach ($option->getSubOptions() as $sub) {
+                $do2 = new DiscordCommandOption($this->client->getDiscordClient());
+                $do2 = $do2->setType($sub->getType());
+                $do2 = $do2->setName($sub->getName());
+                $do2 = $do2->setDescription($sub->getDescription());
+                $do2 = $do2->setRequired($sub->isRequired());
+                $do2 = $do2->setChannelTypes($sub->getChannelTypes());
+                $do2 = $do2->setAutoComplete($sub->isAutoComplete());
+                foreach ($option->getChoices() as $choice) {
+                    $ch = new DiscordChoice($this->client->getDiscordClient());
+                    $ch = $ch->setName($choice->getName());
+                    $ch = $ch->setValue($choice->getValue());
+                    $do2 = $do2->addChoice($ch);
+                }
+                /** @var DiscordCommandOption[] $sub */
+                $subs[] = $do2;
+            }
+            $c->options = $options;
+
+            /** @var DiscordCommandOption $subOption */
+            foreach ($options as $subOption) {
+                $subOption->options = $subs;
+            }
+            $c->default_permission = $command->isDefaultPermission();
+            $app->commands->save($c)->then(function (DiscordCommand $command) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Created Command with success!", [ModelConverter::genModelCommand($command)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to create command.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        }
+    }
+    private function handleUpdateCommand(RequestUpdateCommand $pk): void
+    {
+        $command = $pk->getCommand();
+        if ($command->getId() === null) {
+            $this->resolveRequest($pk->getUID(), false, "Command ID must be present!");
+            return;
+        }
+        if ($command->getServerId()) {
+            $this->getServer($pk, $command->getServerId(), function (DiscordGuild $guild) use ($pk, $command) {
+                $fetch = $guild->commands->fetch($command->getId());
+                $fetch->then(function (DiscordCommand $c) use ($guild, $command, $pk) {
+                    $c->type = $command->getType();
+                    if ($command->getApplicationId()) {
+                        $c->application_id = $command->getApplicationId();
+                    }
+                    if (!empty($command->getDescription())) {
+                        $c->description = $command->getDescription();
+                    }
+                    if ($command->getServerId()) {
+                        $c->guild_id = $command->getServerId();
+                    }
+                    $options = [];
+                    foreach ($command->getOptions() as $option) {
+                        $do = new DiscordCommandOption($this->client->getDiscordClient());
+                        $do = $do->setType($option->getType());
+                        $do = $do->setName($option->getName());
+                        $do = $do->setDescription($option->getDescription());
+                        $do = $do->setRequired($option->isRequired());
+                        $do = $do->setChannelTypes($option->getChannelTypes());
+                        $do = $do->setAutoComplete($option->isAutoComplete());
+                        foreach ($option->getChoices() as $choice) {
+                            $ch = new DiscordChoice($this->client->getDiscordClient());
+                            $ch = $ch->setName($choice->getName());
+                            $ch = $ch->setValue($choice->getValue());
+                            $do = $do->addChoice($ch);
+                        }
+                        $options[] = $do;
+                    }
+                    $subs = [];
+                    foreach ($option->getSubOptions() as $sub) {
+                        $do2 = new DiscordCommandOption($this->client->getDiscordClient());
+                        $do2 = $do2->setType($sub->getType());
+                        $do2 = $do2->setName($sub->getName());
+                        $do2 = $do2->setDescription($sub->getDescription());
+                        $do2 = $do2->setRequired($sub->isRequired());
+                        $do2 = $do2->setChannelTypes($sub->getChannelTypes());
+                        $do2 = $do2->setAutoComplete($sub->isAutoComplete());
+                        foreach ($sub->getChoices() as $choice) {
+                            $ch = new DiscordChoice($this->client->getDiscordClient());
+                            $ch = $ch->setName($choice->getName());
+                            $ch = $ch->setValue($choice->getValue());
+                            $do2 = $do2->addChoice($ch);
+                        }
+                        /** @var DiscordCommandOption[] $sub */
+                        $sub[] = $do2;
+                    }
+                    $c->options = $options;
+
+                    /** @var DiscordCommandOption $subOption */
+                    foreach ($options as $subOption) {
+                        $subOption->options = $sub;
+                    }
+                    $c->default_permission = $command->isDefaultPermission();
+                    $guild->commands->save($c)->then(function (DiscordCommand $command) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), true, "Updated Command with success!", [ModelConverter::genModelCommand($command)]);
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to create command.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
+                });
+            });
+        } else {
+            $app = $this->getApplication();
+            $fetch = $app->commands->fetch($command->getId());
+            $fetch->then(function (DiscordCommand $c) use ($app, $command, $pk) {
+                $c->type = $command->getType();
+                if ($command->getApplicationId()) {
+                    $c->application_id = $command->getApplicationId();
+                }
+                if (!empty($command->getDescription())) {
+                    $c->description = $command->getDescription();
+                }
+                $options = [];
+                foreach ($command->getOptions() as $option) {
+                    $do = new DiscordCommandOption($this->client->getDiscordClient());
+                    $do = $do->setType($option->getType());
+                    $do = $do->setName($option->getName());
+                    $do = $do->setDescription($option->getDescription());
+                    $do = $do->setRequired($option->isRequired());
+                    $do = $do->setChannelTypes($option->getChannelTypes());
+                    $do = $do->setAutoComplete($option->isAutoComplete());
+                    foreach ($option->getChoices() as $choice) {
+                        $ch = new DiscordChoice($this->client->getDiscordClient());
+                        $ch = $ch->setName($choice->getName());
+                        $ch = $ch->setValue($choice->getValue());
+                        $do = $do->addChoice($ch);
+                    }
+                    $options[] = $do;
+                }
+                /** @var DiscordCommandOption[] $subs */
+                $subs = [];
+                foreach ($option->getSubOptions() as $sub) {
+                    $do2 = new DiscordCommandOption($this->client->getDiscordClient());
+                    $do2 = $do2->setType($sub->getType());
+                    $do2 = $do2->setName($sub->getName());
+                    $do2 = $do2->setDescription($sub->getDescription());
+                    $do2 = $do2->setRequired($sub->isRequired());
+                    $do2 = $do2->setChannelTypes($sub->getChannelTypes());
+                    $do2 = $do2->setAutoComplete($sub->isAutoComplete());
+                    foreach ($option->getChoices() as $choice) {
+                        $ch = new DiscordChoice($this->client->getDiscordClient());
+                        $ch = $ch->setName($choice->getName());
+                        $ch = $ch->setValue($choice->getValue());
+                        $do2 = $do2->addChoice($ch);
+                    }
+                    /** @var DiscordCommandOption[] $subs */
+                    $subs[] = $do2;
+                }
+                $c->options = $options;
+
+                /** @var DiscordCommandOption $subOption */
+                foreach ($options as $subOption) {
+                    $subOption->options = $subs;
+                }
+                $c->default_permission = $command->isDefaultPermission();
+                $app->commands->save($c)->then(function (DiscordCommand $command) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Created Command with success!", [ModelConverter::genModelCommand($command)]);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to create command.", [$e->getMessage(), $e->getTraceAsString()]);
+                });
+            });
+        }
+    }
+    private function handleDeleteCommand(RequestDeleteCommand $pk): void
+    {
+        if ($pk->getServerId()) {
+            $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
+                $guild->commands->fetch($pk->getId())->then(function (DiscordCommand $command) use ($guild, $pk) {
+                    $guild->commands->delete($command)->then(function () use ($pk) {
+                        $this->resolveRequest($pk->getUID(), true, "Guild Command deleted.");
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to delete Guild Command.", [$e->getMessage(), $e->getTraceAsString()]);
+                        $this->logger->debug("Failed to delete Guild Command ({$pk->getUID()}) - {$e->getMessage()}");
+                    });
+                });
+            });
+        } else {
+            $this->getApplication()->commands->fetch($pk->getId())->then(function (DiscordCommand $command) use ($pk) {
+                $this->getApplication()->commands->delete($command)->then(function () use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Command deleted.");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to delete Command.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to delete Command ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            });
+        }
+    }
+    private function handleFetchCommands(RequestFetchCommands $pk): void
+    {
+        if ($pk->getServerId()) {
+            $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
+
+                $guild->commands->freshen()->then(function (DiscordGuildCommandRepository $repository) use ($pk) {
+                    $commands = [];
+                    /** @var DiscordCommand $command */
+                    foreach ($repository->toArray() as $command) {
+                        $commands[] = ModelConverter::genModelCommand($command);
+                    }
+                    $this->resolveRequest($pk->getUID(), true, "Fetched guild commands.", $commands);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to fetch guild commands.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to fetch guild commands ({$pk->getUID()}) - freshen error: {$e->getMessage()}");
+                });
+            });
+        } else {
+            $this->getApplication()->commands->freshen()->then(function (DiscordGlobalCommandRepository $repository) use ($pk) {
+                $commands = [];
+                /** @var DiscordCommand $command */
+                foreach ($repository->toArray() as $command) {
+                    $commands[] = ModelConverter::genModelCommand($command);
+                }
+                $this->resolveRequest($pk->getUID(), true, "Fetched global commands.", $commands);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to fetch global commands.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to fetch global commands ({$pk->getUID()}) - freshen error: {$e->getMessage()}");
+            });
+        }
+    }
     private function handleDelayReply(RequestDelayReply $pk): void
     {
         $message = $pk->getMessage();
@@ -895,7 +1230,7 @@ class CommunicationHandler
                 /** @var DiscordMessage[] */
                 $msgs = [];
                 foreach ($messages as $message) {
-         
+
                     if ($message instanceof DiscordMessage) {
                         $msgs[] = $message;
                     }
@@ -1600,7 +1935,7 @@ class CommunicationHandler
                     $msg->edit($builder)->done(function (DiscordMessage $msg) use ($pk) {
 
                         $interaction = $msg->interaction;
-                   
+
                         if ($interaction === null) {
                             $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message. (Data turned into Message Model)", [ModelConverter::genModelMessage($msg)]);
                             return;
@@ -1617,7 +1952,7 @@ class CommunicationHandler
 
                 $message->edit($pk->getMessageBuilder())->done(function (DiscordMessage $msg) use ($pk) {
                     $interaction = $msg->interaction;
-               
+
                     if ($interaction === null) {
                         $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message. (Data turned into Message Model)", [ModelConverter::genModelMessage($msg)]);
                         return;
@@ -1632,7 +1967,7 @@ class CommunicationHandler
             }
             $message->edit($builder)->done(function (DiscordMessage $msg) use ($pk) {
                 $interaction = $msg->interaction;
-            
+
                 if ($interaction === null) {
                     $this->resolveRequest($pk->getUID(), false, "Interaction was not found in message. (Data turned into Message Model)", [ModelConverter::genModelMessage($msg)]);
                     return;
@@ -1713,7 +2048,7 @@ class CommunicationHandler
                     }
                     $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
                         $interaction = $msg->interaction;
-                 
+
                         if ($interaction === null) {
                             $this->resolveRequest($pk->getUID(), true, "Interaction was not found in message (Data turned into Message model)", [ModelConverter::genModelMessage($msg)]);
                             return;
@@ -1733,7 +2068,7 @@ class CommunicationHandler
                 }
                 $channel->sendMessage($builder)->done(function (DiscordMessage $msg) use ($builder, $pk) {
                     $interaction = $msg->interaction;
-              
+
                     if ($interaction === null) {
                         $this->resolveRequest($pk->getUID(), true, "Interaction was not found in message (Data turned into Message model)", [ModelConverter::genModelMessage($msg)]);
                         return;
@@ -2018,7 +2353,7 @@ class CommunicationHandler
                         $this->logger->debug("Failed to modify Button ({$pk->getUID()}) - {$e->getMessage()}");
                     });
                 } catch (\Throwable $e) {
-                    $interaction->editFollowUpMessage($builder)->then(function () use ($builder, $interaction, $pk) {
+                    $interaction->updateFollowUpMessage($m->getId(), $builder)->then(function () use ($builder, $interaction, $pk) {
                         $this->resolveRequest($pk->getUID(), true, "Successfully edited interaction.", [ModelConverter::genModelInteraction($interaction)]);
                     }, function (\Throwable $e) use ($pk) {
                         $this->resolveRequest($pk->getUID(), false, "Failed to edit interaction.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -2119,7 +2454,7 @@ class CommunicationHandler
                         $this->logger->debug("Failed to modify Select Menu ({$pk->getUID()}) - {$e->getMessage()}");
                     });
                 } catch (\Throwable $e) {
-                    $interaction->editFollowUpMessage($builder)->then(function () use ($builder, $interaction, $pk) {
+                    $interaction->updateFollowUpMessage($m->getId(), $builder)->then(function () use ($builder, $interaction, $pk) {
                         $this->resolveRequest($pk->getUID(), true, "Successfully modified interaction.", [ModelConverter::genModelInteraction($interaction)]);
                     }, function (\Throwable $e) use ($pk) {
                         $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);
@@ -2450,6 +2785,12 @@ class CommunicationHandler
             $cb($c);
         }
     }
+    private function getApplication(): DiscordApplication
+    {
+        $app = $this->client->getDiscordClient()->application;
+        return $app;
+    }
+
 
     private function getMessage(Packet $pk, string $channel_id, string $message_id, callable $cb): void
     {

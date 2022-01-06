@@ -28,6 +28,7 @@ use Discord\Repository\Guild\MemberRepository;
 use Discord\Repository\Guild\RoleRepository;
 use Discord\Parts\Guild\AuditLog\AuditLog;
 use Discord\Parts\Guild\AuditLog\Entry;
+use Discord\Repository\Guild\GuildCommandRepository;
 use Discord\Repository\Guild\ScheduledEventRepository;
 use Discord\Repository\Guild\GuildTemplateRepository;
 use Discord\Repository\Guild\StickerRepository;
@@ -110,6 +111,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * @property InviteRepository   $invites
  * @property BanRepository      $bans
  * @property EmojiRepository    $emojis
+ * @property GuildCommandRepository $commands
  * @property StickerRepository $stickers
  * @property StageInstanceRepository $stage_instances
  * @property GuildTemplateRepository $templates
@@ -498,13 +500,13 @@ class Guild extends Part
     public function createRole(array $data = []): ExtendedPromiseInterface
     {
         $botperms = $this->members->offsetGet($this->discord->id)->getPermissions();
-        if (! $botperms->manage_roles) {
+        if (!$botperms->manage_roles) {
             return \React\Promise\reject(new NoPermissionsException('You do not have permission to manage roles in the specified guild.'));
         }
         return $this->roles->save($this->factory->create(Role::class, $data));
     }
 
-     /**
+    /**
      * Creates an Emoji for the guild.
      *
      * @param array $options        An array of options.
@@ -536,7 +538,7 @@ class Guild extends Part
         $options = $resolver->resolve($options);
 
         if (isset($filepath)) {
-            if (! file_exists($filepath)) {
+            if (!file_exists($filepath)) {
                 throw new FileNotFoundException("File does not exist at path {$filepath}.");
             }
 
@@ -544,7 +546,7 @@ class Guild extends Part
             if ($extension == 'jpg') $extension = 'jpeg';
             $contents = file_get_contents($filepath);
 
-            $options['image'] = "data:image/{$extension};base64,".base64_encode($contents);
+            $options['image'] = "data:image/{$extension};base64," . base64_encode($contents);
         }
 
         $headers = [];
@@ -673,7 +675,7 @@ class Guild extends Part
         });
     }
 
-      /**
+    /**
      * Updates the positions of a list of given roles.
      *
      * The `$roles` array should be an associative array where the LHS key is the position,
@@ -847,6 +849,8 @@ class Guild extends Part
     {
         return [
             'guild_id' => $this->id,
+            // Hack, should be only used for the bot's Application Guild Commands
+            'application_id' => $this->discord->application->id,
         ];
     }
 

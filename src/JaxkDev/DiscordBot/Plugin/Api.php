@@ -92,6 +92,7 @@ use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\Channels\DMChannel;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
@@ -113,6 +114,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTimedOutMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateDMChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateDMChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteDMChannel;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateCommand;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateCommand;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteCommand;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 
 /**
@@ -131,6 +136,63 @@ class Api
     {
         $this->plugin = $plugin;
     }
+    
+    /** Creates a guild or global command
+     * @param Command $command
+     * @return PromiseInterface Resolves with a Command Model.
+     */
+    public function createCommand(Command $command): PromiseInterface{
+        $pk = new RequestCreateCommand($command);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+     /** Updates a guild or global command
+     * @param Command $command
+     * @return PromiseInterface Resolves with a Command Model.
+     */
+    public function updateCommand(Command $command): PromiseInterface{
+        if($command->getId() === null){
+            return rejectPromise(new ApiRejection("Command ID must be present!"));
+        }
+        $pk = new RequestUpdateCommand($command);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+     /** Deletes a guild or global command.
+     * @param string $id
+     * @param string|null $server_id
+     * @return PromiseInterface Resolves with no data.
+     */
+    public function deleteCommand(string $id, ?string $server_id = null): PromiseInterface{
+       if(!Utils::validDiscordSnowflake($id)){
+           return rejectPromise(new ApiRejection("Command ID: {$id} is invalid."));
+       }
+       if($server_id){
+           if(!Utils::validDiscordSnowflake($server_id)){
+               return rejectPromise(new ApiRejection("Server ID: {$server_id} is invalid."));
+           }
+        }
+        $pk = new RequestDeleteCommand($id, $server_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    /** Fetches all guild/global commands
+     * @param string|null $server_id - Null when fetching all global commands.
+     * @return PromiseInterface Resolves with a array of Commands
+     * 
+     */
+    public function fetchCommand(?string $server_id = null): PromiseInterface{
+        if($server_id){
+            if(!Utils::validDiscordSnowflake($server_id)){
+                return rejectPromise(new ApiRejection("Server ID: {$server_id} is invalid."));
+            }
+        }
+        $pk = new RequestFetchCommands($server_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
 
     /** Cross posts a message to the followed servers.
      * @param string $message_id
@@ -159,6 +221,9 @@ class Api
      */
     public function fetchWelcomeScreen(string $server_id): PromiseInterface
     {
+        if(!Utils::validDiscordSnowflake($server_id)){
+            return rejectPromise(new ApiRejection("Server ID: {$server_id} is invalid."));
+        }
         $pk = new RequestFetchWelcomeScreen($server_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());

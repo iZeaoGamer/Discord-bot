@@ -42,9 +42,11 @@ use React\EventLoop\Factory as LoopFactory;
 use React\EventLoop\LoopInterface;
 use React\EventLoop\TimerInterface;
 use Discord\Helpers\Deferred;
+use Discord\Helpers\RegisteredCommand;
 use Discord\Http\Drivers\React;
 use Discord\Http\Endpoint;
 use Evenement\EventEmitterTrait;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use React\Promise\ExtendedPromiseInterface;
 use React\Promise\PromiseInterface;
@@ -300,6 +302,13 @@ class Discord
      * @var Client Discord client.
      */
     protected $client;
+
+    /**
+     * An array of registered slash commands.
+     *
+     * @var RegisteredCommand[]
+     */
+    private $application_commands;
 
     /**
      * Creates a Discord client instance.
@@ -1124,8 +1133,8 @@ class Discord
     {
         $deferred = new Deferred();
 
-        if ($channel->type != Channel::TYPE_VOICE) {
-            $deferred->reject(new \Exception('You cannot join a text channel.'));
+        if (! $channel->allowVoice()) {
+            $deferred->reject(new \Exception('Channel must allow voice.'));
 
             return $deferred->promise();
         }
@@ -1460,7 +1469,7 @@ class Discord
      */
     public function __get(string $name)
     {
-        $allowed = ['loop', 'options', 'logger', 'http'];
+        $allowed = ['loop', 'options', 'logger', 'http', 'application_commands'];
 
         if (in_array($name, $allowed)) {
             return $this->{$name};
@@ -1508,6 +1517,36 @@ class Discord
         }
 
         return null;
+    }
+    /**
+     * Registeres a command with the client.
+     *
+     * @param string|array $name
+     * @param callable     $callback
+     *
+     * @return RegisteredCommand
+     */
+    public function listenCommand($name, callable $callback = null): RegisteredCommand
+    {
+        if (is_array($name) && count($name) == 1) {
+            $name = array_shift($name);
+        }
+
+        // registering base command
+        if (!is_array($name) || count($name) == 1) {
+            if (isset($this->application_commands[$name])) {
+                throw new InvalidArgumentException("The command `{$name}` already exists.");
+            }
+
+            return $this->application_commands[$name] = new RegisteredCommand($this, $name, $callback);
+        }
+
+        $baseCommand = array_shift($name);
+
+        if (!isset($this->application_commands[$baseCommand])) {
+            $this->listenCommand($baseCommand);
+        }
+        return $this->application_commands[$baseCommand]->addSubCommand($name, $callback);
     }
 
     /**
