@@ -25,11 +25,15 @@ class Image implements \Serializable
     /** @var null|int */
     private $height;
 
-    public function __construct(?string $url = null, ?int $width = null, ?int $height = null)
+    /** @var null|string */
+    private $proxy_icon_url;
+
+    public function __construct(?string $url = null, ?int $width = null, ?int $height = null, ?string $proxy_icon_url = null)
     {
         $this->setUrl($url);
         $this->setWidth($width);
         $this->setHeight($height);
+        $this->setProxyIconUrl($proxy_icon_url);
     }
 
     public function getUrl(): ?string
@@ -64,6 +68,14 @@ class Image implements \Serializable
     {
         $this->height = $height;
     }
+    public function getProxyIconURL(): ?string
+    {
+        return $this->proxy_icon_url;
+    }
+    public function setProxyIconUrl(?string $proxy_icon_url): void
+    {
+        $this->proxy_icon_url = $proxy_icon_url;
+    }
 
     //----- Serialization -----//
 
@@ -72,7 +84,8 @@ class Image implements \Serializable
         return serialize([
             $this->url,
             $this->width,
-            $this->height
+            $this->height,
+            $this->proxy_icon_url
         ]);
     }
 
@@ -81,7 +94,8 @@ class Image implements \Serializable
         [
             $this->url,
             $this->width,
-            $this->height
+            $this->height,
+            $this->proxy_icon_url
         ] = unserialize($data);
     }
 }

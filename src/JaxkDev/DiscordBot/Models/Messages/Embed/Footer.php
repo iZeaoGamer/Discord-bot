@@ -21,10 +21,14 @@ class Footer implements \Serializable
     /** @var null|string Must be prefixed with `https` */
     private $icon_url;
 
-    public function __construct(?string $text = null, ?string $icon_url = null)
+    /** @var null|string */
+    private $proxy_icon_url;
+
+    public function __construct(?string $text = null, ?string $icon_url = null, ?string $proxy_icon_url = null)
     {
         $this->setText($text);
         $this->setIconUrl($icon_url);
+        $this->setProxyIconUrl($proxy_icon_url);
     }
 
     public function getText(): ?string
@@ -52,6 +56,14 @@ class Footer implements \Serializable
         }
         $this->icon_url = $icon_url;
     }
+    public function getProxyIconURL(): ?string
+    {
+        return $this->proxy_icon_url;
+    }
+    public function setProxyIconUrl(?string $proxy_icon_url): void
+    {
+        $this->proxy_icon_url = $proxy_icon_url;
+    }
 
     //----- Serialization -----//
 
@@ -59,7 +71,8 @@ class Footer implements \Serializable
     {
         return serialize([
             $this->text,
-            $this->icon_url
+            $this->icon_url,
+            $this->proxy_icon_url
         ]);
     }
 
@@ -67,7 +80,8 @@ class Footer implements \Serializable
     {
         [
             $this->text,
-            $this->icon_url
+            $this->icon_url,
+            $this->proxy_icon_url
         ] = unserialize($data);
     }
 }

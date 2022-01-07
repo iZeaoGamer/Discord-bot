@@ -25,11 +25,15 @@ class Author implements \Serializable
     /** @var null|string Must be prefixed with `https` */
     private $icon_url;
 
-    public function __construct(?string $name = null, ?string $url = null, ?string $icon_url = null)
+    /** @var null|string Must be prefixed with `https` */
+    private $proxy_icon_url;
+
+    public function __construct(?string $name = null, ?string $url = null, ?string $icon_url = null, ?string $proxy_icon_url = null)
     {
         $this->setName($name);
         $this->setUrl($url);
         $this->setIconUrl($icon_url);
+        $this->setProxyIconUrl($proxy_icon_url);
     }
 
     public function getName(): ?string
@@ -67,6 +71,14 @@ class Author implements \Serializable
         }
         $this->icon_url = $icon_url;
     }
+    public function getProxyIconURL(): ?string
+    {
+        return $this->proxy_icon_url;
+    }
+    public function setProxyIconUrl(?string $proxy_icon_url): void
+    {
+        $this->proxy_icon_url = $proxy_icon_url;
+    }
 
     //----- Serialization -----//
 
@@ -75,7 +87,8 @@ class Author implements \Serializable
         return serialize([
             $this->name,
             $this->url,
-            $this->icon_url
+            $this->icon_url,
+            $this->proxy_icon_url
         ]);
     }
 
@@ -84,7 +97,8 @@ class Author implements \Serializable
         [
             $this->name,
             $this->url,
-            $this->icon_url
+            $this->icon_url,
+            $this->proxy_icon_url
         ] = unserialize($data);
     }
 }

@@ -41,6 +41,24 @@ class Application implements \Serializable
     /** @var User|null */
     private $user; //null when creating application.
 
+    /** @var bool */
+    private $bot_public;
+
+    /** @var bool */
+    private $bot_require_code_grant;
+
+    /** @var string|null */
+    private $terms_of_service_url; //null when empty or not found.
+
+    /** @var string|null */
+    private $privacy_policy_url; //null when empty or not found.
+
+    /** @var string */
+    private $verify_key;
+
+    /** @var object|null */
+    private $team;
+
     public function __construct(
         string $name,
         string $description,
@@ -48,7 +66,13 @@ class Application implements \Serializable
         ?string $id = null,
         ?string $icon = null,
         array $rpc_origins = [],
-        ?User $user = null
+        ?User $user = null,
+        bool $bot_public = false,
+        bool $bot_require_code_grant = false,
+        ?string $terms_of_service_url = null,
+        ?string $privacy_policy_url = null,
+        string $verify_key = "",
+        ?object $team = null
     ) {
         $this->setName($name);
         $this->setDescription($description);
@@ -57,6 +81,12 @@ class Application implements \Serializable
         $this->setIcon($icon);
         $this->setOrigins($rpc_origins);
         $this->setUser($user);
+        $this->setBotPublic($bot_public);
+        $this->setBotRequireCodeGrant($bot_require_code_grant);
+        $this->setTermsOfServiceURL($terms_of_service_url);
+        $this->setPrivacyPolicyURL($privacy_policy_url);
+        $this->setVerifyKey($verify_key);
+        $this->setTeam($team);
     }
     public function getName(): string
     {
@@ -132,6 +162,60 @@ class Application implements \Serializable
         }
         $this->user = $user;
     }
+    public function isBotPublic(): bool
+    {
+        return $this->bot_public;
+    }
+    public function setBotPublic(bool $public)
+    {
+        $this->bot_public = $public;
+    }
+    public function isBotRequireCodeGrant(): bool
+    {
+        return $this->bot_require_code_grant;
+    }
+    public function setBotRequireCodeGrant(bool $require): void
+    {
+        $this->bot_require_code_grant = $require;
+    }
+    public function getTermsOfServiceURL(): ?string
+    {
+        return $this->terms_of_service_url;
+    }
+    public function setTermsOfServiceURL(?string $url)
+    {
+        if ($url !== null and !str_starts_with($url, "https")) {
+            throw new \AssertionError("URL '$url' must start with https.");
+        }
+        $this->terms_of_service_url = $url;
+    }
+    public function getPrivacyPolicyURL(): ?string
+    {
+        return $this->privacy_policy_url;
+    }
+    public function setPrivacyPolicyURL(?string $url)
+    {
+        if ($url !== null and !str_starts_with($url, "https")) {
+            throw new \AssertionError("URL '$url' must start with https.");
+        }
+        $this->privacy_policy_url = $url;
+    }
+    public function getVerifyKey(): string
+    {
+        return $this->verify_key;
+    }
+    public function setVerifyKey(string $verify_key): void
+    {
+        $this->verify_key = $verify_key;
+    }
+    public function getTeam(): ?object
+    {
+        return $this->team;
+    }
+    public function setTeam(?object $team): void
+    {
+        $this->team = $team;
+    }
 
     //----- Serialization -----//
 
@@ -144,7 +228,13 @@ class Application implements \Serializable
             $this->id,
             $this->icon,
             $this->rpc_origins,
-            $this->user
+            $this->user,
+            $this->bot_public,
+            $this->bot_require_code_grant,
+            $this->terms_of_service_url,
+            $this->privacy_policy_url,
+            $this->verify_key,
+            $this->team
         ]);
     }
 
@@ -157,7 +247,13 @@ class Application implements \Serializable
             $this->id,
             $this->icon,
             $this->rpc_origins,
-            $this->user
+            $this->user,
+            $this->bot_public,
+            $this->bot_require_code_grant,
+            $this->terms_of_service_url,
+            $this->privacy_policy_url,
+            $this->verify_key,
+            $this->team
         ] = unserialize($data);
     }
 }

@@ -14,6 +14,7 @@ namespace JaxkDev\DiscordBot\Bot;
 
 use AssertionError;
 use Carbon\Carbon;
+use Discord\Builders\Components\Component;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
 use Discord\Parts\Channel\Sticker as DiscordSticker;
@@ -114,16 +115,18 @@ use JaxkDev\DiscordBot\Models\Permissions\Permissions;
 
 abstract class ModelConverter
 {
-    static public function genModelChoice(DiscordChoice $choice): Choice{
+    static public function genModelChoice(DiscordChoice $choice): Choice
+    {
         return new Choice($choice->name, $choice->value);
     }
-    static public function genModelCommandOption(DiscordCommandOption $option): CommandOption{
+    static public function genModelCommandOption(DiscordCommandOption $option): CommandOption
+    {
         $choices = [];
-        foreach($option->choices as $choice){
+        foreach ($option->choices as $choice) {
             $choices[] = self::genModelChoice($choice);
         }
         $options = [];
-        foreach($option->options as $option){
+        foreach ($option->options as $option) {
             $options[] = new CommandOption(
                 $option->type,
                 $option->name,
@@ -134,8 +137,9 @@ abstract class ModelConverter
                 $option->channel_types,
                 $option->min_value,
                 $option->max_value,
-            $option->autocomplete);
-            }
+                $option->autocomplete
+            );
+        }
         return new CommandOption(
             $option->type,
             $option->name,
@@ -149,27 +153,32 @@ abstract class ModelConverter
             $option->autoComplete
         );
     }
-    static public function genModelCommandOverwrite(DiscordCommandOverwrite $overwrite): CommandOverwrite{
+    static public function genModelCommandOverwrite(DiscordCommandOverwrite $overwrite): CommandOverwrite
+    {
         $permissions = [];
-        foreach($overwrite->permissions as $permission){
+        foreach ($overwrite->permissions as $permission) {
             $permissions[] = self::genModelCommandPermission($permission);
         }
-        return new CommandOverwrite($overwrite->id,
-        $overwrite->application_id,
-        $overwrite->server_id,
-        $permissions);
+        return new CommandOverwrite(
+            $overwrite->id,
+            $overwrite->application_id,
+            $overwrite->server_id,
+            $permissions
+        );
     }
-    static public function genModelCommandPermission(DiscordCommandPermission $permission): CommandPermission{
+    static public function genModelCommandPermission(DiscordCommandPermission $permission): CommandPermission
+    {
         return new CommandPermission(
             $permission->id,
             $permission->type,
             $permission->permission
         );
     }
-    static public function genModelCommand(DiscordCommand $command): Command{
+    static public function genModelCommand(DiscordCommand $command): Command
+    {
         $options = [];
-        foreach($command->options ?? [] as $option){
-            if($option){
+        foreach ($command->options ?? [] as $option) {
+            if ($option) {
                 $options[] = self::genModelCommandOption($option);
             }
         }
@@ -188,37 +197,37 @@ abstract class ModelConverter
     static public function genModelResolved(DiscordResolved $resolve): Resolved
     {
         $users = [];
-        if($resolve->users){
-        foreach($resolve->users as $snowflake => $user){
-            $users[$snowflake][] = self::genModelUser($user);
+        if ($resolve->users) {
+            foreach ($resolve->users as $snowflake => $user) {
+                $users[$snowflake][] = self::genModelUser($user);
+            }
         }
-    }
         $members = [];
-        if($resolve->members){
-        foreach($resolve->members as $snowflake => $member){
-            $members[$snowflake][] = self::genModelMember($member);
+        if ($resolve->members) {
+            foreach ($resolve->members as $snowflake => $member) {
+                $members[$snowflake][] = self::genModelMember($member);
+            }
         }
-    }
         $roles = [];
-        if($resolve->roles){
-            foreach($resolve->roles as $snowflake => $role){
+        if ($resolve->roles) {
+            foreach ($resolve->roles as $snowflake => $role) {
                 $roles[$snowflake][] = self::genModelRole($role);
             }
         }
         $channels = [];
-        if($resolve->channels){
-            foreach($resolve->channels as $snowflake => $channel){
-                if($channel instanceof DiscordThread){
+        if ($resolve->channels) {
+            foreach ($resolve->channels as $snowflake => $channel) {
+                if ($channel instanceof DiscordThread) {
                     $channels[$snowflake][] = self::genModelThread($channel);
                 }
-                if($channel instanceof DiscordChannel){
+                if ($channel instanceof DiscordChannel) {
                     $channels[$snowflake][] = self::genModelChannel($channel);
                 }
             }
         }
         $messages = [];
-        if($resolve->messages){
-            foreach($resolve->messages as $snowflake => $message){
+        if ($resolve->messages) {
+            foreach ($resolve->messages as $snowflake => $message) {
                 $messages[$snowflake][] = self::genModelMessage($message);
             }
         }
@@ -275,7 +284,13 @@ abstract class ModelConverter
             $application->icon,
             $application->rpc_origins,
             ($application->owner !== null ? self::genModelUser($application->owner) : null
-            )
+            ),
+            $application->bot_public,
+            $application->bot_require_code_grant,
+            $application->terms_of_service_url,
+            $application->privacy_policy_url,
+            $application->verify_key,
+            $application->team
         );
     }
     static public function genModelWelcomeScreen(DiscordWelcomeScreen $screen): WelcomeScreen
@@ -447,7 +462,9 @@ abstract class ModelConverter
             $data->id,
             $data->values,
             $data->custom_id,
-            $resolved, $data->target_id, $data->guild_id
+            $resolved,
+            $data->target_id,
+            $data->guild_id
         );
     }
     static function genModelOption(DiscordInteractOption $option): Option
@@ -609,7 +626,7 @@ abstract class ModelConverter
 
         $members = [];
         /** @var DiscordMember $member */
-        foreach($discordServer->members as $member){
+        foreach ($discordServer->members as $member) {
             $members[] = self::genModelMember($member);
         }
         //todo
@@ -831,7 +848,7 @@ abstract class ModelConverter
             $attachments[] = self::genModelAttachment($attachment);
         }
         $guild_id = $discordMessage->guild_id ?? ($discordMessage->author instanceof DiscordMember ? $discordMessage->author->guild_id : null);
-            $author = $guild_id === null ? $discordMessage->author->id : $guild_id . "." . $discordMessage->author->id;
+        $author = $guild_id === null ? $discordMessage->author->id : $guild_id . "." . $discordMessage->author->id;
         if ($discordMessage->type === DiscordMessage::TYPE_NORMAL) {
             if ($discordMessage->webhook_id === null) {
                 $e = $discordMessage->embeds->first();
@@ -862,6 +879,8 @@ abstract class ModelConverter
                     $embeds[] = self::genModelEmbed($embed);
                 }
                 $author = $guild_id === null ? $discordMessage->author->id : $guild_id . "." . $discordMessage->author->id;
+
+
                 return new WebhookMessage(
                     $discordMessage->channel_id,
                     $discordMessage->webhook_id,
@@ -881,7 +900,6 @@ abstract class ModelConverter
                     $discordMessage->tts
                 );
             }
-            
         } elseif ($discordMessage->type === DiscordMessage::TYPE_REPLY) {
             if ($discordMessage->referenced_message === null) {
                 throw new AssertionError("No referenced message on a REPLY message.");
@@ -906,34 +924,40 @@ abstract class ModelConverter
                 array_keys($discordMessage->mention_roles->toArray()),
                 array_keys($discordMessage->mention_channels->toArray()),
                 array_keys($discordMessage->sticker_items->toArray()),
-                ($discordMessage->interaction !== null ? ModelConverter::genModelInteraction($discordMessage->interaction) : null
-                ),
                 $discordMessage->link,
                 $discordMessage->tts
             );
-        }elseif($discordMessage->type === DiscordMessage::TYPE_APPLICATION_COMMAND){
+        } elseif ($discordMessage->type === DiscordMessage::TYPE_APPLICATION_COMMAND) {
             $e = $discordMessage->embeds->first();
             if ($e !== null) {
                 $e = self::genModelEmbed($e);
             }
-                return new CommandMessage(
-                    $discordMessage->channel_id,
-                    $discordMessage->id,
-                    $discordMessage->content,
-                    $e,
-                    $author,
-                    $guild_id,
-                    $discordMessage->timestamp->getTimestamp(),
-                    $attachments,
-                    $discordMessage->mention_everyone,
-                    array_keys($discordMessage->mentions->toArray()),
-                    array_keys($discordMessage->mention_roles->toArray()),
-                    array_keys($discordMessage->mention_channels->toArray()),
-                    array_keys($discordMessage->sticker_items->toArray()),
-                    $discordMessage->link,
-                    $discordMessage->tts,
-                    ($discordMessage->interaction !== null ? self::genModelInteraction($discordMessage->interaction) : null)
-                );
+            /** @var Component[] $array */
+            $array = [];
+            /** @var Component $com */
+            foreach ($discordMessage->components as $com) {
+                $array[] = $com;
+            }
+            return new CommandMessage(
+                $discordMessage->channel_id,
+                $discordMessage->id,
+                $discordMessage->content,
+                $e,
+                $author,
+                $guild_id,
+                $discordMessage->timestamp->getTimestamp(),
+                $attachments,
+                $discordMessage->mention_everyone,
+                array_keys($discordMessage->mentions->toArray()),
+                array_keys($discordMessage->mention_roles->toArray()),
+                array_keys($discordMessage->mention_channels->toArray()),
+                array_keys($discordMessage->sticker_items->toArray()),
+                $discordMessage->link,
+                $discordMessage->tts,
+                ($discordMessage->interaction !== null ? self::genModelInteraction($discordMessage->interaction) : null),
+                $discordMessage->application_id ?? null,
+                $array
+            );
         }
         throw new AssertionError("Discord message type not supported.");
     }
@@ -977,7 +1001,8 @@ abstract class ModelConverter
     {
         return new Footer(
             $footer->text,
-            $footer->icon_url
+            $footer->icon_url,
+            $footer->proxy_icon_url
         );
     }
 
@@ -986,7 +1011,9 @@ abstract class ModelConverter
         return new Image(
             $image->url,
             $image->width,
-            $image->height
+            $image->height,
+            $image->proxy_url,
+
         );
     }
 
@@ -995,7 +1022,8 @@ abstract class ModelConverter
         return new Video(
             $video->url,
             $video->width,
-            $video->height
+            $video->height,
+            $video->proxy_url
         );
     }
 
@@ -1004,7 +1032,8 @@ abstract class ModelConverter
         return new Author(
             $author->name,
             $author->url,
-            $author->icon_url
+            $author->icon_url,
+            $author->proxy_icon_url
         );
     }
 
