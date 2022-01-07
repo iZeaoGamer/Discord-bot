@@ -18,7 +18,7 @@ use Discord\Exceptions\FileNotFoundException;
 use Discord\Helpers\Multipart;
 use Discord\Http\Exceptions\RequestFailedException;
 use Discord\Parts\Channel\Message;
-use Discord\Parts\Channel\Sticker;
+use Discord\Parts\Guild\Sticker;
 use Discord\Parts\Embed\Embed;
 use InvalidArgumentException;
 use JsonSerializable;
