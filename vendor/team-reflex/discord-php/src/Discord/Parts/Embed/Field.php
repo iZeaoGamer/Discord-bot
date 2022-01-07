@@ -16,9 +16,9 @@ use Discord\Parts\Part;
 /**
  * A field of an embed object.
  *
- * @property string $name   The name of the field.
- * @property string $value  The value of the field.
- * @property bool   $inline Whether the field should be displayed in-line.
+ * @property string      $text           Footer text.
+ * @property string|null $icon_url       URL of an icon for the footer. Must be https.
+ * @property string|null $proxy_icon_url Proxied version of the icon URL.
  */
 class Field extends Part
 {

@@ -144,6 +144,7 @@ class Guild extends Part
         'id',
         'name',
         'icon',
+        'icon_hash',
         'region',
         'owner_id',
         'roles',
@@ -328,7 +329,7 @@ class Guild extends Part
      */
     protected function getIconHashAttribute()
     {
-        return $this->attributes['icon'];
+        return $this->attributes['icon_hash'] ?? $this->attributes['icon'];
     }
 
     /**
