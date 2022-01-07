@@ -17,7 +17,7 @@ use Carbon\Carbon;
 use Discord\Builders\Components\Component;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
-use Discord\Parts\Channel\Sticker as DiscordSticker;
+use Discord\Parts\Guild\Sticker as DiscordSticker;
 use Discord\Parts\Thread\Thread as DiscordThread;
 use Discord\Parts\Channel\Reaction as DiscordReaction;
 use Discord\Parts\Channel\Overwrite as DiscordOverwrite;
@@ -1072,6 +1072,7 @@ abstract class ModelConverter
 
     static public function genModelInvite(DiscordInvite $invite): Invite
     {
+        //todo rewrite invites model to match invites part.
         return new Invite(
             $invite->guild_id,
             $invite->channel_id,
