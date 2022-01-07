@@ -807,7 +807,7 @@ abstract class ModelConverter
             $discordChannel->parent_id,
             $discordChannel->id,
             $discordChannel->last_message_id,
-            array_keys($discordChannel->recipients->toArray()),
+           $discordChannel->permissions
         ));
     }
     static public function genModelStickers(DiscordSticker $sticker): Stickers

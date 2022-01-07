@@ -43,14 +43,19 @@ abstract class ServerChannel extends Channel
     /** @var ?string Category ID | null when not categorised. */
     protected $category_id;
 
-    public function __construct(string $name, int $position, string $server_id, ?string $category_id = null, ?string $id = null)
+    /** @var string|null */
+    protected $permissions; //Computed permissions for the invoking user in the channel, including overwrites, only included when part of the resolved data received on a slash command interaction.
+
+    public function __construct(string $name, int $position, string $server_id, ?string $category_id = null, ?string $id = null,
+    ?string $permissions = null)
     {
         parent::__construct($id);
         $this->setName($name);
         $this->setPosition($position);
         $this->setServerId($server_id);
         $this->setCategoryId($category_id);
-        //Note permissions are not in constructor.
+        $this->setComputePermissions($permissions);
+        //Note Channel and Role Permissions are not in constructor however, Permissions computing is.
     }
 
     public function getName(): string
@@ -141,6 +146,12 @@ abstract class ServerChannel extends Channel
         } else {
             $this->role_permissions[$id] = [null, $deniedPermissions];
         }
+    }
+    public function getComputePermissions(): ?string{
+        return $this->permissions;
+    }
+    public function setComputePermissions(?string $permission): void{
+        $this->permissions = $permission;
     }
 
     public function getServerId(): string

@@ -29,6 +29,7 @@ class TextChannel extends ServerChannel
     /** @var string|null */
     private $messageId; //null when creating.
 
+
     //Pins can be found via API::fetchPinnedMessages();
 
     //Webhooks can be found via API::fetchWebhooks();
@@ -45,6 +46,7 @@ class TextChannel extends ServerChannel
      * @param string|null $category_id
      * @param string|null $id
      * @param string|null $last_message_id
+     * @param string|null $permissions
      */
     public function __construct(
         string $topic,
@@ -55,9 +57,10 @@ class TextChannel extends ServerChannel
         ?int $rate_limit = null,
         ?string $category_id = null,
         ?string $id = null,
-        ?string $last_message_id = null
+        ?string $last_message_id = null,
+        ?string $permissions = null
     ) {
-        parent::__construct($name, $position, $server_id, $category_id, $id);
+        parent::__construct($name, $position, $server_id, $category_id, $id, $permissions);
         $this->setTopic($topic);
         $this->setNsfw($nsfw);
         $this->setRateLimit($rate_limit);
@@ -124,6 +127,7 @@ class TextChannel extends ServerChannel
             $this->member_permissions,
             $this->role_permissions,
             $this->server_id,
+            $this->permissions,
             $this->topic,
             $this->nsfw,
             $this->rate_limit,
@@ -141,6 +145,7 @@ class TextChannel extends ServerChannel
             $this->member_permissions,
             $this->role_permissions,
             $this->server_id,
+            $this->permissions,
             $this->topic,
             $this->nsfw,
             $this->rate_limit,
