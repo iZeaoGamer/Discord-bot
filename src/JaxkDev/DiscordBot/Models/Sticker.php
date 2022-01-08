@@ -1,12 +1,12 @@
 <?php
 
-namespace JaxkDev\DiscordBot\Models\Messages;
+namespace JaxkDev\DiscordBot\Models;
 
 use JaxkDev\DiscordBot\Plugin\Utils;
 
 use JaxkDev\DiscordBot\Models\User;
 
-class Stickers implements \Serializable
+class Sticker implements \Serializable
 {
 
 

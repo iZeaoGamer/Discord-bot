@@ -41,7 +41,7 @@ use Discord\Repository\Channel\WebhookRepository as DiscordWebhookRepository;
 use Discord\Repository\Guild\InviteRepository as DiscordInviteRepository;
 use Discord\Repository\Guild\GuildCommandRepository as DiscordGuildCommandRepository;
 use Discord\Repository\Interaction\GlobalCommandRepository as DiscordGlobalCommandRepository;
-use Discord\Parts\Channel\Sticker as DiscordSticker;
+use Discord\Parts\Guild\Sticker as DiscordSticker;
 use Discord\Parts\OAuth\Application as DiscordApplication;
 use Discord\Parts\Interactions\Command\Command as DiscordCommand;
 use Discord\Parts\Interactions\Command\Option as DiscordCommandOption;
@@ -155,6 +155,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateSticker;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteSticker;
+
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Plugin\Utils;
 
@@ -1600,11 +1603,41 @@ class CommunicationHandler
             });
         });
     }
+    private function handleStickerCreate(RequestCreateSticker $pk): void
+    {
+     $serverId = $pk->getSticker()->getServerId();
+     if($serverId === null){
+         $this->resolveRequest($pk->getUID(), false, "Server ID must be present.");
+        return;
+     }
+     $this->getServer($pk, $serverId, function (DiscordGuild $guild) use ($serverId, $pk){
+        /** @var DiscordSticker $sticker */
+        $sticker = $guild->stickers->create([
+             "name" => $pk->getSticker()->getName(),
+             "description" => $pk->getSticker()->getDescription(),
+             "tags" => $pk->getSticker()->getTags()
+         ]);
+         $sticker->type = $pk->getSticker()->getType();
+         $sticker->format_type = $pk->getSticker()->getFormatType();
+         $sticker->available = $pk->getSticker()->isAvailable();
+         $sticker->user = $pk->getSticker()->getUser();
+         $sticker->sort_value = $pk->getSticker()->getSortValue();
+         $guild->stickers->save($sticker)->then(function (DiscordSticker $sticker) use ($serverId, $pk, $guild){
+             $this->resolveRequest($pk->getUID(), true, "Successfully created guild sticker.", [ModelConverter::genModelSticker($sticker)]);
+         }, function (\Throwable $e) use ($serverId, $pk){
+             $this->resolveRequest($pk->getUID(), false, "Failed to create guild sticker.", [$e->getMessage(), $e->getTraceAsString()]);
+         });
+        }, function(\Throwable $e) use ($serverId, $pk){
+            $this->resolveRequest($pk->getUID(), false, "Failed to fetch Guild ID: {$serverId}.", [$e->getMessage(), $e->getTraceAsString()]);
+        });
+    }
+
+
     private function handleStickerUpdate(RequestStickerUpdate $pk): void
     {
         $serverId = $pk->getSticker()->getServerId();
         if ($serverId === null) {
-            $this->resolveRequest($pk->getUID(), false, "Server ID must not be null.");
+            $this->resolveRequest($pk->getUID(), false, "Server ID must be present.");
             return;
         }
         $this->getServer($pk, $serverId, function (DiscordGuild $guild) use ($pk) {
@@ -1612,7 +1645,7 @@ class CommunicationHandler
                 $sticker->name = $pk->getSticker()->getName();
                 $sticker->description = $pk->getSticker()->getDescription();
                 $guild->stickers->save($sticker)->then(function (DiscordSticker $sticker) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), true, "Successfully updated Guild Sticker.", [ModelConverter::genModelStickers($sticker)]);
+                    $this->resolveRequest($pk->getUID(), true, "Successfully updated Guild Sticker.", [ModelConverter::genModelSticker($sticker)]);
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to update guild sticker.", [$e->getMessage(), $e->getTraceAsString()]);
                     $this->logger->debug("Failed to update guild sticker ({$pk->getUID()}) - {$e->getMessage()}");
@@ -1620,6 +1653,24 @@ class CommunicationHandler
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to update guild sticker", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to update guild sticker ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
+            });
+        });
+    }
+    private function handleStickerDelete(RequestDeleteSticker $pk): void
+    {
+        $serverId = $pk->getServerId();
+        $id = $pk->getId();
+        $this->getServer($pk, $serverId, function (DiscordGuild $guild) use ($id, $serverId, $pk) {
+            $guild->stickers->fetch($id)->then(function (DiscordSticker $sticker) use ($guild, $pk) {
+                $guild->stickers->delete($sticker)->then(function() use ($pk){
+                    $this->resolveRequest($pk->getUID(), true, "Successfully deleted Guild Sticker.");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to delete guild sticker.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to delete guild sticker ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to delete guild sticker", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to delete guild sticker ({$pk->getUID()}) - fetch error: {$e->getMessage()}");
             });
         });
     }

@@ -94,7 +94,7 @@ use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Models\AuditLog\AuditLog;
 use JaxkDev\DiscordBot\Models\AuditLog\Options;
 use JaxkDev\DiscordBot\Models\AuditLog\Entry;
-use JaxkDev\DiscordBot\Models\Messages\Stickers;
+use JaxkDev\DiscordBot\Models\Sticker;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Models\Emoji;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
@@ -810,9 +810,9 @@ abstract class ModelConverter
            $discordChannel->permissions
         ));
     }
-    static public function genModelStickers(DiscordSticker $sticker): Stickers
+    static public function genModelSticker(DiscordSticker $sticker): Sticker
     {
-        return new Stickers(
+        return new Sticker(
             $sticker->name,
             $sticker->description,
             $sticker->type,
@@ -1072,17 +1072,24 @@ abstract class ModelConverter
 
     static public function genModelInvite(DiscordInvite $invite): Invite
     {
-        //todo rewrite invites model to match invites part.
         return new Invite(
-            $invite->guild_id,
-            $invite->channel_id,
+            $invite->guild_id ?? "",
+            $invite->channel_id ?? "",
             $invite->max_age,
             $invite->max_uses,
             $invite->temporary,
             $invite->code,
             $invite->created_at->getTimestamp(),
-            $invite->guild_id . "." . $invite->inviter->id,
-            $invite->uses
+            $invite->guild_id . "." . ($invite->inviter !== null ? $invite->inviter->id : null),
+            $invite->uses,
+            $invite->target_type,
+            $invite->target_user,
+            $invite->target_application,
+            $invite->approximate_presence_count,
+            $invite->approximate_member_count,
+            ($invite->expires_at !== null ? $invite->expires_at->getTimestamp() : null),
+            $invite->stage_instance,
+            $invite->guild_scheduled_event
         );
     }
 

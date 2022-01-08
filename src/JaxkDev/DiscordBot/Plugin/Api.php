@@ -96,7 +96,7 @@ use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\Server;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
-use JaxkDev\DiscordBot\Models\Messages\Stickers;
+use JaxkDev\DiscordBot\Models\Sticker;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Models\Messages\Reaction;
 use JaxkDev\DiscordBot\Models\Emoji;
@@ -118,6 +118,8 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateSticker;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteSticker;
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 
 /**
@@ -136,42 +138,43 @@ class Api
     {
         $this->plugin = $plugin;
     }
-    
+
     /** Creates a guild or global command
      * @param Command $command
      * @return PromiseInterface Resolves with a Command Model.
      */
-    public function createCommand(Command $command): PromiseInterface{
+    public function createCommand(Command $command): PromiseInterface
+    {
         $pk = new RequestCreateCommand($command);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
-     /** Updates a guild or global command
+
+    /** Updates a guild or global command - ID must be present.
      * @param Command $command
      * @return PromiseInterface Resolves with a Command Model.
      */
-    public function updateCommand(Command $command): PromiseInterface{
-        if($command->getId() === null){
-            return rejectPromise(new ApiRejection("Command ID must be present!"));
-        }
+    public function updateCommand(Command $command): PromiseInterface
+    {
         $pk = new RequestUpdateCommand($command);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
 
-     /** Deletes a guild or global command.
+    /** Deletes a guild or global command.
      * @param string $id
      * @param string|null $server_id
      * @return PromiseInterface Resolves with no data.
      */
-    public function deleteCommand(string $id, ?string $server_id = null): PromiseInterface{
-       if(!Utils::validDiscordSnowflake($id)){
-           return rejectPromise(new ApiRejection("Command ID: {$id} is invalid."));
-       }
-       if($server_id){
-           if(!Utils::validDiscordSnowflake($server_id)){
-               return rejectPromise(new ApiRejection("Server ID: {$server_id} is invalid."));
-           }
+    public function deleteCommand(string $id, ?string $server_id = null): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($id)) {
+            return rejectPromise(new ApiRejection("Command ID: {$id} is invalid."));
+        }
+        if ($server_id) {
+            if (!Utils::validDiscordSnowflake($server_id)) {
+                return rejectPromise(new ApiRejection("Server ID: {$server_id} is invalid."));
+            }
         }
         $pk = new RequestDeleteCommand($id, $server_id);
         $this->plugin->writeOutboundData($pk);
@@ -182,9 +185,10 @@ class Api
      * @return PromiseInterface Resolves with a array of Commands
      * 
      */
-    public function fetchCommand(?string $server_id = null): PromiseInterface{
-        if($server_id){
-            if(!Utils::validDiscordSnowflake($server_id)){
+    public function fetchCommand(?string $server_id = null): PromiseInterface
+    {
+        if ($server_id) {
+            if (!Utils::validDiscordSnowflake($server_id)) {
                 return rejectPromise(new ApiRejection("Server ID: {$server_id} is invalid."));
             }
         }
@@ -221,7 +225,7 @@ class Api
      */
     public function fetchWelcomeScreen(string $server_id): PromiseInterface
     {
-        if(!Utils::validDiscordSnowflake($server_id)){
+        if (!Utils::validDiscordSnowflake($server_id)) {
             return rejectPromise(new ApiRejection("Server ID: {$server_id} is invalid."));
         }
         $pk = new RequestFetchWelcomeScreen($server_id);
@@ -238,6 +242,9 @@ class Api
      */
     public function updateWelcomeScreen(string $server_id, bool $enabled, array $options, string $description): PromiseInterface
     {
+        if (!Utils::validDiscordSnowflake($server_id)) {
+            return rejectPromise(new ApiRejection("Server ID: {$server_id} is invalid."));
+        }
         if (strlen($description) > 140) {
             return rejectPromise(new ApiRejection("Description must be below 140 characters long."));
         }
@@ -258,16 +265,13 @@ class Api
         return ApiResolver::create($pk->getUID());
     }
 
-    /** Updates a reaction.
+    /** Updates a reaction. ID must be present.
      * @param Reaction $reaction
      * 
      * @return PromiseInterface Resolves with a Reaction Model.
      */
     public function updateReaction(Reaction $reaction): PromiseInterface
     {
-        if ($reaction->getId() === null) {
-            return rejectPromise(new ApiRejection("ID must be present."));
-        }
         $pk = new RequestUpdateReaction($reaction);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -282,6 +286,15 @@ class Api
      */
     public function deleteReaction(string $channel_id, string $message_id, string $reaction_id): PromiseInterface
     {
+        if (!Utils::validDiscordSnowflake($channel_id)) {
+            return rejectPromise(new ApiRejection("Channel ID: {$channel_id} is invalid!"));
+        }
+        if (!Utils::validDiscordSnowflake($message_id)) {
+            return rejectPromise(new ApiRejection("Message ID: {$message_id} is invalid!"));
+        }
+        if (!Utils::validDiscordSnowflake($reaction_id)) {
+            return rejectPromise(new ApiRejection("Reaction ID: {$reaction_id} is invalid!"));
+        }
         $pk = new RequestDeleteReaction($channel_id, $message_id, $reaction_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -296,6 +309,15 @@ class Api
      */
     public function fetchReaction(string $channel_id, string $message_id, string $reaction_id): PromiseInterface
     {
+        if (!Utils::validDiscordSnowflake($channel_id)) {
+            return rejectPromise(new ApiRejection("Channel ID: {$channel_id} is invalid!"));
+        }
+        if (!Utils::validDiscordSnowflake($message_id)) {
+            return rejectPromise(new ApiRejection("Message ID: {$message_id} is invalid!"));
+        }
+        if (!Utils::validDiscordSnowflake($reaction_id)) {
+            return rejectPromise(new ApiRejection("Reaction ID: {$reaction_id} is invalid!"));
+        }
         $pk = new RequestFetchReaction($channel_id, $message_id, $reaction_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -320,9 +342,6 @@ class Api
      */
     public function updateEvent(ServerScheduledEvent $schedule): PromiseInterface
     {
-        if ($schedule->getId() === null) {
-            return rejectPromise(new ApiRejection("ID must be present."));
-        }
         $pk = new RequestScheduleUpdate($schedule);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -336,6 +355,13 @@ class Api
      */
     public function deleteEvent(string $serverId, string $id): PromiseInterface
     {
+        if (!Utils::validDiscordSnowflake($serverId)) {
+            return rejectPromise(new ApiRejection("Server ID: {$serverId} is invalid!"));
+        }
+        if (!Utils::validDiscordSnowflake($id)) {
+            return rejectPromise(new ApiRejection("Server Scheduled Event ID: {$id} is invalid!"));
+        }
+
         $pk = new RequestScheduleDelete($serverId, $id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -359,9 +385,6 @@ class Api
      */
     public function updateTemplate(ServerTemplate $template): PromiseInterface
     {
-        if ($template->getCode() === null) {
-            return rejectPromise(new ApiRejection("Template Code must be present."));
-        }
         $pk = new RequestTemplateUpdate($template);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -374,6 +397,9 @@ class Api
      */
     public function deleteTemplate(string $server_id, string $code): PromiseInterface
     {
+        if (!Utils::validDiscordSnowflake($server_id)) {
+            return rejectPromise(new ApiRejection("Server ID: {$server_id} is invalid!"));
+        }
         $pk = new RequestTemplateDelete($server_id, $code);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -385,9 +411,6 @@ class Api
      */
     public function updateEmoji(Emoji $emoji): PromiseInterface
     {
-        if ($emoji->getId() === null) {
-            return rejectPromise(new ApiRejection("Emoji ID must be present."));
-        }
         $pk = new RequestEmojiUpdate($emoji);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -411,9 +434,6 @@ class Api
      */
     public function updateStage(Stage $stage): PromiseInterface
     {
-        if ($stage->getID() === null) {
-            return rejectPromise(new ApiRejection("Stage ID must be present."));
-        }
         $pk = new RequestStageUpdate($stage);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -426,21 +446,55 @@ class Api
      */
     public function deleteStage(string $server_id, string $stage_id): PromiseInterface
     {
+        if (!Utils::validDiscordSnowflake($server_id)) {
+            return rejectPromise(new ApiRejection("Server ID: {$server_id} is invalid!"));
+        }
+        if (!Utils::validDiscordSnowflake($stage_id)) {
+            return rejectPromise(new ApiRejection("Stage ID: {$stage_id} is invalid!"));
+        }
         $pk = new RequestStageDelete($server_id, $stage_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
 
-
-
-    /** Updates a sticker.
-     * @param Stickers $sticker
+    /** Creates a sticker.
+     * @param Sticker $sticker
      * 
      * @return PromiseInterface Resolves with a Sticker Model.
      */
-    public function updateSticker(Stickers $sticker): PromiseInterface
+    public function createSticker(Sticker $sticker): PromiseInterface
+    {
+        $pk = new RequestCreateSticker($sticker);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    /** Updates a sticker.
+     * @param Sticker $sticker
+     * 
+     * @return PromiseInterface Resolves with a Sticker Model.
+     */
+    public function updateSticker(Sticker $sticker): PromiseInterface
     {
         $pk = new RequestStickerUpdate($sticker);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Deletes a sticker
+     * @param string $id
+     * @param string $serverId
+     * 
+     * @return PromiseInterface Resolves with no data.
+     */
+    public function deleteSticker(string $id, string $serverId): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($id)) {
+            return rejectPromise(new ApiRejection("Sticker ID: {$id} is invalid."));
+        }
+        if (!Utils::validDiscordSnowflake($serverId)) {
+            return rejectPromise(new ApiRejection("Server ID: {$serverId} is invalid."));
+        }
+        $pk = new RequestDeleteSticker($id, $serverId);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -453,6 +507,9 @@ class Api
      */
     public function delayReply(Message $message, int $delay): PromiseInterface
     {
+        if ($delay <= 0) {
+            return rejectPromise(new ApiRejection("Reply Delay counter: {$delay} must be above 0."));
+        }
         $pk = new RequestDelayReply($message, $delay);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -473,6 +530,9 @@ class Api
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channel_id}"));
         }
+        if ($delay <= 0) {
+            return rejectPromise(new ApiRejection("Delete Delay counter: {$delay} must be above 0."));
+        }
         $pk = new RequestDelayDelete($message_id, $channel_id, $delay);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -487,10 +547,10 @@ class Api
      * 
      * @return PromiseInterface Resolves with a Interaction Model. If Interaction not found, returns a Message Model instead.
      */
-    public function respondInteraction(MessageBuilder $builder, Message $message, string $message_id, string $channel_id): PromiseInterface{
+    public function respondInteraction(MessageBuilder $builder, Message $message, string $message_id, string $channel_id): PromiseInterface
+    {
         $this->deleteMessage($message_id, $channel_id);
         return $this->createInteraction($builder, $message);
-       
     }
 
 
@@ -542,11 +602,6 @@ class Api
         if (!Utils::validDiscordSnowflake($channelId)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
         }
-        if ($message->getId() !== null) {
-            if (!Utils::validDiscordSnowflake($message->getId())) {
-                return rejectPromise(new APIRejection("Invalid Message ID: {$message->getId()}"));
-            }
-        }
         $pk = new RequestModifyButton($builder, $message, $channelId, $button, $ephemeral, $doNothing);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -559,9 +614,6 @@ class Api
      */
     public function modifyInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false): PromiseInterface
     {
-        if ($message->getId() === null) {
-            return rejectPromise(new ApiRejection("Interaction must have a valid ID to be able to edit it."));
-        }
         if (strlen($message->getContent()) > 2000) {
             return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
         }
@@ -601,9 +653,6 @@ class Api
     {
         if (!Utils::validDiscordSnowflake($channelId)) {
             return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
-        }
-        if (!Utils::validDiscordSnowflake($message->getId())) {
-            return rejectPromise(new APIRejection("Invalid Message ID: {$message->getId()}"));
         }
         $pk = new RequestModifySelectMenu($builder, $message, $channelId, $select, $ephemeral, $doNothing);
         $this->plugin->writeOutboundData($pk);
@@ -1147,6 +1196,9 @@ class Api
         if ($message->getId() === null) {
             return rejectPromise(new ApiRejection("Message must have a valid ID to be able to edit it."));
         }
+        if (!Utils::validDiscordSnowflake($message->getId())) {
+            return rejectPromise(new ApiRejection("Message ID: {$message->getId()} is invalid."));
+        }
         if (strlen($message->getContent()) > 2000) {
             return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
         }
@@ -1189,6 +1241,9 @@ class Api
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
         }
+        if ($deleteLimit <= 0) {
+            return rejectPromise(new ApiRejection("Delete limit {$deleteLimit} is invalid."));
+        }
 
         $pk = new RequestMessageBulkDelete($channel_id, $deleteLimit);
         $this->plugin->writeOutboundData($pk);
@@ -1223,6 +1278,12 @@ class Api
      */
     public function updateChannel(ServerChannel $channel): PromiseInterface
     {
+        if ($channel->getId() === null) {
+            return rejectPromise(new ApiRejection("Channel ID must be present."));
+        }
+        if (!Utils::validDiscordSnowflake($channel->getId())) {
+            return rejectPromise(new ApiRejection("Channel ID: {$channel->getId()} is invalid."));
+        }
         $pk = new RequestUpdateChannel($channel);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -1270,6 +1331,12 @@ class Api
      */
     public function updateDMChannel(DMChannel $channel): PromiseInterface
     {
+        if ($channel->getId() === null) {
+            return rejectPromise(new ApiRejection("DM Channel ID must be present."));
+        }
+        if (!Utils::validDiscordSnowflake($channel->getId())) {
+            return rejectPromise(new ApiRejection("Channel ID: {$channel->getId()} is invalid."));
+        }
         $pk = new RequestUpdateDMChannel($channel);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -1353,6 +1420,9 @@ class Api
         if (!Utils::validDiscordSnowflake($server_id)) {
             return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
         }
+        if (!Utils::validDiscordSnowflake($user_id)) {
+            return rejectPromise(new ApiRejection("User ID: {$user_id} is invalid."));
+        }
 
         $pk = new RequestSearchMembers($server_id, $user_id, $limit);
         $this->plugin->writeOutboundData($pk);
@@ -1396,6 +1466,9 @@ class Api
         if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
         }
+        if (!Utils::validDiscordSnowflake($channel->getId())) {
+            return rejectPromise(new ApiRejection("Voice Channel ID: {$channel->getId()} is invalid!"));
+        }
         $pk = new RequestJoinVoiceChannel($channel, $isDeafened, $isMuted);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -1411,6 +1484,9 @@ class Api
     {
         if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
+        }
+        if (!Utils::validDiscordSnowflake($channel->getId())) {
+            return rejectPromise(new ApiRejection("Voice Channel ID: {$channel->getId()} is invalid!"));
         }
         $pk = new RequestLeaveVoiceChannel($channel);
         $this->plugin->writeOutboundData($pk);
@@ -1429,6 +1505,9 @@ class Api
         if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
         }
+        if (!Utils::validDiscordSnowflake($channel->getId())) {
+            return rejectPromise(new ApiRejection("Voice Channel ID: {$channel->getId()} is invalid!"));
+        }
         $pk = new RequestMoveVoiceChannel($channel);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -1446,6 +1525,9 @@ class Api
     {
         if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
+        }
+        if (!Utils::validDiscordSnowflake($channel->getId())) {
+            return rejectPromise(new ApiRejection("Voice Channel ID: {$channel->getId()} is invalid!"));
         }
         if (!Utils::validDiscordSnowflake($userID)) {
             return rejectPromise(new ApiRejection("Invalid Member ID '$userID'."));
@@ -1467,6 +1549,9 @@ class Api
     {
         if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
+        }
+        if (!Utils::validDiscordSnowflake($channel->getId())) {
+            return rejectPromise(new ApiRejection("Voice Channel ID: {$channel->getId()} is invalid!"));
         }
 
         if (!Utils::validDiscordSnowflake($userID)) {
@@ -1526,6 +1611,12 @@ class Api
      */
     public function updateThread(ThreadChannel $channel)
     {
+        if ($channel->getId() === null) {
+            return rejectPromise(new ApiRejection("Thread Channel ID: {$channel->getId()} must be present."));
+        }
+        if (!Utils::validDiscordSnowflake($channel->getId())) {
+            return rejectPromise(new ApiRejection("Thread Channel ID: {$channel->getId()} is invalid!"));
+        }
         $pk = new RequestThreadUpdate($channel);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());

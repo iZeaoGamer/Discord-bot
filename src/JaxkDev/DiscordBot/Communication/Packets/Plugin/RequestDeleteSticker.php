@@ -15,28 +15,36 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Models\Sticker;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestStickerUpdate extends Packet
+class RequestDeleteSticker extends Packet
 {
 
-    /** @var Sticker */
-    private $sticker;
+    /** @var string */
+    private $id;
 
-    public function __construct(Sticker $sticker)
+    /** @var string */
+    private $server_id;
+
+    public function __construct(string $id, string $server_id)
     {
         parent::__construct();
-        $this->sticker = $sticker;
+        $this->id = $id;
+        $this->server_id = $server_id;
     }
 
-    public function getSticker(): Sticker
+    public function getId(): string
     {
-        return $this->sticker;
+        return $this->id;
+    }
+    public function getServerId(): string{
+        return $this->server_id;
     }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->sticker
+            $this->id,
+            $this->server_id
         ]);
     }
 
@@ -44,7 +52,8 @@ class RequestStickerUpdate extends Packet
     {
         [
             $this->UID,
-            $this->sticker
+            $this->id,
+            $this->server_id
         ] = unserialize($data);
     }
 }

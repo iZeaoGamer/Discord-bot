@@ -18,17 +18,20 @@ use Discord\Parts\Part;
 /**
  * Permission represents a set of permissions for a given role or overwrite.
  *
+ * @see https://discord.com/developers/docs/topics/permissions
+ *
  * @property int|string $bitwise
  * @property bool       $create_instant_invite
  * @property bool       $manage_channels
  * @property bool       $view_channel
  * @property bool       $manage_roles
- * @property bool       $manage_webhooks
  */
 abstract class Permission extends Part
 {
     /**
      * Array of permissions that only apply to stage channels.
+     * 
+     * i.e. indicated S in documentation
      *
      * @var array
      */
@@ -44,6 +47,8 @@ abstract class Permission extends Part
     /**
      * Array of permissions that only apply to voice channels.
      *
+     * i.e. indicated V in documentation
+     * 
      * @var array
      */
     public const VOICE_PERMISSIONS = [
@@ -61,7 +66,9 @@ abstract class Permission extends Part
 
     /**
      * Array of permissions that only apply to text channels.
-     *
+     * 
+     * i.e. indicated T in documentation
+     * 
      * @var array
      */
     public const TEXT_PERMISSIONS = [
@@ -74,6 +81,7 @@ abstract class Permission extends Part
         'read_message_history' => 16,
         'mention_everyone' => 17,
         'use_external_emojis' => 18,
+        'manage_webhooks' => 29,
         'use_application_commands' => 31,
         'manage_threads' => 34,
         'create_public_threads' => 35,
@@ -84,7 +92,9 @@ abstract class Permission extends Part
 
     /**
      * Array of permissions that can only be applied to roles.
-     *
+     * 
+     * i.e. indicated empty in documentation
+     * 
      * @var array
      */
     public const ROLE_PERMISSIONS = [
@@ -97,13 +107,13 @@ abstract class Permission extends Part
         'change_nickname' => 26,
         'manage_nicknames' => 27,
         'manage_emojis_and_stickers' => 30,
-        'manage_events' => 33,
         'moderate_members' => 40,
     ];
 
     /**
      * Array of permissions for all roles.
      *
+     * i.e. indicated T,V,S in documentation
      * @var array
      */
     public const ALL_PERMISSIONS = [
@@ -111,7 +121,6 @@ abstract class Permission extends Part
         'manage_channels' => 4,
         'view_channel' => 10,
         'manage_roles' => 28,
-        'manage_webhooks' => 29,
     ];
 
     /**

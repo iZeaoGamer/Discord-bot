@@ -17,6 +17,10 @@ use JaxkDev\DiscordBot\Plugin\Utils;
 class Invite implements \Serializable
 {
 
+
+    public const TARGET_TYPE_STREAM = 1;
+    public const TARGET_TYPE_EMBEDDED_APPLICATION = 2;
+
     /** @var string|null Also used as ID internally, null when creating model. */
     private $code;
 
@@ -44,6 +48,30 @@ class Invite implements \Serializable
     /** @var string|null Member ID, null when creating model. */
     private $creator;
 
+    /** @var int|null */
+    private $target_type;
+
+    /** @var User|null */
+    private $target_user;
+
+    /** @var object|null */
+    private $target_application;
+
+    /** @var int|null */
+    private $approximate_presence_count;
+
+    /** @var int|null */
+    private $approximate_member_count;
+
+    /** @var int|null */
+    private $expires_at;
+
+    /** @var object|null */
+    private $stage_instance;
+
+    /** @var object|null */
+    private $server_scheduled_event;
+
     public function __construct(
         string $server_id,
         string $channel_id,
@@ -53,7 +81,16 @@ class Invite implements \Serializable
         ?string $code = null,
         ?int $created_at = null,
         ?string $creator = null,
-        int $uses = 0
+        int $uses = 0,
+        ?int $target_type = null,
+        ?User $target_user = null,
+        ?object $target_application = null,
+        ?int $approximate_presence_count = null,
+        ?int $approximate_member_count = null,
+        ?int $expires_at = null,
+        ?object $stage_instance = null,
+        ?object $server_scheduled_event = null
+
     ) {
         $this->setServerId($server_id);
         $this->setChannelId($channel_id);
@@ -64,7 +101,17 @@ class Invite implements \Serializable
         $this->setCreatedAt($created_at);
         $this->setCreator($creator);
         $this->setUses($uses);
+        $this->setTargetType($target_type);
+        $this->setTargetUser($target_user);
+        $this->setTargetApplication($target_application);
+        $this->setEstimatePresenceCount($approximate_presence_count);
+        $this->setEstimateMemberCount($approximate_member_count);
+        $this->setExpiresAt($expires_at);
+        $this->setStageInstance($stage_instance);
+        $this->setServerScheduledEvent($server_scheduled_event);
     }
+
+
 
     public function getCode(): ?string
     {
@@ -174,6 +221,69 @@ class Invite implements \Serializable
     {
         $this->creator = $creator;
     }
+    public function getTargetType(): ?int
+    {
+        return $this->target_type;
+    }
+    public function setTargetType(?int $target_type): void
+    {
+        if ($target_type) {
+            if ($target_type < self::TARGET_TYPE_STREAM or $target_type > self::TARGET_TYPE_EMBEDDED_APPLICATION) {
+                throw new \AssertionError("Target Type {$target_type} is invalid. Must be between 1-2.");
+            }
+        }
+        $this->target_type = $target_type;
+    }
+    public function getTargetUser(): ?User{
+        return $this->target_user;
+    }
+    public function setTargetUser(?User $user): void{
+        if($user){
+            if($user->getId() === null){
+                throw new \AssertionError("User ID must be present.");
+            }
+            if(!Utils::validDiscordSnowflake($user->getId())){
+                throw new \AssertionError("User ID: {$user->getId()} is invalid.");
+            }
+        }
+        $this->target_user = $user;
+    }
+    public function getTargetApplication(): ?object{
+        return $this->target_application;
+    }
+    public function setTargetApplication(?object $application): void{
+        $this->target_application = $application;
+    }
+    public function getEstimatePresenceCount(): ?int{
+        return $this->approximate_presence_count;
+    }
+    public function setEstimatePresenceCount(?int $approximate_presence_count){
+        $this->approximate_presence_count = $approximate_presence_count;
+    }
+    public function getEstimateMemberCount(): ?int{
+        return $this->approximate_member_count;
+    }
+    public function setEstimateMemberCount(?int $approximate_member_count): void{
+        $this->approximate_member_count = $approximate_member_count;
+    }
+    public function getExpiresAt(): ?int{
+        return $this->expires_at;
+    }
+    public function setExpiresAt(?int $expires_at){
+        $this->expires_at = $expires_at;
+    }
+    public function getStageInstance(): ?object{
+        return $this->stage_instance;
+    }
+    public function setStageInstance(?object $stage_instance): void{
+        $this->stage_instance = $stage_instance;
+    }
+    public function getServerScheduledEvent(): ?object{
+        return $this->server_scheduled_event;
+    }
+    public function setServerScheduledEvent(?object $server_scheduled_event){
+        $this->server_scheduled_event = $server_scheduled_event;
+    }
 
     //----- Serialization -----//
 
@@ -188,7 +298,15 @@ class Invite implements \Serializable
             $this->temporary,
             $this->uses,
             $this->max_uses,
-            $this->creator
+            $this->creator,
+            $this->target_type,
+            $this->target_user,
+            $this->target_application,
+            $this->approximate_member_count,
+            $this->approximate_presence_count,
+            $this->expires_at,
+            $this->stage_instance,
+            $this->server_scheduled_event
         ]);
     }
 
@@ -203,7 +321,15 @@ class Invite implements \Serializable
             $this->temporary,
             $this->uses,
             $this->max_uses,
-            $this->creator
+            $this->creator,
+            $this->target_type,
+            $this->target_user,
+            $this->target_application,
+            $this->approximate_member_count,
+            $this->approximate_presence_count,
+            $this->expires_at,
+            $this->stage_instance,
+            $this->server_scheduled_event
         ] = unserialize($data);
     }
 }

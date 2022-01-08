@@ -422,7 +422,7 @@ class Message extends Part
         }
 
         if (isset($this->attributes['referenced_message'])) {
-            return $this->factory->create(Message::class, $this->attributes['referenced_message'] ?? [], true);
+            return $this->factory->create(Message::class, $this->attributes['referenced_message'], true);
         }
 
         return null;
