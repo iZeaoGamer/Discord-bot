@@ -224,6 +224,7 @@ class Guild extends Part
         'bans' => BanRepository::class,
         'invites' => InviteRepository::class,
         'emojis' => EmojiRepository::class,
+        'commands' => GuildCommandRepository::class,
         'stickers' => StickerRepository::class,
         'stage_instances' => StageInstanceRepository::class,
         'templates' => GuildTemplateRepository::class,

@@ -10,7 +10,7 @@
  * Email   :: JaxkDev@gmail.com
  */
 
-namespace JaxkDev\DiscordBot\Models\Interactions\Command;
+namespace JaxkDev\DiscordBot\Models\Interactions\Request;
 
 
 use JaxkDev\DiscordBot\Plugin\Utils;

@@ -107,7 +107,7 @@ use JaxkDev\DiscordBot\Models\Interactions\Command\Option as CommandOption;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Overwrite as CommandOverwrite;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Permission as CommandPermission;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
-use JaxkDev\DiscordBot\Models\Interactions\Command\Resolved;
+use JaxkDev\DiscordBot\Models\Interactions\Request\Resolved;
 
 use JaxkDev\DiscordBot\Models\Channels\Overwrite;
 use JaxkDev\DiscordBot\Plugin\Bitwise;

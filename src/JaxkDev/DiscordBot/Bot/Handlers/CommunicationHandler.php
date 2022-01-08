@@ -269,7 +269,9 @@ class CommunicationHandler
         elseif ($pk instanceof RequestFetchWelcomeScreen) $this->handleFetchWelcomeScreen($pk);
         elseif ($pk instanceof RequestUpdateWelcomeScreen) $this->handleUpdateWelcomeScreen($pk);
         elseif ($pk instanceof RequestTimedOutMember) $this->handleTimedOutMember($pk);
+        elseif($pk instanceof RequestCreateSticker) $this->handleStickerCreate($pk);
         elseif ($pk instanceof RequestStickerUpdate) $this->handleStickerUpdate($pk);
+        elseif($pk instanceof RequestDeleteSticker) $this->handleStickerDelete($pk);
         elseif ($pk instanceof RequestCreateDMChannel) $this->handleCreateDMChannel($pk);
         elseif ($pk instanceof RequestUpdateDMChannel) $this->handleUpdateDMChannel($pk);
         elseif ($pk instanceof RequestDeleteDMChannel) $this->handleDeleteDMChannel($pk);
@@ -311,7 +313,9 @@ class CommunicationHandler
                         $ch = new DiscordChoice($this->client->getDiscordClient());
                         $ch = $ch->setName($choice->getName());
                         $ch = $ch->setValue($choice->getValue());
+                        if($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER){
                         $do = $do->addChoice($ch);
+                        }
                     }
                     $options[] = $do;
                 }
@@ -329,7 +333,9 @@ class CommunicationHandler
                         $ch = new DiscordChoice($this->client->getDiscordClient());
                         $ch = $ch->setName($choice->getName());
                         $ch = $ch->setValue($choice->getValue());
+                        if($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER){
                         $do2 = $do2->addChoice($ch);
+                        }
                     }
                     /** @var DiscordCommandOption[] $subs */
                     $subs[] = $do2;
@@ -374,7 +380,9 @@ class CommunicationHandler
                     $ch = new DiscordChoice($this->client->getDiscordClient());
                     $ch = $ch->setName($choice->getName());
                     $ch = $ch->setValue($choice->getValue());
+                    if($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER){
                     $do = $do->addChoice($ch);
+                    }
                 }
                 $options[] = $do;
             }
@@ -391,7 +399,9 @@ class CommunicationHandler
                     $ch = new DiscordChoice($this->client->getDiscordClient());
                     $ch = $ch->setName($choice->getName());
                     $ch = $ch->setValue($choice->getValue());
+                    if($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER){
                     $do2 = $do2->addChoice($ch);
+                    }
                 }
                 /** @var DiscordCommandOption[] $sub */
                 $subs[] = $do2;
@@ -444,7 +454,9 @@ class CommunicationHandler
                             $ch = new DiscordChoice($this->client->getDiscordClient());
                             $ch = $ch->setName($choice->getName());
                             $ch = $ch->setValue($choice->getValue());
+                            if($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER){
                             $do = $do->addChoice($ch);
+                            }
                         }
                         $options[] = $do;
                     }
@@ -461,7 +473,9 @@ class CommunicationHandler
                             $ch = new DiscordChoice($this->client->getDiscordClient());
                             $ch = $ch->setName($choice->getName());
                             $ch = $ch->setValue($choice->getValue());
+                            if($do2->type === $do2::STRING || $do2->type === $do::INTEGER || $do2->type === $do2::NUMBER){
                             $do2 = $do2->addChoice($ch);
+                            }
                         }
                         /** @var DiscordCommandOption[] $sub */
                         $sub[] = $do2;
@@ -504,7 +518,9 @@ class CommunicationHandler
                         $ch = new DiscordChoice($this->client->getDiscordClient());
                         $ch = $ch->setName($choice->getName());
                         $ch = $ch->setValue($choice->getValue());
+                        if($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER){
                         $do = $do->addChoice($ch);
+                        }
                     }
                     $options[] = $do;
                 }
@@ -522,7 +538,9 @@ class CommunicationHandler
                         $ch = new DiscordChoice($this->client->getDiscordClient());
                         $ch = $ch->setName($choice->getName());
                         $ch = $ch->setValue($choice->getValue());
+                        if($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER){
                         $do2 = $do2->addChoice($ch);
+                        }
                     }
                     /** @var DiscordCommandOption[] $subs */
                     $subs[] = $do2;

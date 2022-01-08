@@ -189,8 +189,10 @@ class Option extends Part
      */
     public function addChoice(Choice $choice)
     {
-        if (count($this->choices) >= 25) {
-            throw new \RangeException('Option can only have a maximum of 25 Choices.');
+        if ($this->choices) {
+            if (count($this->choices) >= 25) {
+                throw new \RangeException('Option can only have a maximum of 25 Choices.');
+            }
         }
 
         $this->attributes['choices'][] = $choice->getRawAttributes();
