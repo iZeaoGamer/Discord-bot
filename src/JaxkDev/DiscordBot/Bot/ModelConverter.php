@@ -122,8 +122,10 @@ abstract class ModelConverter
     static public function genModelCommandOption(DiscordCommandOption $option): CommandOption
     {
         $choices = [];
-        foreach ($option->choices as $choice) {
-            $choices[] = self::genModelChoice($choice);
+        if ($option->choices) {
+            foreach ($option->choices as $choice) {
+                $choices[] = self::genModelChoice($choice);
+            }
         }
         $options = [];
         foreach ($option->options as $option) {
@@ -807,7 +809,7 @@ abstract class ModelConverter
             $discordChannel->parent_id,
             $discordChannel->id,
             $discordChannel->last_message_id,
-           $discordChannel->permissions
+            $discordChannel->permissions
         ));
     }
     static public function genModelSticker(DiscordSticker $sticker): Sticker

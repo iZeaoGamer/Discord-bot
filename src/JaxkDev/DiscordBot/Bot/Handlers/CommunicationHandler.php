@@ -269,9 +269,9 @@ class CommunicationHandler
         elseif ($pk instanceof RequestFetchWelcomeScreen) $this->handleFetchWelcomeScreen($pk);
         elseif ($pk instanceof RequestUpdateWelcomeScreen) $this->handleUpdateWelcomeScreen($pk);
         elseif ($pk instanceof RequestTimedOutMember) $this->handleTimedOutMember($pk);
-        elseif($pk instanceof RequestCreateSticker) $this->handleStickerCreate($pk);
+        elseif ($pk instanceof RequestCreateSticker) $this->handleStickerCreate($pk);
         elseif ($pk instanceof RequestStickerUpdate) $this->handleStickerUpdate($pk);
-        elseif($pk instanceof RequestDeleteSticker) $this->handleStickerDelete($pk);
+        elseif ($pk instanceof RequestDeleteSticker) $this->handleStickerDelete($pk);
         elseif ($pk instanceof RequestCreateDMChannel) $this->handleCreateDMChannel($pk);
         elseif ($pk instanceof RequestUpdateDMChannel) $this->handleUpdateDMChannel($pk);
         elseif ($pk instanceof RequestDeleteDMChannel) $this->handleDeleteDMChannel($pk);
@@ -313,32 +313,32 @@ class CommunicationHandler
                         $ch = new DiscordChoice($this->client->getDiscordClient());
                         $ch = $ch->setName($choice->getName());
                         $ch = $ch->setValue($choice->getValue());
-                        if($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER){
-                        $do = $do->addChoice($ch);
+                        if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
+                            $do = $do->addChoice($ch);
                         }
                     }
                     $options[] = $do;
-                }
-                /** @var DiscordCommandOption[] $subs */
-                $subs = [];
-                foreach ($option->getSubOptions() as $sub) {
-                    $do2 = new DiscordCommandOption($this->client->getDiscordClient());
-                    $do2 = $do2->setType($sub->getType());
-                    $do2 = $do2->setName($sub->getName());
-                    $do2 = $do2->setDescription($sub->getDescription());
-                    $do2 = $do2->setRequired($sub->isRequired());
-                    $do2 = $do2->setChannelTypes($sub->getChannelTypes());
-                    $do2 = $do2->setAutoComplete($sub->isAutoComplete());
-                    foreach ($option->getChoices() as $choice) {
-                        $ch = new DiscordChoice($this->client->getDiscordClient());
-                        $ch = $ch->setName($choice->getName());
-                        $ch = $ch->setValue($choice->getValue());
-                        if($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER){
-                        $do2 = $do2->addChoice($ch);
-                        }
-                    }
                     /** @var DiscordCommandOption[] $subs */
-                    $subs[] = $do2;
+                    $subs = [];
+                    foreach ($option->getSubOptions() as $sub) {
+                        $do2 = new DiscordCommandOption($this->client->getDiscordClient());
+                        $do2 = $do2->setType($sub->getType());
+                        $do2 = $do2->setName($sub->getName());
+                        $do2 = $do2->setDescription($sub->getDescription());
+                        $do2 = $do2->setRequired($sub->isRequired());
+                        $do2 = $do2->setChannelTypes($sub->getChannelTypes());
+                        $do2 = $do2->setAutoComplete($sub->isAutoComplete());
+                        foreach ($option->getChoices() as $choice) {
+                            $ch = new DiscordChoice($this->client->getDiscordClient());
+                            $ch = $ch->setName($choice->getName());
+                            $ch = $ch->setValue($choice->getValue());
+                            if ($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER) {
+                                $do2 = $do2->addChoice($ch);
+                            }
+                        }
+                        /** @var DiscordCommandOption[] $subs */
+                        $subs[] = $do2;
+                    }
                 }
                 $c->options = $options;
 
@@ -380,31 +380,31 @@ class CommunicationHandler
                     $ch = new DiscordChoice($this->client->getDiscordClient());
                     $ch = $ch->setName($choice->getName());
                     $ch = $ch->setValue($choice->getValue());
-                    if($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER){
-                    $do = $do->addChoice($ch);
+                    if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
+                        $do = $do->addChoice($ch);
                     }
                 }
                 $options[] = $do;
-            }
-            $subs = [];
-            foreach ($option->getSubOptions() as $sub) {
-                $do2 = new DiscordCommandOption($this->client->getDiscordClient());
-                $do2 = $do2->setType($sub->getType());
-                $do2 = $do2->setName($sub->getName());
-                $do2 = $do2->setDescription($sub->getDescription());
-                $do2 = $do2->setRequired($sub->isRequired());
-                $do2 = $do2->setChannelTypes($sub->getChannelTypes());
-                $do2 = $do2->setAutoComplete($sub->isAutoComplete());
-                foreach ($option->getChoices() as $choice) {
-                    $ch = new DiscordChoice($this->client->getDiscordClient());
-                    $ch = $ch->setName($choice->getName());
-                    $ch = $ch->setValue($choice->getValue());
-                    if($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER){
-                    $do2 = $do2->addChoice($ch);
+                $subs = [];
+                foreach ($option->getSubOptions() as $sub) {
+                    $do2 = new DiscordCommandOption($this->client->getDiscordClient());
+                    $do2 = $do2->setType($sub->getType());
+                    $do2 = $do2->setName($sub->getName());
+                    $do2 = $do2->setDescription($sub->getDescription());
+                    $do2 = $do2->setRequired($sub->isRequired());
+                    $do2 = $do2->setChannelTypes($sub->getChannelTypes());
+                    $do2 = $do2->setAutoComplete($sub->isAutoComplete());
+                    foreach ($option->getChoices() as $choice) {
+                        $ch = new DiscordChoice($this->client->getDiscordClient());
+                        $ch = $ch->setName($choice->getName());
+                        $ch = $ch->setValue($choice->getValue());
+                        if ($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER) {
+                            $do2 = $do2->addChoice($ch);
+                        }
                     }
+                    /** @var DiscordCommandOption[] $sub */
+                    $subs[] = $do2;
                 }
-                /** @var DiscordCommandOption[] $sub */
-                $subs[] = $do2;
             }
             $c->options = $options;
 
@@ -441,6 +441,7 @@ class CommunicationHandler
                     if ($command->getServerId()) {
                         $c->guild_id = $command->getServerId();
                     }
+                    /** @var DiscordCommandOption[] $options */
                     $options = [];
                     foreach ($command->getOptions() as $option) {
                         $do = new DiscordCommandOption($this->client->getDiscordClient());
@@ -454,31 +455,31 @@ class CommunicationHandler
                             $ch = new DiscordChoice($this->client->getDiscordClient());
                             $ch = $ch->setName($choice->getName());
                             $ch = $ch->setValue($choice->getValue());
-                            if($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER){
-                            $do = $do->addChoice($ch);
+                            if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
+                                $do = $do->addChoice($ch);
                             }
                         }
                         $options[] = $do;
-                    }
-                    $subs = [];
-                    foreach ($option->getSubOptions() as $sub) {
-                        $do2 = new DiscordCommandOption($this->client->getDiscordClient());
-                        $do2 = $do2->setType($sub->getType());
-                        $do2 = $do2->setName($sub->getName());
-                        $do2 = $do2->setDescription($sub->getDescription());
-                        $do2 = $do2->setRequired($sub->isRequired());
-                        $do2 = $do2->setChannelTypes($sub->getChannelTypes());
-                        $do2 = $do2->setAutoComplete($sub->isAutoComplete());
-                        foreach ($sub->getChoices() as $choice) {
-                            $ch = new DiscordChoice($this->client->getDiscordClient());
-                            $ch = $ch->setName($choice->getName());
-                            $ch = $ch->setValue($choice->getValue());
-                            if($do2->type === $do2::STRING || $do2->type === $do::INTEGER || $do2->type === $do2::NUMBER){
-                            $do2 = $do2->addChoice($ch);
+                        $subs = [];
+                        foreach ($option->getSubOptions() as $sub) {
+                            $do2 = new DiscordCommandOption($this->client->getDiscordClient());
+                            $do2 = $do2->setType($sub->getType());
+                            $do2 = $do2->setName($sub->getName());
+                            $do2 = $do2->setDescription($sub->getDescription());
+                            $do2 = $do2->setRequired($sub->isRequired());
+                            $do2 = $do2->setChannelTypes($sub->getChannelTypes());
+                            $do2 = $do2->setAutoComplete($sub->isAutoComplete());
+                            foreach ($sub->getChoices() as $choice) {
+                                $ch = new DiscordChoice($this->client->getDiscordClient());
+                                $ch = $ch->setName($choice->getName());
+                                $ch = $ch->setValue($choice->getValue());
+                                if ($do2->type === $do2::STRING || $do2->type === $do::INTEGER || $do2->type === $do2::NUMBER) {
+                                    $do2 = $do2->addChoice($ch);
+                                }
                             }
+                            /** @var DiscordCommandOption[] $sub */
+                            $sub[] = $do2;
                         }
-                        /** @var DiscordCommandOption[] $sub */
-                        $sub[] = $do2;
                     }
                     $c->options = $options;
 
@@ -518,32 +519,32 @@ class CommunicationHandler
                         $ch = new DiscordChoice($this->client->getDiscordClient());
                         $ch = $ch->setName($choice->getName());
                         $ch = $ch->setValue($choice->getValue());
-                        if($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER){
-                        $do = $do->addChoice($ch);
+                        if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
+                            $do = $do->addChoice($ch);
                         }
                     }
                     $options[] = $do;
-                }
-                /** @var DiscordCommandOption[] $subs */
-                $subs = [];
-                foreach ($option->getSubOptions() as $sub) {
-                    $do2 = new DiscordCommandOption($this->client->getDiscordClient());
-                    $do2 = $do2->setType($sub->getType());
-                    $do2 = $do2->setName($sub->getName());
-                    $do2 = $do2->setDescription($sub->getDescription());
-                    $do2 = $do2->setRequired($sub->isRequired());
-                    $do2 = $do2->setChannelTypes($sub->getChannelTypes());
-                    $do2 = $do2->setAutoComplete($sub->isAutoComplete());
-                    foreach ($option->getChoices() as $choice) {
-                        $ch = new DiscordChoice($this->client->getDiscordClient());
-                        $ch = $ch->setName($choice->getName());
-                        $ch = $ch->setValue($choice->getValue());
-                        if($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER){
-                        $do2 = $do2->addChoice($ch);
-                        }
-                    }
                     /** @var DiscordCommandOption[] $subs */
-                    $subs[] = $do2;
+                    $subs = [];
+                    foreach ($option->getSubOptions() as $sub) {
+                        $do2 = new DiscordCommandOption($this->client->getDiscordClient());
+                        $do2 = $do2->setType($sub->getType());
+                        $do2 = $do2->setName($sub->getName());
+                        $do2 = $do2->setDescription($sub->getDescription());
+                        $do2 = $do2->setRequired($sub->isRequired());
+                        $do2 = $do2->setChannelTypes($sub->getChannelTypes());
+                        $do2 = $do2->setAutoComplete($sub->isAutoComplete());
+                        foreach ($option->getChoices() as $choice) {
+                            $ch = new DiscordChoice($this->client->getDiscordClient());
+                            $ch = $ch->setName($choice->getName());
+                            $ch = $ch->setValue($choice->getValue());
+                            if ($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER) {
+                                $do2 = $do2->addChoice($ch);
+                            }
+                        }
+                        /** @var DiscordCommandOption[] $subs */
+                        $subs[] = $do2;
+                    }
                 }
                 $c->options = $options;
 
@@ -1623,29 +1624,29 @@ class CommunicationHandler
     }
     private function handleStickerCreate(RequestCreateSticker $pk): void
     {
-     $serverId = $pk->getSticker()->getServerId();
-     if($serverId === null){
-         $this->resolveRequest($pk->getUID(), false, "Server ID must be present.");
-        return;
-     }
-     $this->getServer($pk, $serverId, function (DiscordGuild $guild) use ($serverId, $pk){
-        /** @var DiscordSticker $sticker */
-        $sticker = $guild->stickers->create([
-             "name" => $pk->getSticker()->getName(),
-             "description" => $pk->getSticker()->getDescription(),
-             "tags" => $pk->getSticker()->getTags()
-         ]);
-         $sticker->type = $pk->getSticker()->getType();
-         $sticker->format_type = $pk->getSticker()->getFormatType();
-         $sticker->available = $pk->getSticker()->isAvailable();
-         $sticker->user = $pk->getSticker()->getUser();
-         $sticker->sort_value = $pk->getSticker()->getSortValue();
-         $guild->stickers->save($sticker)->then(function (DiscordSticker $sticker) use ($serverId, $pk, $guild){
-             $this->resolveRequest($pk->getUID(), true, "Successfully created guild sticker.", [ModelConverter::genModelSticker($sticker)]);
-         }, function (\Throwable $e) use ($serverId, $pk){
-             $this->resolveRequest($pk->getUID(), false, "Failed to create guild sticker.", [$e->getMessage(), $e->getTraceAsString()]);
-         });
-        }, function(\Throwable $e) use ($serverId, $pk){
+        $serverId = $pk->getSticker()->getServerId();
+        if ($serverId === null) {
+            $this->resolveRequest($pk->getUID(), false, "Server ID must be present.");
+            return;
+        }
+        $this->getServer($pk, $serverId, function (DiscordGuild $guild) use ($serverId, $pk) {
+            /** @var DiscordSticker $sticker */
+            $sticker = $guild->stickers->create([
+                "name" => $pk->getSticker()->getName(),
+                "description" => $pk->getSticker()->getDescription(),
+                "tags" => $pk->getSticker()->getTags()
+            ]);
+            $sticker->type = $pk->getSticker()->getType();
+            $sticker->format_type = $pk->getSticker()->getFormatType();
+            $sticker->available = $pk->getSticker()->isAvailable();
+            $sticker->user = $pk->getSticker()->getUser();
+            $sticker->sort_value = $pk->getSticker()->getSortValue();
+            $guild->stickers->save($sticker)->then(function (DiscordSticker $sticker) use ($serverId, $pk, $guild) {
+                $this->resolveRequest($pk->getUID(), true, "Successfully created guild sticker.", [ModelConverter::genModelSticker($sticker)]);
+            }, function (\Throwable $e) use ($serverId, $pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to create guild sticker.", [$e->getMessage(), $e->getTraceAsString()]);
+            });
+        }, function (\Throwable $e) use ($serverId, $pk) {
             $this->resolveRequest($pk->getUID(), false, "Failed to fetch Guild ID: {$serverId}.", [$e->getMessage(), $e->getTraceAsString()]);
         });
     }
@@ -1680,7 +1681,7 @@ class CommunicationHandler
         $id = $pk->getId();
         $this->getServer($pk, $serverId, function (DiscordGuild $guild) use ($id, $serverId, $pk) {
             $guild->stickers->fetch($id)->then(function (DiscordSticker $sticker) use ($guild, $pk) {
-                $guild->stickers->delete($sticker)->then(function() use ($pk){
+                $guild->stickers->delete($sticker)->then(function () use ($pk) {
                     $this->resolveRequest($pk->getUID(), true, "Successfully deleted Guild Sticker.");
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to delete guild sticker.", [$e->getMessage(), $e->getTraceAsString()]);
