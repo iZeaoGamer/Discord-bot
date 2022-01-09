@@ -16,6 +16,8 @@ use Discord\Parts\Part;
 /**
  * A field of an embed object.
  *
+ * @see https://discord.com/developers/docs/resources/channel#embed-object-embed-field-structure
+ * 
  * @property string      $text           Footer text.
  * @property string|null $icon_url       URL of an icon for the footer. Must be https.
  * @property string|null $proxy_icon_url Proxied version of the icon URL.

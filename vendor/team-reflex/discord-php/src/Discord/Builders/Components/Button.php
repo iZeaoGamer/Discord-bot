@@ -16,7 +16,6 @@ use Discord\Parts\Guild\Emoji;
 use Discord\Parts\Interactions\Interaction;
 use Discord\WebSockets\Event;
 use Exception;
-use InvalidArgumentException;
 use React\Promise\PromiseInterface;
 
 use function Discord\poly_strlen;
@@ -63,7 +62,7 @@ class Button extends Component
      * @var string
      */
     private $url;
-    
+
     /**
      * Whether the button is disabled.
      *
@@ -88,19 +87,21 @@ class Button extends Component
     /**
      * Creates a new button.
      *
+     * @throws \InvalidArgumentException
+     * 
      * @param int $style Style of the button.
      * @param string|null $custom_id custom ID of the button. If not given, an UUID will be used
      */
     public function __construct(int $style, ?string $custom_id)
     {
-        if (! in_array($style, [
+        if (!in_array($style, [
             self::STYLE_PRIMARY,
             self::STYLE_SECONDARY,
             self::STYLE_SUCCESS,
             self::STYLE_DANGER,
             self::STYLE_LINK,
         ])) {
-            throw new InvalidArgumentException('Invalid style.');
+            throw new \InvalidArgumentException('Invalid button style.');
         }
 
         $this->style = $style;
@@ -130,18 +131,20 @@ class Button extends Component
      *
      * @param int $style
      *
+     * @throws \InvalidArgumentException
+     * 
      * @return $this
      */
     public function setStyle(int $style): self
     {
-        if (! in_array($style, [
+        if (!in_array($style, [
             self::STYLE_PRIMARY,
             self::STYLE_SECONDARY,
             self::STYLE_SUCCESS,
             self::STYLE_DANGER,
             self::STYLE_LINK,
         ])) {
-            throw new InvalidArgumentException('Invalid style.');
+            throw new \InvalidArgumentException('Invalid button style.');
         }
 
         if ($this->style == self::STYLE_LINK && $style != self::STYLE_LINK) {
@@ -160,12 +163,13 @@ class Button extends Component
      *
      * @param string $label Label of the button. Maximum 80 characters.
      *
+     * @throws \LengthException
      * @return $this
      */
     public function setLabel(string $label): self
     {
         if (poly_strlen($label) > 80) {
-            throw new InvalidArgumentException('Label must be maximum 80 characters.');
+            throw new \LengthException('Label must be maximum 80 characters.');
         }
 
         $this->label = $label;
@@ -222,16 +226,18 @@ class Button extends Component
      *
      * @param string $custom_id
      *
+     * @throws \LogicException
+     * 
      * @return $this
      */
     public function setCustomId(string $custom_id): self
     {
         if ($this->style == Button::STYLE_LINK) {
-            throw new InvalidArgumentException('You cannot set the custom ID of a link button.');
+            throw new \LogicException('You cannot set the custom ID of a link button.');
         }
 
         if (poly_strlen($custom_id) > 100) {
-            throw new InvalidArgumentException('Custom ID must be maximum 100 characters.');
+            throw new \LogicException('Custom ID must be maximum 100 characters.');
         }
 
         $this->custom_id = $custom_id;
@@ -244,12 +250,14 @@ class Button extends Component
      *
      * @param string $url
      *
+     * @throws \LogicException
+     * 
      * @return $this
      */
     public function setUrl(string $url): self
     {
         if ($this->style != Button::STYLE_LINK) {
-            throw new InvalidArgumentException('You cannot set the URL of a non-link button.');
+            throw new \LogicException('You cannot set the URL of a non-link button.');
         }
 
         $this->url = $url;
@@ -289,15 +297,17 @@ class Button extends Component
      * @param Discord  $discord  Discord client.
      * @param bool     $oneOff   Whether the listener should be removed after the button is pressed for the first time.
      *
+     * @throws \LogicException
+     * 
      * @return $this
      */
     public function setListener(?callable $callback, Discord $discord, bool $oneOff = false): self
     {
         if ($this->style == Button::STYLE_LINK) {
-            throw new InvalidArgumentException('You cannot add a listener to a link button.');
+            throw new \LogicException('You cannot add a listener to a link button.');
         }
 
-        if (! $this->custom_id) {
+        if (!$this->custom_id) {
             $this->custom_id = $this->generateUuid();
         }
 
@@ -431,13 +441,13 @@ class Button extends Component
         if ($this->custom_id) {
             $content['custom_id'] = $this->custom_id;
         } elseif ($this->style != Button::STYLE_LINK) {
-            throw new InvalidArgumentException('Buttons must have a `custom_id` field set.');
+            throw new \DomainException('Buttons must have a `custom_id` field set.');
         }
 
         if ($this->url) {
             $content['url'] = $this->url;
         } elseif ($this->style == Button::STYLE_LINK) {
-            throw new InvalidArgumentException('Link buttons must have a `url` field set.');
+            throw new \DomainException('Link buttons must have a `url` field set.');
         }
 
         if ($this->disabled) {

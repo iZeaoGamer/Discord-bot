@@ -74,6 +74,8 @@ class CommandBuilder implements JsonSerializable
      *
      * @param int $type Type of the command
      *
+     * @throws \InvalidArgumentException
+     *
      * @return $this
      */
     public function setType(int $type): self
@@ -91,12 +93,14 @@ class CommandBuilder implements JsonSerializable
      *
      * @param string $description Name of the command
      *
+     * @throws \LengthException
+     *
      * @return $this
      */
     public function setName(string $name): self
     {
         if (poly_strlen($name) > 100) {
-            throw new \InvalidArgumentException('Command name must be less than or equal to 32 characters.');
+            throw new \LengthException('Command name must be less than or equal to 32 characters.');
         }
 
         $this->name = $name;
@@ -108,12 +112,14 @@ class CommandBuilder implements JsonSerializable
      *
      * @param string $description Description of the command
      *
+     * @throws \LengthException
+     * 
      * @return $this
      */
     public function setDescription(string $description): self
     {
         if ($this->type == Command::CHAT_INPUT && poly_strlen($description) > 100) {
-            throw new \InvalidArgumentException('Command description must be less than or equal to 100 characters.');
+            throw new \LengthException('Command description must be less than or equal to 100 characters.');
         }
 
         $this->description = $description;
@@ -138,6 +144,8 @@ class CommandBuilder implements JsonSerializable
      *
      * @param Option $option The option
      *
+     * @throws \InvalidArgumentException
+     * 
      * @return $this
      */
     public function addOption(Option $option)
@@ -168,7 +176,7 @@ class CommandBuilder implements JsonSerializable
 
     /**
      * Returns all the options in the command.
-     *
+     * 
      * @return Option[]
      */
     public function getOptions(): array
@@ -179,18 +187,20 @@ class CommandBuilder implements JsonSerializable
     /**
      * Returns an array with all the options.
      *
+     * @throws \Exception
+     * 
      * @return array
      */
     public function toArray(): array
     {
         if (poly_strlen($this->name) < 1) {
-            throw new \InvalidArgumentException('Command name must be greater than or equal to 1 character.');
+            throw new \LengthException('Command name must be greater than or equal to 1 character.');
         }
 
         $desclen = poly_strlen($this->description);
         if ($this->type == Command::CHAT_INPUT) {
             if ($desclen < 1) {
-                throw new \InvalidArgumentException('Description must be greater than or equal to 1 character.');
+                throw new \LengthException('Description must be greater than or equal to 1 character.');
             }
         } elseif ($this->type == Command::USER || $this->type == Command::MESSAGE) {
             if ($desclen) {

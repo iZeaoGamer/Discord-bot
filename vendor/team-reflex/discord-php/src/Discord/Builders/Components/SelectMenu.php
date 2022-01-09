@@ -16,7 +16,6 @@ use Discord\Helpers\Collection;
 use Discord\Parts\Interactions\Interaction;
 use Discord\WebSockets\Event;
 use Exception;
-use InvalidArgumentException;
 use React\Promise\PromiseInterface;
 
 use function Discord\poly_strlen;
@@ -88,7 +87,7 @@ class SelectMenu extends Component
      */
     public function __construct(?string $custom_id)
     {
-        $this->setCustomId($custom_id ?? $this->generateUuid()); 
+        $this->setCustomId($custom_id ?? $this->generateUuid());
     }
 
     /**
@@ -107,15 +106,17 @@ class SelectMenu extends Component
      * Sets the custom ID for the select menu
      * 
      * @param string $custom_id
-     
+     * 
+     * @throws \LengthException
+     * 
      * @return $this
      */
     public function setCustomId($custom_id): self
     {
         if (poly_strlen($custom_id) > 100) {
-            throw new InvalidArgumentException('Custom ID must be maximum 100 characters.');
+            throw new \LengthException('Custom ID must be maximum 100 characters.');
         }
-        
+
         $this->custom_id = $custom_id;
 
         return $this;
@@ -126,12 +127,14 @@ class SelectMenu extends Component
      *
      * @param Option $option Option to add.
      *
+     * @throws \InvalidArgumentException
+     * 
      * @return $this
      */
     public function addOption(Option $option): self
     {
         if (count($this->options) > 25) {
-            throw new InvalidArgumentException('You can only have 25 options per select menu.');
+            throw new \InvalidArgumentException('You can only have 25 options per select menu.');
         }
 
         $value = $option->getValue();
@@ -139,7 +142,7 @@ class SelectMenu extends Component
         // didn't wanna use a hashtable here so that we can keep the order of options
         foreach ($this->options as $other) {
             if ($other->getValue() == $value) {
-                throw new InvalidArgumentException('Another value already has the same value. These must not be the same.');
+                throw new \InvalidArgumentException('Another value already has the same value. These must not be the same.');
             }
         }
 
@@ -170,12 +173,14 @@ class SelectMenu extends Component
      *
      * @param string|null $placeholder
      *
+     * @throws \LengthException
+     * 
      * @return $this
      */
     public function setPlaceholder(?string $placeholder): self
     {
         if ($placeholder && strlen($placeholder) > 100) {
-            throw new InvalidArgumentException('Placeholder string must be less than or equal to 100 characters.');
+            throw new \LengthException('Placeholder string must be less than or equal to 100 characters.');
         }
 
         $this->placeholder = $placeholder;
@@ -189,12 +194,14 @@ class SelectMenu extends Component
      *
      * @param int|null $min_values
      *
+     * @throws \LengthException
+     * 
      * @return $this
      */
     public function setMinValues(?int $min_values): self
     {
         if ($min_values && ($min_values < 0 || $min_values > 25)) {
-            throw new InvalidArgumentException('Number must be between 0 and 25 inclusive.');
+            throw new \LengthException('Number must be between 0 and 25 inclusive.');
         }
 
         $this->min_values = $min_values;
@@ -208,12 +215,14 @@ class SelectMenu extends Component
      *
      * @param int|null $max_values
      *
+     * @throws \LengthException
+     * 
      * @return $this
      */
     public function setMaxValues(?int $max_values): self
     {
         if ($max_values && $max_values > 25) {
-            throw new InvalidArgumentException('Number must be less than or equal to 25.');
+            throw new \LengthException('Number must be less than or equal to 25.');
         }
 
         $this->max_values = $max_values;
@@ -271,10 +280,12 @@ class SelectMenu extends Component
         }
 
         $this->listener = function (Interaction $interaction) use ($callback, $oneOff) {
-            if ($interaction->data->component_type == Component::TYPE_SELECT_MENU &&
-                $interaction->data->custom_id == $this->custom_id) {
+            if (
+                $interaction->data->component_type == Component::TYPE_SELECT_MENU &&
+                $interaction->data->custom_id == $this->custom_id
+            ) {
                 $options = Collection::for(Option::class, null);
-                
+
                 foreach ($this->options as $option) {
                     if (in_array($option->getValue(), $interaction->data->values)) {
                         $options->push($option);
@@ -394,7 +405,7 @@ class SelectMenu extends Component
 
         if ($this->min_values) {
             if ($this->min_values > count($this->options)) {
-                throw new InvalidArgumentException('There are less options than the minimum number of options to be selected.');
+                throw new \LengthException('There are less options than the minimum number of options to be selected.');
             }
 
             $content['min_values'] = $this->min_values;
@@ -402,7 +413,7 @@ class SelectMenu extends Component
 
         if ($this->max_values) {
             if ($this->max_values > count($this->options)) {
-                throw new InvalidArgumentException('There are less options than the maximum number of options to be selected.');
+                throw new \LengthException('There are less options than the maximum number of options to be selected.');
             }
 
             $content['max_values'] = $this->max_values;

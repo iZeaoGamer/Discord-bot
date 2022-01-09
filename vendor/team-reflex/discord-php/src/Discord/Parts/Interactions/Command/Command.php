@@ -86,7 +86,7 @@ class Command extends Part
      */
     protected function getOptionsAttribute(): ?Collection
     {
-        if (! isset($this->attributes['options'])) {
+        if (!isset($this->attributes['options'])) {
             return null;
         }
 
