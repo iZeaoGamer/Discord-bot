@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Models\Interactions\Request;
 
-use JaxkDev\DiscordBot\Models\Interactions\Command\Resolved;
+use JaxkDev\DiscordBot\Models\Interactions\Request\Resolved;
 
 use JaxkDev\DiscordBot\Plugin\Utils;
 
@@ -43,6 +43,16 @@ class InteractionData implements \Serializable
     /** @var string|null */
     private $server_id;
 
+    /** InteractionData Constructor
+     * @param string|null $name
+     * @param int|null $type
+     * @param string|null $id
+     * @param string[]|null $values
+     * @param string|null $custom_id
+     * @param Resolved|null $resolved
+     * @param string|null $target_id
+     * @param string|null $server_id
+     */
     public function __construct(
         ?string $name,
         ?int $type,
@@ -78,10 +88,14 @@ class InteractionData implements \Serializable
     {
         $this->id = $id;
     }
+
+    /** @return string[]|null */
     public function getSelected(): ?array
     {
         return $this->values;
     }
+
+    /** @param string[]|null $values */
     public function setSelected(?array $values): void
     {
         $this->values = $values;

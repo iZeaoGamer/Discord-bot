@@ -58,6 +58,18 @@ class Command implements \Serializable
     /** @var string|null */
     private $version; //null when creating.
 
+
+    /** Command Constructor 
+     * @param int $type
+     * @param string $name
+     * @param string $description
+     * @param bool $default_permission
+     * @param Option[] $options
+     * @param string|null $id
+     * @param string|null $application_id
+     * @param string|null $server_id
+     * @param string|null $version
+     */
     public function __construct(
         int $type,
         string $name,

@@ -60,6 +60,18 @@ class Option implements \Serializable
     public const MENTIONABLE = 9; // Includes users and roles
     public const NUMBER = 10; // Any double between -2^53 and 2^53
 
+    /** Command Option Constructor
+     * @param int $type
+     * @param string $name
+     * @param string $description
+     * @param bool $required
+     * @param Choice[] $choices
+     * @param Option[] $sub_options
+     * @param int[] $channel_typs
+     * @param int $min
+     * @param int $max
+     * @param bool $autoComplete
+     */
     public function __construct(
         int $type,
         string $name,
