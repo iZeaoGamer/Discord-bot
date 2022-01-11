@@ -481,7 +481,7 @@ abstract class ModelConverter
         }
         return new InteractionData(
             $data->name,
-            $data->type,
+            $data->type ?? $data->component_type,
             $data->id,
             $data->values,
             $data->custom_id,

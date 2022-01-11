@@ -23,7 +23,7 @@ class InteractionData implements \Serializable
     private $name; //null when not using slash commands.
 
     /** @var int|null */
-    private $type; //null when using slash commands.
+    private $type; //null if not using slash commands and message components.
 
     /** @var string|null */
     private $id; //null when creating.
