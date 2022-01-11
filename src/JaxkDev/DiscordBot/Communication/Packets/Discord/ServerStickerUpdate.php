@@ -13,22 +13,22 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\Messages\Stickers;
+use JaxkDev\DiscordBot\Models\Sticker;
 
-class ServerStickersUpdate extends Packet
+class ServerStickerUpdate extends Packet
 {
 
-    /** @var Stickers */
+    /** @var Sticker */
     private $sticker;
 
-    /** @param Stickers $sticker */
-    public function __construct(Stickers $sticker)
+    /** @param Sticker $sticker */
+    public function __construct(Sticker $sticker)
     {
         parent::__construct();
         $this->sticker = $sticker;
     }
 
-    public function getSticker(): Stickers
+    public function getSticker(): Sticker
     {
         return $this->sticker;
     }

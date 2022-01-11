@@ -25,9 +25,18 @@ class CommandMessage extends Message implements \Serializable
     /** @var Interaction|null */
     protected $interaction;
 
+    /** @var string|null */
+    protected $application_id;
+
+    /** @var Component[] */
+    protected $components;
+
     /**
      * Message constructor.
      *
+     * @param string|null      $application_id
+     * @param Interaction|null $interaction
+     * @param Component[]      $components
      * @param string           $channel_id
      * @param string|null      $id
      * @param string           $content
@@ -43,12 +52,12 @@ class CommandMessage extends Message implements \Serializable
      * @param string[]         $stickers
      * @param string|null      $link
      * @param bool             $tts
-     * @param Interaction|null $interaction
-     * @param string|null      $application_id
-     * @param Component[]      $components
      */
     public function __construct(
         string $channel_id,
+        ?Interaction $interaction = null,
+        ?string $application_id = null,
+        array $components = [],
         ?string $id = null,
         string $content = "",
         ?Embed $embed = null,
@@ -62,10 +71,8 @@ class CommandMessage extends Message implements \Serializable
         array $channels_mentioned = [],
         array $stickers = [],
         ?string $link = null,
-        bool $tts = false,
-        ?Interaction $interaction = null,
-        ?string $application_id = null,
-        array $components = []
+        bool $tts = false
+
     ) {
         parent::__construct(
             $channel_id,

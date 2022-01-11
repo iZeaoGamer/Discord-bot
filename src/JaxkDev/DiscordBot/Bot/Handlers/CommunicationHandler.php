@@ -50,11 +50,7 @@ use Discord\Parts\Interactions\Command\Overwrite as DiscordCommandOverwrite;
 use Discord\Parts\Interactions\Command\Permission as DiscordCommandPermission;
 
 use Discord\Builders\MessageBuilder;
-use Discord\Builders\CommandBuilder;
-use Discord\Builders\Components\ActionRow;
-use Discord\Builders\Components\Option;
-use Discord\Builders\Components\SelectMenu;
-
+use Discord\WebSockets\Event;
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;
@@ -157,6 +153,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateSticker;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteSticker;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestListenCommand;
 
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Plugin\Utils;
@@ -283,8 +280,35 @@ class CommunicationHandler
     private function handleCreateCommand(RequestCreateCommand $pk): void
     {
         $command = $pk->getCommand();
+        $permissions = $pk->getPermissions();
+        $builder = MessageBuilder::new();
+        try{
+        $this->client->getDiscordClient()->listenCommand($command->getName(), function (DiscordInteraction $interaction) use ($command, $builder, $pk) {
+        
+            try {
+                $interaction->acknowledgeWithResponse()->then(function () use ($pk, $builder, $interaction) {
+               //     $interaction->respondWithMessage($builder, true)->then(function () use ($pk, $builder, $interaction) {
+                     //   $interaction->updateOriginalResponse($builder)->then(function (DiscordMessage $message) use ($pk) {
+                       //     $this->resolveRequest($pk->getUID(), true, "Updated Original Response!", [ModelConverter::genModelMessage($message)]);
+                         //   print_r("\nUpdated original response!");
+                       // });
+                       $interaction->deleteOriginalResponse(); 
+                   //    print_r("\nResponded with success!");
+                    });
+                    //print_r("\nAcknowledged response!");
+         //   } catch (\Throwable $e) {
+         ///       print_r("\nError whilst responding to an interaction - {$e->getMessage()}");
+           // } catch (\Throwable $e) {
+            //    print_r("\nError whilst listening to command {$command->getName()} - {$e->getMessage()}");
+           }catch(\Throwable $e){
+           }
+            $this->resolveRequest($pk->getUID(), true, "Listened to command successfully!", [ModelConverter::genModelInteraction($interaction)]);
+            $this->logger->info("Listened to command successfully!");
+        });
+    }catch(\Throwable $e){
+    }
         if ($command->getServerId()) {
-            $this->getServer($pk, $command->getServerId(), function (DiscordGuild $guild) use ($pk, $command) {
+            $this->getServer($pk, $command->getServerId(), function (DiscordGuild $guild) use ($permissions, $pk, $command) {
                 /** @var DiscordCommand $c */
                 $c = $guild->commands->create([
                     "name" => $command->getName()
@@ -347,8 +371,34 @@ class CommunicationHandler
                     $subOption->options = $subs;
                 }
                 $c->default_permission = $command->isDefaultPermission();
-                $guild->commands->save($c)->then(function (DiscordCommand $command) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), true, "Created Command with success!", [ModelConverter::genModelCommand($command)]);
+
+                $guild->commands->save($c)->then(function (DiscordCommand $command2) use ($permissions, $command, $pk) {
+
+                    /** @var DiscordCommandPermission[] $perms */
+                    $perms = [];
+                    $overwrite = new DiscordCommandOverwrite($this->client->getDiscordClient());
+                    $overwrite->id = $command2->id;
+                    $overwrite->application_id = $command->getApplicationId();
+                    $overwrite->guild_id = $command->getServerId();
+
+                    foreach ($permissions as $permission) {
+                        $perm = new DiscordCommandPermission($this->client->getDiscordClient());
+                        $perm->id = $permission->getId();
+                        $perm->type = $permission->getType();
+                        $perm->permission = $permission->isAllowed();
+                        $perms[] = $perm;
+                    }
+                    $overwrite->permissions = $perms;
+                    $command2->setOverwrite($overwrite)->done(
+                        function () use ($command2, $command, $pk) {
+                            $this->resolveRequest($pk->getUID(), true, "An Overwrite object has been created.");
+                        },
+                        function (\Throwable $e) use ($pk) {
+                            $this->resolveRequest($pk->getUID(), false, "Failed to create overwrite object.", [$e->getMessage(), $e->getTraceAsString()]);
+                        }
+                    );
+
+                    $this->resolveRequest($pk->getUID(), true, "Created Command with success!", [ModelConverter::genModelCommand($command2)]);
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to create command.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
@@ -413,8 +463,31 @@ class CommunicationHandler
                 $subOption->options = $subs;
             }
             $c->default_permission = $command->isDefaultPermission();
-            $app->commands->save($c)->then(function (DiscordCommand $command) use ($pk) {
-                $this->resolveRequest($pk->getUID(), true, "Created Command with success!", [ModelConverter::genModelCommand($command)]);
+            $app->commands->save($c)->then(function (DiscordCommand $command2) use ($permissions, $command, $pk) {
+                /** @var DiscordCommandPermission[] $perms */
+                $perms = [];
+                $overwrite = new DiscordCommandOverwrite($this->client->getDiscordClient());
+                $overwrite->id = $command2->id;
+                $overwrite->application_id = $command->getApplicationId();
+                $overwrite->guild_id = $command->getServerId();
+
+                foreach ($permissions as $permission) {
+                    $perm = new DiscordCommandPermission($this->client->getDiscordClient());
+                    $perm->id = $permission->getId();
+                    $perm->type = $permission->getType();
+                    $perm->permission = $permission->isAllowed();
+                    $perms[] = $perm;
+                }
+                $overwrite->permissions = $perms;
+                $command2->setOverwrite($overwrite)->done(
+                    function () use ($command2, $command, $pk) {
+                        $this->resolveRequest($pk->getUID(), true, "An Overwrite object has been created.");
+                    },
+                    function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to create overwrite object.", [$e->getMessage(), $e->getTraceAsString()]);
+                    }
+                );
+                $this->resolveRequest($pk->getUID(), true, "Created Command with success!", [ModelConverter::genModelCommand($command2)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to create command.", [$e->getMessage(), $e->getTraceAsString()]);
             });
@@ -423,14 +496,17 @@ class CommunicationHandler
     private function handleUpdateCommand(RequestUpdateCommand $pk): void
     {
         $command = $pk->getCommand();
+        $builder = MessageBuilder::new();
+        $permissions = $pk->getPermissions();
         if ($command->getId() === null) {
             $this->resolveRequest($pk->getUID(), false, "Command ID must be present!");
             return;
         }
+        $permissions = $pk->getPermissions();
         if ($command->getServerId()) {
-            $this->getServer($pk, $command->getServerId(), function (DiscordGuild $guild) use ($pk, $command) {
+            $this->getServer($pk, $command->getServerId(), function (DiscordGuild $guild) use ($pk, $permissions, $command) {
                 $fetch = $guild->commands->fetch($command->getId());
-                $fetch->then(function (DiscordCommand $c) use ($guild, $command, $pk) {
+                $fetch->then(function (DiscordCommand $c) use ($guild, $command, $permissions, $pk) {
                     $c->type = $command->getType();
                     if ($command->getApplicationId()) {
                         $c->application_id = $command->getApplicationId();
@@ -488,8 +564,32 @@ class CommunicationHandler
                         $subOption->options = $sub;
                     }
                     $c->default_permission = $command->isDefaultPermission();
-                    $guild->commands->save($c)->then(function (DiscordCommand $command) use ($pk) {
-                        $this->resolveRequest($pk->getUID(), true, "Updated Command with success!", [ModelConverter::genModelCommand($command)]);
+                    $guild->commands->save($c)->then(function (DiscordCommand $command2) use ($permissions, $command, $pk) {
+
+                        /** @var DiscordCommandPermission[] $perms */
+                        $perms = [];
+                        $overwrite = new DiscordCommandOverwrite($this->client->getDiscordClient());
+                        $overwrite->id = $command2->id;
+                        $overwrite->application_id = $command->getApplicationId();
+                        $overwrite->guild_id = $command->getServerId();
+
+                        foreach ($permissions as $permission) {
+                            $perm = new DiscordCommandPermission($this->client->getDiscordClient());
+                            $perm->id = $permission->getId();
+                            $perm->type = $permission->getType();
+                            $perm->permission = $permission->isAllowed();
+                            $perms[] = $perm;
+                        }
+                        $overwrite->permissions = $perms;
+                        $command2->setOverwrite($overwrite)->done(
+                            function () use ($pk) {
+                                $this->resolveRequest($pk->getUID(), true, "An Overwrite object has been created.");
+                            },
+                            function (\Throwable $e) use ($pk) {
+                                $this->resolveRequest($pk->getUID(), false, "Failed to create overwrite object.", [$e->getMessage(), $e->getTraceAsString()]);
+                            }
+                        );
+                        $this->resolveRequest($pk->getUID(), true, "Updated Command with success!", [ModelConverter::genModelCommand($command2)]);
                     }, function (\Throwable $e) use ($pk) {
                         $this->resolveRequest($pk->getUID(), false, "Failed to create command.", [$e->getMessage(), $e->getTraceAsString()]);
                     });
@@ -498,7 +598,7 @@ class CommunicationHandler
         } else {
             $app = $this->getApplication();
             $fetch = $app->commands->fetch($command->getId());
-            $fetch->then(function (DiscordCommand $c) use ($app, $command, $pk) {
+            $fetch->then(function (DiscordCommand $c) use ($permissions, $app, $command, $pk) {
                 $c->type = $command->getType();
                 if ($command->getApplicationId()) {
                     $c->application_id = $command->getApplicationId();
@@ -553,8 +653,31 @@ class CommunicationHandler
                     $subOption->options = $subs;
                 }
                 $c->default_permission = $command->isDefaultPermission();
-                $app->commands->save($c)->then(function (DiscordCommand $command) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), true, "Created Command with success!", [ModelConverter::genModelCommand($command)]);
+                $app->commands->save($c)->then(function (DiscordCommand $command2) use ($permissions, $command, $pk) {
+                    /** @var DiscordCommandPermission[] $perms */
+                    $perms = [];
+                    $overwrite = new DiscordCommandOverwrite($this->client->getDiscordClient());
+                    $overwrite->id = $command2->id;
+                    $overwrite->application_id = $command->getApplicationId();
+                    $overwrite->guild_id = $command->getServerId();
+
+                    foreach ($permissions as $permission) {
+                        $perm = new DiscordCommandPermission($this->client->getDiscordClient());
+                        $perm->id = $permission->getId();
+                        $perm->type = $permission->getType();
+                        $perm->permission = $permission->isAllowed();
+                        $perms[] = $perm;
+                    }
+                    $overwrite->permissions = $perms;
+                    $command2->setOverwrite($overwrite)->done(
+                        function () use ($pk) {
+                            $this->resolveRequest($pk->getUID(), true, "An Overwrite object has been created.");
+                        },
+                        function (\Throwable $e) use ($pk) {
+                            $this->resolveRequest($pk->getUID(), false, "Failed to create overwrite object.", [$e->getMessage(), $e->getTraceAsString()]);
+                        }
+                    );
+                    $this->resolveRequest($pk->getUID(), true, "Created Command with success!", [ModelConverter::genModelCommand($command2)]);
                 }, function (\Throwable $e) use ($pk) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to create command.", [$e->getMessage(), $e->getTraceAsString()]);
                 });

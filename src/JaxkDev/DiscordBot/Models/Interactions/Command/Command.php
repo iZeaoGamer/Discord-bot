@@ -40,11 +40,15 @@ class Command implements \Serializable
     /** @var string */
     private $description; //empty when not using CHAT_INPUT Command type.
 
+    /** @var bool */
+    private $default_permissions;
+
+    /** @var Overwrite[] */
+    private $overwrite;
+
     /** @var Option[] */
     private $options;
 
-    /** @var bool */
-    private $default_permissions;
 
     /** @var string|null */
     private $id; //null when creating.
@@ -64,6 +68,7 @@ class Command implements \Serializable
      * @param string $name
      * @param string $description
      * @param bool $default_permission
+     * @param Overwrite[] $overwrites
      * @param Option[] $options
      * @param string|null $id
      * @param string|null $application_id
@@ -75,6 +80,7 @@ class Command implements \Serializable
         string $name,
         string $description,
         bool $default_permission,
+        array $overwrites,
         array $options = [],
         ?string $id = null,
         ?string $application_id = null,
@@ -86,6 +92,7 @@ class Command implements \Serializable
         $this->setDescription($description);
         $this->setOptions($options);
         $this->setDefaultPermission($default_permission);
+        $this->setOverwrites($overwrites);
         $this->setId($id);
         $this->setApplicationId($application_id);
         $this->setServerId($server_id);
@@ -129,12 +136,6 @@ class Command implements \Serializable
     {
         return $this->options;
     }
-
-    /** @param Option[] $options */
-    public function setOptions(array $options): void
-    {
-        $this->options = $options;
-    }
     public function isDefaultPermission(): bool
     {
         return $this->default_permission;
@@ -142,6 +143,22 @@ class Command implements \Serializable
     public function setDefaultPermission(bool $default): void
     {
         $this->default_permission = $default;
+    }
+
+    /** @return Overwrite[] */
+    public function getOverwrites(): array{
+        return $this->overwrite;
+    }
+    /** @param Overwrite[] $overwrites
+     * @return void
+     */
+    public function setOverwrites(array $overwrites): void{
+        $this->overwrite = $overwrites;
+    }
+    /** @param Option[] $options */
+    public function setOptions(array $options): void
+    {
+        $this->options = $options;
     }
     public function getId(): ?string
     {
@@ -199,8 +216,9 @@ class Command implements \Serializable
             $this->type,
             $this->name,
             $this->description,
-            $this->options,
             $this->default_permission,
+            $this->overwrite,
+            $this->options,
             $this->id,
             $this->application_id,
             $this->serverId,
@@ -214,8 +232,9 @@ class Command implements \Serializable
             $this->type,
             $this->name,
             $this->description,
-            $this->options,
             $this->default_permission,
+            $this->overwrite,
+            $this->options,
             $this->id,
             $this->application_id,
             $this->serverId,

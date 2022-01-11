@@ -22,7 +22,7 @@ use Discord\Parts\Guild\Ban as DiscordBan;
 use Discord\Parts\Guild\Guild as DiscordGuild;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
-use Discord\Parts\Channel\Sticker as DiscordSticker;
+use Discord\Parts\Guild\Sticker as DiscordSticker;
 use Discord\Parts\Guild\GuildTemplate as DiscordTemplate;
 use Discord\Parts\Permissions\RolePermission as DiscordRolePermission;
 use Discord\Parts\User\Member as DiscordMember;
@@ -74,7 +74,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdat
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\TypingStart as TypingStartPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\InteractionCreate as InteractionCreatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerStickersUpdate as ServerStickersUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerStickerUpdate as ServerStickerUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageCreate as StageCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageUpdate as StageUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageDelete as StageDeletePacket;
@@ -84,10 +84,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUpdate 
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventDelete as ServerScheduledEventDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserAdd as ServerScheduledEventUserAddPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserRemove as ServerScheduledEventUserRemovePacket;
-use React\Promise\ExtendedPromiseInterface;
-use JaxkDev\DiscordBot\Plugin\Utils;
 use Discord\Helpers\Collection;
-use JaxkDev\DiscordBot\Models\Server;
 use Monolog\Logger;
 
 class DiscordEventHandler
@@ -491,7 +488,7 @@ array(5) {
     }
     public function onStickersUpdate(DiscordSticker $sticker): void
     {
-        $packet = new ServerStickersUpdatePacket(ModelConverter::genModelStickers($sticker));
+        $packet = new ServerStickerUpdatePacket(ModelConverter::genModelSticker($sticker));
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onVoiceStateUpdate(DiscordVoiceStateUpdate $ds): void

@@ -16,6 +16,7 @@ use JaxkDev\DiscordBot\Models\Interactions\Request\InteractionData;
 
 use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Models\User;
+use JaxkDev\DiscordBot\Models\Member;
 
 class Interaction implements \Serializable
 
@@ -27,7 +28,7 @@ class Interaction implements \Serializable
     /** @var int */
     private $type;
 
-    /** @var User */
+    /** @var User|null */
     private $user;
 
     /** @var string|null */
@@ -51,17 +52,25 @@ class Interaction implements \Serializable
     /** @var Message|null */
     private $message; //null when not using message components as interaction type.
 
+    /** @var Member|null */
+    private $member;
+
+    /** @var string|null */
+    private $name; //only null when object isn't an stdclass.
+
     public function __construct(
-        string $application_id,
+        ?string $application_id,
         int $type,
-        User $user,
+        ?User $user,
         ?string $server_id,
         ?string $channel_id,
         ?string $id = null,
         ?InteractionData $data = null,
         ?string $token = null,
         ?int $version = null,
-        ?Message $message = null
+        ?Message $message = null,
+        ?Member $member = null,
+        ?string $name = null
     ) {
         $this->setApplicationID($application_id);
         $this->setType($type);
@@ -73,6 +82,9 @@ class Interaction implements \Serializable
         $this->setToken($token);
         $this->setVersion($version);
         $this->setMessage($message);
+        $this->setMember($member);
+        $this->setCommandName($name);
+
     }
 
     public function getApplicationID(): string
@@ -91,11 +103,11 @@ class Interaction implements \Serializable
     {
         $this->type = $type;
     }
-    public function getUser(): User
+    public function getUser(): ?User
     {
         return $this->user;
     }
-    public function setUser(User $user): void
+    public function setUser(?User $user): void
     {
         $this->user = $user;
     }
@@ -155,6 +167,19 @@ class Interaction implements \Serializable
     {
         $this->message = $message;
     }
+
+    public function getMember(): ?Member{
+        return $this->member;
+    }
+    public function setMember(?Member $member): void{
+        $this->member = $member;
+    }
+    public function getCommandName(): ?string{
+        return $this->name;
+    }
+    public function setCommandName(?string $name): void{
+        $this->name = $name;
+    }
     //----- Serialization -----//
 
     public function serialize(): ?string
@@ -169,7 +194,9 @@ class Interaction implements \Serializable
             $this->data,
             $this->token,
             $this->version,
-            $this->message
+            $this->message,
+            $this->member,
+            $this->name,
         ]);
     }
 
@@ -185,7 +212,9 @@ class Interaction implements \Serializable
             $this->data,
             $this->token,
             $this->version,
-            $this->message
+            $this->message,
+            $this->member,
+            $this->name
         ] = unserialize($data);
     }
 }

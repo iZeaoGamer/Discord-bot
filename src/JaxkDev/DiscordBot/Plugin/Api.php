@@ -120,8 +120,11 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateSticker;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteSticker;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestListenCommand;
+
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 
+use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 /**
  * For internal and developers use for interacting with the discord bot.
  *
@@ -138,25 +141,30 @@ class Api
     {
         $this->plugin = $plugin;
     }
-
     /** Creates a guild or global command
      * @param Command $command
+     * @param Permission[] $permissions
+     * 
      * @return PromiseInterface Resolves with a Command Model.
      */
-    public function createCommand(Command $command): PromiseInterface
+    public function createCommand(Command $command, array $permissions = []): PromiseInterface
     {
-        $pk = new RequestCreateCommand($command);
+        /** @var Permission[] $permissions */
+        $pk = new RequestCreateCommand($command, $permissions);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
 
     /** Updates a guild or global command - ID must be present.
      * @param Command $command
+     * @param Permission[] $permissions
+     * 
      * @return PromiseInterface Resolves with a Command Model.
      */
-    public function updateCommand(Command $command): PromiseInterface
+    public function updateCommand(Command $command, array $permissions = []): PromiseInterface
     {
-        $pk = new RequestUpdateCommand($command);
+        /** @var Permission[] $permissions */
+        $pk = new RequestUpdateCommand($command, $permissions);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -164,6 +172,7 @@ class Api
     /** Deletes a guild or global command.
      * @param string $id
      * @param string|null $server_id
+     * 
      * @return PromiseInterface Resolves with no data.
      */
     public function deleteCommand(string $id, ?string $server_id = null): PromiseInterface
@@ -182,8 +191,8 @@ class Api
     }
     /** Fetches all guild/global commands
      * @param string|null $server_id - Null when fetching all global commands.
-     * @return PromiseInterface Resolves with a array of Commands
      * 
+     * @return PromiseInterface Resolves with a array of Commands
      */
     public function fetchCommand(?string $server_id = null): PromiseInterface
     {

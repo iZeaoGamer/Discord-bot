@@ -43,6 +43,9 @@ class InteractionData implements \Serializable
     /** @var string|null */
     private $server_id;
 
+    /** @var Option[]|null */
+    private $options;
+
     /** InteractionData Constructor
      * @param string|null $name
      * @param int|null $type
@@ -52,6 +55,7 @@ class InteractionData implements \Serializable
      * @param Resolved|null $resolved
      * @param string|null $target_id
      * @param string|null $server_id
+     * @param Option[] $options
      */
     public function __construct(
         ?string $name,
@@ -61,7 +65,8 @@ class InteractionData implements \Serializable
         ?string $custom_id = null,
         ?Resolved $resolved = null,
         ?string $target_id = null,
-        ?string $server_id = null
+        ?string $server_id = null,
+        ?array $options = null
     ) {
         $this->setName($name);
         $this->setType($type);
@@ -71,6 +76,7 @@ class InteractionData implements \Serializable
         $this->setResolved($resolved);
         $this->setTargetId($target_id);
         $this->setServerId($server_id);
+        $this->setOptions($options);
     }
     public function getName(): ?string
     {
@@ -150,6 +156,17 @@ class InteractionData implements \Serializable
         }
         $this->server_id = $server_id;
     }
+    
+    /** @return Option[]|null */
+    public function getOptions(): ?array{
+        return $this->options;
+    }
+
+    /** @param Option[]|null $options */
+    public function setOptions(?array $options): void{
+        $this->options = $options;
+    }
+
 
     //----- Serialization -----//
 
@@ -163,7 +180,8 @@ class InteractionData implements \Serializable
             $this->customId,
             $this->resolved,
             $this->target_id,
-            $this->server_id
+            $this->server_id,
+            $this->options
         ]);
     }
 
@@ -177,7 +195,8 @@ class InteractionData implements \Serializable
             $this->customId,
             $this->resolved,
             $this->target_id,
-            $this->server_id
+            $this->server_id,
+            $this->options,
         ] = unserialize($data);
     }
 }

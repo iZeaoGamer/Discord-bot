@@ -13,8 +13,8 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Permission;
 
 class RequestUpdateCommand extends Packet
 {
@@ -22,22 +22,30 @@ class RequestUpdateCommand extends Packet
     /** @var Command */
     private $command;
 
-    public function __construct(Command $command)
+    /** @var Permission[] */
+    private $permissions;
+
+    public function __construct(Command $command, array $permissions)
     {
         parent::__construct();
         $this->command = $command;
+        $this->permissions = $permissions;
     }
 
     public function getCommand(): Command
     {
         return $this->command;
     }
-
+    /** @return Permission[] */
+    public function getPermissions(): array{
+        return $this->permissions;
+    }
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->command
+            $this->command,
+            $this->permissions
         ]);
     }
 
@@ -45,7 +53,8 @@ class RequestUpdateCommand extends Packet
     {
         [
             $this->UID,
-            $this->command
+            $this->command,
+            $this->permissions
         ] = unserialize($data);
     }
 }

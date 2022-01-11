@@ -184,11 +184,17 @@ abstract class ModelConverter
                 $options[] = self::genModelCommandOption($option);
             }
         }
+        $overwrites = [];
+        /** @var DiscordCommandOverwrite $overwrite */
+        foreach ($command->overwrites as $overwrite) {
+            $overwrites[] = self::genModelCommandOverwrite($overwrite);
+        }
         return new Command(
             $command->type,
             $command->name,
             $command->description,
             $command->default_permission,
+            $overwrites,
             $options,
             $command->id,
             $command->application_id,
@@ -440,33 +446,49 @@ abstract class ModelConverter
             $schedule->user_count
         );
     }
-    static public function genModelInteraction(DiscordInteraction $interact): Interaction
+
+    /** @param DiscordInteraction
+     * @return Interaction
+     */
+    static public function genModelInteraction($interact): ?Interaction
     {
-        return new Interaction(
-            $interact->application_id,
-            $interact->type,
-            self::genModelUser($interact->user),
-            $interact->guild_id,
-            $interact->channel_id,
-            $interact->id,
-            ($interact->data !== null ? self::genModelData($interact->data) : null),
-            $interact->token,
-            $interact->version,
-            ($interact->message !== null ? self::genModelMessage($interact->message) : null)
-        );
+        $interaction = null;
+        if ($interact instanceof DiscordInteraction) {
+            $interaction = new Interaction(
+                $interact->application_id,
+                $interact->type,
+                ($interact->user !== null ? self::genModelUser($interact->user) : null),
+                $interact->guild_id,
+                $interact->channel_id,
+                $interact->id,
+                ($interact->data !== null ? self::genModelData($interact->data) : null),
+                $interact->token,
+                $interact->version,
+                ($interact->message !== null ? self::genModelMessage($interact->message) : null),
+                ($interact->member !== null ? self::genModelMember($interact->member) : null)
+            );
+        }
+        return $interaction;
     }
     static public function genModelData(DiscordInteractData $data): InteractionData
     {
         $resolved = ($data->resolved ? self::genModelResolved($data->resolved) : null);
+        $options = [];
+
+        /** @var DiscordInteractOption $option */
+        foreach ($data->options as $option) {
+            $options[] = self::genModelOption($option);
+        }
         return new InteractionData(
             $data->name,
-            $data->component_type,
+            $data->type,
             $data->id,
             $data->values,
             $data->custom_id,
-            $resolved,
+            ($data->resolved !== null ? self::genModelResolved($data->resolved) : null),
             $data->target_id,
-            $data->guild_id
+            $data->guild_id,
+            $options
         );
     }
     static function genModelOption(DiscordInteractOption $option): Option
@@ -475,7 +497,7 @@ abstract class ModelConverter
             $option->name,
             $option->type,
             $option->value,
-            $option->focused
+            $option->focused ?? false
         );
     }
     static public function genModelVoiceState(DiscordVoiceStateUpdate $stateUpdate): VoiceState
@@ -942,6 +964,9 @@ abstract class ModelConverter
             }
             return new CommandMessage(
                 $discordMessage->channel_id,
+                ($discordMessage->interaction !== null ? self::genModelInteraction($discordMessage->interaction) : null),
+                $discordMessage->application_id ?? null,
+                $array,
                 $discordMessage->id,
                 $discordMessage->content,
                 $e,
@@ -956,9 +981,7 @@ abstract class ModelConverter
                 array_keys($discordMessage->sticker_items->toArray()),
                 $discordMessage->link,
                 $discordMessage->tts,
-                ($discordMessage->interaction !== null ? self::genModelInteraction($discordMessage->interaction) : null),
-                $discordMessage->application_id ?? null,
-                $array
+
             );
         }
         throw new AssertionError("Discord message type not supported.");

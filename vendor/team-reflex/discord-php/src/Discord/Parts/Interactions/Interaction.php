@@ -43,7 +43,7 @@ use function React\Promise\reject;
  * @property string|null          $channel_id     ID of the channel the interaction was sent from.
  * @property Channel|null         $channel        Channel the interaction was sent from.
  * @property Member|null          $member         Member who invoked the interaction.
- * @property User                 $user           User who invoked the interaction.
+ * @property User|null                 $user           User who invoked the interaction.
  * @property string               $token          Continuation token for responding to the interaction.
  * @property int                  $version        Version of interaction.
  * @property Message|null         $message        Message that triggered the interactions, when triggered from message components.
@@ -140,12 +140,15 @@ class Interaction extends Part
     /**
      * Returns the user who invoked the interaction.
      *
-     * @return User
+     * @return User|null
      */
-    protected function getUserAttribute(): User
+    protected function getUserAttribute(): ?User
     {
         if (isset($this->member->user)) {
             return $this->member->user;
+        }
+        if(!isset($this->attributes['user'])){
+            return null;
         }
 
         return $this->factory->create(User::class, $this->attributes['user'], true);

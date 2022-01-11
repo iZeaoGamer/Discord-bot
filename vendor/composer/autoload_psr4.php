@@ -34,7 +34,6 @@ return array(
     'GuzzleHttp\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
     'Discord\\Http\\' => array($vendorDir . '/discord-php/http/src/Discord'),
     'Discord\\' => array($vendorDir . '/team-reflex/discord-php/src/Discord'),
-    'Discord\\Slash\\' => array($vendorDir . '/discord-php/slash/src/Discord'),
     'Discord\\' => array($vendorDir . '/discord/interactions/discord'),
     'Carbon\\' => array($vendorDir . '/nesbot/carbon/src/Carbon'),
     'Elliptic\\' => array($venderDir . '/simplito/elliptic-php/lib/'),

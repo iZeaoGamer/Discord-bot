@@ -73,7 +73,6 @@ class ComposerStaticInit6bcf578d60c79e52f17300e6732601ac
         array (
             'Discord\\Http\\' => 13,
             'Discord\\' => 8,
-            'Discord\\Slash\\' => 13,
         ),
         'C' => 
         array (
@@ -189,10 +188,6 @@ class ComposerStaticInit6bcf578d60c79e52f17300e6732601ac
         'Discord\\Http\\' => 
         array (
             0 => __DIR__ . '/..' . '/discord-php/http/src/Discord',
-        ),
-        'Discord\\Slash\\' =>
-        array(
-        0 => __DIR__ . '/..' . '/discord-php/slash/src/Discord',
         ),
         'Discord\\' => 
         array (

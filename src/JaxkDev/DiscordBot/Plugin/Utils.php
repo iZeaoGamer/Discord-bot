@@ -14,6 +14,22 @@ namespace JaxkDev\DiscordBot\Plugin;
 
 abstract class Utils
 {
+     /** 
+     * Converts a string to a regex.
+     * 
+     * Returns null if the given string's regex isn't valid.
+     * 
+     * @param string $string
+     * @return string|null
+     */
+    public static function toRegex(string $string): ?string
+    {
+        $pattern = '/' . $string . "test" . '/i'; //use this as a test replacement in the future.
+        $replacement = '/' . $string . '/i';
+        $name = preg_replace($pattern, $replacement, $string);
+        return $name;
+    }
+
     /** 
      * Converts timestamps to seconds.
      * @param int $timestamp

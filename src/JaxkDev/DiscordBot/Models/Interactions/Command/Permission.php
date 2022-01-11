@@ -68,7 +68,7 @@ class Permission implements \Serializable
        $this->type = $type;
     }
     public function isAllowed(): bool{
-        return $this->permision;
+        return $this->permission;
     }
     public function isDenied(): bool{
         return !$this->permission;
