@@ -106,6 +106,7 @@ use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Models\Webhook;
 use JaxkDev\DiscordBot\Models\Role;
+use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 
 use Discord\Builders\MessageBuilder;
 use Discord\Builders\Components\Button;
@@ -121,6 +122,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateSticker;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteSticker;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestListenCommand;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRespondInteraction;
 
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 
@@ -140,6 +142,19 @@ class Api
     public function __construct(Main $plugin)
     {
         $this->plugin = $plugin;
+    }
+
+    /** Responds to an interaction without the hack.
+     * @param Interaction $interaction
+     * @param MessageBuilder|null $builder
+     * @param strong $content
+     * @param Embed|null $embed
+     * @return PromiseInterface Resolves with a Message Model.
+     */
+    public function createInteractionResponse(Interaction $interaction, ?MessageBuilder $builder = null, string $content = "", ?Embed $embed = null): PromiseInterface{
+        $pk = new RequestRespondInteraction($interaction, $builder, $content, $embed);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
     }
     /** Creates a guild or global command
      * @param Command $command

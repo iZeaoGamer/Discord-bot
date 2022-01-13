@@ -20,10 +20,13 @@ class InteractionData implements \Serializable
 
 {
     /** @var string|null */
-    private $name; //null when not using slash commands.
+    private $name; //null when using component types.
 
     /** @var int|null */
-    private $type; //null if not using slash commands and message components.
+    private $type; //null when using component types.
+
+    /** @var int|null */
+    private $component_type; //null when using slash commands.
 
     /** @var string|null */
     private $id; //null when creating.
@@ -49,6 +52,7 @@ class InteractionData implements \Serializable
     /** InteractionData Constructor
      * @param string|null $name
      * @param int|null $type
+     * @param int|null $component_type
      * @param string|null $id
      * @param string[]|null $values
      * @param string|null $custom_id
@@ -60,6 +64,7 @@ class InteractionData implements \Serializable
     public function __construct(
         ?string $name,
         ?int $type,
+        ?int $component_type = null,
         ?string $id = null,
         ?array $values = null,
         ?string $custom_id = null,
@@ -70,6 +75,7 @@ class InteractionData implements \Serializable
     ) {
         $this->setName($name);
         $this->setType($type);
+        $this->setComponentType($component_type);
         $this->setId($id);
         $this->setSelected($values);
         $this->setCustomId($custom_id);
@@ -114,6 +120,7 @@ class InteractionData implements \Serializable
     {
         $this->customId = $custom_id;
     }
+
     public function getType(): ?int
     {
         return $this->type;
@@ -122,6 +129,14 @@ class InteractionData implements \Serializable
     {
         $this->type = $type;
     }
+    public function setComponentType(?int $type): void{
+        $this->component_type = $type;
+    }
+
+    public function getComponentType(): ?int{
+        return $this->component_type;
+    }
+
     public function getResolved(): ?Resolved
     {
         return $this->resolved;
@@ -175,6 +190,7 @@ class InteractionData implements \Serializable
         return serialize([
             $this->name,
             $this->type,
+            $this->component_type,
             $this->id,
             $this->values,
             $this->customId,
@@ -190,6 +206,7 @@ class InteractionData implements \Serializable
         [
             $this->name,
             $this->type,
+            $this->component_type,
             $this->id,
             $this->values,
             $this->customId,

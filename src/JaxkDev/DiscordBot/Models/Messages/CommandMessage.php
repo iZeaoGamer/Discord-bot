@@ -128,11 +128,6 @@ class CommandMessage extends Message implements \Serializable
     /** @param Component[] $components */
     public function setComponents(array $components): void
     {
-        foreach ($components as $component) {
-            if (!$component instanceof Component) {
-                throw new \AssertionError("Component must be an instanceof Component");
-            }
-        }
         $this->components = $components;
     }
     //----- Serialization -----//

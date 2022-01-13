@@ -25,22 +25,22 @@ class Resolved implements \Serializable
 {
 
     /** @var User[]|null */
-private $users;
+    private $users;
 
-/** @var Member[]|null */
-private $members;
+    /** @var Member[]|null */
+    private $members;
 
-/** @var Role[]|null */
-private $roles;
+    /** @var Role[]|null */
+    private $roles;
 
-/** @var ServerChannel[]|ThreadChannel[]|null */
-private $channels;
+    /** @var ServerChannel[]|ThreadChannel[]|null */
+    private $channels;
 
-/** @var Message[]|null */
-private $messages;
+    /** @var Message[]|null */
+    private $messages;
 
-/** @var string|null */
-private $server_id;
+    /** @var string|null */
+    private $server_id;
 
 
     /** 
@@ -69,67 +69,108 @@ private $server_id;
         $this->setServerId($server_id);
     }
 
-    public function getUsers(): ?array{
+    /** @return User[]|null */
+    public function getUsers(): ?array
+    {
         return $this->users;
     }
-    public function setUsers(?array $users){
-        foreach($users ?? [] as $snowflake => $user){
-            if(!Utils::validDiscordSnowflake($snowflake)){
-                throw new \AssertionError("User ID: {$snowflake} is invalid.");
+
+    /** @param User[]|null $users */
+    public function setUsers(?array $users)
+    {
+        if ($users) {
+            foreach ($users as $snowflake => $user) {
+                if (!Utils::validDiscordSnowflake($snowflake)) {
+                    throw new \AssertionError("User ID: {$snowflake} is invalid.");
+                }
             }
         }
         $this->users = $users;
     }
-    public function getMembers(): ?array{
+
+    /** @return Member[]|null */
+    public function getMembers(): ?array
+    {
         return $this->members;
     }
-    public function setMembers(?array $members){
-        foreach($members ?? [] as $snowflake => $member){
-            if(!Utils::validDiscordSnowflake($snowflake)){
-                throw new \AssertionError("Member ID: {$snowflake} is invalid.");
+
+    /** @param Member[]|null $members */
+    public function setMembers(?array $members)
+    {
+        if ($members) {
+            foreach ($members as $snowflake => $member) {
+                if (!Utils::validDiscordSnowflake($snowflake)) {
+                    throw new \AssertionError("Member ID: {$snowflake} is invalid.");
+                }
             }
         }
         $this->members = $members;
     }
-    public function getRoles(): ?array{
+
+    /** @return Role[]|null */
+    public function getRoles(): ?array
+    {
         return $this->roles;
     }
-    public function setRoles(?array $roles){
-        foreach($roles ?? [] as $snowflake => $role){
-            if(!Utils::validDiscordSnowflake($snowflake)){
-                throw new \AssertionError("Role ID: {$snowflake} is invalid.");
+
+    /** @param Role[]|null $roles */
+    public function setRoles(?array $roles)
+    {
+        if ($roles) {
+            foreach ($roles as $snowflake => $role) {
+                if (!Utils::validDiscordSnowflake($snowflake)) {
+                    throw new \AssertionError("Role ID: {$snowflake} is invalid.");
+                }
             }
         }
         $this->roles = $roles;
     }
-    public function getChannels(): ?array{
+
+    /** @return ServerChannel[]|ThreadChannel[]|null */
+    public function getChannels(): ?array
+    {
         return $this->channels;
     }
-    public function setChannels(?array $channels){
-        foreach($channel ?? [] as $snowflake => $channel){
-            if(!Utils::validDiscordSnowflake($snowflake)){
-                throw new \AssertionError("User ID: {$snowflake} is invalid.");
+
+    /** @param ServerChannel[]|ThreadChannel[]|null $channels */
+    public function setChannels(?array $channels)
+    {
+        if ($channels) {
+            foreach ($channels as $snowflake => $channel) {
+                if (!Utils::validDiscordSnowflake($snowflake)) {
+                    throw new \AssertionError("User ID: {$snowflake} is invalid.");
+                }
             }
         }
         $this->channels = $channels;
     }
-    public function getMessages(): ?array{
+
+    /** @return Message[]|null */
+    public function getMessages(): ?array
+    {
         return $this->messages;
     }
-    public function setMessages(?array $messages){
-        foreach($messages ?? [] as $snowflake => $message){
-            if(!Utils::validDiscordSnowflake($snowflake)){
-                throw new \AssertionError("User ID: {$snowflake} is invalid.");
+
+    /** @param Message[]|null $messages  */
+    public function setMessages(?array $messages)
+    {
+        if ($messages) {
+            foreach ($messages as $snowflake => $message) {
+                if (!Utils::validDiscordSnowflake($snowflake)) {
+                    throw new \AssertionError("User ID: {$snowflake} is invalid.");
+                }
             }
         }
         $this->messages = $messages;
     }
-    public function getServerId(): ?string{
+    public function getServerId(): ?string
+    {
         return $this->server_id;
     }
-    public function setServerId(?string $server_id): void{
-        if($server_id){
-            if(!Utils::validDiscordSnowflake($server_id)){
+    public function setServerId(?string $server_id): void
+    {
+        if ($server_id) {
+            if (!Utils::validDiscordSnowflake($server_id)) {
                 throw new \AssertionError("Server ID: {$server_id} is invalid.");
             }
         }
