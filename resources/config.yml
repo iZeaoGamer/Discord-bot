@@ -3,7 +3,6 @@ version: 3
 
 discord:
   token: "login token here"
-  interactions_over_gateway: true
   use_plugin_cacert: true
 
 logging:
