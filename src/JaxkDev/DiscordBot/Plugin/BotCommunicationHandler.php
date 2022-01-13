@@ -12,8 +12,6 @@
 
 namespace JaxkDev\DiscordBot\Plugin;
 
-use Discord\WebSockets\Events\ServerScheduledEventCreated as ServerScheduledEventCreatedEvent;
-use Discord\WebSockets\Events\ServerScheduledEventUpdated as ServerScheduledEventUpdatedEvent;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution as ResolutionPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordDataDump as DiscordDataDumpPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\BanAdd as BanAddPacket;
@@ -42,7 +40,6 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerJoin as ServerJoinPac
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerLeave as ServerLeavePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerUpdate as ServerUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordReady as DiscordReadyPacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\GuildEmojiUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\VoiceStateUpdate as VoiceStateUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBulkDelete as MessageBulkDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
@@ -53,7 +50,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\DMChannelUpdate as DMChanne
 use Jaxkdev\DiscordBot\Communication\Packets\Discord\DMChannelDelete as DMChannelDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\TypingStart as TypingStartPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\InteractionCreate as InteractionCreatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerStickersUpdate as ServerStickersUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerStickerUpdate as ServerStickerUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageCreate as StageCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageUpdate as StageUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\StageDelete as StageDeletePacket;
@@ -185,7 +182,7 @@ class BotCommunicationHandler
         elseif ($packet instanceof TypingStartPacket) $this->handleTypingStart($packet);
         elseif ($packet instanceof InteractionCreatePacket) $this->handleInteraction($packet);
         elseif ($packet instanceof DiscordDataDumpPacket) $this->handleDataDump($packet);
-        elseif ($packet instanceof ServerStickersUpdatePacket) $this->handleServerSticker($packet);
+        elseif ($packet instanceof ServerStickerUpdatePacket) $this->handleServerSticker($packet);
         elseif ($packet instanceof StageCreatePacket) $this->handleStageCreate($packet);
         elseif ($packet instanceof StageUpdatePacket) $this->handleStageUpdate($packet);
         elseif ($packet instanceof StageDeletePacket) $this->handleStageDelete($packet);
@@ -236,7 +233,7 @@ class BotCommunicationHandler
     {
         (new ServerEmojiUpdatedEvent($this->plugin, $packet->getEmoji()))->call();
     }
-    private function handleServerSticker(ServerStickersUpdatePacket $packet): void
+    private function handleServerSticker(ServerStickerUpdatePacket $packet): void
     {
         (new ServerStickerUpdatedEvent($this->plugin, $packet->getSticker()))->call();
     }

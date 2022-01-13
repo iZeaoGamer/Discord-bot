@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Messages\Stickers;
+use JaxkDev\DiscordBot\Models\Sticker;
 use pocketmine\plugin\Plugin;
 
 /**
@@ -22,15 +22,15 @@ use pocketmine\plugin\Plugin;
 class ServerStickerUpdated extends DiscordBotEvent
 {
 
-    /** @var Stickers */
+    /** @var Sticker */
     private $sticker;
 
-    public function __construct(Plugin $plugin, Stickers $sticker)
+    public function __construct(Plugin $plugin, Sticker $sticker)
     {
         parent::__construct($plugin);
         $this->sticker = $sticker;
     }
-    public function getSticker(): Stickers
+    public function getSticker(): Sticker
     {
         return $this->sticker;
     }

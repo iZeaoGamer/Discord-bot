@@ -58,10 +58,6 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUnmuteMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestServerAuditLog;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestServerTransfer;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestSearchMembers;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateButton;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateSelectMenu;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifySelectMenu;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyButton;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDelayReply;
@@ -106,11 +102,10 @@ use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Models\Webhook;
 use JaxkDev\DiscordBot\Models\Role;
+use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 
 use Discord\Builders\MessageBuilder;
-use Discord\Builders\Components\Button;
-use Discord\Builders\Components\SelectMenu;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTimedOutMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateDMChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateDMChannel;
@@ -119,14 +114,11 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateSticker;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteSticker;
-use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestListenCommand;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerCreate;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRespondInteraction;
 
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
-
-use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 /**
  * For internal and developers use for interacting with the discord bot.
  *
@@ -488,7 +480,7 @@ class Api
      */
     public function createSticker(Sticker $sticker): PromiseInterface
     {
-        $pk = new RequestCreateSticker($sticker);
+        $pk = new RequestStickerCreate($sticker);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -518,7 +510,7 @@ class Api
         if (!Utils::validDiscordSnowflake($serverId)) {
             return rejectPromise(new ApiRejection("Server ID: {$serverId} is invalid."));
         }
-        $pk = new RequestDeleteSticker($id, $serverId);
+        $pk = new RequestStickerDelete($id, $serverId);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -562,23 +554,6 @@ class Api
         return ApiResolver::create($pk->getUID());
     }
 
-    /** Responds to an interaction.
-     * 
-     * @param MessageBuilder $builder
-     * @param Message $message
-     * @param string $message_id
-     * @param string $channel_id
-     * 
-     * @return PromiseInterface Resolves with a Interaction Model. If Interaction not found, returns a Message Model instead.
-     */
-    public function respondInteraction(MessageBuilder $builder, Message $message, string $message_id, string $channel_id): PromiseInterface
-    {
-        $this->deleteMessage($message_id, $channel_id);
-        return $this->createInteraction($builder, $message);
-    }
-
-
-
     /** Creates an interaction. 
      * 
      * @param MessageBuilder $builder
@@ -593,43 +568,6 @@ class Api
         return ApiResolver::create($pk->getUID());
     }
 
-    /** Creates a Button interaction
-     * 
-     * @param MessageBuilder $builder
-     * @param Message $message
-     * @param string $channelId
-     * @param Button $button
-     * 
-     * @return PromiseInterface Resolves with a Interaction Model.
-     */
-    public function createButton(MessageBuilder $builder, Message $message, string $channelId, Button $button, bool $ephemeral = false): PromiseInterface
-    {
-        if (!Utils::validDiscordSnowflake($channelId)) {
-            return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
-        }
-        $pk = new RequestCreateButton($builder, $message, $channelId, $button, $ephemeral);
-        $this->plugin->writeOutboundData($pk);
-        return ApiResolver::create($pk->getUID());
-    }
-
-    /** Modifies a Button interaction
-     * 
-     * @param MessageBuilder $builder
-     * @param Message $message
-     * @param string $channelId
-     * @param Button $button
-     * 
-     * @return PromiseInterface Resolves with a Interaction Model.
-     */
-    public function modifyButton(MessageBuilder $builder, Message $message, string $channelId, Button $button, bool $ephemeral = false, bool $doNothing = false): PromiseInterface
-    {
-        if (!Utils::validDiscordSnowflake($channelId)) {
-            return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
-        }
-        $pk = new RequestModifyButton($builder, $message, $channelId, $button, $ephemeral, $doNothing);
-        $this->plugin->writeOutboundData($pk);
-        return ApiResolver::create($pk->getUID());
-    }
     /** Modifys an interaction.
      * @param MessageBuilder $builder
      * @param Message $message
@@ -646,42 +584,6 @@ class Api
         return ApiResolver::create($pk->getUID());
     }
 
-    /** Creates an option interaction
-     * 
-     * @param MessageBuilder $builder
-     * @param Message $message
-     * @param string $channelId
-     * @param SelectMenu $select
-     * 
-     * @return PromiseInterface Resolves with a Interaction Model
-     */
-    public function createOption(MessageBuilder $builder, Message $message, string $channelId, SelectMenu $select, bool $ephemeral = false): PromiseInterface
-    {
-        if (!Utils::validDiscordSnowflake($channelId)) {
-            return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
-        }
-        $pk = new RequestCreateSelectMenu($builder, $message, $channelId, $select, $ephemeral);
-        $this->plugin->writeOutboundData($pk);
-        return ApiResolver::create($pk->getUID());
-    }
-    /** Modifies an option interaction
-     * 
-     * @param MessageBuilder $builder
-     * @param Message $message
-     * @param string $channelId
-     * @param SelectMenu $select
-     * 
-     * @return PromiseInterface Resolves with a Interaction Model
-     */
-    public function modifyOption(MessageBuilder $builder, Message $message, string $channelId, SelectMenu $select, bool $ephemeral = false, bool $doNothing = false): PromiseInterface
-    {
-        if (!Utils::validDiscordSnowflake($channelId)) {
-            return rejectPromise(new ApiRejection("Invalid channel id {$channelId}"));
-        }
-        $pk = new RequestModifySelectMenu($builder, $message, $channelId, $select, $ephemeral, $doNothing);
-        $this->plugin->writeOutboundData($pk);
-        return ApiResolver::create($pk->getUID());
-    }
     /**
      * Creates a normal webhook inside a channel.
      *
@@ -1585,7 +1487,29 @@ class Api
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
+    
+    /** Unmutes a Member that's in the current boice channel. Unmuted Member's Voice Channel ID must be present. 
+     * @param string $userID
+     * @param VoiceChannel $channel
+     * @param string|null $reason
+     * 
+     * @return PromiseInterface Resolves with a VoiceChannel Model.
+    */
+    public function unmuteMember(string $userID, VoiceChannel $channel, ?string $reason = null): PromiseInterface{
+        if ($channel->getId() === null) {
+            return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
+        }
+        if (!Utils::validDiscordSnowflake($channel->getId())) {
+            return rejectPromise(new ApiRejection("Voice Channel ID: {$channel->getId()} is invalid!"));
+        }
 
+        if (!Utils::validDiscordSnowflake($userID)) {
+            return rejectPromise(new ApiRejection("Invalid Member ID '$userID'."));
+        }
+        $pk = new RequestUnMuteMember($userID, $channel, $reason);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
 
     /** 
      * Starts a thread in a channel.

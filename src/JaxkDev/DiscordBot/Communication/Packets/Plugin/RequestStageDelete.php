@@ -12,7 +12,6 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestStageDelete extends Packet

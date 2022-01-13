@@ -12,9 +12,6 @@
 
 namespace JaxkDev\DiscordBot\Models\Interactions\Command;
 
-
-use JaxkDev\DiscordBot\Plugin\Utils;
-
 class Choice implements \Serializable
 {
     /** @var string */

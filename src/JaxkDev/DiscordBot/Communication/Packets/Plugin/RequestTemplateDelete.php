@@ -12,7 +12,6 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\Template;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestTemplateDelete extends Packet

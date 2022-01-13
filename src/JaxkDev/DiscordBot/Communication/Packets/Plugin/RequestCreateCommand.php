@@ -15,7 +15,6 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Permission;
-use Discord\Builders\MessageBuilder;
 
 class RequestCreateCommand extends Packet
 {

@@ -13,8 +13,6 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
-use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
 
 class RequestDeleteCommand extends Packet
 {

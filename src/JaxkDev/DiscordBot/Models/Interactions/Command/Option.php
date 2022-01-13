@@ -12,8 +12,6 @@
 
 namespace JaxkDev\DiscordBot\Models\Interactions\Command;
 
-
-
 class Option implements \Serializable
 
 {

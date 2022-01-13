@@ -12,7 +12,6 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestDelayDelete extends Packet

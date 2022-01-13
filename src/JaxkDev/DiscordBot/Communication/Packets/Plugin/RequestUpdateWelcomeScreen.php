@@ -14,8 +14,6 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-use JaxkDev\DiscordBot\Models\WelcomeScreen;
-
 class RequestUpdateWelcomeScreen extends Packet
 {
 

@@ -12,11 +12,6 @@
 
 namespace JaxkDev\DiscordBot\Models\Interactions\Command;
 
-
-
-use JaxkDev\DiscordBot\Models\Messages\Message;
-use JaxkDev\DiscordBot\Models\User;
-use JaxkDev\DiscordBot\Models\Interactions\Request\InteractionData;
 use JaxkDev\DiscordBot\Plugin\Utils;
 
 class Command implements \Serializable

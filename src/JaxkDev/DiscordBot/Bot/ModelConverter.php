@@ -90,7 +90,6 @@ use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\VoiceState;
 use JaxkDev\DiscordBot\Models\Webhook;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
-use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Models\AuditLog\AuditLog;
 use JaxkDev\DiscordBot\Models\AuditLog\Options;
 use JaxkDev\DiscordBot\Models\AuditLog\Entry;

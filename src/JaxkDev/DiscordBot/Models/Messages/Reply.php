@@ -12,7 +12,6 @@
 
 namespace JaxkDev\DiscordBot\Models\Messages;
 
-use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 
 class Reply extends Message

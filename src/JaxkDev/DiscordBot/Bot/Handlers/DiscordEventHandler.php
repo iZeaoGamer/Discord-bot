@@ -13,7 +13,6 @@
 namespace JaxkDev\DiscordBot\Bot\Handlers;
 
 use Discord\Discord;
-use Discord\Builders\MessageBuilder;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
 use Discord\Parts\Interactions\Interaction as DiscordInteraction;
@@ -68,7 +67,6 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerLeave as ServerLeaveP
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerUpdate as ServerUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordReady as DiscordReadyPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\VoiceStateUpdate as VoiceStateUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\MessageBulkDelete as MessageBulkDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadCreate as ThreadCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadUpdate as ThreadUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadDelete as ThreadDeletePacket;
@@ -108,7 +106,6 @@ class DiscordEventHandler
         $discord = $this->client->getDiscordClient();
         $discord->on("MESSAGE_CREATE", [$this, "onMessageCreate"]);
         $discord->on("MESSAGE_DELETE", [$this, "onMessageDelete"]);
-        // $discord->on("MESSAGE_DELETE_BULK", [$this, "onMessageBulkDelete"]);
         $discord->on("MESSAGE_UPDATE", [$this, "onMessageUpdate"]);  //AKA Edit
 
         $discord->on("GUILD_MEMBER_ADD", [$this, "onMemberJoin"]);
@@ -149,7 +146,7 @@ class DiscordEventHandler
         $discord->on("TYPING_START", [$this, "onTypingStart"]);
 
         $discord->on("INTERACTION_CREATE", [$this, "onInteractionCreate"]);
-        $discord->on("GUILD_STICKERS_UPDATE", [$this, "onStickersUpdate"]);
+        $discord->on("GUILD_STICKERS_UPDATE", [$this, "onStickerUpdate"]);
 
         $discord->on("STAGE_INSTANCE_CREATE", [$this, "onStageCreate"]);
         $discord->on("STAGE_INSTANCE_UPDATE", [$this, "onStageUpdate"]);
@@ -486,7 +483,7 @@ array(5) {
         $packet = new StageDeletePacket(ModelConverter::genModelStage($stage));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onStickersUpdate(DiscordSticker $sticker): void
+    public function onStickerUpdate(DiscordSticker $sticker): void
     {
         $packet = new ServerStickerUpdatePacket(ModelConverter::genModelSticker($sticker));
         $this->client->getThread()->writeOutboundData($packet);

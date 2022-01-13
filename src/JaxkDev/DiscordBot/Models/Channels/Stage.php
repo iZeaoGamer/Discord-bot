@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Models\Channels;
 
-class Stage  implements \Serializable
+class Stage implements \Serializable
 {
 
     /** @var string */

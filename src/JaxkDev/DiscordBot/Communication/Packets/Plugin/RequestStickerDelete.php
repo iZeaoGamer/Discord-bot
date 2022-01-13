@@ -12,10 +12,10 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\Sticker;
+
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestDeleteSticker extends Packet
+class RequestStickerDelete extends Packet
 {
 
     /** @var string */
