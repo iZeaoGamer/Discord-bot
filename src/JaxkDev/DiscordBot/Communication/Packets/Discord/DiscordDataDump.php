@@ -24,6 +24,7 @@ use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Models\Messages\Message;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
 
 class DiscordDataDump extends Packet
 {
@@ -60,6 +61,9 @@ class DiscordDataDump extends Packet
 
     /** @var Message[] */
     private $messages = [];
+
+    /** @var Command[] */
+    private $commands = [];
 
     /** @var null|User */
     private $bot_user = null;
@@ -193,6 +197,14 @@ class DiscordDataDump extends Packet
         $this->messages[] = $message;
     }
 
+    /** @return Command[] */
+    public function getCommands(): array{
+        return $this->commands;
+    }
+    public function addCommand(Command $command): void{
+        $this->commands[] = $command;
+    }
+
     public function getBotUser(): ?User
     {
         return $this->bot_user;
@@ -216,7 +228,7 @@ class DiscordDataDump extends Packet
     public function getSize(): int
     {
         return sizeof($this->servers) + sizeof($this->threads) + sizeof($this->channels) + sizeof($this->roles) + sizeof($this->members)
-            + sizeof($this->users) + sizeof($this->bans) + sizeof($this->invites) + sizeof($this->templates) + sizeof($this->scheduledEvents) + sizeof($this->messages);
+            + sizeof($this->users) + sizeof($this->bans) + sizeof($this->invites) + sizeof($this->templates) + sizeof($this->scheduledEvents) + sizeof($this->messages) + sizeof($this->commands);
     }
 
     public function serialize(): ?string
@@ -234,6 +246,7 @@ class DiscordDataDump extends Packet
             $this->templates,
             $this->scheduledEvents,
             $this->messages,
+            $this->commands,
             $this->bot_user,
             $this->timestamp
         ]);
@@ -254,6 +267,7 @@ class DiscordDataDump extends Packet
             $this->templates,
             $this->scheduledEvents,
             $this->messages,
+            $this->commands,
             $this->bot_user,
             $this->timestamp
         ] = unserialize($data);

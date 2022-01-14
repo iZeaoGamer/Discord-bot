@@ -49,6 +49,9 @@ class ServerJoin extends Packet
     /** @var Message[] */
     private $messages;
 
+    /** @var Command[] */
+    private $commands;
+
     /**
      * ServerJoin constructor.
      *
@@ -60,8 +63,9 @@ class ServerJoin extends Packet
      * @param ServerTemplate[] $templates
      * @param ServerScheduledEvent[] $events
      * @param Message[] $messages
+     * @param Command[] $commands
      */
-    public function __construct(Server $server, array $threads, array $channels, array $members, array $roles, array $templates, array $events, array $messages)
+    public function __construct(Server $server, array $threads, array $channels, array $members, array $roles, array $templates, array $events, array $messages, array $commands)
     {
         parent::__construct();
         $this->server = $server;
@@ -72,6 +76,7 @@ class ServerJoin extends Packet
         $this->templates = $templates;
         $this->events = $events;
         $this->messages = $messages;
+        $this->commands = $commands;
     }
 
     public function getServer(): Server
@@ -120,6 +125,10 @@ class ServerJoin extends Packet
     {
         return $this->messages;
     }
+      /** @return Command[] */
+      public function getCommands(): array{
+        return $this->commands;
+    }
 
     public function serialize(): ?string
     {
@@ -132,7 +141,8 @@ class ServerJoin extends Packet
             $this->roles,
             $this->templates,
             $this->events,
-            $this->messages
+            $this->messages,
+            $this->commands
         ]);
     }
 
@@ -147,7 +157,8 @@ class ServerJoin extends Packet
             $this->roles,
             $this->templates,
             $this->events,
-            $this->messages
+            $this->messages,
+            $this->commands
         ] = unserialize($data);
     }
 }

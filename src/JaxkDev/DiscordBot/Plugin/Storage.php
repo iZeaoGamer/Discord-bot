@@ -27,6 +27,7 @@ use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Models\Channels\DMChannel;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
 
 use JaxkDev\DiscordBot\Plugin\Events\MessageDeleted as MessageDeletedEvent;
 
@@ -40,6 +41,13 @@ class Storage
 
     /** @var Server[] */
     private static $server_map = [];
+
+
+    /** @var Array<string, Command> */
+    private static $command_map = [];
+
+    /** @var Array<string, Command> */
+    private static $command_name_map = [];
 
     /** @var Array<string, Message> */
     private static $message_map = [];
@@ -642,6 +650,47 @@ class Storage
             }
         }
     }
+    public static function addCommand(Command $command): void
+    {
+        if ($command->getId() === null) {
+            throw new \AssertionError("Failed to add Command to storage, ID not found.");
+        }
+        if (isset(self::$command_map[$command->getId()])) return;
+        self::$command_name_map[$command->getName()] = $command;
+        self::$command_map[$command->getId()] = $command;
+    }
+    public static function updateCommand(Command $command): void
+    {
+        if ($command->getId() === null) {
+            throw new \AssertionError("Failed to update message in storage, ID not found.");
+        }
+        if (!isset(self::$command_map[$command->getId()])) {
+            self::addCommand($command);
+        } else {
+            self::$command_map[$command->getId()] = $command;
+        }
+    }
+    public static function removeCommand(string $command_id): void
+    {
+        $command = self::getCommand($command_id);
+        if (!$command instanceof Command) return; //Already deleted or not added.
+        unset(self::$command_name_map[$command->getName()]);
+        unset(self::$command_map[$command_id]);
+        
+    }
+
+    public static function getCommand(string $id): ?Command{
+        return self::$command_map[$id] ?? null;
+    }
+    public static function getCommandByName(string $name): ?Command{
+        return self::$command_name_map[$name] ?? null;
+    }
+
+    /** @return Command[] */
+    public static function getCommands(): array{
+        return array_values(self::$command_map);
+    }
+
 
     /** 
      * @param string $channel_id

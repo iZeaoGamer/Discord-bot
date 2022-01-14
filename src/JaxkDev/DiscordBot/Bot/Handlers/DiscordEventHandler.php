@@ -33,6 +33,7 @@ use Discord\Parts\WebSockets\TypingStart as DiscordTypingStart;
 use Discord\Parts\Channel\StageInstance as DiscordStageInstance;
 use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
 use Discord\Parts\Guild\Emoji as DiscordEmoji;
+use Discord\Parts\Interactions\Command\Command as DiscordCommand;
 use JaxkDev\DiscordBot\Bot\Client;
 use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Communication\BotThread;
@@ -297,13 +298,19 @@ array(5) {
                     $pk->addThread($c);
                 }
             }
+            /** @var DiscordCommand $command */
+            foreach ($guild->commands as $command) {
+                $pk->addCommand(ModelConverter::genModelCommand($command));
+            }
+        //    $this->client->getLogger()->info("Fetched " . sizeof($guild->commands) . " Guild Commannds!");
+            $this->client->getThread()->writeOutboundData($pk);
             /** @var DiscordChannel $channel */
             foreach ($guild->channels as $channel) {
 
                 $c = ModelConverter::genModelChannel($channel);
                 if ($c !== null) $pk->addChannel($c);
                 if ($permissions->read_message_history) {
-            
+
                     $this->fetchAllMessages(100, $guild, $channel);
                 } else {
                     $this->logger->debug("Cannot fetch Messages from server '" . $guild->name . "' (" . $guild->id .
@@ -408,28 +415,29 @@ array(5) {
         $this->client->getThread()->writeOutboundData(new DiscordReadyPacket());
         $this->client->getCommunicationHandler()->sendHeartbeat();
     }
-    public function fetchAllMessages(int $limit, DiscordGuild $guild, DiscordChannel $channel){
+    public function fetchAllMessages(int $limit, DiscordGuild $guild, DiscordChannel $channel)
+    {
         $messages = $channel->getMessageHistory([
             "limit" => $limit
         ]);
-        $messages->done(function(Collection $msgs) use ($guild, $channel){
+        $messages->done(function (Collection $msgs) use ($guild, $channel) {
             //   $channel->messages->freshen()->done(function () use ($channel, $guild) {
-                   $this->logger->debug("Successfully fetched " . sizeof($msgs->toArray()) . " Messages from channel: {$channel->name} in server '" .
-                       $guild->name . "' (" . $guild->id . ")");
-                   $pk = new DiscordDataDumpPacket();
-                   $pk->setTimestamp(time());
-                   
-                   /** @var DiscordMessage $message */
-                   foreach($msgs as $message){
-                 //  foreach ($channel->messages as $message) {
-                       $msg = ModelConverter::genModelMessage($message);
-                       $pk->addMessage($msg);
-                   }
-                   $this->client->getThread()->writeOutboundData($pk);
-               }, function (\Throwable $e) use ($guild) {
-                   $this->logger->debug("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
-               });
-           }
+            $this->logger->debug("Successfully fetched " . sizeof($msgs->toArray()) . " Messages from channel: {$channel->name} in server '" .
+                $guild->name . "' (" . $guild->id . ")");
+            $pk = new DiscordDataDumpPacket();
+            $pk->setTimestamp(time());
+
+            /** @var DiscordMessage $message */
+            foreach ($msgs as $message) {
+                //  foreach ($channel->messages as $message) {
+                $msg = ModelConverter::genModelMessage($message);
+                $pk->addMessage($msg);
+            }
+            $this->client->getThread()->writeOutboundData($pk);
+        }, function (\Throwable $e) use ($guild) {
+            $this->logger->debug("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
+        });
+    }
     public function onScheduleCreate(DiscordScheduledEvent $schedule): void
     {
         $packet = new ServerScheduledEventCreatePacket(ModelConverter::genModelScheduledEvent($schedule));
@@ -684,13 +692,17 @@ array(5) {
                 }
             }
         }
-
+        $commands = [];
+        /** @var DiscordCommand $command */
+        foreach($guild->commands as $command){
+            $commands[] = ModelConverter::genModelCommand($command);
+        }
         if ($guild->region === null) {
             return;
         }
 
 
-        $packet = new ServerJoinPacket(ModelConverter::genModelServer($guild), $threads, $channels, $members, $roles, $templates, $scheduled, $messages);
+        $packet = new ServerJoinPacket(ModelConverter::genModelServer($guild), $threads, $channels, $members, $roles, $templates, $scheduled, $messages, $commands);
         $this->client->getThread()->writeOutboundData($packet);
     }
 

@@ -119,6 +119,7 @@ use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\Channels\DMChannel;
 use JaxkDev\DiscordBot\Models\Messages\Message;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
 
 class BotCommunicationHandler
 {
@@ -595,6 +596,7 @@ class BotCommunicationHandler
             $packet->getTemplates(),
             $packet->getScheduledEvents(),
             $packet->getMessages(),
+            $packet->getCommands(),
         ))->call();
 
         Storage::addServer($packet->getServer());
@@ -618,6 +620,9 @@ class BotCommunicationHandler
         }
         foreach ($packet->getMessages() as $message) {
             Storage::addMessage($message);
+        }
+        foreach($packet->getCommands() as $command){
+            Storage::addCommand($command);
         }
     }
 
@@ -671,6 +676,9 @@ class BotCommunicationHandler
         }
         foreach ($packet->getMessages() as $message) {
             Storage::addMessage($message);
+        }
+        foreach($packet->getCommands() as $command){
+            Storage::addCommand($command);
         }
 
         if ($packet->getBotUser() !== null) {
