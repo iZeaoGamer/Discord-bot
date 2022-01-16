@@ -264,11 +264,11 @@ class Member extends Part
             return $newPermission;
         }
 
-        if ($channel) {
+        if ($channel) { $this->discord->logger->debug(print_r([__LINE__=>'BEGIN CHANNEL OVERWRITE TEST','bitwise'=>$bitwise], true));
             /* @var Overwrite */
-            if ($overwrite = $channel->overwrites->get('id', $this->guild->id)) {
-                $bitwise = Bitwise::or($bitwise, $overwrite->allow->bitwise);
-                $bitwise = Bitwise::and($bitwise, Bitwise::not($overwrite->deny->bitwise));
+            if ($overwrite = $channel->overwrites->get('id', $this->guild->id)) { $this->discord->logger->debug(print_r([__LINE__=>'TESTING ROLE @everyone','bitwise'=>$bitwise], true));
+                $bitwise = Bitwise::and($bitwise, Bitwise::not($overwrite->deny->bitwise)); $this->discord->logger->debug(print_r([__LINE__=>'bitwise &= ~deny','bitwise'=>$bitwise,'deny'=>$overwrite->deny->bitwise], true));
+                $bitwise = Bitwise::or($bitwise, $overwrite->allow->bitwise); $this->discord->logger->debug(print_r([__LINE__=>'bitwise |= allow','bitwise'=>$bitwise,'allow'=>$overwrite->allow->bitwise], true));
             }
 
             /* @var Overwrite */
@@ -276,16 +276,16 @@ class Member extends Part
                 if ($overwrite->type !== Overwrite::TYPE_ROLE || !in_array($overwrite->id, $roles)) {
                     continue;
                 }
-
-                $bitwise = Bitwise::or($bitwise, $overwrite->allow->bitwise);
-                $bitwise = Bitwise::and($bitwise, Bitwise::not($overwrite->deny->bitwise));
+                $this->discord->logger->debug(print_r([__LINE__=>'TESTING ROLE '.$overwrite->id,'bitwise'=>$bitwise], true));
+                $bitwise = Bitwise::and($bitwise, Bitwise::not($overwrite->deny->bitwise)); $this->discord->logger->debug(print_r([__LINE__=>'bitwise &= ~deny','bitwise'=>$bitwise,'deny'=>$overwrite->deny->bitwise], true));
+                $bitwise = Bitwise::or($bitwise, $overwrite->allow->bitwise); $this->discord->logger->debug(print_r([__LINE__=>'bitwise |= allow','bitwise'=>$bitwise,'allow'=>$overwrite->allow->bitwise], true));
             }
 
             /* @var Overwrite */
-            if ($overwrite = $channel->overwrites->get('id', $this->id)) {
-                $bitwise = Bitwise::or($bitwise, $overwrite->allow->bitwise);
-                $bitwise = Bitwise::and($bitwise, Bitwise::not($overwrite->deny->bitwise));
-            }
+            if ($overwrite = $channel->overwrites->get('id', $this->id)) { $this->discord->logger->debug(print_r([__LINE__=>'TESTING MEMBER '.$this->id,'bitwise'=>$bitwise], true));
+                $bitwise = Bitwise::and($bitwise, Bitwise::not($overwrite->deny->bitwise)); $this->discord->logger->debug(print_r([__LINE__=>'bitwise &= ~deny','bitwise'=>$bitwise,'deny'=>$overwrite->deny->bitwise], true));
+                $bitwise = Bitwise::or($bitwise, $overwrite->allow->bitwise); $this->discord->logger->debug(print_r([__LINE__=>'bitwise |= allow','bitwise'=>$bitwise,'allow'=>$overwrite->allow->bitwise], true));
+            } $this->discord->logger->debug(print_r([__LINE__=>'END OF TEST','bitwise'=>$bitwise], true));
         }
 
         /** @var RolePermission */

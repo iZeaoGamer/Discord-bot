@@ -199,7 +199,7 @@ class Interaction extends Part
      * 
      * @return ExtendedPromiseInterface
      */
-    public function acknowledgeWithResponse(): ExtendedPromiseInterface
+    public function acknowledgeWithResponse(bool $ephemeral = false): ExtendedPromiseInterface
     {
         if (!in_array($this->type, [InteractionType::APPLICATION_COMMAND, InteractionType::MESSAGE_COMPONENT])) {
             throw new \LogicException('You can only acknowledge application command or message component interactions.');
@@ -207,6 +207,7 @@ class Interaction extends Part
 
         return $this->respond([
             'type' => InteractionResponseType::DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+            'data' => $ephemeral ? ['flags' => 64] : [],
         ]);
     }
 
