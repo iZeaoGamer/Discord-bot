@@ -401,7 +401,7 @@ class CommunicationHandler
                     $di->updateMessage($builder);
                 });
             } else {
-                $di->acknowledgeWithResponse()->then(function () use ($builder, $di, $pk) {
+                $di->acknowledgeWithResponse($pk->isEphemeral())->then(function () use ($builder, $di, $pk) {
                     $di->updateOriginalResponse($builder)->then(function (DiscordMessage $message) use ($pk) {
                         $this->resolveRequest($pk->getUID(), true, "Successfully executed new Interaction class.", [ModelConverter::genModelMessage($message)]);
                     }, function (\Throwable $e) use ($pk) {
@@ -443,7 +443,7 @@ class CommunicationHandler
                 $di->updateMessage($builder);
             });
         } else {
-            $di->acknowledgeWithResponse()->then(function () use ($builder, $di, $pk) {
+            $di->acknowledgeWithResponse($pk->isEphemeral())->then(function () use ($builder, $di, $pk) {
                 print_r("Ackknowledged new interaction class.");
                 $di->updateOriginalResponse($builder)->then(function (DiscordMessage $message) use ($pk) {
                     $this->resolveRequest($pk->getUID(), true, "Successfully executed new Interaction class.", [ModelConverter::genModelMessage($message)]);

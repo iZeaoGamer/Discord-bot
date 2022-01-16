@@ -141,10 +141,12 @@ class Api
      * @param MessageBuilder|null $builder
      * @param strong $content
      * @param Embed|null $embed
+     * @param bool $ephemeral
+     * 
      * @return PromiseInterface Resolves with a Message Model.
      */
-    public function createInteractionResponse(Interaction $interaction, ?MessageBuilder $builder = null, string $content = "", ?Embed $embed = null): PromiseInterface{
-        $pk = new RequestRespondInteraction($interaction, $builder, $content, $embed);
+    public function createInteractionResponse(Interaction $interaction, ?MessageBuilder $builder = null, string $content = "", ?Embed $embed = null, bool $ephemeral = false): PromiseInterface{
+        $pk = new RequestRespondInteraction($interaction, $builder, $content, $embed, $ephemeral);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
