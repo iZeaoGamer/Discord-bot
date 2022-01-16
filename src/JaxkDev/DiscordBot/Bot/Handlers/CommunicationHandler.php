@@ -332,10 +332,88 @@ class CommunicationHandler
         $di->channel_id = $interaction->getChannelId();
         $di->token = $interaction->getToken();
         $di->version = $interaction->getVersion();
-        if($interaction->getServerId()){
-        $this->getServer($pk, $interaction->getServerId(), function (DiscordGuild $guild) use ($builder, $resolvedModel, $resolved, $di, $pk, $interaction) {
-            if ($resolvedModel) {
+        if ($interaction->getServerId()) {
+            $this->getServer($pk, $interaction->getServerId(), function (DiscordGuild $guild) use ($builder, $resolvedModel, $resolved, $di, $pk, $interaction) {
+                if ($resolvedModel) {
 
+                    $users = [];
+                    /** @var DiscordUser $user */
+                    foreach ($this->client->getDiscordClient()->users as $user) {
+                        if (isset($resolvedModel->getUsers()[$user->id])) {
+                            $users[$user->id][] = $user;
+                        }
+                    }
+
+                    $channels = [];
+                    /** @var DiscordChannel $channel */
+                    foreach ($guild->channels as $channel) {
+                        if (isset($resolvedModel->getChannels()[$channel->id])) {
+                            $channels[$channel->id][] = $channel;
+                        }
+                    }
+                    $members = [];
+                    /** @var DiscordMember $member */
+                    foreach ($guild->members as $member) {
+                        if (isset($resolvedModel->getMembers()[$member->id])) {
+                            $members[$member->id][] = $member;
+                        }
+                    }
+                    $roles = [];
+                    /** @var DiscordRole $role */
+                    foreach ($guild->roles as $role) {
+                        if (isset($resolvedModel->getRoles()[$role->id])) {
+                            $roles[$role->id][] = $role;
+                        }
+                    }
+                    $resolved->members = $members;
+                    $resolved->users = $users;
+                    $resolved->channels = $channels;
+                    $resolved->roles = $roles;
+                    $resolved->guild_id = $resolvedModel->getServerId();
+                }
+
+                $di->guild_id = $interaction->getServerId();
+                $di->guild = $guild;
+                /** @var DiscordChannel $channel */
+                foreach ($guild->channels as $channel) {
+                    if ($channel->id === $interaction->getChannelId()) {
+                        $di->channel = $channel;
+                    }
+                }
+                /** @var DiscordMember $member */
+                foreach ($guild->members as $member) {
+                    if ($interaction->getMember()) {
+                        if ($member->id === $interaction->getMember()->getUserId()) {
+                            $di->member = $member;
+                        }
+                    }
+                }
+                /** @var DiscordUser $user */
+                foreach ($this->client->getDiscordClient()->users as $user) {
+                    if ($interaction->getUser()) {
+                        if ($member->id === $interaction->getUser()->getId()) {
+                            $di->user = $user;
+                        }
+                    }
+                }
+                if ($interaction->getType() === 3) {
+                    $di->acknowledge()->then(function () use ($builder, $di, $pk) {
+                        $di->updateMessage($builder);
+                    });
+                } else {
+                    $di->acknowledgeWithResponse($pk->isEphemeral())->then(function () use ($builder, $di, $pk) {
+                        $di->updateOriginalResponse($builder)->then(function (DiscordMessage $message) use ($pk) {
+                            $this->resolveRequest($pk->getUID(), true, "Successfully executed new Interaction class.", [ModelConverter::genModelMessage($message)]);
+                        }, function (\Throwable $e) use ($pk) {
+                            $this->resolveRequest($pk->getUID(), false, "Failed to execute new interaction class.", [$e->getMessage(), $e->getTraceAsString()]);
+                        });
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to acknowledge new Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
+                }
+            });
+        } else {
+            if ($resolvedModel) {
                 $users = [];
                 /** @var DiscordUser $user */
                 foreach ($this->client->getDiscordClient()->users as $user) {
@@ -346,62 +424,29 @@ class CommunicationHandler
 
                 $channels = [];
                 /** @var DiscordChannel $channel */
-                foreach ($guild->channels as $channel) {
+                foreach ($this->client->getDiscordClient()->private_channels as $channel) {
                     if (isset($resolvedModel->getChannels()[$channel->id])) {
                         $channels[$channel->id][] = $channel;
                     }
                 }
-                $members = [];
-                /** @var DiscordMember $member */
-                foreach ($guild->members as $member) {
-                    if (isset($resolvedModel->getMembers()[$member->id])) {
-                        $members[$member->id][] = $member;
-                    }
-                }
-                $roles = [];
-                /** @var DiscordRole $role */
-                foreach ($guild->roles as $role) {
-                    if (isset($resolvedModel->getRoles()[$role->id])) {
-                        $roles[$role->id][] = $role;
-                    }
-                }
-                $resolved->members = $members;
+
                 $resolved->users = $users;
                 $resolved->channels = $channels;
-                $resolved->roles = $roles;
-                $resolved->guild_id = $resolvedModel->getServerId();
             }
-
-            $di->guild_id = $interaction->getServerId();
-            $di->guild = $guild;
             /** @var DiscordChannel $channel */
-            foreach ($guild->channels as $channel) {
+            foreach ($this->client->getDiscordClient()->private_channels as $channel) {
                 if ($channel->id === $interaction->getChannelId()) {
                     $di->channel = $channel;
                 }
             }
-            /** @var DiscordMember $member */
-            foreach ($guild->members as $member) {
-                if ($interaction->getMember()) {
-                    if ($member->id === $interaction->getMember()->getUserId()) {
-                        $di->member = $member;
-                    }
-                }
-            }
-            /** @var DiscordUser $user */
-            foreach ($this->client->getDiscordClient()->users as $user) {
-                if ($interaction->getUser()) {
-                    if ($member->id === $interaction->getUser()->getId()) {
-                        $di->user = $user;
-                    }
-                }
-            }
+
             if ($interaction->getType() === 3) {
                 $di->acknowledge()->then(function () use ($builder, $di, $pk) {
                     $di->updateMessage($builder);
                 });
             } else {
                 $di->acknowledgeWithResponse($pk->isEphemeral())->then(function () use ($builder, $di, $pk) {
+                    print_r("Ackknowledged new interaction class.");
                     $di->updateOriginalResponse($builder)->then(function (DiscordMessage $message) use ($pk) {
                         $this->resolveRequest($pk->getUID(), true, "Successfully executed new Interaction class.", [ModelConverter::genModelMessage($message)]);
                     }, function (\Throwable $e) use ($pk) {
@@ -411,50 +456,7 @@ class CommunicationHandler
                     $this->resolveRequest($pk->getUID(), false, "Failed to acknowledge new Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
                 });
             }
-        });
-    }else{
-        $users = [];
-        /** @var DiscordUser $user */
-        foreach ($this->client->getDiscordClient()->users as $user) {
-            if (isset($resolvedModel->getUsers()[$user->id])) {
-                $users[$user->id][] = $user;
-            }
         }
-
-        $channels = [];
-        /** @var DiscordChannel $channel */
-        foreach ($this->client->getDiscordClient()->private_channels as $channel) {
-            if (isset($resolvedModel->getChannels()[$channel->id])) {
-                $channels[$channel->id][] = $channel;
-            }
-        }
-     
-        $resolved->users = $users;
-        $resolved->channels = $channels;
-        /** @var DiscordChannel $channel */
-        foreach ($this->client->getDiscordClient()->private_channels as $channel) {
-            if ($channel->id === $interaction->getChannelId()) {
-                $di->channel = $channel;
-            }
-        }
-
-        if ($interaction->getType() === 3) {
-            $di->acknowledge()->then(function () use ($builder, $di, $pk) {
-                $di->updateMessage($builder);
-            });
-        } else {
-            $di->acknowledgeWithResponse($pk->isEphemeral())->then(function () use ($builder, $di, $pk) {
-                print_r("Ackknowledged new interaction class.");
-                $di->updateOriginalResponse($builder)->then(function (DiscordMessage $message) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), true, "Successfully executed new Interaction class.", [ModelConverter::genModelMessage($message)]);
-                }, function (\Throwable $e) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), false, "Failed to execute new interaction class.", [$e->getMessage(), $e->getTraceAsString()]);
-                });
-            }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to acknowledge new Interaction.", [$e->getMessage(), $e->getTraceAsString()]);
-            });
-        }
-    }
     }
     private function handleCreateCommand(RequestCreateCommand $pk): void
     {
@@ -466,13 +468,11 @@ class CommunicationHandler
 
                 try {
                     $interaction->acknowledgeWithResponse()->then(function () use ($pk, $builder, $interaction) {
-                      
+
                         $this->resolveRequest($pk->getUID(), true, "Added Discord Interaction model.", [ModelConverter::genModelInteraction($interaction)]);
-                
                     });
                 } catch (\Throwable $e) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to add interaction model. {$e->getMessage()}", [$e->getMessage(), $e->getTraceAsString()]);
-                   
                 }
                 $this->resolveRequest($pk->getUID(), true, "Listened to command successfully!", [ModelConverter::genModelInteraction($interaction)]);
                 $this->logger->info("Listened to command successfully!");
