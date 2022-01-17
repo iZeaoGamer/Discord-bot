@@ -65,6 +65,7 @@ class Choice extends Part
         }
 
         $this->name = $name;
+
         return $this;
     }
 
@@ -84,6 +85,7 @@ class Choice extends Part
         }
 
         $this->value = $value;
+
         return $this;
     }
 }

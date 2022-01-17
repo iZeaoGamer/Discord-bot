@@ -41,19 +41,22 @@ class Sticker extends Part
     public const FORMAT_TYPE_APNG = 2;
     public const FORMAT_TYPE_LOTTIE = 3;
 
+    /**
+     * @inheritdoc
+     */
     protected $fillable = [
         'id',
-        'pack_id',
         'name',
-        'description',
         'tags',
         'asset',
         'type',
         'format_type',
+        'description',
+        'pack_id',
+        'sort_value',
         'available',
         'guild_id',
         'user',
-        'sort_value',
     ];
 
     /**
@@ -61,7 +64,12 @@ class Sticker extends Part
      */
     public function isPartial(): bool
     {
-        return array_keys($this->attributes) == ['id', 'name', 'format_type'];
+        $partial = array_filter($this->attributes, function ($var) {
+            return isset($var);
+        });
+
+        sort($partial);
+        return array_keys($partial) == ['format_type', 'name', 'id'];
     }
 
     /**
@@ -83,7 +91,7 @@ class Sticker extends Part
      *
      * @return User|null
      */
-    protected function getUserAttribute(): ?Part
+    protected function getUserAttribute(): ?User
     {
         if (!isset($this->attributes['user'])) {
             return null;
@@ -109,6 +117,7 @@ class Sticker extends Part
 
         return [];
     }
+
     /**
      * Returns the URL for the sticker
      *
@@ -124,7 +133,8 @@ class Sticker extends Part
 
         return "https://cdn.discordapp.com/stickers/{$this->id}.{$format}";
     }
-     /**
+
+    /**
      * @inheritdoc
      */
     public function getUpdatableAttributes(): array
@@ -136,7 +146,6 @@ class Sticker extends Part
         ];
     }
 
-
     /**
      * @inheritdoc
      */
@@ -144,12 +153,12 @@ class Sticker extends Part
     {
         if ($this->type == self::TYPE_GUILD) {
             return [
-                'id' => $this->id,
+                'sticker_id' => $this->id,
                 'guild_id' => $this->guild_id
             ];
         }
         return [
-            'id' => $this->id
+            'sticker_id' => $this->id
         ];
     }
 }

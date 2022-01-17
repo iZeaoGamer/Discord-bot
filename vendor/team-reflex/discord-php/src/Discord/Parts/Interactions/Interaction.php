@@ -47,6 +47,8 @@ use function React\Promise\reject;
  * @property string               $token          Continuation token for responding to the interaction.
  * @property int                  $version        Version of interaction.
  * @property Message|null         $message        Message that triggered the interactions, when triggered from message components.
+ * @property string|null          $locale         The selected language of the invoking user.
+ * @property string|null          $guild_locale   The guild's preferred locale, if invoked in a guild.
  */
 class Interaction extends Part
 {
@@ -66,6 +68,8 @@ class Interaction extends Part
         'token',
         'version',
         'message',
+        'locale',
+        'guild_locale',
     ];
 
     /**
@@ -147,7 +151,7 @@ class Interaction extends Part
         if (isset($this->member->user)) {
             return $this->member->user;
         }
-        if(!isset($this->attributes['user'])){
+        if (!isset($this->attributes['user'])) {
             return null;
         }
 

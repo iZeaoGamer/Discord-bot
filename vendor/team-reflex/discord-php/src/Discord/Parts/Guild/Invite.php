@@ -18,12 +18,11 @@ use Discord\Parts\Part;
 use Discord\Parts\User\User;
 use React\Promise\ExtendedPromiseInterface;
 
-
 /**
  * An invite to a Channel and Guild.
  *
  * @property string      $code                       The invite code.
- * @property Guild       $guild                      The guild that the invite is for.
+ * @property Guild|null  $guild                      The guild that the invite is for.
  * @property string|null $guild_id
  * @property Channel     $channel                    The channel that the invite is for.
  * @property string|null $channel_id
@@ -44,7 +43,7 @@ use React\Promise\ExtendedPromiseInterface;
  */
 class Invite extends Part
 {
-   /**
+    /**
      * @inheritdoc
      */
     protected $fillable = [
@@ -83,7 +82,6 @@ class Invite extends Part
      */
     public function accept(): ExtendedPromiseInterface
     {
-
         if ($this->uses >= $this->max_uses) {
             return \React\Promise\reject(new \Exception('This invite has been used the max times.'));
         }
@@ -114,8 +112,9 @@ class Invite extends Part
     /**
      * Returns the guild attribute.
      *
-     * @return Guild      The Guild that you have been invited to.
      * @throws \Exception
+     *
+     * @return Guild|null The Guild that you have been invited to.
      */
     protected function getGuildAttribute(): ?Guild
     {
@@ -123,7 +122,11 @@ class Invite extends Part
             return $guild;
         }
 
-        return $this->factory->create(Guild::class, $this->attributes['guild'] ?? [], true);
+        if (!isset($this->attributes['guild'])) {
+            return null;
+        }
+
+        return $this->factory->create(Guild::class, $this->attributes['guild'], true);
     }
 
     /**
@@ -143,8 +146,9 @@ class Invite extends Part
     /**
      * Returns the channel attribute.
      *
-     * @return Channel    The Channel that you have been invited to.
      * @throws \Exception
+     *
+     * @return Channel    The Channel that you have been invited to.
      */
     protected function getChannelAttribute(): ?Channel
     {
@@ -172,12 +176,17 @@ class Invite extends Part
     /**
      * Returns the inviter attribute.
      *
-     * @return User       The User that invited you.
      * @throws \Exception
+     *
+     * @return User|null The User that invited you.
      */
-    protected function getInviterAttribute(): User
+    protected function getInviterAttribute(): ?User
     {
-        if (isset($this->attributes['inviter']) && $user = $this->discord->users->get('id', $this->attributes['inviter']->id ?? null)) {
+        if (!isset($this->attributes['inviter'])) {
+            return null;
+        }
+
+        if ($user = $this->discord->users->get('id', $this->attributes['inviter']->id ?? null)) {
             return $user;
         }
 
@@ -187,22 +196,25 @@ class Invite extends Part
     /**
      * Returns the created at attribute.
      *
-     * @return Carbon     The time that the invite was created.
      * @throws \Exception
+     *
+     * @return Carbon     The time that the invite was created.
      */
     protected function getCreatedAtAttribute(): Carbon
     {
         return new Carbon($this->attributes['created_at']);
     }
-     /**
+
+    /**
      * Returns the target user attribute.
      *
-     * @return User|null  The user whose stream to display for this voice channel stream invite.
      * @throws \Exception
+     *
+     * @return User|null  The user whose stream to display for this voice channel stream invite.
      */
     protected function getTargetUserAttribute(): ?User
     {
-        if (! isset($this->attributes['target_user'])) {
+        if (!isset($this->attributes['target_user'])) {
             return null;
         }
 
@@ -216,24 +228,17 @@ class Invite extends Part
     /**
      * Returns the expires at attribute.
      *
-     * @return Carbon|null The time that the invite was created.
      * @throws \Exception
+     *
+     * @return Carbon|null The time that the invite was created.
      */
     protected function getExpiresAtAttribute(): ?Carbon
     {
-        if (! isset($this->attributes['expires_at'])) {
+        if (!isset($this->attributes['expires_at'])) {
             return null;
         }
 
         return new Carbon($this->attributes['expires_at']);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getCreatableAttributes(): array
-    {
-        return [];
     }
 
     /**
