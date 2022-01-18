@@ -580,6 +580,8 @@ abstract class ModelConverter
     {
         $m = new Member(
             $discordMember->id,
+            $discordMember->username,
+            $discordMember->discriminator,
             $discordMember->joined_at === null ? 0 : $discordMember->joined_at->getTimestamp(),
             $discordMember->guild_id,
             [],
@@ -617,7 +619,8 @@ abstract class ModelConverter
             $user->discriminator,
             $user->avatar,
             $user->bot ?? false,
-            $user->public_flags ?? 0
+            $user->public_flags ?? 0,
+            $user->email
         );
     }
 

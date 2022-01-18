@@ -26,9 +26,9 @@ use ReflectionClass;
  * @see https://discord.com/developers/docs/resources/audit-log#audit-log-object
  *
  * @property Collection|Entry[]               $audit_log_entries      List of audit log entries.
- * @property Collection|GuildScheduledEvent[] $guild_scheduled_events List of guild scheduled events found in the audit log.
+ * @property Collection|ScheduledEvent[] $guild_scheduled_events List of guild scheduled events found in the audit log.
  * @property Collection                       $integrations           List of partial integration objects.
- * @property Collection|Threads[]             $threads                List of threads found in the audit log.
+ * @property Collection|Thread[]             $threads                List of threads found in the audit log.
  * @property Collection|User[]                $users                  List of users found in the audit log.
  * @property Collection|Webhook[]             $webhooks               List of webhooks found in the audit log.
  * @property string                           $guild_id

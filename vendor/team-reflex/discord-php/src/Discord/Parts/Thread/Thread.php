@@ -303,6 +303,26 @@ class Thread extends Part
         return $this->http->delete(Endpoint::bind(Endpoint::THREAD_MEMBER, $this->id, $user));
     }
 
+      /**
+     * Archive the thread.
+     *
+     * @return ExtendedPromiseInterface
+     */
+    public function archive(): ExtendedPromiseInterface
+    {
+        return $this->http->patch(Endpoint::bind(Endpoint::THREAD, $this->id), ['archived' => true]);
+    }
+
+    /**
+     * Unarchive the thread.
+     *
+     * @return ExtendedPromiseInterface
+     */
+    public function unarchive(): ExtendedPromiseInterface
+    {
+        return $this->http->patch(Endpoint::bind(Endpoint::THREAD, $this->id), ['archived' => false]);
+    }
+
     /**
      * Returns the thread's pinned messages.
      *

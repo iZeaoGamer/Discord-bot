@@ -60,6 +60,8 @@ class Member implements \Serializable
      * Member constructor.
      *
      * @param string               $user_id
+     * @param string               $username
+     * @param string               $discriminator
      * @param int                  $join_timestamp
      * @param string               $server_id
      * @param string[]             $roles
@@ -71,6 +73,8 @@ class Member implements \Serializable
      */
     public function __construct(
         string $user_id,
+        string $username,
+        string $discriminator,
         int $join_timestamp,
         string $server_id,
         array $roles = [],
@@ -89,6 +93,10 @@ class Member implements \Serializable
         $this->setPermissions($permissions ?? new RolePermissions());
         $this->setActivities($activities);
         $this->setVoiceState($voice_state);
+    }
+
+    public function getDisplayName(): string{
+        return ($this->getNickname() ?? $this->getUsername()) . "#" . $this->getDiscriminator();
     }
 
     /**
@@ -235,6 +243,28 @@ class Member implements \Serializable
     public function setVoiceState(?VoiceState $voice_state): void
     {
         $this->voice_state = $voice_state;
+    }
+    public function getUsername(): string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(string $username): void
+    {
+        $this->username = $username;
+    }
+
+    public function getDiscriminator(): string
+    {
+        return $this->discriminator;
+    }
+
+    public function setDiscriminator(string $discriminator): void
+    {
+        if (strlen($discriminator) !== 4) {
+            throw new \AssertionError("Discriminator '$discriminator' is invalid.");
+        }
+        $this->discriminator = $discriminator;
     }
     //----- Serialization -----//
 

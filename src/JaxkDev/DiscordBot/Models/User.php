@@ -62,13 +62,17 @@ class User implements \Serializable
     /** @var Array<string, bool> */
     private $flags = [];
 
+    /** @var string|null */
+    private $email; //null when creating.
+
     public function __construct(
         string $id,
         string $username,
         string $discriminator,
         string $avatar_url,
         bool $bot = false,
-        int $flags_bitwise = 0
+        int $flags_bitwise = 0,
+        ?string $email = null
     ) {
         $this->setId($id);
         $this->setUsername($username);
@@ -76,6 +80,11 @@ class User implements \Serializable
         $this->setAvatarUrl($avatar_url);
         $this->setBot($bot);
         $this->setFlagsBitwise($flags_bitwise);
+        $this->setEmail($email);
+    }
+
+    public function getDisplayName(): string{
+        return $this->getUsername() . "#" . $this->getDiscriminator();
     }
 
     public function getId(): string
@@ -195,6 +204,13 @@ class User implements \Serializable
         }
     }
 
+    public function getEmail(): ?string{
+        return $this->email;
+    }
+    public function setEmail(?string $email): void{
+        $this->email = $email;
+    }
+
     //----- Serialization -----//
 
     public function serialize(): ?string
@@ -205,7 +221,8 @@ class User implements \Serializable
             $this->discriminator,
             $this->avatar_url,
             $this->bot,
-            $this->flags_bitwise
+            $this->flags_bitwise,
+            $this->email
         ]);
     }
 
@@ -217,7 +234,8 @@ class User implements \Serializable
             $this->discriminator,
             $this->avatar_url,
             $this->bot,
-            $this->flags_bitwise
+            $this->flags_bitwise,
+            $this->email
         ] = unserialize($data);
     }
 }
