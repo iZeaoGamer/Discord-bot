@@ -13,38 +13,30 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
+use JaxkDev\DiscordBot\Models\Invite;
 
-class RequestFetchPinnedMessages extends Packet
+class RequestAcceptInvite extends Packet
 {
 
-    /** @var string */
-    private $channel_id;
+    /** @var Invite */
+    private $invite;
 
-    /** @var string|null */
-    private $thread_id;
-
-    public function __construct(string $channel_id, ?string $thread_id)
+    public function __construct(Invite $invite)
     {
         parent::__construct();
-        $this->channel_id = $channel_id;
-        $this->thread_id = $thread_id;
+        $this->invite = $invite;
     }
 
-    public function getChannelId(): string
+    public function getInvite(): Invite
     {
-        return $this->channel_id;
-    }
-    public function getThreadId(): ?string
-    {
-        return $this->thread_id;
+        return $this->invite;
     }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->channel_id,
-            $this->thread_id
+            $this->invite
         ]);
     }
 
@@ -52,8 +44,7 @@ class RequestFetchPinnedMessages extends Packet
     {
         [
             $this->UID,
-            $this->channel_id,
-            $this->thread_id
+            $this->invite
         ] = unserialize($data);
     }
 }

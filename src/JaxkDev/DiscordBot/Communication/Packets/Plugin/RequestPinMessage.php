@@ -24,13 +24,17 @@ class RequestPinMessage extends Packet
     private $message_id;
 
     /** @var string|null */
+    private $thread_id;
+
+    /** @var string|null */
     private $reason;
 
-    public function __construct(string $channel_id, string $message_id, ?string $reason = null)
+    public function __construct(string $channel_id, string $message_id, ?string $thread_id, ?string $reason = null)
     {
         parent::__construct();
         $this->message_id = $message_id;
         $this->channel_id = $channel_id;
+        $this->thread_id = $thread_id;
         $this->reason = $reason;
     }
 
@@ -43,6 +47,10 @@ class RequestPinMessage extends Packet
     {
         return $this->channel_id;
     }
+    public function getThreadId(): ?string
+    {
+        return $this->thread_id;
+    }
     public function getReason(): ?string
     {
         return $this->reason;
@@ -54,6 +62,7 @@ class RequestPinMessage extends Packet
             $this->UID,
             $this->message_id,
             $this->channel_id,
+            $this->thread_id,
             $this->reason
         ]);
     }
@@ -64,6 +73,7 @@ class RequestPinMessage extends Packet
             $this->UID,
             $this->message_id,
             $this->channel_id,
+            $this->thread_id,
             $this->reason
         ] = unserialize($data);
     }

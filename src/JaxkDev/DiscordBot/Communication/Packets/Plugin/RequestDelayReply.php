@@ -24,6 +24,7 @@ class RequestDelayReply extends Packet
     /** @var int */
     private $delay;
 
+
     public function __construct(Message $message, int $delay)
     {
         parent::__construct();

@@ -125,6 +125,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteReaction;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAcceptInvite;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
 use JaxkDev\DiscordBot\Models\Channels\TextChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
@@ -152,6 +153,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRespondInteraction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadAchive;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadJoin;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadLeave;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUnachive;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Plugin\Utils;
 
@@ -270,6 +275,11 @@ class CommunicationHandler
         elseif ($pk instanceof RequestDeleteCommand) $this->handleDeleteCommand($pk);
         elseif ($pk instanceof RequestFetchCommands) $this->handleFetchCommands($pk);
         elseif ($pk instanceof RequestRespondInteraction) $this->handleInteractionRespond($pk);
+        elseif ($pk instanceof RequestThreadAchive) $this->handleThreadAchive($pk);
+        elseif ($pk instanceof RequestThreadUnachive) $this->handleThreadUnachive($pk);
+        elseif ($pk instanceof RequestThreadJoin) $this->handleThreadJoin($pk);
+        elseif ($pk instanceof RequestThreadLeave) $this->handleThreadLeave($pk);
+        elseif ($pk instanceof RequestAcceptInvite) $this->handleInviteAccept($pk);
     }
     private function handleInteractionRespond(RequestRespondInteraction $pk): void
     {
@@ -1135,22 +1145,37 @@ class CommunicationHandler
     private function handleFetchPinnedMessages(RequestFetchPinnedMessages $pk): void
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
-            $channel->getPinnedMessages()->then(function (Collection $collection) use ($pk) {
-                $messages = [];
-                foreach ($collection->toArray() as $message) {
-                    $messages[] = ModelConverter::genModelMessage($message);
-                }
-                $this->resolveRequest($pk->getUID(), true, "Fetched pinned messages.", $messages);
-            }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to fetch pinned messages.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to fetch pinned messages ({$pk->getUID()}) - {$e->getMessage()}");
-            });
+            if ($pk->getThreadId()) {
+                $channel->threads->fetch($pk->getThreadId())->done(function (DiscordThread $thread) use ($pk) {
+                    $thread->getPinnedMessages()->then(function (Collection $collection) use ($pk) {
+                        $messages = [];
+                        foreach ($collection->toArray() as $message) {
+                            $messages[] = ModelConverter::genModelMessage($message);
+                        }
+                        $this->resolveRequest($pk->getUID(), true, "Fetched pinned messages.", $messages);
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to fetch pinned messages.", [$e->getMessage(), $e->getTraceAsString()]);
+                        $this->logger->debug("Failed to fetch pinned messages ({$pk->getUID()}) - {$e->getMessage()}");
+                    });
+                });
+            } else {
+                $channel->getPinnedMessages()->then(function (Collection $collection) use ($pk) {
+                    $messages = [];
+                    foreach ($collection->toArray() as $message) {
+                        $messages[] = ModelConverter::genModelMessage($message);
+                    }
+                    $this->resolveRequest($pk->getUID(), true, "Fetched pinned messages.", $messages);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to fetch pinned messages.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to fetch pinned messages ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            }
         });
     }
 
     private function handleFetchMessage(RequestFetchMessage $pk): void
     {
-        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($pk) {
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $message) use ($pk) {
             $this->resolveRequest($pk->getUID(), true, "Fetched message.", [ModelConverter::genModelMessage($message)]);
         });
     }
@@ -1158,28 +1183,55 @@ class CommunicationHandler
     private function handleUnpinMessage(RequestUnpinMessage $pk): void
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
-            $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($channel, $pk) {
-                $channel->unpinMessage($message, $pk->getReason())->then(function () use ($pk) {
-                    $this->resolveRequest($pk->getUID(), true, "Successfully unpinned the message.");
-                }, function (\Throwable $e) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), false, "Failed to unpin the message.", [$e->getMessage(), $e->getTraceAsString()]);
-                    $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
+            if ($pk->getThreadId()) {
+                $channel->threads->fetch($pk->getThreadId())->done(function (DiscordThread $thread) use ($pk) {
+                    $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $message) use ($thread, $pk) {
+                        $thread->unpinMessage($message, $pk->getReason())->then(function () use ($pk) {
+                            $this->resolveRequest($pk->getUID(), true, "Successfully unpinned the message.");
+                        }, function (\Throwable $e) use ($pk) {
+                            $this->resolveRequest($pk->getUID(), false, "Failed to unpin the message.", [$e->getMessage(), $e->getTraceAsString()]);
+                            $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
+                        });
+                    });
                 });
-            });
+            } else {
+                $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $message) use ($channel, $pk) {
+                    $channel->unpinMessage($message, $pk->getReason())->then(function () use ($pk) {
+                        $this->resolveRequest($pk->getUID(), true, "Successfully unpinned the message.");
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to unpin the message.", [$e->getMessage(), $e->getTraceAsString()]);
+                        $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
+                    });
+                });
+            }
         });
     }
 
     private function handlePinMessage(RequestPinMessage $pk): void
     {
         $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
-            $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($channel, $pk) {
-                $channel->pinMessage($message, $pk->getReason())->then(function (DiscordMessage $message) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), true, "Successfully pinned the message.", [ModelConverter::genModelMessage($message)]);
-                }, function (\Throwable $e) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), false, "Failed to pin the message.", [$e->getMessage(), $e->getTraceAsString()]);
-                    $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
+            if ($pk->getThreadId()) {
+                $channel->threads->fetch($pk->getThreadId())->done(function (DiscordThread $thread) use ($pk) {
+                    $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $message) use ($thread, $pk) {
+                        $thread->pinMessage($message, $pk->getReason())->then(function (DiscordMessage $message) use ($pk) {
+                            $this->resolveRequest($pk->getUID(), true, "Successfully pinned the message.", [ModelConverter::genModelMessage($message)]);
+                        }, function (\Throwable $e) use ($pk) {
+                            $this->resolveRequest($pk->getUID(), false, "Failed to pin the message.", [$e->getMessage(), $e->getTraceAsString()]);
+                            $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
+                        });
+                    });
                 });
-            });
+            } else {
+
+                $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($channel, $pk) {
+                    $channel->pinMessage($message, $pk->getReason())->then(function (DiscordMessage $message) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), true, "Successfully pinned the message.", [ModelConverter::genModelMessage($message)]);
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to pin the message.", [$e->getMessage(), $e->getTraceAsString()]);
+                        $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
+                    });
+                });
+            }
         });
     }
 
@@ -1613,20 +1665,21 @@ class CommunicationHandler
     }
     private function handleThreadUpdate(RequestThreadUpdate $pk): void
     {
-        $id = $pk->getChannel()->getID();
-        if ($id === null) {
+        $id = $pk->getChannelId();
+        $threadID = $pk->getThreadChannel()->getId();
+        if (!$threadID) {
             return;
         }
 
-        $this->getServer($pk, $pk->getChannel()->getServerID(), function (DiscordGuild $guild) use ($id, $pk) {
-            $guild->channels->fetch($id)->then(function (DiscordChannel $discord) use ($id, $pk) {
-                $discord->threads->fetch($id)->then(function (DiscordThread $thread) use ($id, $discord, $pk) {
-                    $thread->id = $id;
-                    $thread->guild_id = $pk->getChannel()->getServerID();
-                    $thread->name = $pk->getChannel()->getName();
-                    $thread->owner_id = $pk->getChannel()->getOwner();
-                    $thread->auto_archive_duration = $pk->getChannel()->getDuration();
-                    $thread->archiver_id = $pk->getChannel()->getUserID();
+        $this->getServer($pk, $pk->getThreadChannel()->getServerID(), function (DiscordGuild $guild) use ($threadID, $id, $pk) {
+            $guild->channels->fetch($id)->then(function (DiscordChannel $discord) use ($threadID, $pk) {
+                $discord->threads->fetch($threadID)->then(function (DiscordThread $thread) use ($threadID, $discord, $pk) {
+                    $thread->id = $threadID;
+                    $thread->guild_id = $pk->getThreadChannel()->getServerID();
+                    $thread->name = $pk->getThreadChannel()->getName();
+                    $thread->owner_id = $pk->getThreadChannel()->getOwner();
+                    $thread->auto_archive_duration = $pk->getThreadChannel()->getDuration();
+                    $thread->archiver_id = $pk->getThreadChannel()->getUserID();
 
 
                     $discord->threads->save($thread)->then(function (DiscordChannel $channel) use ($pk) {
@@ -1642,6 +1695,91 @@ class CommunicationHandler
             });
         });
     }
+
+    private function handleThreadAchive(RequestThreadAchive $pk)
+    {
+        $id = $pk->getChannelId();
+        $threadID = $pk->getThreadChannel()->getId();
+        if (!$threadID) {
+            return;
+        }
+
+        $this->getServer($pk, $pk->getThreadChannel()->getServerID(), function (DiscordGuild $guild) use ($threadID, $id, $pk) {
+            $guild->channels->fetch($id)->then(function (DiscordChannel $discord) use ($threadID, $pk) {
+                $discord->threads->fetch($threadID)->then(function (DiscordThread $thread) use ($threadID, $discord, $pk) {
+                    $thread->archive()->done(function () use ($pk) {
+                        $this->resolveRequest($pk->getUID(), true, "Successfully achived thread.");
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to achive thread.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
+                });
+            });
+        });
+    }
+
+    private function handleThreadUnachive(RequestThreadUnachive $pk)
+    {
+        $id = $pk->getChannelId();
+        $threadID = $pk->getThreadChannel()->getId();
+        if (!$threadID) {
+            return;
+        }
+
+        $this->getServer($pk, $pk->getThreadChannel()->getServerID(), function (DiscordGuild $guild) use ($threadID, $id, $pk) {
+            $guild->channels->fetch($id)->then(function (DiscordChannel $discord) use ($threadID, $pk) {
+                $discord->threads->fetch($threadID)->then(function (DiscordThread $thread) use ($threadID, $discord, $pk) {
+                    $thread->unarchive()->done(function () use ($pk) {
+                        $this->resolveRequest($pk->getUID(), true, "Successfully unachived thread.");
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to unachive thread.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
+                });
+            });
+        });
+    }
+    private function handleThreadJoin(RequestThreadJoin $pk)
+    {
+
+        $id = $pk->getChannelId();
+        $threadID = $pk->getThreadChannel()->getId();
+        if (!$threadID) {
+            return;
+        }
+
+        $this->getServer($pk, $pk->getThreadChannel()->getServerID(), function (DiscordGuild $guild) use ($threadID, $id, $pk) {
+            $guild->channels->fetch($id)->then(function (DiscordChannel $discord) use ($threadID, $pk) {
+                $discord->threads->fetch($threadID)->then(function (DiscordThread $thread) use ($threadID, $discord, $pk) {
+                    $thread->join()->done(function () use ($pk) {
+                        $this->resolveRequest($pk->getUID(), true, "Successfully joined thread.");
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to join thread.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
+                });
+            });
+        });
+    }
+    private function handleThreadLeave(RequestThreadLeave $pk)
+    {
+
+        $id = $pk->getChannelId();
+        $threadID = $pk->getThreadChannel()->getId();
+        if (!$threadID) {
+            return;
+        }
+
+        $this->getServer($pk, $pk->getThreadChannel()->getServerID(), function (DiscordGuild $guild) use ($threadID, $id, $pk) {
+            $guild->channels->fetch($id)->then(function (DiscordChannel $discord) use ($threadID, $pk) {
+                $discord->threads->fetch($threadID)->then(function (DiscordThread $thread) use ($threadID, $discord, $pk) {
+                    $thread->leave()->done(function () use ($pk) {
+                        $this->resolveRequest($pk->getUID(), true, "Successfully left thread.");
+                    }, function (\Throwable $e) use ($pk) {
+                        $this->resolveRequest($pk->getUID(), false, "Failed to leave thread.", [$e->getMessage(), $e->getTraceAsString()]);
+                    });
+                });
+            });
+        });
+    }
+
     private function handleMessageStartThread(RequestThreadMessageCreate $pk): void
     {
         $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), function (DiscordMessage $message) use ($pk) {
@@ -2688,6 +2826,24 @@ class CommunicationHandler
             });
         });
     }
+    private function handleInviteAccept(RequestAcceptInvite $pk): void
+    {
+        $invite = $pk->getInvite();
+        $this->getServer($pk, $invite->getServerId(), function (DiscordGuild $guild) use ($pk) {
+            /** @phpstan-ignore-next-line Poorly documented function on discord.php's side. */
+            $guild->invites->freshen()->done(function (DiscordInviteRepository $invites) use ($pk) {
+                /** @var DiscordInvite $invite */
+                $invite = $invites->offsetGet($pk->getInvite()->getCode());
+                $invite->accept()->done(function () use ($invite, $pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Invite accepted.", [ModelConverter::genModelInvite($invite)]);
+                    $this->logger->debug("Invite accepted ({$pk->getUID()})");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to accept invite.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to accept invite ({$pk->getUID()}) - {$e->getMessage()}");
+                });
+            });
+        });
+    }
 
     private function handleRevokeInvite(RequestRevokeInvite $pk): void
     {
@@ -2772,19 +2928,9 @@ class CommunicationHandler
     private function getMessage(Packet $pk, string $channel_id, string $message_id, callable $cb): void
     {
         $this->getChannel($pk, $channel_id, function (DiscordChannel $channel) use ($pk, $message_id, $cb) {
+
             $channel->messages->fetch($message_id)->done(function (DiscordMessage $dMessage) use ($cb) {
                 $cb($dMessage);
-            }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to fetch message.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to process request (" . get_class($pk) . "|{$pk->getUID()}) - message error: {$e->getMessage()}");
-            });
-        });
-    }
-    private function getMessageChannelId(Packet $pk, string $channel_id, string $message_id, callable $cb): void
-    {
-        $this->getChannel($pk, $channel_id, function (DiscordChannel $channel) use ($pk, $message_id, $cb) {
-            $channel->messages->fetch($message_id)->done(function (DiscordMessage $dMessage) use ($channel, $cb) {
-                $cb($dMessage, $channel);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to fetch message.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to process request (" . get_class($pk) . "|{$pk->getUID()}) - message error: {$e->getMessage()}");
@@ -2800,17 +2946,6 @@ class CommunicationHandler
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to fetch member.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to process request (" . get_class($pk) . "|{$pk->getUID()}) - member error: {$e->getMessage()}");
-            });
-        });
-    }
-    private function getThread(Packet $pk, string $channel_id, string $thread_id, callable $cb): void
-    {
-        $this->getChannel($pk, $channel_id, function (DiscordChannel $channel) use ($pk, $thread_id, $cb) {
-            $channel->threads->fetch($thread_id)->then(function (DiscordThread $thread) use ($cb) {
-                $cb($thread);
-            }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to fetch thread.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to process request (" . get_class($pk) . "|{$pk->getUID()}) - Thead Error: {$e->getMessage()}");
             });
         });
     }

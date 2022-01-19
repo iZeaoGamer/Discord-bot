@@ -106,6 +106,7 @@ use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
 use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 
 use Discord\Builders\MessageBuilder;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAcceptInvite;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTimedOutMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateDMChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateDMChannel;
@@ -117,6 +118,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRespondInteraction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadAchive;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadJoin;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadLeave;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUnachive;
 
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
 /**
@@ -134,6 +139,82 @@ class Api
     public function __construct(Main $plugin)
     {
         $this->plugin = $plugin;
+    }
+
+    /** Accepts an invite invitation.
+     * 
+     * @param Invite $invite
+     * 
+     * @return PromiseInterface Resolves with a Invite Model.
+     */
+    public function acceptInvite(Invite $invite): PromiseInterface{
+        $pk = new RequestAcceptInvite($invite);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Joins a new thread
+     * 
+     * @param ThreadChannel $thread
+     * @param string $parent_id ID of the channel the thread is in.
+     * 
+     * @return PromiseInterface Resolves with no data.
+    */
+    public function joinThread(ThreadChannel $thread, string $parent_id): PromiseInterface{
+        if(!Utils::validDiscordSnowflake($parent_id)){
+            return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
+        }
+        $pk = new RequestThreadJoin($thread, $parent_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+    /** Leaves a thread
+     * 
+     * @param ThreadChannel $thread
+     * @param string $parent_id ID of the channel the thread is in.
+     * 
+     * @return PromiseInterface Resolves with no data.
+    */
+    public function leaveThread(ThreadChannel $thread, string $parent_id): PromiseInterface{
+        if(!Utils::validDiscordSnowflake($parent_id)){
+            return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
+        }
+        $pk = new RequestThreadLeave($thread, $parent_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+     /** Achives a thread
+     * 
+     * @param ThreadChannel $thread
+     * @param string $parent_id ID of the channel the thread is in.
+     * 
+     * @return PromiseInterface Resolves with no data.
+    */
+    public function achiveThread(ThreadChannel $thread, string $parent_id): PromiseInterface{
+        if(!Utils::validDiscordSnowflake($parent_id)){
+            return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
+        }
+        $pk = new RequestThreadAchive($thread, $parent_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+
+     /** Un achives a thread
+     * 
+     * @param ThreadChannel $thread
+     * @param string $parent_id ID of the channel the thread is in.
+     * 
+     * @return PromiseInterface Resolves with no data.
+    */
+    public function unachiveThread(ThreadChannel $thread, string $parent_id): PromiseInterface{
+        if(!Utils::validDiscordSnowflake($parent_id)){
+            return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
+        }
+        $pk = new RequestThreadUnachive($thread, $parent_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
     }
 
     /** Responds to an interaction without the hack.
@@ -695,15 +776,21 @@ class Api
      * Note you could fetch individual messages by id using fetchMessage from channel::pins but this is easier.
      *
      * @param string $channel_id
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with an array of Message models.
      */
-    public function fetchPinnedMessages(string $channel_id): PromiseInterface
+    public function fetchPinnedMessages(string $channel_id, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
         }
-        $pk = new RequestFetchPinnedMessages($channel_id);
+        if($thread_id){
+        if(!Utils::validDiscordSnowflake($thread_id)){
+            return rejectPromise(new ApiRejection("Thread Channel ID: {$thread_id} is invalid."));
+        }
+    }
+        $pk = new RequestFetchPinnedMessages($channel_id, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -713,10 +800,11 @@ class Api
      *
      * @param string $channel_id
      * @param string $message_id
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Message model.
      */
-    public function fetchMessage(string $channel_id, string $message_id): PromiseInterface
+    public function fetchMessage(string $channel_id, string $message_id, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -724,7 +812,12 @@ class Api
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
         }
-        $pk = new RequestFetchMessage($channel_id, $message_id);
+        if($thread_id){
+        if(!Utils::validDiscordSnowflake($thread_id)){
+            return rejectPromise(new ApiRejection("Thread Channel ID: {$thread_id} is invalid."));
+        }
+    }
+        $pk = new RequestFetchMessage($channel_id, $message_id, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -734,11 +827,12 @@ class Api
      *
      * @param string $channel_id
      * @param string $message_id
+     * @param string|null $thread_id
      * @param string|null $reason
      * 
      * @return PromiseInterface Resolves with a Message Model.
      */
-    public function pinMessage(string $channel_id, string $message_id, ?string $reason = null): PromiseInterface
+    public function pinMessage(string $channel_id, string $message_id, ?string $thread_id = null, ?string $reason = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -746,7 +840,12 @@ class Api
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
         }
-        $pk = new RequestPinMessage($channel_id, $message_id, $reason);
+        if($thread_id){
+        if(!Utils::validDiscordSnowflake($thread_id)){
+            return rejectPromise(new ApiRejection("Thread Channel ID: {$thread_id} is invalid."));
+        }
+    }
+        $pk = new RequestPinMessage($channel_id, $message_id, $thread_id, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -756,11 +855,12 @@ class Api
      *
      * @param string $channel_id
      * @param string $message_id
+     * @param string|null $thread_id
      * @param string|null $reason
      * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function unpinMessage(string $channel_id, string $message_id, ?string $reason = null): PromiseInterface
+    public function unpinMessage(string $channel_id, string $message_id, ?string $thread_id = null, ?string $reason = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -768,7 +868,12 @@ class Api
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
         }
-        $pk = new RequestUnpinMessage($channel_id, $message_id, $reason);
+        if($thread_id){
+        if(!Utils::validDiscordSnowflake($thread_id)){
+            return rejectPromise(new ApiRejection("Thread Channel ID: {$thread_id} is invalid."));
+        }
+    }
+        $pk = new RequestUnpinMessage($channel_id, $message_id, $thread_id, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1559,7 +1664,7 @@ class Api
      * 
      * @return PromiseInterface Resolves with a Thread Channel Model.
      */
-    public function updateThread(ThreadChannel $channel)
+    public function updateThread(ThreadChannel $channel, string $parent_id)
     {
         if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Thread Channel ID: {$channel->getId()} must be present."));
@@ -1567,7 +1672,10 @@ class Api
         if (!Utils::validDiscordSnowflake($channel->getId())) {
             return rejectPromise(new ApiRejection("Thread Channel ID: {$channel->getId()} is invalid!"));
         }
-        $pk = new RequestThreadUpdate($channel);
+        if(!Utils::validDiscordSnowflake($parent_id)){
+            return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
+        }
+        $pk = new RequestThreadUpdate($channel, $parent_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
