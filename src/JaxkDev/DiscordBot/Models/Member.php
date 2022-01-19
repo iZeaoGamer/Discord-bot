@@ -26,6 +26,12 @@ class Member implements \Serializable
     /** @var string */
     private $user_id;
 
+    /** @var string */
+    private $username;
+
+    /** @var string */
+    private $discriminator;
+
     /** @var null|string */
     private $nickname;
 
@@ -85,6 +91,8 @@ class Member implements \Serializable
         ?VoiceState $voice_state = null
     ) {
         $this->setUserId($user_id);
+        $this->setUsername($username);
+        $this->setDiscriminator($discriminator);
         $this->setJoinTimestamp($join_timestamp);
         $this->setServerId($server_id);
         $this->setRoles($roles);
@@ -272,6 +280,8 @@ class Member implements \Serializable
     {
         return serialize([
             $this->user_id,
+            $this->username,
+            $this->discriminator,
             $this->nickname,
             $this->join_timestamp,
             $this->boost_timestamp,
@@ -289,6 +299,8 @@ class Member implements \Serializable
     {
         [
             $this->user_id,
+            $this->username,
+            $this->discriminator,
             $this->nickname,
             $this->join_timestamp,
             $this->boost_timestamp,
