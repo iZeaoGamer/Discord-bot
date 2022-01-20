@@ -3,10 +3,10 @@
 /*
  * This file is a part of the DiscordPHP project.
  *
- * Copyright (c) 2021 David Cole <david.cole1340@gmail.com>
+ * Copyright (c) 2015-present David Cole <david.cole1340@gmail.com>
  *
- * This source file is subject to the MIT license which is
- * bundled with this source code in the LICENSE.md file.
+ * This file is subject to the MIT license that is bundled
+ * with this source code in the LICENSE.md file.
  */
 
 namespace Discord\Parts\Interactions\Command;
@@ -18,8 +18,8 @@ use function Discord\poly_strlen;
 
 /**
  * Option represents an array of options that can be given to a command.
- * 
- * @@see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure
+ *
+ * @see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure
  *
  * @property int                      $type          Type of the option.
  * @property string                   $name          Name of the option.
@@ -103,7 +103,7 @@ class Option extends Part
      * @param int $type type of the option
      *
      * @throws \InvalidArgumentException
-     * 
+     *
      * @return $this
      */
     public function setType(int $type)
@@ -123,7 +123,7 @@ class Option extends Part
      * @param string $name name of the option
      *
      * @throws \LengthException
-     * 
+     *
      * @return $this
      */
     public function setName(string $name)
@@ -143,7 +143,7 @@ class Option extends Part
      * @param string $description description of the option
      *
      * @throws \LengthException
-     * 
+     *
      * @return $this
      */
     public function setDescription(string $description)
@@ -191,7 +191,7 @@ class Option extends Part
      * @param Option $option The option
      *
      * @throws \OverflowException
-     * 
+     *
      * @return $this
      */
     public function addOption(Option $option)
@@ -211,15 +211,13 @@ class Option extends Part
      * @param Choice $choice The choice
      *
      * @throws \OverflowException
-     * 
+     *
      * @return $this
      */
     public function addChoice(Choice $choice)
     {
-        if ($this->choices) {
-            if (count($this->choices) >= 25) {
-                throw new \OverflowException('Option can only have a maximum of 25 Choices.');
-            }
+        if (count($this->choices) >= 25) {
+            throw new \OverflowException('Option can only have a maximum of 25 Choices.');
         }
 
         $this->attributes['choices'][] = $choice->getRawAttributes();
@@ -303,7 +301,7 @@ class Option extends Part
      * @param bool $autocomplete enable autocomplete interactions for this option
      *
      * @throws \InvalidArgumentException
-     * 
+     *
      * @return $this
      */
     public function setAutoComplete(bool $autocomplete)

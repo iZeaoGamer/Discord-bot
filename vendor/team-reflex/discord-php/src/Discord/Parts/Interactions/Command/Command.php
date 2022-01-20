@@ -1,16 +1,15 @@
 <?php
 
 /*
- * This file was a part of the DiscordPHP-Slash project.
+ * This file is a part of the DiscordPHP project.
  *
- * Copyright (c) 2021 David Cole <david.cole1340@gmail.com>
+ * Copyright (c) 2015-present David Cole <david.cole1340@gmail.com>
  *
- * This source file is subject to the MIT license which is
- * bundled with this source code in the LICENSE.md file.
+ * This file is subject to the MIT license that is bundled
+ * with this source code in the LICENSE.md file.
  */
 
 namespace Discord\Parts\Interactions\Command;
-
 
 use Discord\Helpers\Collection;
 use Discord\Http\Endpoint;
@@ -21,7 +20,7 @@ use React\Promise\ExtendedPromiseInterface;
 
 /**
  * Represents a command registered on the Discord servers.
- * 
+ *
  * @see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
  *
  * @property string                   $id                 The unique identifier of the command.
@@ -79,6 +78,7 @@ class Command extends Part
         if (!isset($this->attributes['application_id'])) {
             return $this->discord->application->id;
         }
+
         return $this->attributes['application_id'];
     }
 
@@ -122,6 +122,8 @@ class Command extends Part
      * @see https://discord.com/developers/docs/interactions/application-commands#edit-application-command-permissions
      *
      * @param Overwrite $overwrite An overwrite object.
+     *
+     * @deprecated 7.0.0
      *
      * @return ExtendedPromiseInterface
      */

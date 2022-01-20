@@ -1,12 +1,12 @@
 <?php
 
 /*
- * This file was a part of the DiscordPHP-Slash project.
+ * This file is a part of the DiscordPHP project.
  *
- * Copyright (c) 2021 David Cole <david.cole1340@gmail.com>
+ * Copyright (c) 2015-present David Cole <david.cole1340@gmail.com>
  *
- * This source file is subject to the MIT license which is
- * bundled with this source code in the LICENSE.md file.
+ * This file is subject to the MIT license that is bundled
+ * with this source code in the LICENSE.md file.
  */
 
 namespace Discord\Helpers;
@@ -103,6 +103,7 @@ class RegisteredCommand
 
         return false;
     }
+
     /**
      * Executes the command. Will search for a sub-command if given,
      * otherwise executes the callback, if given.
@@ -134,6 +135,7 @@ class RegisteredCommand
     {
         $this->callback = $callback;
     }
+
     /**
      * Sets the callback for the auto complete suggestion.
      *
@@ -159,12 +161,12 @@ class RegisteredCommand
     /**
      * Adds a sub-command to the command.
      *
-     * @param string|array $name
-     * @param callable     $callback
+     * @param string|array  $name
+     * @param callable      $callback
      * @param callable|null $autocomplete_callback
      *
      * @throws \LogicException
-     * 
+     *
      * @return RegisteredCommand
      */
     public function addSubCommand($name, callable $callback = null, ?callable $autocomplete_callback = null): RegisteredCommand
