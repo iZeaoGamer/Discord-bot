@@ -27,14 +27,21 @@ class MemberUpdated extends DiscordBotEvent
     /** @var Member */
     private $member;
 
-    public function __construct(Plugin $plugin, Member $member)
+    /** @var Member|null */
+    private $old;
+
+    public function __construct(Plugin $plugin, Member $member, ?Member $old)
     {
         parent::__construct($plugin);
         $this->member = $member;
+        $this->old = $old;
     }
 
     public function getMember(): Member
     {
         return $this->member;
+    }
+    public function getOldMember(): ?Member{
+        return $this->old;
     }
 }

@@ -27,14 +27,21 @@ class DMChannelUpdated extends DiscordBotEvent
     /** @var DMChannel */
     private $channel;
 
-    public function __construct(Plugin $plugin, DMChannel $channel)
+    /** @var DMChannel */
+    private $old;
+
+    public function __construct(Plugin $plugin, DMChannel $channel, DMChannel $old)
     {
         parent::__construct($plugin);
         $this->channel = $channel;
+        $this->old = $old;
     }
 
     public function getChannel(): DMChannel
     {
         return $this->channel;
+    }
+    public function getOldChannel(): DMChannel{
+        return $this->old;
     }
 }

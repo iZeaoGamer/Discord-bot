@@ -538,10 +538,16 @@ array(5) {
         $this->client->getThread()->writeOutboundData($packet);
     }
 
-    public function onMessageUpdate(DiscordMessage $message, Discord $discord): void
+    public function onMessageUpdate(DiscordMessage $message, Discord $discord, ?DiscordMessage $old): void
     {
+        if($old){
+            if(!$this->checkMessage($old)) return;
+            $oldMessage = ModelConverter::genModelMessage($old);
+        }else{
+            $oldMessage = null;
+        }
         if (!$this->checkMessage($message)) return;
-        $packet = new MessageUpdatePacket(ModelConverter::genModelMessage($message));
+        $packet = new MessageUpdatePacket(ModelConverter::genModelMessage($message), $oldMessage);
         $this->client->getThread()->writeOutboundData($packet);
     }
 
@@ -631,9 +637,14 @@ array(5) {
         $this->client->getThread()->writeOutboundData($packet);
     }
 
-    public function onMemberUpdate(DiscordMember $member, Discord $discord): void
+    public function onMemberUpdate(DiscordMember $member, Discord $discord, ?DiscordMember $old): void
     {
-        $packet = new MemberUpdatePacket(ModelConverter::genModelMember($member));
+        if($old){
+            $oldModel = ModelConverter::genModelMember($old);
+        }else{
+            $oldModel = null;
+        }
+        $packet = new MemberUpdatePacket(ModelConverter::genModelMember($member), $oldModel);
         $this->client->getThread()->writeOutboundData($packet);
     }
 
@@ -706,9 +717,9 @@ array(5) {
         $this->client->getThread()->writeOutboundData($packet);
     }
 
-    public function onGuildUpdate(DiscordGuild $guild, Discord $discord): void
+    public function onGuildUpdate(DiscordGuild $guild, Discord $discord, DiscordGuild $old): void
     {
-        $packet = new ServerUpdatePacket(ModelConverter::genModelServer($guild));
+        $packet = new ServerUpdatePacket(ModelConverter::genModelServer($guild), ModelConverter::genModelServer($old));
         $this->client->getThread()->writeOutboundData($packet);
     }
 
@@ -733,17 +744,20 @@ array(5) {
         }
     }
 
-    public function onChannelUpdate(DiscordChannel $channel, Discord $discord): void
+    public function onChannelUpdate(DiscordChannel $channel, Discord $discord, DiscordChannel $old): void
     {
-        if ($channel->type === $channel::TYPE_DM) {
+        if ($old->type === $old::TYPE_DM && $channel->type === $channel::TYPE_DM) {
+            $oc = ModelConverter::genModelDMChannel($old);
             $c = ModelConverter::genModelDMChannel($channel);
-            if ($c === null) return;
-            $packet = new DMChannelUpdatePacket($c);
+            if ($oc === null && $c === null) return;
+            $packet = new DMChannelUpdatePacket($c, $oc);
             $this->client->getThread()->writeOutboundData($packet);
         } else {
+            $oc = ModelConverter::genModelChannel($old);
             $c = ModelConverter::genModelChannel($channel);
-            if ($c === null) return;
-            $packet = new ChannelUpdatePacket($c);
+            if ($oc === null && $c === null) return;
+
+            $packet = new ChannelUpdatePacket($c, $oc);
             $this->client->getThread()->writeOutboundData($packet);
         }
     }
@@ -789,9 +803,9 @@ array(5) {
         $this->client->getThread()->writeOutboundData($packet);
     }
 
-    public function onRoleUpdate(DiscordRole $role, Discord $discord): void
+    public function onRoleUpdate(DiscordRole $role, Discord $discord, DiscordRole $old): void
     {
-        $packet = new RoleUpdatePacket(ModelConverter::genModelRole($role));
+        $packet = new RoleUpdatePacket(ModelConverter::genModelRole($role), ModelConverter::genModelRole($old));
         $this->client->getThread()->writeOutboundData($packet);
     }
 

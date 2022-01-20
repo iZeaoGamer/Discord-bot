@@ -27,14 +27,21 @@ class ServerUpdated extends DiscordBotEvent
     /** @var Server */
     private $server;
 
-    public function __construct(Plugin $plugin, Server $server)
+    /** @var Server */
+    private $old;
+
+    public function __construct(Plugin $plugin, Server $server, Server $old)
     {
         parent::__construct($plugin);
         $this->server = $server;
+        $this->old = $old;
     }
 
     public function getServer(): Server
     {
         return $this->server;
+    }
+    public function getOldServer(): Server{
+        return $this->old;
     }
 }

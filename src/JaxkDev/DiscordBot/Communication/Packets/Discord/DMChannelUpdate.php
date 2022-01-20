@@ -21,22 +21,31 @@ class DMChannelUpdate extends Packet
     /** @var DMChannel */
     private $channel;
 
-    public function __construct(DMChannel $channel)
+    /** @var DMChannel */
+    private $old;
+
+    public function __construct(DMChannel $channel, DMChannel $old)
     {
         parent::__construct();
         $this->channel = $channel;
+        $this->old = $old;
     }
 
     public function getChannel(): DMChannel
     {
         return $this->channel;
     }
+    public function getOldChannel(): DMChannel
+    {
+        return $this->old;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->channel
+            $this->channel,
+            $this->old
         ]);
     }
 
@@ -44,7 +53,8 @@ class DMChannelUpdate extends Packet
     {
         [
             $this->UID,
-            $this->channel
+            $this->channel,
+            $this->old
         ] = unserialize($data);
     }
 }

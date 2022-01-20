@@ -21,22 +21,31 @@ class MemberUpdate extends Packet
     /** @var Member */
     private $member;
 
-    public function __construct(Member $member)
+    /** @var Member|null */
+    private $old;
+
+    public function __construct(Member $member, ?Member $old)
     {
         parent::__construct();
         $this->member = $member;
+        $this->old = $old;
     }
 
     public function getMember(): Member
     {
         return $this->member;
     }
+    public function getOldMember(): ?Member
+    {
+        return $this->old;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->member
+            $this->member,
+            $this->old
         ]);
     }
 
@@ -44,7 +53,8 @@ class MemberUpdate extends Packet
     {
         [
             $this->UID,
-            $this->member
+            $this->member,
+            $this->old
         ] = unserialize($data);
     }
 }

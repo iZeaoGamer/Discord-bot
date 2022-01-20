@@ -20,6 +20,7 @@ use JaxkDev\DiscordBot\Models\Messages\Message;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class ServerJoin extends Packet

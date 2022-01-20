@@ -358,7 +358,8 @@ class BotCommunicationHandler
 
     private function handleMessageUpdate(MessageUpdatePacket $packet): void
     {
-        (new MessageUpdatedEvent($this->plugin, $packet->getMessage()))->call();
+
+        (new MessageUpdatedEvent($this->plugin, $packet->getMessage(), $packet->getOldMessage()))->call();
         Storage::updateMessage($packet->getMessage());
     }
 
@@ -450,7 +451,7 @@ class BotCommunicationHandler
     }
     private function handleDMChannelUpdate(DMChannelUpdatePacket $packet): void
     {
-        (new DMChannelUpdatedEvent($this->plugin, $packet->getChannel()))->call();
+        (new DMChannelUpdatedEvent($this->plugin, $packet->getChannel(), $packet->getOldChannel()))->call();
         Storage::updateDMChannel($packet->getChannel());
     }
     private function handleDMChannelDelete(DMChannelDeletePacket $packet): void
@@ -470,7 +471,7 @@ class BotCommunicationHandler
 
     private function handleChannelUpdate(ChannelUpdatePacket $packet): void
     {
-        (new ChannelUpdatedEvent($this->plugin, $packet->getChannel()))->call();
+        (new ChannelUpdatedEvent($this->plugin, $packet->getChannel(), $packet->getOldChannel()))->call();
 
         Storage::updateChannel($packet->getChannel());
     }
@@ -502,7 +503,7 @@ class BotCommunicationHandler
 
     private function handleRoleUpdate(RoleUpdatePacket $packet): void
     {
-        (new RoleUpdatedEvent($this->plugin, $packet->getRole()))->call();
+        (new RoleUpdatedEvent($this->plugin, $packet->getRole(), $packet->getOldRole()))->call();
         Storage::updateRole($packet->getRole());
     }
 
@@ -561,7 +562,7 @@ class BotCommunicationHandler
 
     private function handleMemberUpdate(MemberUpdatePacket $packet): void
     {
-        (new MemberUpdatedEvent($this->plugin, $packet->getMember()))->call();
+        (new MemberUpdatedEvent($this->plugin, $packet->getMember(), $packet->getOldMember()))->call();
         Storage::updateMember($packet->getMember());
     }
 
@@ -628,7 +629,7 @@ class BotCommunicationHandler
 
     private function handleServerUpdate(ServerUpdatePacket $packet): void
     {
-        (new ServerUpdatedEvent($this->plugin, $packet->getServer()))->call();
+        (new ServerUpdatedEvent($this->plugin, $packet->getServer(), $packet->getOldServer()))->call();
         Storage::updateServer($packet->getServer());
     }
 

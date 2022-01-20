@@ -28,14 +28,21 @@ class MessageUpdated extends DiscordBotEvent
     /** @var Message */
     private $message;
 
-    public function __construct(Plugin $plugin, Message $message)
+    /** @var Message|null */
+    private $old;
+
+    public function __construct(Plugin $plugin, Message $message, ?Message $old)
     {
         parent::__construct($plugin);
         $this->message = $message;
+        $this->old = $old;
     }
 
     public function getMessage(): Message
     {
         return $this->message;
+    }
+    public function getOldMessage(): ?Message{
+        return $this->old;
     }
 }

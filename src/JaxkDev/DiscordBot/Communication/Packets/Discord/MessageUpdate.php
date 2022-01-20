@@ -21,22 +21,31 @@ class MessageUpdate extends Packet
     /** @var Message */
     private $message;
 
-    public function __construct(Message $message)
+    /** @var Message|null */
+    private $old;
+
+    public function __construct(Message $message, ?Message $old)
     {
         parent::__construct();
         $this->message = $message;
+        $this->old = $old;
     }
 
     public function getMessage(): Message
     {
         return $this->message;
     }
+    public function getOldMessage(): ?Message
+    {
+        return $this->old;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->message
+            $this->message,
+            $this->old
         ]);
     }
 
@@ -44,7 +53,8 @@ class MessageUpdate extends Packet
     {
         [
             $this->UID,
-            $this->message
+            $this->message,
+            $this->old
         ] = unserialize($data);
     }
 }

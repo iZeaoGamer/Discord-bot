@@ -21,22 +21,31 @@ class RoleUpdate extends Packet
     /** @var Role */
     private $role;
 
-    public function __construct(Role $role)
+    /** @var Role */
+    private $old;
+
+    public function __construct(Role $role, Role $old)
     {
         parent::__construct();
         $this->role = $role;
+        $this->old = $old;
     }
 
     public function getRole(): Role
     {
         return $this->role;
     }
+    public function getOldRole(): Role
+    {
+        return $this->old;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->role
+            $this->role,
+            $this->old
         ]);
     }
 
@@ -44,7 +53,8 @@ class RoleUpdate extends Packet
     {
         [
             $this->UID,
-            $this->role
+            $this->role,
+            $this->old
         ] = unserialize($data);
     }
 }

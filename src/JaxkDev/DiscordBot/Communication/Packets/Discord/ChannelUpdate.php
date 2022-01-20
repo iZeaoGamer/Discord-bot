@@ -21,22 +21,31 @@ class ChannelUpdate extends Packet
     /** @var ServerChannel */
     private $channel;
 
-    public function __construct(ServerChannel $channel)
+    /** @var ServerChannel */
+    private $old;
+
+    public function __construct(ServerChannel $channel, ServerChannel $old)
     {
         parent::__construct();
         $this->channel = $channel;
+        $this->old = $old;
     }
 
     public function getChannel(): ServerChannel
     {
         return $this->channel;
     }
+    public function getOldChannel(): ServerChannel
+    {
+        return $this->old;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->channel
+            $this->channel,
+            $this->old
         ]);
     }
 
@@ -44,7 +53,8 @@ class ChannelUpdate extends Packet
     {
         [
             $this->UID,
-            $this->channel
+            $this->channel,
+            $this->old
         ] = unserialize($data);
     }
 }

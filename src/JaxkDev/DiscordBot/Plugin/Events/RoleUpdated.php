@@ -27,14 +27,21 @@ class RoleUpdated extends DiscordBotEvent
     /** @var Role */
     private $role;
 
-    public function __construct(Plugin $plugin, Role $role)
+    /** @var Role */
+    private $old;
+
+    public function __construct(Plugin $plugin, Role $role, Role $old)
     {
         parent::__construct($plugin);
         $this->role = $role;
+        $this->old = $old;
     }
 
     public function getRole(): Role
     {
         return $this->role;
+    }
+    public function getOldRole(): Role{
+        return $this->old;
     }
 }

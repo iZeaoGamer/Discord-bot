@@ -27,14 +27,21 @@ class ChannelUpdated extends DiscordBotEvent
     /** @var ServerChannel */
     private $channel;
 
-    public function __construct(Plugin $plugin, ServerChannel $channel)
+    /** @var ServerChannel */
+    private $old;
+
+    public function __construct(Plugin $plugin, ServerChannel $channel, ServerChannel $old)
     {
         parent::__construct($plugin);
         $this->channel = $channel;
+        $this->old = $old;
     }
 
     public function getChannel(): ServerChannel
     {
         return $this->channel;
+    }
+    public function getOldChannel(): ServerChannel{
+        return $this->old;
     }
 }

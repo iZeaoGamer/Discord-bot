@@ -21,22 +21,30 @@ class ServerUpdate extends Packet
     /** @var Server */
     private $server;
 
-    public function __construct(Server $server)
+    /** @var Server */
+    private $old;
+
+    public function __construct(Server $server, Server $old)
     {
         parent::__construct();
         $this->server = $server;
+        $this->old = $old;
     }
 
     public function getServer(): Server
     {
         return $this->server;
     }
+    public function getOldServer(): Server{
+        return $this->old;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->server
+            $this->server,
+            $this->old
         ]);
     }
 
@@ -44,7 +52,8 @@ class ServerUpdate extends Packet
     {
         [
             $this->UID,
-            $this->server
+            $this->server,
+            $this->old
         ] = unserialize($data);
     }
 }
