@@ -144,14 +144,14 @@ class CommandBuilder implements JsonSerializable
      *
      * @param Option $option The option
      *
-     * @throws \InvalidArgumentException
+     * @throws \OverflowException
      * 
      * @return $this
      */
     public function addOption(Option $option)
     {
         if (count($this->options) >= 25) {
-            throw new \InvalidArgumentException('Command can only have a maximum of 25 options.');
+            throw new \OverflowException('Command can only have a maximum of 25 options.');
         }
 
         $this->options[] = $option;
@@ -187,7 +187,8 @@ class CommandBuilder implements JsonSerializable
     /**
      * Returns an array with all the options.
      *
-     * @throws \Exception
+     * @throws \LengthException
+     * @throws \DomainException
      * 
      * @return array
      */
@@ -204,7 +205,7 @@ class CommandBuilder implements JsonSerializable
             }
         } elseif ($this->type == Command::USER || $this->type == Command::MESSAGE) {
             if ($desclen) {
-                throw new \InvalidArgumentException('Only a command with type CHAT_INPUT accepts a description.');
+                throw new \DomainException('Only a command with type CHAT_INPUT accepts a description.');
             }
         }
 

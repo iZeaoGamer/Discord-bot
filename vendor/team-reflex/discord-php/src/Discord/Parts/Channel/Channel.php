@@ -33,12 +33,9 @@ use Discord\Http\Endpoint;
 use Discord\Http\Exceptions\NoPermissionsException;
 use Discord\Parts\Thread\Thread;
 use Discord\Repository\Channel\ThreadRepository;
-use RangeException;
 use React\Promise\ExtendedPromiseInterface;
-use RuntimeException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Traversable;
-use UnexpectedValueException;
 
 use function React\Promise\all;
 use function React\Promise\reject;
@@ -259,6 +256,8 @@ class Channel extends Part
      * @param array $deny  An array of permissions to deny.
      * @param string|null $reason Reason for Audit Log.
      * 
+     * @throws InvalidOverwriteException
+     *
      * @return ExtendedPromiseInterface
      */
     public function setPermissions(Part $part, array $allow = [], array $deny = [], ?string $reason = null): ExtendedPromiseInterface
@@ -295,6 +294,9 @@ class Channel extends Part
      * @param Overwrite $overwrite An overwrite object.
      * @param string|null $reason    Reason for Audit Log.
      * 
+     * @throws NoPermissionsException
+     * @throws InvalidOverwriteException
+     *
      * @return ExtendedPromiseInterface
      */
     public function setOverwrite(Part $part, Overwrite $overwrite, ?string $reason = null): ExtendedPromiseInterface
@@ -356,12 +358,15 @@ class Channel extends Part
      * @param Member|string The member to move. (either a Member part or the member ID)
      * @param string|null   $reason Reason for Audit Log.
      * 
+     * @throws \RuntimeException
+     * @throws NoPermissionsException
+     *
      * @return ExtendedPromiseInterface
      */
     public function moveMember($member, ?string $reason = null): ExtendedPromiseInterface
     {
         if (!$this->allowVoice()) {
-            return reject(new RuntimeException('You cannot move a member in a text channel.'));
+            return reject(new \RuntimeException('You cannot move a member in a text channel.'));
         }
 
         if (!$this->is_private) {
@@ -390,12 +395,15 @@ class Channel extends Part
      * @param Member|string The member to mute. (either a Member part or the member ID)
      * @param string|null   $reason Reason for Audit Log.
      * 
+     * @throws \RuntimeException
+     * @throws NoPermissionsException
+     *
      * @return ExtendedPromiseInterface
      */
     public function muteMember($member, ?string $reason = null): ExtendedPromiseInterface
     {
         if (!$this->allowVoice()) {
-            return reject(new RuntimeException('You cannot mute a member in a text channel.'));
+            return reject(new \RuntimeException('You cannot mute a member in a text channel.'));
         }
 
         if (!$this->is_private) {
@@ -424,12 +432,15 @@ class Channel extends Part
      * @param Member|string The member to unmute. (either a Member part or the member ID)
      * @param string|null   $reason Reason for Audit Log.
      * 
+     * @throws \RuntimeException
+     * @throws NoPermissionsException
+     *
      * @return ExtendedPromiseInterface
      */
     public function unmuteMember($member, ?string $reason = null): ExtendedPromiseInterface
     {
         if (!$this->allowVoice()) {
-            return reject(new RuntimeException('You cannot unmute a member in a text channel.'));
+            return reject(new \RuntimeException('You cannot unmute a member in a text channel.'));
         }
 
         if (!$this->is_private) {
@@ -460,6 +471,8 @@ class Channel extends Part
      * @param int   $options['max_uses']  The amount of times the invite can be used.
      * @param bool  $options['temporary'] Whether the invite is for temporary membership.
      * @param bool  $options['unique']    Whether the invite code should be unique (useful for creating many unique one time use invites).
+     *
+     * @throws NoPermissionsException
      *
      * @return ExtendedPromiseInterface<Invite>
      */
@@ -502,12 +515,14 @@ class Channel extends Part
      * @param array|Traversable $messages An array of messages to delete.
      * @param string|null       $reason   Reason for Audit Log (only for bulk messages).
      *
+     * @throws \UnexpectedValueException
+     *
      * @return ExtendedPromiseInterface
      */
     public function deleteMessages($messages, ?string $reason = null): ExtendedPromiseInterface
     {
         if (!is_array($messages) && !($messages instanceof Traversable)) {
-            return reject(new UnexpectedValueException('$messages must be an array or implement Traversable.'));
+            return reject(new \UnexpectedValueException('$messages must be an array or implement Traversable.'));
         }
 
         $count = count($messages);
@@ -572,6 +587,9 @@ class Channel extends Part
      *
      * @param array $options
      *
+     * @throws NoPermissionsException
+     * @throws \RangeException
+     *
      * @return ExtendedPromiseInterface<Collection<Message>>
      */
     public function getMessageHistory(array $options): ExtendedPromiseInterface
@@ -598,7 +616,7 @@ class Channel extends Part
             isset($options['before'], $options['around']) ||
             isset($options['around'], $options['after'])
         ) {
-            return reject(new RangeException('Can only specify one of before, after and around.'));
+            return reject(new \RangeException('Can only specify one of before, after and around.'));
         }
 
         $endpoint = Endpoint::bind(Endpoint::CHANNEL_MESSAGES, $this->id);
@@ -634,6 +652,9 @@ class Channel extends Part
      * @param Message     $message The message to pin.
      * @param string|null $reason  Reason for Audit Log.
      * 
+     * @throws NoPermissionsException
+     * @throws \RuntimeException
+     *
      * @return ExtendedPromiseInterface<Message>
      */
     public function pinMessage(Message $message, ?string $reason = null): ExtendedPromiseInterface
@@ -647,11 +668,11 @@ class Channel extends Part
         }
 
         if ($message->pinned) {
-            return reject(new RuntimeException('This message is already pinned.'));
+            return reject(new \RuntimeException('This message is already pinned.'));
         }
 
         if ($message->channel_id != $this->id) {
-            return reject(new RuntimeException('You cannot pin a message to a different channel.'));
+            return reject(new \RuntimeException('You cannot pin a message to a different channel.'));
         }
 
         $headers = [];
@@ -672,6 +693,9 @@ class Channel extends Part
      * @param Message     $message The message to un-pin.
      * @param string|null $reason  Reason for Audit Log.
      *
+     * @throws NoPermissionsException
+     * @throws \RuntimeException
+     *
      * @return ExtendedPromiseInterface
      */
     public function unpinMessage(Message $message, ?string $reason = null): ExtendedPromiseInterface
@@ -685,11 +709,11 @@ class Channel extends Part
         }
 
         if (!$message->pinned) {
-            return reject(new RuntimeException('This message is not pinned.'));
+            return reject(new \RuntimeException('This message is not pinned.'));
         }
 
         if ($message->channel_id != $this->id) {
-            return reject(new RuntimeException('You cannot un-pin a message from a different channel.'));
+            return reject(new \RuntimeException('You cannot un-pin a message from a different channel.'));
         }
 
         $headers = [];
@@ -749,39 +773,42 @@ class Channel extends Part
      * @param int         $auto_archive_duration number of minutes of inactivity until the thread is auto-archived. one of 60, 1440, 4320, 10080.
      * @param string|null $reason                Reason for Audit Log.
      *
+     * @throws \RuntimeException
+     * @throws \UnexpectedValueException
+     *
      * @return ExtendedPromiseInterface<Thread>
      */
     public function startThread(string $name, bool $private = false, int $auto_archive_duration = 1440, ?string $reason = null): ExtendedPromiseInterface
     {
         if ($private && !$this->guild->feature_private_threads) {
-            return reject(new RuntimeException('Guild does not have access to private threads.'));
+            return reject(new \RuntimeException('Guild does not have access to private threads.'));
         }
 
         if ($this->type == Channel::TYPE_NEWS) {
             if ($private) {
-                return reject(new RuntimeException('You cannot start a private thread within a news channel.'));
+                return reject(new \RuntimeException('You cannot start a private thread within a news channel.'));
             }
 
             $type = Channel::TYPE_NEWS_THREAD;
         } elseif ($this->type == Channel::TYPE_TEXT) {
             $type = $private ? Channel::TYPE_PRIVATE_THREAD : Channel::TYPE_PUBLIC_THREAD;
         } else {
-            return reject(new RuntimeException('You cannot start a thread in this type of channel.'));
+            return reject(new \RuntimeException('You cannot start a thread in this type of channel.'));
         }
 
         if (!in_array($auto_archive_duration, [60, 1440, 4320, 10080])) {
-            return reject(new UnexpectedValueException('`auto_archive_duration` must be one of 60, 1440, 4320, 10080.'));
+            return reject(new \UnexpectedValueException('`auto_archive_duration` must be one of 60, 1440, 4320, 10080.'));
         }
 
         switch ($auto_archive_duration) {
             case 4320:
                 if (!$this->guild->feature_three_day_thread_archive) {
-                    return reject(new RuntimeException('Guild does not have access to three day thread archive.'));
+                    return reject(new \RuntimeException('Guild does not have access to three day thread archive.'));
                 }
                 break;
             case 10080:
                 if (!$this->guild->feature_seven_day_thread_archive) {
-                    return reject(new RuntimeException('Guild does not have access to seven day thread archive.'));
+                    return reject(new \RuntimeException('Guild does not have access to seven day thread archive.'));
                 }
                 break;
         }
@@ -811,6 +838,9 @@ class Channel extends Part
      * @param array|null            $allowed_mentions Allowed mentions object for the message.
      * @param Message|null          $replyTo          Sends the message as a reply to the given message instance.
      *
+     * @throws \RuntimeException
+     * @throws NoPermissionsException
+     *
      * @return ExtendedPromiseInterface<Message>
      */
     public function sendMessage($message, bool $tts = false, $embed = null, $allowed_mentions = null, ?Message $replyTo = null): ExtendedPromiseInterface
@@ -838,7 +868,7 @@ class Channel extends Part
         }
 
         if (!$this->allowText()) {
-            return reject(new RuntimeException('You can only send messages to text channels.'));
+            return reject(new \RuntimeException('You can only send messages to text channels.'));
         }
 
         if (!$this->is_private && $member = $this->guild->members->offsetGet($this->discord->id)) {
@@ -926,12 +956,14 @@ class Channel extends Part
     /**
      * Broadcasts that you are typing to the channel. Lasts for 5 seconds.
      *
+     * @throws \RuntimeException
+     *
      * @return ExtendedPromiseInterface
      */
     public function broadcastTyping(): ExtendedPromiseInterface
     {
         if (!$this->allowText()) {
-            return reject(new RuntimeException('You cannot broadcast typing to a voice channel.'));
+            return reject(new \RuntimeException('You cannot broadcast typing to a voice channel.'));
         }
 
         return $this->http->post(Endpoint::bind(Endpoint::CHANNEL_TYPING, $this->id));

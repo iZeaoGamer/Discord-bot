@@ -98,6 +98,7 @@ class GuildTemplate extends Part
      * Returns the created at attribute.
      *
      * @return Carbon     The time that the guild template was created.
+     * 
      * @throws \Exception
      */
     protected function getCreatedAtAttribute(): Carbon
@@ -109,6 +110,7 @@ class GuildTemplate extends Part
      * Returns the updated at attribute.
      *
      * @return Carbon     The time that the guild template was updated.
+     * 
      * @throws \Exception
      */
     protected function getUpdatedAtAttribute(): Carbon
@@ -119,8 +121,8 @@ class GuildTemplate extends Part
      * Creates a guild from this template. Can be used only by bots in less than 10 guilds.
      *
      * @param array       $options An array of options.
-     * @param string      $options ['name'] The name of the guild (2-100 characters).
-     * @param string|null $options ['icon'] The base64 128x128 image for the guild icon.
+     * @param string      $options['name'] The name of the guild (2-100 characters).
+     * @param string|null $options['icon'] The base64 128x128 image for the guild icon.
      *
      * @return ExtendedPromiseInterface<Guild>
      */

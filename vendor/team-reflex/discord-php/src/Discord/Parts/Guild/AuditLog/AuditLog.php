@@ -156,6 +156,8 @@ class AuditLog extends Part
      *
      * @param int $action_type
      *
+     * @throws \InvalidArgumentException
+     *
      * @return Collection|Entry[]
      */
     public function searchByType(int $action_type): Collection
