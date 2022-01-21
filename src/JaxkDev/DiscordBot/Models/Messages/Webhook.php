@@ -28,21 +28,22 @@ class Webhook extends Message
     /**
      * Webhook constructor.
      *
-     * @param string       $channel_id
-     * @param string       $webhook_id
-     * @param Embed[]      $embeds
-     * @param string|null  $id
-     * @param string       $content
-     * @param string|null  $author_id
-     * @param string|null  $server_id
-     * @param float|null   $timestamp
-     * @param Attachment[] $attachments
-     * @param bool         $everyone_mentioned
-     * @param string[]     $users_mentioned
-     * @param string[]     $roles_mentioned
-     * @param string[]     $channels_mentioned
-     * @param string[]     $stickers
-     * @param Interaction|null  $interaction
+     * @param string                        $channel_id
+     * @param string                        $webhook_id
+     * @param Embed[]                       $embeds
+     * @param string|null                   $id
+     * @param string                        $content
+     * @param string|null                   $author_id
+     * @param string|null                   $server_id
+     * @param float|null                    $timestamp
+     * @param Attachment[]                  $attachments
+     * @param bool                          $everyone_mentioned
+     * @param string[]                      $users_mentioned
+     * @param string[]                      $roles_mentioned
+     * @param string[]                      $channels_mentioned
+     * @param string[]                      $stickers
+     * @param Interaction|null              $interaction
+     * 
      */
     public function __construct(
         string $channel_id,

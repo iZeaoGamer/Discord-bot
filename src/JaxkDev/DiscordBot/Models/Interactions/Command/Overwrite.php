@@ -32,10 +32,11 @@ class Overwrite implements \Serializable
 
     /** 
      * Overwrite Constructor
-     * @param string $id
-     * @param string $application_id
-     * @param string $server_id
-     * @param Permission[] $permissions
+     * @param string                $id
+     * @param string                $application_id
+     * @param string                $server_id
+     * @param Permission[]          $permissions
+     * 
      */
     public function __construct(
         string $id,

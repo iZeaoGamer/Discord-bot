@@ -22,8 +22,9 @@ class Choice implements \Serializable
 
     /** 
      * Choice Constructor
-     * @param string $name
-     * @param mixed $value
+     * @param string            $name
+     * @param mixed             $value
+     * 
      */
     public function __construct(string $name, mixed $value)
     {

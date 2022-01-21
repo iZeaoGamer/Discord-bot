@@ -48,14 +48,15 @@ class ThreadChannel
     /**
      * ThreadChannel constructor.
      *
-     * @param string      $name
-     * @param string      $server_id
-     * @param string      $threadOwner
-     * @param bool        $private
-     * @param int         $duration
-     * @param int|null    $rate_limit
-     * @param string|null $userID
-     * @param string|null $id
+     * @param string                $name
+     * @param string                $server_id
+     * @param string                $threadOwner
+     * @param bool                  $private
+     * @param int                   $duration
+     * @param int|null              $rate_limit
+     * @param string|null           $userID
+     * @param string|null           $id
+     * 
      */
     public function __construct(
         string $name,

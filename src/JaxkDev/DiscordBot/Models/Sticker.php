@@ -34,7 +34,7 @@ class Sticker implements \Serializable
     /** @var int|null */
     protected $sortValue;
 
-    /** @var array */
+    /** @var string[] */
     protected $tags; //null when not using suggestive tags.
 
     /** @var string|null */
@@ -43,8 +43,35 @@ class Sticker implements \Serializable
     /** @var string|null */
     protected $pack_id; //null if using guild stickers type.
 
-    public function __construct(string $name, string $description, int $type, int $format_type, ?bool $available = null, ?string $server_id = null, ?User $user = null, ?int $sort_value = null, array $tags = [], ?string $id = null, ?string $pack_id = null)
-    {
+
+    /** Sticker Constructor
+     * 
+     * @param string                $name
+     * @param string                $description
+     * @param int                   $type
+     * @param int                   $format_type
+     * @param bool|null             $available
+     * @param string|null           $server_id
+     * @param User|null             $user
+     * @param int|null              $sort_value
+     * @param string[]              $tags
+     * @param string|null           $id
+     * @param string|null           $pack_id
+     * 
+     */
+    public function __construct(
+        string $name,
+        string $description,
+        int $type,
+        int $format_type,
+        ?bool $available = null,
+        ?string $server_id = null,
+        ?User $user = null,
+        ?int $sort_value = null,
+        array $tags = [],
+        ?string $id = null,
+        ?string $pack_id = null
+    ) {
         $this->setName($name);
         $this->setDescription($description);
         $this->setType($type);
@@ -160,6 +187,8 @@ class Sticker implements \Serializable
         }
         $this->description = $description;
     }
+
+    /** @return string[] */
     public function getTags(): array
     {
         return $this->tags;

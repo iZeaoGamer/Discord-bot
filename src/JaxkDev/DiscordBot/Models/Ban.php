@@ -29,6 +29,15 @@ class Ban implements \Serializable
     /** @var int|null Only present on banRequest. */
     private $days_to_delete;
 
+
+    /** Ban Constructor
+     * 
+     * @param string                $server_id
+     * @param string                $user_id
+     * @param string|null           $reason
+     * @param int|null              $days_to_delete
+     * 
+     */
     public function __construct(string $server_id, string $user_id, ?string $reason = null, ?int $days_to_delete = null)
     {
         $this->setServerId($server_id);

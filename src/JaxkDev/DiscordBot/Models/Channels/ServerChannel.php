@@ -46,6 +46,17 @@ abstract class ServerChannel extends Channel
     /** @var string|null */
     protected $permissions; //Computed permissions for the invoking user in the channel, including overwrites, only included when part of the resolved data received on a slash command interaction.
 
+
+    /** ServerChannel Constructor.
+     * 
+     * @param string                $name
+     * @param int                   $position
+     * @param string                $server_id
+     * @param string|null           $category_id
+     * @param string|null           $id
+     * @param string|null           $permissions
+     * 
+     */
     public function __construct(string $name, int $position, string $server_id, ?string $category_id = null, ?string $id = null,
     ?string $permissions = null)
     {

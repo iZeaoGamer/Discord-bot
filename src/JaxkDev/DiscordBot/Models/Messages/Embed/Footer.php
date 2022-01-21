@@ -24,6 +24,14 @@ class Footer implements \Serializable
     /** @var null|string */
     private $proxy_icon_url;
 
+
+    /** Footer Constructor
+     * 
+     * @param string|null           $text
+     * @param string|null           $icon_url
+     * @param string|null           $proxy_icon_url
+     * 
+     */
     public function __construct(?string $text = null, ?string $icon_url = null, ?string $proxy_icon_url = null)
     {
         $this->setText($text);

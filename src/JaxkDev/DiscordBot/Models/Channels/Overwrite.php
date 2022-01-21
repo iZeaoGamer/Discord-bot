@@ -17,15 +17,25 @@ class Overwrite implements \Serializable
     /** @var int */
     protected $type;
 
-     /** @var ChannelPermissions|null */
-     protected $allow;
+    /** @var ChannelPermissions|null */
+    protected $allow;
 
-     /** @var ChannelPermissions|null */
-     protected $deny;
+    /** @var ChannelPermissions|null */
+    protected $deny;
 
-     /** @var string|null */
-     protected $id;
+    /** @var string|null */
+    protected $id;
 
+
+    /** Overwrite Constructor
+     *
+     * @param string                            $channel_id
+     * @param int                               $type
+     * @param ChannelPermissions|null           $allow
+     * @param ChannelPermissions|null           $deny
+     * @param string|null                       $id
+     * 
+     */
     public function __construct(string $channel_id, int $type, ?ChannelPermissions $allow = null, ?ChannelPermissions $deny = null, ?string $id = null)
     {
         $this->setChannelId($channel_id);
@@ -63,14 +73,16 @@ class Overwrite implements \Serializable
     {
         return $this->allow;
     }
-    public function setAllowPermissions(?ChannelPermissions $allow): void{
+    public function setAllowPermissions(?ChannelPermissions $allow): void
+    {
         $this->allow = $allow;
     }
     public function getDenyPermissions(): ?ChannelPermissions
     {
         return $this->deny;
     }
-    public function setDenyPermissions(?ChannelPermissions $deny): void{
+    public function setDenyPermissions(?ChannelPermissions $deny): void
+    {
         $this->deny = $deny;
     }
 

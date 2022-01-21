@@ -43,16 +43,38 @@ class ServerTemplate implements \Serializable
     /** @var bool */
     private $dirty;
 
-    public function __construct(string $name, ?string $description, string $server_id, ?string $code = null, int $usage_count = 0, ?string $creator_id = null, ?int $created_at_timestamp = null, ?int $updated_at_timestamp = null, bool $is_dirty = false)
-    {
+    /** ServerTemplate Constructor
+     * 
+     * @param string                $name
+     * @param string|null           $description
+     * @param string                $server_id
+     * @param string|null           $code
+     * @param int                   $usage_count
+     * @param string|null           $creator_id
+     * @param int|null              $created_at
+     * @param int|null              $updated_at
+     * @param bool                  $is_dirty
+     * 
+     */
+    public function __construct(
+        string $name,
+        ?string $description,
+        string $server_id,
+        ?string $code = null,
+        int $usage_count = 0,
+        ?string $creator_id = null,
+        ?int $created_at = null,
+        ?int $updated_at = null,
+        bool $is_dirty = false
+    ) {
         $this->setName($name);
         $this->setDescription($description ?? "");
         $this->setServerId($server_id);
         $this->setCode($code);
         $this->setUsageCount($usage_count);
         $this->setCreatorId($creator_id);
-        $this->setCreatedTimestamp($created_at_timestamp ?? time());
-        $this->setUpdatedTimestamp($updated_at_timestamp ?? time());
+        $this->setCreatedTimestamp($created_at ?? time());
+        $this->setUpdatedTimestamp($updated_at ?? time());
         $this->setDirty($is_dirty);
     }
 

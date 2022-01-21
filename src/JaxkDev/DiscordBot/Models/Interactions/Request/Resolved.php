@@ -46,12 +46,13 @@ class Resolved implements \Serializable
     /** 
      * Resolved Constructor
      *
-     * @param User[]|null             $users    The ids and User objects.
-     * @param Member[]|null           $members  The ids and partial Member objects.
-     * @param Role[]|null             $roles    The ids and Role objects.
-     * @param ServerChannel[]|ThreadChannel[]|null $channels The ids and partial Channel objects.
-     * @param Message[]|null          $messages The ids and partial Message objects.
-     * @param string|null                        $server_id ID of the server passed from Interaction.
+     * @param User[]|null                                   $users    The ids and User objects.
+     * @param Member[]|null                                 $members  The ids and partial Member objects.
+     * @param Role[]|null                                   $roles    The ids and Role objects.
+     * @param ServerChannel[]|ThreadChannel[]|null          $channels The ids and partial Channel objects.
+     * @param Message[]|null                                $messages The ids and partial Message objects.
+     * @param string|null                                   $server_id ID of the server passed from Interaction.
+     * 
      */
     public function __construct(
         ?array $users = null,

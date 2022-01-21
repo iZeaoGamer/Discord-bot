@@ -78,6 +78,7 @@ class Embed implements \Serializable
      * @param Video|null  $video
      * @param Author|null $author
      * @param Field[]     $fields
+     * 
      */
     public function __construct(
         ?string $title = null,

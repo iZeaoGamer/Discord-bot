@@ -72,6 +72,28 @@ class Invite implements \Serializable
     /** @var object|null */
     private $server_scheduled_event;
 
+
+    /** Invite Constructor
+     * 
+     * @param string                $server_id
+     * @param string                $channel_id
+     * @param int                   $max_age
+     * @param int                   $max_uses
+     * @param bool                  $temporary
+     * @param string|null           $code
+     * @param int|null              $created_at
+     * @param string|null           $creator
+     * @param int                   $uses
+     * @param int|null              $target_type
+     * @param User|null             $target_user
+     * @param object|null           $target_application
+     * @param int|null              $approximate_presence_count
+     * @param int|null              $approximate_member_count
+     * @param int|null              $expires_at
+     * @param object|null           $stage_instance
+     * @param object|null           $server_scheduled_event
+     * 
+     */
     public function __construct(
         string $server_id,
         string $channel_id,

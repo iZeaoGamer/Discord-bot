@@ -34,24 +34,25 @@ class CommandMessage extends Message implements \Serializable
     /**
      * Message constructor.
      *
-     * @param string|null      $application_id
-     * @param Interaction|null $interaction
-     * @param Component[]      $components
-     * @param string           $channel_id
-     * @param string|null      $id
-     * @param string           $content
-     * @param Embed|null       $embed
-     * @param string|null      $author_id
-     * @param string|null      $server_id
-     * @param float|null       $timestamp
-     * @param Attachment[]     $attachments
-     * @param bool             $everyone_mentioned
-     * @param string[]         $users_mentioned
-     * @param string[]         $roles_mentioned
-     * @param string[]         $channels_mentioned
-     * @param string[]         $stickers
-     * @param string|null      $link
-     * @param bool             $tts
+     * @param string|null               $application_id
+     * @param Interaction|null          $interaction
+     * @param Component[]               $components
+     * @param string                    $channel_id
+     * @param string|null               $id
+     * @param string                    $content
+     * @param Embed|null                $embed
+     * @param string|null               $author_id
+     * @param string|null               $server_id
+     * @param float|null                $timestamp
+     * @param Attachment[]              $attachments
+     * @param bool                      $everyone_mentioned
+     * @param string[]                  $users_mentioned
+     * @param string[]                  $roles_mentioned
+     * @param string[]                  $channels_mentioned
+     * @param string[]                  $stickers
+     * @param string|null               $link
+     * @param bool                      $tts
+     * 
      */
     public function __construct(
         string $channel_id,

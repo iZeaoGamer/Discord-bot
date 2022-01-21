@@ -48,6 +48,7 @@ class AuditLog implements \Serializable
      * @param Entry[]                   $audit_log_entries
      * @param ServerScheduledEvent[]    $events
      * @param ThreadChannel[]           $threads
+     * 
      */
     public function __construct(
         string $serverId,

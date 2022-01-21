@@ -45,6 +45,18 @@ class Webhook implements \Serializable
     /** @var string|null Only present on TYPE_NORMAL. */
     private $token;
 
+
+    /** Webhook Constructor.
+     * 
+     * @param int                   $type
+     * @param string                $channel_id
+     * @param string                $name
+     * @param string|null           $id
+     * @param string|null           $user_id
+     * @param string|null           $avatar
+     * @param string|null           $token
+     * 
+     */
     public function __construct(
         int $type,
         string $channel_id,

@@ -47,6 +47,20 @@ class Emoji implements \Serializable
     /** @var bool */
     private $available;
 
+
+    /** Emoji Constructor
+     * 
+     * @param string                $name
+     * @param string                $server_id
+     * @param bool                  $managed
+     * @param string|null           $id
+     * @param bool                  $require_colons
+     * @param string[]              $roles
+     * @param User|null             $user
+     * @param bool                  $animated
+     * @param bool                  $available
+     * 
+     */
     public function __construct(
         string $name,
         string $server_id,

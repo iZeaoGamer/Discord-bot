@@ -28,6 +28,15 @@ class Option implements \Serializable
     /** @var bool */
     private $focused;
 
+
+    /** Option Constructor
+     * 
+     * @param string            $name
+     * @param int               $type
+     * @param mixed             $value
+     * @param bool              $focused
+     * 
+     */
     public function __construct(string $name, int $type, mixed $value, bool $focused)
     {
         $this->setName($name);

@@ -56,6 +56,7 @@ class Options implements \Serializable
      * @param string|null           $id
      * @param string|null           $type
      * @param string|null           $role_name
+     * 
      */
     public function __construct(
         ?string $delete_member_days = null,

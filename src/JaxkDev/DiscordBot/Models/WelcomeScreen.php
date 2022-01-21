@@ -21,6 +21,13 @@ class WelcomeScreen implements \Serializable
     /** @var WelcomeChannel[] */
     private $channels;
 
+
+    /** WelcomeScreen Constructor.
+     * 
+     * @param string                    $description
+     * @param WelcomeChannel[]          $channels
+     * 
+     */
     public function __construct(string $description, array $channels)
     {
         $this->setDescription($description);

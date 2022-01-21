@@ -38,6 +38,17 @@ class Attachment implements \Serializable
     /** @var int|null Image height, null if not an image. */
     private $height;
 
+    /** Attachment Constructor
+     * 
+     * @param string            $id
+     * @param string            $file_name
+     * @param string            $content_type
+     * @param int               $size
+     * @param string            $url
+     * @param int|null          $width
+     * @param int|null          $height
+     * 
+     */
     public function __construct(
         string $id,
         string $file_name,

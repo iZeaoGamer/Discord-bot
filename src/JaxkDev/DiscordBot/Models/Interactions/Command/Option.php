@@ -59,16 +59,17 @@ class Option implements \Serializable
     public const NUMBER = 10; // Any double between -2^53 and 2^53
 
     /** Command Option Constructor
-     * @param int $type
-     * @param string $name
-     * @param string $description
-     * @param bool $required
-     * @param Choice[] $choices
-     * @param Option[] $sub_options
-     * @param int[] $channel_typs
-     * @param int $min
-     * @param int $max
-     * @param bool $autoComplete
+     * @param int               $type
+     * @param string            $name
+     * @param string            $description
+     * @param bool              $required
+     * @param Choice[]          $choices
+     * @param Option[]          $sub_options
+     * @param int[]             $channel_typs
+     * @param int               $min
+     * @param int               $max
+     * @param bool              $autoComplete
+     * 
      */
     public function __construct(
         int $type,
@@ -81,7 +82,7 @@ class Option implements \Serializable
         int $min = 0,
         int $max = 1,
         bool $autoComplete = false
-    ){
+    ) {
         $this->setType($type);
         $this->setName($name);
         $this->setDescription($description);
@@ -93,11 +94,13 @@ class Option implements \Serializable
         $this->setMaxValue($max);
         $this->setAutoComplete($autoComplete);
     }
-    public function getType(): int{
+    public function getType(): int
+    {
         return $this->type;
     }
-    public function setType(int $type): void{
-        if($type < self::SUB_COMMAND or $type > self::NUMBER){
+    public function setType(int $type): void
+    {
+        if ($type < self::SUB_COMMAND or $type > self::NUMBER) {
             throw new \AssertionError("Option type: {$type} is invalid. It must be either from 1-10.");
         }
         $this->type = $type;
@@ -121,61 +124,73 @@ class Option implements \Serializable
         }
         $this->description = $description;
     }
-    public function isRequired(): bool{
+    public function isRequired(): bool
+    {
         return $this->required;
     }
-    public function setRequired(bool $required): void{
+    public function setRequired(bool $required): void
+    {
         $this->required = $required;
     }
 
     /** @return Choice[] */
-    public function getChoices(): array{
+    public function getChoices(): array
+    {
         return $this->choices;
     }
 
     /** @param Choice[] $choices */
-    public function setChoices(array $choices): void{
+    public function setChoices(array $choices): void
+    {
         $this->choices = $choices;
     }
 
     /** @return Option[] */
-    public function getSubOptions(): array{
+    public function getSubOptions(): array
+    {
         return $this->sub_options;
     }
 
     /** @param Option[] $sub_options */
-    public function setSubOptions(array $sub_options): void{
+    public function setSubOptions(array $sub_options): void
+    {
         $this->sub_options = $sub_options;
     }
 
     /** @return int[] */
-    public function getChannelTypes(): array{
+    public function getChannelTypes(): array
+    {
         return $this->channelTypes;
     }
 
     /** @param int[] $channel_types */
-    public function setChannelTypes(array $channel_types): void{
-        foreach($channel_types as $type){
-            if($type < 0 or $type > 13){
+    public function setChannelTypes(array $channel_types): void
+    {
+        foreach ($channel_types as $type) {
+            if ($type < 0 or $type > 13) {
                 throw new \AssertionError("Channel Type: {$type} is invalid. It must be between 0-13.");
             }
         }
         $this->channelTypes = $channel_types;
     }
-    public function getMinValue(): int{
+    public function getMinValue(): int
+    {
         return $this->minValue;
     }
     public function setMinValue(int $min): void
     {
         $this->minValue = $min;
     }
-    public function getMaxValue(): int{
+    public function getMaxValue(): int
+    {
         return $this->maxValue;
     }
-    public function setMaxValue(int $max){
+    public function setMaxValue(int $max)
+    {
         $this->maxValue = $max;
     }
-    public function isAutoComplete(): bool{
+    public function isAutoComplete(): bool
+    {
         return $this->autoComplete;
     }
     public function setAutoComplete(bool $auto): void

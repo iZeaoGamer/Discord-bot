@@ -150,6 +150,7 @@ class Entry implements \Serializable
      * @param Options   $options
      * @param string    $reason
      * @param Change[]  $changes
+     * 
      */
     public function __construct(
         string $id,

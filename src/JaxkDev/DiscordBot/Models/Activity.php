@@ -92,6 +92,30 @@ class Activity implements \Serializable
 
     //Buttons (max 2) https://github.com/discord-php/DiscordPHP/issues/561
 
+
+    /** Activity Constructor
+     * 
+     * @param string                $name
+     * @param int                   $type
+     * @param int|null              $created_at
+     * @param string|null           $url
+     * @param int|null              $start_timestamp
+     * @param int|null              $end_timestamp
+     * @param string|null           $application_id
+     * @param string|null           $details
+     * @param string|null           $state
+     * @param string|null           $emoji
+     * @param string|null           $party_id
+     * @param int|null              $party_size
+     * @param int|null              $party_max_size
+     * @param string|null           $large_image
+     * @param string|null           $large_text
+     * @param string|null           $small_image
+     * @param string|null           $small_text
+     * @param bool|null             $instance
+     * @param int|null              $flags
+     * 
+     */
     public function __construct(
         string $name,
         int $type,
@@ -109,8 +133,7 @@ class Activity implements \Serializable
         ?string $large_image = null,
         ?string $large_text = null,
         ?string $small_image = null,
-        ?string $small_text = null, /*?string $join_secret = null,
-                                ?string $spectate_secret = null, ?string $match_secret = null,*/
+        ?string $small_text = null,
         ?bool $instance = null,
         ?int $flags = null
     ) {

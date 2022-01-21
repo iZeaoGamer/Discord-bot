@@ -50,16 +50,17 @@ class InteractionData implements \Serializable
     private $options;
 
     /** InteractionData Constructor
-     * @param string|null $name
-     * @param int|null $type
-     * @param int|null $component_type
-     * @param string|null $id
-     * @param string[]|null $values
-     * @param string|null $custom_id
-     * @param Resolved|null $resolved
-     * @param string|null $target_id
-     * @param string|null $server_id
-     * @param Option[] $options
+     * @param string|null               $name
+     * @param int|null                  $type
+     * @param int|null                  $component_type
+     * @param string|null               $id
+     * @param string[]|null             $values
+     * @param string|null               $custom_id
+     * @param Resolved|null             $resolved
+     * @param string|null               $target_id
+     * @param string|null               $server_id
+     * @param Option[]                  $options
+     * 
      */
     public function __construct(
         ?string $name,

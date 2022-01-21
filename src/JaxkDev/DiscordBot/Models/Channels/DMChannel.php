@@ -35,6 +35,16 @@ class DMChannel implements \Serializable
     /** @var string|null */
     protected $application_id; //null when the application id isn't a bot.
 
+
+    /** DM Channel Constructor.
+     * 
+     * @param string                $recipient_id
+     * @param string                $owner_id
+     * @param string|null           $id
+     * @param array                 $users
+     * @param string|null           $application_id
+     * 
+     */
     public function __construct(
         string $recipient_id,
         string $owner_id,

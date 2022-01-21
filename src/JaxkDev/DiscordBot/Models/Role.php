@@ -48,6 +48,21 @@ class Role implements \Serializable
     /** @var string|null */
     private $icon;
 
+
+    /** Role Constructor
+     * 
+     * @param string                    $name
+     * @param int                       $colour
+     * @param bool                      $hoisted
+     * @param int                       $hoisted_position
+     * @param bool                      $mentionable
+     * @param string                    $server_id
+     * @param bool                      $managed
+     * @param string|null               $icon
+     * @param RolePermissions           $permissions
+     * @param string|null               $id
+     * 
+     */
     public function __construct(
         string $name,
         int $colour,

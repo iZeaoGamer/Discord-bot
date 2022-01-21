@@ -65,17 +65,18 @@ class Member implements \Serializable
     /**
      * Member constructor.
      *
-     * @param string               $user_id
-     * @param string               $username
-     * @param string               $discriminator
-     * @param int                  $join_timestamp
-     * @param string               $server_id
-     * @param string[]             $roles
-     * @param string|null          $nickname
-     * @param int|null             $boost_timestamp
-     * @param RolePermissions|null $permissions
-     * @param Activity[]|null      $activities
-     * @param VoiceState|null      $voice_state
+     * @param string                        $user_id
+     * @param string                        $username
+     * @param string                        $discriminator
+     * @param int                           $join_timestamp
+     * @param string                        $server_id
+     * @param string[]                      $roles
+     * @param string|null                   $nickname
+     * @param int|null                      $boost_timestamp
+     * @param RolePermissions|null          $permissions
+     * @param Activity[]|null               $activities
+     * @param VoiceState|null               $voice_state
+     * 
      */
     public function __construct(
         string $user_id,

@@ -53,6 +53,20 @@ class Client implements \Serializable
     /** @var Array<string, bool> */
     private $flags = [];
 
+
+    /** Client Constructor
+     * 
+     * @param string                $id
+     * @param string                $username
+     * @param string                $discriminator
+     * @param string                $avatar_url
+     * @param bool                  $bot
+     * @param Application           $application
+     * @param Server[]              $servers
+     * @param User[]                $users
+     * @param DMChannel[]           $channels
+     * 
+     */
     public function __construct(
         string $id,
         string $username,

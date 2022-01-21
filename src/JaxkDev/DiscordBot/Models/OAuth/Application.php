@@ -59,6 +59,24 @@ class Application implements \Serializable
     /** @var object|null */
     private $team;
 
+
+    /** Application Constructor.
+     * 
+     * @param string                $name
+     * @param string                $description
+     * @param string                $invite_url
+     * @param string|null           $id
+     * @param string|null           $icon
+     * @param string[]              $rpc_origins
+     * @param User|null             $user
+     * @param bool                  $bot_public   
+     * @param bool                  $bot_require_code_grant
+     * @param string|null           $terms_of_service_url
+     * @param string|null           $privacy_policy_url
+     * @param string                $verify_key
+     * @param object|null           $team
+     * 
+     */
     public function __construct(
         string $name,
         string $description,

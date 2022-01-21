@@ -28,6 +28,15 @@ class Author implements \Serializable
     /** @var null|string Must be prefixed with `https` */
     private $proxy_icon_url;
 
+
+    /** Author Constructor
+     * 
+     * @param string|null           $name
+     * @param string|null           $url
+     * @param string|null           $icon_url
+     * @param string|null           $proxy_icon_url
+     * 
+     */
     public function __construct(?string $name = null, ?string $url = null, ?string $icon_url = null, ?string $proxy_icon_url = null)
     {
         $this->setName($name);

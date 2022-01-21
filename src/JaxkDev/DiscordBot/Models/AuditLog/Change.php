@@ -22,6 +22,7 @@ class Change implements \Serializable
      * @param mixed $new_value
      * @param mixed $old_value
      * @param string $key
+     * 
      */
     public function __construct(
         mixed $new_value,

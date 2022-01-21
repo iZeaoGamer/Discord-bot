@@ -28,6 +28,15 @@ class Image implements \Serializable
     /** @var null|string */
     private $proxy_icon_url;
 
+
+    /** Image Constructor.
+     * 
+     * @param string|null           $url
+     * @param int|null              $width
+     * @param int|null              $height
+     * @param string|null           $proxy_icon_url
+     * 
+     */
     public function __construct(?string $url = null, ?int $width = null, ?int $height = null, ?string $proxy_icon_url = null)
     {
         $this->setUrl($url);

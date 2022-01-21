@@ -21,21 +21,22 @@ class Permission implements \Serializable
     public const TYPE_ROLE = 1;
     public const TYPE_USER = 2;
 
-  /** @var string */
-  private $id;
+    /** @var string */
+    private $id;
 
-  /** @var int */
-  private $type;
+    /** @var int */
+    private $type;
 
-  /** @var bool */
-  private $permission;
+    /** @var bool */
+    private $permission;
 
     /** 
      * Permission Constructor
      *
-     * @param string $id
-     * @param int $type
-     * @param bool $permission
+     * @param string            $id
+     * @param int               $type
+     * @param bool              $permission
+     * 
      */
     public function __construct(
         string $id,
@@ -43,8 +44,8 @@ class Permission implements \Serializable
         bool $permission
     ) {
         $this->setId($id);
-       $this->setType($type);
-       $this->setPermission($permission);
+        $this->setType($type);
+        $this->setPermission($permission);
     }
 
     public function getId(): string
@@ -58,22 +59,27 @@ class Permission implements \Serializable
         }
         $this->id = $id;
     }
-   public function getType(): int{
-       return $this->type;
-   }
-   public function setType(int $type): void{
-       if($type < self::TYPE_ROLE or $type > self::TYPE_USER){
-           throw new \AssertionError("Permission type: {$type} is invalid. Must be either Role (1) or User (2).");
-       }
-       $this->type = $type;
+    public function getType(): int
+    {
+        return $this->type;
     }
-    public function isAllowed(): bool{
+    public function setType(int $type): void
+    {
+        if ($type < self::TYPE_ROLE or $type > self::TYPE_USER) {
+            throw new \AssertionError("Permission type: {$type} is invalid. Must be either Role (1) or User (2).");
+        }
+        $this->type = $type;
+    }
+    public function isAllowed(): bool
+    {
         return $this->permission;
     }
-    public function isDenied(): bool{
+    public function isDenied(): bool
+    {
         return !$this->permission;
     }
-    public function setPermission(bool $permission): void{
+    public function setPermission(bool $permission): void
+    {
         $this->permission = $permission;
     }
     //----- Serialization -----//
@@ -82,7 +88,7 @@ class Permission implements \Serializable
         return serialize([
             $this->id,
             $this->type,
-            $this->permission 
+            $this->permission
         ]);
     }
 

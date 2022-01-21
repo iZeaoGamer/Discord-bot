@@ -29,8 +29,21 @@ class WelcomeChannel implements \Serializable
     /** @var string|null */
     private $emojiName; //null if emoji not set.
 
-    public function __construct(string $channel_id, string $description, ?string $emoji_id = null, ?string $emoji_name)
-    {
+
+    /** WelcomeChannel Constructor
+     * 
+     * @param string                $channel_id
+     * @param string                $description
+     * @param string|null           $emoji_id
+     * @param string|null           $emoji_name
+     * 
+     */
+    public function __construct(
+        string $channel_id,
+        string $description,
+        ?string $emoji_id = null,
+        ?string $emoji_name = null
+    ) {
         $this->setChannelId($channel_id);
         $this->setDescription($description);
         $this->setEmojiId($emoji_id);

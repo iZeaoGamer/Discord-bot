@@ -36,12 +36,13 @@ class Stage implements \Serializable
     /**
      * Stage constructor.
      *
-     * @param string      $server_id
-     * @param string      $channel_id
-     * @param int         $topic
-     * @param string|null $id
-     * @param int         $privacy_level
-     * @param bool        $disableDiscovery
+     * @param string                $server_id
+     * @param string                $channel_id
+     * @param int                   $topic
+     * @param string|null           $id
+     * @param int                   $privacy_level
+     * @param bool                  $disableDiscovery
+     * 
      */
     public function __construct(
         string $server_id,

@@ -40,6 +40,20 @@ class VoiceState implements \Serializable
     /** @var bool */
     private $suppress;
 
+
+    /** VoiceState Constructor
+     * 
+     * @param string                $session_id
+     * @param string|null           $channel_id
+     * @param bool                  $deaf
+     * @param bool                  $mute
+     * @param bool                  $self_deaf
+     * @param bool                  $self_mute
+     * @param bool                  $self_stream
+     * @param bool                  $self_video
+     * @param bool                  $suppress
+     * 
+     */
     public function __construct(
         string $session_id,
         ?string $channel_id,

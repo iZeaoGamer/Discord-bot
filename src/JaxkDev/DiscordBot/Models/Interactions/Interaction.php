@@ -58,6 +58,23 @@ class Interaction implements \Serializable
     /** @var string|null */
     private $name; //only null when object isn't an stdclass.
 
+
+    /** Interaction Constructor
+     * 
+     * @param string|null                   $application_id
+     * @param int                           $type
+     * @param User|null                     $user
+     * @param string|null                   $server_id
+     * @param string|null                   $channel_id
+     * @param string|null                   $id
+     * @param InteractionData|null          $data
+     * @param string|null                   $token
+     * @param int|null                      $version
+     * @param Message|null                  $message
+     * @param Member|null                   $member
+     * @param string|null                   $name
+     * 
+     */
     public function __construct(
         ?string $application_id,
         int $type,

@@ -37,16 +37,17 @@ class TextChannel extends ServerChannel
     /**
      * TextChannel constructor.
      *
-     * @param string      $topic
-     * @param string      $name
-     * @param int         $position
-     * @param string      $server_id
-     * @param bool        $nsfw
-     * @param int|null    $rate_limit
-     * @param string|null $category_id
-     * @param string|null $id
-     * @param string|null $last_message_id
-     * @param string|null $permissions
+     * @param string                $topic
+     * @param string                $name
+     * @param int                   $position
+     * @param string                $server_id
+     * @param bool                  $nsfw
+     * @param int|null              $rate_limit
+     * @param string|null           $category_id
+     * @param string|null           $id
+     * @param string|null           $last_message_id
+     * @param string|null           $permissions
+     * 
      */
     public function __construct(
         string $topic,

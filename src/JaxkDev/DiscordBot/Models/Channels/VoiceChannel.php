@@ -29,14 +29,15 @@ class VoiceChannel extends ServerChannel
     /**
      * VoiceChannel constructor.
      *
-     * @param int         $bitrate
-     * @param int         $member_limit
-     * @param string      $name
-     * @param int         $position
-     * @param string      $server_id
-     * @param string[]    $members Array of Member ID's
-     * @param string|null $category_id
-     * @param string|null $id
+     * @param int                   $bitrate
+     * @param int                   $member_limit
+     * @param string                $name
+     * @param int                   $position
+     * @param string                $server_id
+     * @param string[]              $members Array of Member ID's
+     * @param string|null           $category_id
+     * @param string|null           $id
+     * 
      */
     public function __construct(
         int $bitrate,

@@ -56,8 +56,38 @@ class ServerScheduledEvent implements \Serializable
     private $userCount;
 
 
-    public function __construct(string $server_id, string $name, ?string $id = null, ?string $channel_id = null, ?string $creator_id = null, ?string $description = null, ?int $start = null, ?int $end = null, int $privacy_level = 2, int $status = 3, int $entity_type = 1, ?string $entity_id = null, int $user_count = 0)
-    {
+    /** ServerScheduledEvent Constructor
+     * 
+     * @param string                $server_id
+     * @param string                $name
+     * @param string|null           $id
+     * @param string|null           $channel_id
+     * @param string|null           $creator_id
+     * @param string|null           $description
+     * @param int|null              $start
+     * @param int|null              $end
+     * @param int                   $privacy_level
+     * @param int                   $status
+     * @param int                   $entry_type
+     * @param string|null           $entity_id
+     * @param int                   $user_count
+     * 
+     */
+    public function __construct(
+        string $server_id,
+        string $name,
+        ?string $id = null,
+        ?string $channel_id = null,
+        ?string $creator_id = null,
+        ?string $description = null,
+        ?int $start = null,
+        ?int $end = null,
+        int $privacy_level = 2,
+        int $status = 3,
+        int $entity_type = 1,
+        ?string $entity_id = null,
+        int $user_count = 0
+    ) {
         $this->setServerId($server_id);
         $this->setName($name);
         $this->setId($id);

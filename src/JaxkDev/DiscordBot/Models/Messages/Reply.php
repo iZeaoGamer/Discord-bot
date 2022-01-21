@@ -23,23 +23,24 @@ class Reply extends Message
     /**
      * Reply constructor.
      *
-     * @param string       $channel_id
-     * @param string|null  $referenced_message_id
-     * @param string|null  $id
-     * @param string       $content
-     * @param Embed|null   $embed
-     * @param string|null  $author_id
-     * @param string|null  $server_id
-     * @param float|null   $timestamp
-     * @param Attachment[] $attachments
-     * @param bool         $everyone_mentioned
-     * @param string[]     $users_mentioned
-     * @param string[]     $roles_mentioned
-     * @param string[]     $channels_mentioned
-     * @param string[]     $stickers
-     * @param string|null $link
-     * @param bool $tts
-     * */
+     * @param string                $channel_id
+     * @param string|null           $referenced_message_id
+     * @param string|null           $id
+     * @param string                $content
+     * @param Embed|null            $embed
+     * @param string|null           $author_id
+     * @param string|null           $server_id
+     * @param float|null            $timestamp
+     * @param Attachment[]          $attachments
+     * @param bool                  $everyone_mentioned
+     * @param string[]              $users_mentioned
+     * @param string[]              $roles_mentioned
+     * @param string[]              $channels_mentioned
+     * @param string[]              $stickers
+     * @param string|null           $link
+     * @param bool                  $tts
+     *
+     */
     public function __construct(
         string $channel_id,
         ?string $referenced_message_id = null,

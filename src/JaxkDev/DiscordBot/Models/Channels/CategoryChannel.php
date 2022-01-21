@@ -15,6 +15,14 @@ namespace JaxkDev\DiscordBot\Models\Channels;
 class CategoryChannel extends ServerChannel
 {
 
+    /** CategoryChannel Constructor
+     * 
+     * @param string                $name
+     * @param int                   $position
+     * @param string                $server_id
+     * @param string|null           $id
+     * 
+     */
     public function __construct(string $name, int $position, string $server_id, ?string $id = null)
     {
         parent::__construct($name, $position, $server_id, null, $id);

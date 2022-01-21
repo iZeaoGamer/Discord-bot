@@ -177,6 +177,47 @@ class Server implements \Serializable
     /** @var WelcomeScreen|null */
     private $welcomeScreen; //null when welcome screen is disabled.
 
+
+    /** Server Constructor
+     * 
+     * @param string                            $id
+     * @param string                            $name
+     * @param string                            $region
+     * @param string                            $owner_id
+     * @param bool                              $large
+     * @param int                               $member_count
+     * @param string|null                       $icon_url
+     * @param WelcomeScreen|null                $screen
+     * @param string|null                       $afk_channel_id
+     * @param int|null                          $afk_timeout
+     * @param string|null                       $splash
+     * @param string|null                       $discovery_splash
+     * @param int                               $verification_level
+     * @param int                               $default_notifications
+     * @param int                               $content_filter
+     * @param int                               $mfa_level
+     * @param string|null                       $application_id
+     * @param bool                              $widget_enabled
+     * @param string|null                       $widget_channel_id
+     * @param string|null                       $system_channel_id
+     * @param int                               $system_channel_flags
+     * @param string|null                       $rules_channel_id
+     * @param string|null                       $vanity_url_code
+     * @param string|null                       $description
+     * @param string|null                       $banner
+     * @param int                               $premiumm_tier
+     * @param int                               $premium_subscription_count
+     * @param string                            $preferred_locale
+     * @param string|null                       $public_updates_channel_id
+     * @param int                               $nsfw_level
+     * @param bool                              $premium_progress_bar_enabled
+     * @param ServerScheduledEvent[]            $schedules
+     * @param ServerTemplate[]                  $templates
+     * @param Role[]                            $roles
+     * @param ServerChannel[]                   $channels
+     * @param Member[]                          $members 
+     * 
+     */
     public function __construct(
         string $id,
         string $name,
@@ -596,54 +637,64 @@ class Server implements \Serializable
     {
         $this->progressBar = $progressBar;
     }
-      /** @return ServerScheduledEvent[] */
-      public function getSchedules(): array{
+    /** @return ServerScheduledEvent[] */
+    public function getSchedules(): array
+    {
         return $this->schedules;
     }
 
     /** @param ServerScheduledEvent[] $schedules*/
-    public function setSchedules(array $schedules): void{
-        $this->schedules = $schedules; 
+    public function setSchedules(array $schedules): void
+    {
+        $this->schedules = $schedules;
     }
 
     /** @return ServerTemplate[] */
-    public function getTemplates(): array{
+    public function getTemplates(): array
+    {
         return $this->templates;
     }
 
     /** @param ServerTemplate[] $templates */
-    public function setTemplates(array $templates): void{
-        $this->templates = $templates; 
+    public function setTemplates(array $templates): void
+    {
+        $this->templates = $templates;
     }
 
     /** @return Role[] */
-    public function getRoles(): array{
+    public function getRoles(): array
+    {
         return $this->roles;
     }
 
     /** @param Role[] $roles */
-    public function setRoles(array $roles): void{
-        $this->roles = $roles; 
+    public function setRoles(array $roles): void
+    {
+        $this->roles = $roles;
     }
 
     /** @return ServerChannel[] */
-    public function getChannels(): array{
+    public function getChannels(): array
+    {
         return $this->channels;
     }
 
     /** @param ServerChannel[] $channels */
-    public function setChannels(array $channels): void{
-        $this->channels = $channels; 
+    public function setChannels(array $channels): void
+    {
+        $this->channels = $channels;
     }
 
     /** @return Member[] */
-    public function getMembers(): array{
+    public function getMembers(): array
+    {
         return $this->members;
     }
 
     /** @param Member[] $members */
-    public function setMembers(array $members): void{
-        $this->members = $members; 
+    public function setMembers(array $members): void
+    {
+        $this->members = $members;
     }
     public function getCreationTimestamp(): float
     {

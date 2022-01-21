@@ -42,6 +42,17 @@ class Reaction implements \Serializable
     private $me; //null when creating.
 
 
+    /** Reaction Constructor
+     * 
+     * @param string                $message_id
+     * @param string                $channel_id
+     * @param Emoji                 $emoji
+     * @param string|null           $server_id
+     * @param string|null           $id
+     * @param int|null              $count
+     * @param bool|null             $me
+     * 
+     */
     public function __construct(
         string $message_id,
         string $channel_id,

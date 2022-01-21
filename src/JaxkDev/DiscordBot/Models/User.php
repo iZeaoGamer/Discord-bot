@@ -65,6 +65,18 @@ class User implements \Serializable
     /** @var string|null */
     private $email; //null when creating.
 
+
+    /** User Constructor
+     * 
+     * @param string                $id
+     * @param string                $username
+     * @param string                $discriminator
+     * @param string                $avatar_url
+     * @param bool                  $bot
+     * @param int                   $flags_bitwise
+     * @param string|null           $email
+     * 
+     */
     public function __construct(
         string $id,
         string $username,

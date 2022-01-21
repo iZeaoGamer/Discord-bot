@@ -17,14 +17,14 @@ use JaxkDev\DiscordBot\Plugin\Utils;
 class Command implements \Serializable
 {
 
-     /** Slash commands; a text-based command that shows up when a user types / */
-     public const CHAT_INPUT = 1;
+    /** Slash commands; a text-based command that shows up when a user types / */
+    public const CHAT_INPUT = 1;
 
-     /** A UI-based command that shows up when you right click or tap on a user */
-     public const USER = 2;
- 
-     /** A UI-based command that shows up when you right click or tap on a message */
-     public const MESSAGE = 3;
+    /** A UI-based command that shows up when you right click or tap on a user */
+    public const USER = 2;
+
+    /** A UI-based command that shows up when you right click or tap on a message */
+    public const MESSAGE = 3;
 
     /** @var int */
     private $type;
@@ -59,16 +59,17 @@ class Command implements \Serializable
 
 
     /** Command Constructor 
-     * @param int $type
-     * @param string $name
-     * @param string $description
-     * @param bool $default_permission
-     * @param Overwrite[] $overwrites
-     * @param Option[] $options
-     * @param string|null $id
-     * @param string|null $application_id
-     * @param string|null $server_id
-     * @param string|null $version
+     * @param int                   $type
+     * @param string                $name
+     * @param string                $description
+     * @param bool                  $default_permission
+     * @param Overwrite[]           $overwrites
+     * @param Option[]              $options
+     * @param string|null           $id
+     * @param string|null           $application_id
+     * @param string|null           $server_id
+     * @param string|null           $version
+     * 
      */
     public function __construct(
         int $type,
@@ -99,7 +100,7 @@ class Command implements \Serializable
     }
     public function setType(int $type): void
     {
-        if($type < self::CHAT_INPUT or $type > self::MESSAGE){
+        if ($type < self::CHAT_INPUT or $type > self::MESSAGE) {
             throw new \AssertionError("Command type {$type} is invalid! It must be either Chat input (1), User (2) or Message (3).");
         }
         $this->type = $type;
@@ -141,13 +142,15 @@ class Command implements \Serializable
     }
 
     /** @return Overwrite[] */
-    public function getOverwrites(): array{
+    public function getOverwrites(): array
+    {
         return $this->overwrite;
     }
     /** @param Overwrite[] $overwrites
      * @return void
      */
-    public function setOverwrites(array $overwrites): void{
+    public function setOverwrites(array $overwrites): void
+    {
         $this->overwrite = $overwrites;
     }
     /** @param Option[] $options */
