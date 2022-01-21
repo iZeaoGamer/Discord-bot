@@ -26,13 +26,13 @@ class RequestServerAuditLog extends Packet
     /** @var int */
     private $action_type;
 
-    /** @var string */
+    /** @var string|null */
     private $before;
 
     /** @var int */
     private $limit;
 
-    public function __construct(string $server_id, string $user_id, int $action_type, string $before, int $limit)
+    public function __construct(string $server_id, string $user_id, int $action_type, ?string $before, int $limit)
     {
         parent::__construct();
         $this->server_id = $server_id;
@@ -54,7 +54,7 @@ class RequestServerAuditLog extends Packet
     {
         return $this->action_type;
     }
-    public function getBefore(): string
+    public function getBefore(): ?string
     {
         return $this->before;
     }

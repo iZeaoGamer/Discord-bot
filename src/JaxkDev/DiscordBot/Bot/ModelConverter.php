@@ -32,6 +32,7 @@ use Discord\Parts\Guild\Ban as DiscordBan;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\Guild\Emoji as DiscordEmoji;
+use Discord\Parts\Guild\AuditLog\Change as DiscordChange;
 use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
 use Discord\Parts\Permissions\RolePermission as DiscordRolePermission;
 use Discord\Parts\User\Activity as DiscordActivity;
@@ -93,6 +94,7 @@ use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Models\AuditLog\AuditLog;
 use JaxkDev\DiscordBot\Models\AuditLog\Options;
 use JaxkDev\DiscordBot\Models\AuditLog\Entry;
+use JaxkDev\DiscordBot\Models\AuditLog\Change;
 use JaxkDev\DiscordBot\Models\Sticker;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Models\Emoji;
@@ -377,13 +379,26 @@ abstract class ModelConverter
     }
     static public function genModelEntryLog(DiscordEntryLog $entry): Entry
     {
+        /** @var Change[] */
+        $changes = [];
+        foreach($entry->changes as $change){
+            $changes[] = self::genModelEntryChange($change);
+        }
         return new Entry(
             $entry->id,
             $entry->user_id,
             $entry->target_id,
             $entry->action_type,
             self::genModelAuditLogOptions($entry->options),
-            $entry->reason
+            $entry->reason,
+            $changes ?? []
+        );
+    }
+    static public function genModelEntryChange(DiscordChange $change){
+        return new Change(
+            $change->new_value,
+            $change->old_value,
+            $change->key
         );
     }
     static public function genModelAuditLogOptions(DiscordEntryOptions $option): Options

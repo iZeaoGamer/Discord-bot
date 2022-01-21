@@ -302,7 +302,7 @@ array(5) {
             foreach ($guild->commands as $command) {
                 $pk->addCommand(ModelConverter::genModelCommand($command));
             }
-        //    $this->client->getLogger()->info("Fetched " . sizeof($guild->commands) . " Guild Commannds!");
+            //    $this->client->getLogger()->info("Fetched " . sizeof($guild->commands) . " Guild Commannds!");
             $this->client->getThread()->writeOutboundData($pk);
             /** @var DiscordChannel $channel */
             foreach ($guild->channels as $channel) {
@@ -540,10 +540,10 @@ array(5) {
 
     public function onMessageUpdate(DiscordMessage $message, Discord $discord, ?DiscordMessage $old): void
     {
-        if($old){
-            if(!$this->checkMessage($old)) return;
+        if ($old) {
+            if (!$this->checkMessage($old)) return;
             $oldMessage = ModelConverter::genModelMessage($old);
-        }else{
+        } else {
             $oldMessage = null;
         }
         if (!$this->checkMessage($message)) return;
@@ -639,9 +639,9 @@ array(5) {
 
     public function onMemberUpdate(DiscordMember $member, Discord $discord, ?DiscordMember $old): void
     {
-        if($old){
+        if ($old) {
             $oldModel = ModelConverter::genModelMember($old);
-        }else{
+        } else {
             $oldModel = null;
         }
         $packet = new MemberUpdatePacket(ModelConverter::genModelMember($member), $oldModel);
@@ -705,7 +705,7 @@ array(5) {
         }
         $commands = [];
         /** @var DiscordCommand $command */
-        foreach($guild->commands as $command){
+        foreach ($guild->commands as $command) {
             $commands[] = ModelConverter::genModelCommand($command);
         }
         if ($guild->region === null) {

@@ -45,6 +45,18 @@ class Options implements \Serializable
     /** @var string|null */
     private $roleName;
 
+
+    /** Options Constructor.
+     * 
+     * @param string|null           $delete_member_days
+     * @param string|null           $members_removed
+     * @param string|null           $channel_id
+     * @param string|null           $message_id
+     * @param string|null           $count
+     * @param string|null           $id
+     * @param string|null           $type
+     * @param string|null           $role_name
+     */
     public function __construct(
         ?string $delete_member_days = null,
         ?string $members_removed = null,

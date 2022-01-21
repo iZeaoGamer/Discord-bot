@@ -137,13 +137,28 @@ class Entry implements \Serializable
     /** @var string */
     private $reason;
 
+    /** @var Change[] */
+    private $changes = [];
+
+
+    /** Entry Constructor.
+     * 
+     * @param string    $id
+     * @param string    $userId
+     * @param string    $target_id
+     * @param int       $action_type
+     * @param Options   $options
+     * @param string    $reason
+     * @param Change[]  $changes
+     */
     public function __construct(
         string $id,
         string $userId,
         string $target_id,
         int $action_type,
         Options $options,
-        string $reason
+        string $reason,
+        array $changes
     ) {
         $this->setId($id);
         $this->setUserId($userId);
@@ -151,6 +166,7 @@ class Entry implements \Serializable
         $this->setActionType($action_type);
         $this->setOption($options);
         $this->setReason($reason);
+        $this->setChanges($changes);
     }
     public function getId(): string
     {
@@ -210,6 +226,16 @@ class Entry implements \Serializable
         $this->reason = $reason;
     }
 
+    /** @return Change[] */
+    public function getChanges(): array{
+        return $this->changes;
+    }
+
+    /** @param Change[] $changes */
+    public function setChanges(array $changes){
+        $this->changes = $changes;
+    }
+
     //----- Serialization -----//
 
     public function serialize(): ?string
@@ -220,7 +246,8 @@ class Entry implements \Serializable
             $this->targetId,
             $this->actionType,
             $this->option,
-            $this->reason
+            $this->reason,
+            $this->changes
         ]);
     }
 
@@ -232,7 +259,8 @@ class Entry implements \Serializable
             $this->targetId,
             $this->actionType,
             $this->option,
-            $this->reason
+            $this->reason,
+            $this->changes
         ] = unserialize($data);
     }
 }

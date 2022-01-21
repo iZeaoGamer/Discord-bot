@@ -70,7 +70,7 @@ class Client extends Part
      *
      * @return User
      */
-    protected function getUserAttribute()
+    protected function getUserAttribute(): User
     {
         return $this->factory->create(User::class, $this->attributes, true);
     }

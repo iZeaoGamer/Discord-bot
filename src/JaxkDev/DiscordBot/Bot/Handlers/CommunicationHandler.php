@@ -2147,17 +2147,22 @@ class CommunicationHandler
 
     private function handleAuditLog(RequestServerAuditLog $pk): void
     {
-        $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
+        print_r("\n\nSearching Audit Log via CommunicationHandler..");
+        $this->getMember($pk, $pk->getServerId(), $pk->getUserId(), function (DiscordMember $member, DiscordGuild $guild) use ($pk) {
+            print_r("\n\nFound Member. Getting Audit Log Object..");
             $guild->getAuditLog([
-                "user_id" => $pk->getUserId(),
+                "user_id" => $member,
                 "action_type" => $pk->getActionType(),
                 "before" => $pk->getBefore(),
                 "limit" => $pk->getLimit()
             ])->then(function (DiscordAuditLog $log) use ($pk) {
+                print_r("\n\nGot Audit Log.");
                 $this->resolveRequest($pk->getUID(), true, "Searched AuditLog with success!.", [ModelConverter::genModelAuditLog($log)]);
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to search audit log.", [$e->getMessage(), $e->getTraceAsString()]);
             });
+        }, function (\Throwable $e2) use ($pk) {
+            $this->resolveRequest($pk->getUID(), false, "Unable to fetch audit log member.", [$e2->getTrace(), $e2->getTraceAsString()]);
         });
     }
     private function handleFetchWelcomeScreen(RequestFetchWelcomeScreen $pk): void
@@ -2476,7 +2481,7 @@ class CommunicationHandler
                     return;
                 }
                 $ephemeral = $pk->isEphemeral();
-                $this->resolveRequest($pk->getUID(), true, "Interaction sent.", [ModelConverter::genModelInteraction($interaction, $pk->getMessageBuilder(), $ephemeral)]);
+                $this->resolveRequest($pk->getUID(), true, "Interaction sent.", [ModelConverter::genModelInteraction($interaction)]);
                 $this->logger->debug("Sent Interaction ({$pk->getUID()})");
             }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to modify interaction.", [$e->getMessage(), $e->getTraceAsString()]);

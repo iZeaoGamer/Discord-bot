@@ -40,6 +40,15 @@ class AuditLog implements \Serializable
     private $threads = [];
 
 
+    /** AuditLog Constructor.
+     * 
+     * @param string                    $serverId
+     * @param WebHook[]                 $webhooks
+     * @param User[]                    $users
+     * @param Entry[]                   $audit_log_entries
+     * @param ServerScheduledEvent[]    $events
+     * @param ThreadChannel[]           $threads
+     */
     public function __construct(
         string $serverId,
         array $webhooks = [],

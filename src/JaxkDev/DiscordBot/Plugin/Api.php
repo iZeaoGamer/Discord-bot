@@ -1467,12 +1467,12 @@ class Api
      * @param string $server_id
      * @param string $user_id
      * @param int $action_type
-     * @param string $before
+     * @param string|null $before
      * @param int $limit
      * 
      * @return PromiseInterface Resolves with a AuditLog Model.
      */
-    public function searchAuditLog(string $server_id, string $user_id, int $action_type, string $before, int $limit): PromiseInterface
+    public function searchAuditLog(string $server_id, string $user_id, int $action_type, ?string $before, int $limit): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($server_id)) {
             return rejectPromise(new ApiRejection("Invalid server ID '$server_id'."));
