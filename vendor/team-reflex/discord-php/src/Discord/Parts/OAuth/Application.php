@@ -19,9 +19,12 @@ use Discord\Repository\Interaction\GlobalCommandRepository;
 /**
  * The OAuth2 application of the bot.
  *
+ * @see https://discord.com/developers/docs/resources/application
+ *
  * @property string                  $id                     The client ID of the OAuth application.
  * @property string                  $name                   The name of the OAuth application.
- * @property string                  $icon                   The icon hash of the OAuth application.
+ * @property string|null             $icon                   The icon URL of the OAuth application.
+ * @property string                  $icon_hash              The icon hash of the OAuth application.
  * @property string                  $description            The description of the OAuth application.
  * @property string[]                $rpc_origins            An array of RPC origin URLs.
  * @property bool                    $bot_public             When false only app owner can join the app's bot to guilds.
@@ -29,34 +32,52 @@ use Discord\Repository\Interaction\GlobalCommandRepository;
  * @property string|null             $terms_of_service_url   The url of the app's terms of service.
  * @property string|null             $privacy_policy_url     The url of the app's privacy policy
  * @property User|null               $owner                  The owner of the OAuth application.
+ * @property string                  $summary                If this application is a game sold on Discord, this field will be the summary field for the store page of its primary sku.
  * @property string                  $verify_key             The hex encoded key for verification in interactions and the GameSDK's GetTicket.
  * @property object|null             $team                   If the application belongs to a team, this will be a list of the members of that team.
+ * @property string|null             $guild_id               If this application is a game sold on Discord, this field will be the guild to which it has been linked.
+ * @property string|null             $primary_sku_id         If this application is a game sold on Discord, this field will be the id of the "Game SKU" that is created, if exists.
+ * @property string|null             $slug                   If this application is a game sold on Discord, this field will be the URL slug that links to the store page.
+ * @property string|null             $cover_image            The application's default rich presence invite cover image URL.
+ * @property string|null             $cover_image_hash       The application's default rich presence invite cover image hash.
  * @property int                     $flags                  The application's public flags.
  * @property string                  $invite_url             The invite URL to invite the bot to a guild.
  * @property GlobalCommandRepository $commands               The application global commands.
  */
 class Application extends Part
 {
-
-
     /**
      * @inheritdoc
      */
     protected $fillable = [
-        'id',
-        'name',
-        'icon',
-        'description',
-        'rpc_origins',
         'bot_public',
         'bot_require_code_grant',
+        'cover_image',
+        'description',
+        'guild_id',
+        'icon',
+        'id',
+        'name',
+        'owner',
+        'primary_sku_id',
+        'slug',
+        'summary',
+        'team',
+        'verify_key',
+        'rpc_origins',
         'terms_of_service_url',
         'privacy_policy_url',
-        'owner',
-        'verify_key',
-        'team',
         'flags',
     ];
+
+    public const GATEWAY_PRESENCE = (1 << 12);
+    public const GATEWAY_PRESENCE_LIMITED = (1 << 13);
+    public const GATEWAY_GUILD_MEMBERS = (1 << 14);
+    public const GATEWAY_GUILD_MEMBERS_LIMITED = (1 << 15);
+    public const VERIFICATION_PENDING_GUILD_LIMIT = (1 << 16);
+    public const EMBEDDED = (1 << 17);
+    public const GATEWAY_MESSAGE_CONTENT = (1 << 18);
+    public const GATEWAY_MESSAGE_CONTENT_LIMITED = (1 << 19);
 
     /**
      * @inheritdoc
@@ -64,6 +85,38 @@ class Application extends Part
     protected $repositories = [
         'commands' => GlobalCommandRepository::class,
     ];
+
+    /**
+     * Returns the application icon.
+     *
+     * @param string|null $format The image format.
+     * @param int         $size   The size of the image.
+     *
+     * @return string|null The URL to the application icon or null.
+     */
+    public function getIconAttribute(string $format = 'webp', int $size = 1024): ?string
+    {
+        if (!isset($this->attributes['icon'])) {
+            return null;
+        }
+
+        $allowed = ['png', 'jpg', 'webp'];
+        if (!in_array(strtolower($format), $allowed)) {
+            $format = 'webp';
+        }
+
+        return "https://cdn.discordapp.com/app-icons/{$this->id}/{$this->attributes['icon']}.{$format}?size={$size}";
+    }
+
+    /**
+     * Returns the application icon attribute.
+     *
+     * @return string|null The application icon hash or null.
+     */
+    protected function getIconHashAttribute(): ?string
+    {
+        return $this->attributes['icon'];
+    }
 
     /**
      * Returns the owner of the application.
@@ -82,36 +135,37 @@ class Application extends Part
 
         return $this->factory->part(User::class, (array) $this->attributes['owner'], true);
     }
+
     /**
-     * Returns the avatar URL for the application.
+     * Returns the application cover image.
      *
      * @param string|null $format The image format.
      * @param int         $size   The size of the image.
      *
-     * @return string The URL to the clients avatar.
+     * @return string|null The URL to the application cover image or null.
      */
-    public function getIconAttribute(string $format = null, int $size = 1024): string
+    public function getCoverImageAttribute(string $format = 'webp', int $size = 1024): ?string
     {
-        if (empty($this->attributes['icon'])) {
-            $user = $this->getOwnerAttribute();
-            if (isset($user)) {
-                $avatarDiscrim = (int) $user->discriminator % 5;
-
-                return "https://cdn.discordapp.com/embed/avatars/{$avatarDiscrim}.png?size={$size}";
-            }
-        }
-        if (isset($format)) {
-            $allowed = ['png', 'jpg', 'webp', 'gif'];
-            if (!in_array(strtolower($format), $allowed)) {
-                $format = 'webp';
-            }
-        } elseif (strpos($this->attributes['icon'], 'a_') === 0) {
-            $format = 'gif';
-        } else {
-            $format = 'jpg';
+        if (!isset($this->attributes['cover_image'])) {
+            return null;
         }
 
-        return "https://cdn.discordapp.com/app-icons/application_id/{$this->attributes['icon']}.{$format}?size={$size}";
+        $allowed = ['png', 'jpg', 'webp'];
+        if (!in_array(strtolower($format), $allowed)) {
+            $format = 'webp';
+        }
+
+        return "https://cdn.discordapp.com/app-icons/{$this->id}/{$this->attributes['cover_image']}.{$format}?size={$size}";
+    }
+
+    /**
+     * Returns the application cover image attribute.
+     *
+     * @return string|null The application cover image hash or null.
+     */
+    protected function getCoverImageHashAttribute(): ?string
+    {
+        return $this->attributes['cover_image'];
     }
 
     /**
@@ -129,6 +183,7 @@ class Application extends Part
 
         return "https://discordapp.com/oauth2/authorize?client_id={$this->id}&scope=bot&permissions={$permissions}";
     }
+
     /**
      * @inheritdoc
      */
