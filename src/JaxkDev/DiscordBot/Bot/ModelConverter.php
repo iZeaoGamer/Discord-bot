@@ -1001,8 +1001,9 @@ abstract class ModelConverter
                 $discordMessage->tts,
 
             );
+        }else{
+        throw new AssertionError("Discord message type: {$discordMessage->type} not supported.");
         }
-        throw new AssertionError("Discord message type not supported.");
     }
 
     static public function genModelAttachment(\stdClass $attachment): Attachment
