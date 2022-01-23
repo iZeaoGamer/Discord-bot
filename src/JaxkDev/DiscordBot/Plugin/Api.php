@@ -1096,6 +1096,7 @@ class Api
      * Attempt to ban a member.
      *
      * @param Ban $ban
+     * @param string|null $reason
      * 
      * @return PromiseInterface Resolves with no data.
      */
