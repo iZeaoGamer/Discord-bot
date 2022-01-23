@@ -121,7 +121,7 @@ class Member extends Part
 
         // jake plz
         if ($this->discord->id == $this->id) {
-            return $this->http->patch(Endpoint::bind(Endpoint::GUILD_MEMBER_SELF_NICK, $this->guild_id), $payload, $headers);
+            return $this->http->patch(Endpoint::bind(Endpoint::GUILD_MEMBER_SELF, $this->guild_id), $payload, $headers);
         }
 
         return $this->http->patch(Endpoint::bind(Endpoint::GUILD_MEMBER, $this->guild_id, $this->id), $payload, $headers);
@@ -384,7 +384,6 @@ class Member extends Part
      * Returns the user attribute.
      *
      * @return User       The user that owns the member.
-     * @throws \Exception
      */
     protected function getUserAttribute(): User
     {
@@ -392,7 +391,7 @@ class Member extends Part
             return $user;
         }
 
-        return $this->factory->create(User::class, $this->attributes['user'], true);
+        return $this->factory->part(User::class, (array) $this->attributes['user'], true);
     }
 
     /**
@@ -569,7 +568,7 @@ class Member extends Part
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         if ($this->nick) {
             return "<@!{$this->id}>";

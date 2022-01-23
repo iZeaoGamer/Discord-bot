@@ -208,7 +208,7 @@ class Embed extends Part
      * @return $this
      *
      */
-    protected function setTitleAttribute(string $title)
+    protected function setTitleAttribute(string $title): self
     {
         if (poly_strlen($title) == 0) {
             $this->attributes['title'] = null;
@@ -230,7 +230,7 @@ class Embed extends Part
      *
      * @return $this
      */
-    public function setTitle(string $title)
+    public function setTitle(string $title): self
     {
         $this->title = $title;
 
@@ -244,7 +244,7 @@ class Embed extends Part
      *
      * @return $this
      */
-    public function setType(string $type)
+    public function setType(string $type): self
     {
         $this->type = $type;
 
@@ -258,7 +258,7 @@ class Embed extends Part
      *
      * @return $this
      */
-    public function setDescription(string $description)
+    public function setDescription(string $description): self
     {
         $this->description = $description;
 
@@ -272,7 +272,7 @@ class Embed extends Part
      *
      * @return $this
      */
-    public function setColor($color)
+    public function setColor($color): self
     {
         $this->color = $color;
 
@@ -318,7 +318,7 @@ class Embed extends Part
      * @return $this
      *
      */
-    public function addFieldValues(string $name, string $value, bool $inline = false)
+    public function addFieldValues(string $name, string $value, bool $inline = false): self
     {
         return $this->addField([
             'name' => $name,
@@ -339,7 +339,7 @@ class Embed extends Part
      * @return $this
      * 
      */
-    public function setAuthor(string $name, string $iconurl = '', string $url = '')
+    public function setAuthor(string $name, string $iconurl = '', string $url = ''): self
     {
         if (poly_strlen($name) === 0) {
             $this->author = null;
@@ -368,7 +368,7 @@ class Embed extends Part
      *
      * @return $this
      */
-    public function setFooter(string $text, string $iconurl = '')
+    public function setFooter(string $text, string $iconurl = ''): self
     {
         if (poly_strlen($text) === 0) {
             $this->footer = null;
@@ -393,7 +393,7 @@ class Embed extends Part
      *
      * @return $this
      */
-    public function setImage($url)
+    public function setImage($url): self
     {
         $this->image = ['url' => (string) $url];
 
@@ -407,7 +407,7 @@ class Embed extends Part
      *
      * @return $this
      */
-    public function setThumbnail($url)
+    public function setThumbnail($url): self
     {
         $this->thumbnail = ['url' => (string) $url];
 
@@ -423,7 +423,7 @@ class Embed extends Part
      * 
      * @return $this
      */
-    public function setTimestamp(?int $timestamp = null)
+    public function setTimestamp(?int $timestamp = null): self
     {
         $this->timestamp = (new Carbon(($timestamp !== null ? '@' . $timestamp : 'now')))->format('c');
 
@@ -437,7 +437,7 @@ class Embed extends Part
      *
      * @return $this
      */
-    public function setURL(string $url)
+    public function setURL(string $url): self
     {
         $this->url = $url;
 
@@ -520,9 +520,9 @@ class Embed extends Part
     /**
      * Returns all possible embed types.
      *
-     * @return array
+     * @return string[]
      */
-    private static function getEmbedTypes()
+    private static function getEmbedTypes(): array
     {
         return [
             self::TYPE_RICH,

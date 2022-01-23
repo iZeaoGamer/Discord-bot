@@ -652,7 +652,7 @@ class Thread extends Part
      *
      * @return string A formatted mention.
      */
-    public function __toString()
+    public function __toString(): string
     {
         return "<#{$this->id}>";
     }

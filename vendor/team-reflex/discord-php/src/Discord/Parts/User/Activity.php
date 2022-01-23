@@ -114,7 +114,7 @@ class Activity extends Part
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         switch ($this->type) {
             case self::TYPE_PLAYING:

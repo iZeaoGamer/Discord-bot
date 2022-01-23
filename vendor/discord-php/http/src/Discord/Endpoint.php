@@ -111,8 +111,10 @@ class Endpoint
     public const GUILD_MEMBERS_SEARCH = self::GUILD . '/members/search';
     // GET, PATCH, PUT, DELETE
     public const GUILD_MEMBER = self::GUILD . '/members/:user_id';
+    public const GUILD_MEMBER_SELF = self::GUILD . '/members/@me';
     // PATCH
-    public const GUILD_MEMBER_SELF_NICK = self::GUILD . '/members/@me/nick';
+    /** @deprecated 9.0.9 Use `GUILD_MEMBER_SELF` */
+    public const GUILD_MEMBER_SELF_NICK = self::GUILD.'/members/@me/nick';
     // PUT, DELETE
     public const GUILD_MEMBER_ROLE = self::GUILD . '/members/:user_id/roles/:role_id';
 
@@ -186,18 +188,18 @@ class Endpoint
     // GET, DELETE
     public const INVITE = 'invites/:code';
 
-     // POST
-     public const STAGE_INSTANCES = 'stage-instances';
+    // POST
+    public const STAGE_INSTANCES = 'stage-instances';
 
     // GET, PATCH, DELETE
     public const STAGE_INSTANCE = 'stage-instances/:channel_id';
 
-     // GET, POST
-     public const GUILDS_TEMPLATE = self::GUILDS.'/templates/:template_code';
-     // GET, POST
-     public const GUILD_TEMPLATES = self::GUILD.'/templates';
-     // PUT, PATCH, DELETE
-     public const GUILD_TEMPLATE = self::GUILD.'/templates/:template_code';
+    // GET, POST
+    public const GUILDS_TEMPLATE = self::GUILDS . '/templates/:template_code';
+    // GET, POST
+    public const GUILD_TEMPLATES = self::GUILD . '/templates';
+    // PUT, PATCH, DELETE
+    public const GUILD_TEMPLATE = self::GUILD . '/templates/:template_code';
 
     // GET, PATCH
     public const USER_CURRENT = 'users/@me';

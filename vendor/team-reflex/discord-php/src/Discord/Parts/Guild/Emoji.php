@@ -108,7 +108,7 @@ class Emoji extends Part
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         if ($this->id) {
             return '<' . ($this->animated ? 'a' : '') . $this->toReactionString() . '>';

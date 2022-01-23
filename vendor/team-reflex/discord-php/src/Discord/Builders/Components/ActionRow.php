@@ -65,7 +65,7 @@ class ActionRow extends Component
      *
      * @return $this
      */
-    public function removeComponent(Component $component)
+    public function removeComponent(Component $component): self
     {
         if (($idx = array_search($component, $this->components)) !== null) {
             array_splice($this->components, $idx, 1);
