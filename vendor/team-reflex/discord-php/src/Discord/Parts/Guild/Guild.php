@@ -31,6 +31,7 @@ use Discord\Parts\Guild\AuditLog\Entry;
 use Discord\Repository\Guild\GuildCommandRepository;
 use Discord\Repository\Guild\ScheduledEventRepository;
 use Discord\Repository\Guild\GuildTemplateRepository;
+use Discord\Repository\Guild\IntegrationRepository;
 use Discord\Repository\Guild\StickerRepository;
 use Discord\Repository\Guild\StageInstanceRepository;
 use Exception;
@@ -116,6 +117,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * @property StageInstanceRepository $stage_instances
  * @property GuildTemplateRepository $templates
  * @property ScheduledEventRepository $guild_scheduled_events
+ * @property IntegrationRepository    $integrations
  */
 class Guild extends Part
 {
@@ -229,6 +231,7 @@ class Guild extends Part
         'stage_instances' => StageInstanceRepository::class,
         'templates' => GuildTemplateRepository::class,
         'guild_scheduled_events' => ScheduledEventRepository::class,
+        'integrations' => IntegrationRepository::class,
     ];
 
     /**

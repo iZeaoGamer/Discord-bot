@@ -48,6 +48,7 @@ use Discord\Parts\Guild\AuditLog\Entry as DiscordEntryLog;
 use Discord\Parts\Guild\AuditLog\Options as DiscordEntryOptions;
 use Discord\Parts\Guild\WelcomeScreen as DiscordWelcomeScreen;
 use Discord\Parts\Guild\WelcomeChannel as DiscordWelcomeChannel;
+use Discord\Parts\Guild\Integration as DiscordIntergration;
 use Discord\Parts\OAuth\Application as DiscordApplication;
 use Discord\Parts\Interactions\Command\Choice as DiscordChoice;
 use Discord\Parts\Interactions\Command\Command as DiscordCommand;
@@ -101,6 +102,7 @@ use JaxkDev\DiscordBot\Models\Emoji;
 use JaxkDev\DiscordBot\Models\ServerTemplate;
 use JaxkDev\DiscordBot\Models\WelcomeScreen;
 use JaxkDev\DiscordBot\Models\WelcomeChannel;
+use JaxkDev\DiscordBot\Models\Intergration;
 use JaxkDev\DiscordBot\Models\OAuth\Application;
 use Jaxkdev\DiscordBot\Models\Client;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Choice;
@@ -381,7 +383,7 @@ abstract class ModelConverter
     {
         /** @var Change[] */
         $changes = [];
-        foreach($entry->changes as $change){
+        foreach ($entry->changes as $change) {
             $changes[] = self::genModelEntryChange($change);
         }
         return new Entry(
@@ -394,7 +396,8 @@ abstract class ModelConverter
             $changes ?? []
         );
     }
-    static public function genModelEntryChange(DiscordChange $change){
+    static public function genModelEntryChange(DiscordChange $change)
+    {
         return new Change(
             $change->new_value,
             $change->old_value,
@@ -414,7 +417,26 @@ abstract class ModelConverter
             $option->role_name
         );
     }
-
+    static public function genModelIntergration(DiscordIntergration $intergration)
+    {
+        return new Intergration(
+            $intergration->id,
+            $intergration->name,
+            $intergration->type,
+            $intergration->enabled,
+            $intergration->syncing,
+            $intergration->role_id,
+            $intergration->enable_emoticons,
+            $intergration->expire_behavior,
+            $intergration->expire_grace_period,
+            $intergration->user,
+            ($intergration->synced_at !== null ? $intergration->synced_at->getTimestamp() : null),
+            $intergration->subscriber_count,
+            $intergration->revoked,
+            $intergration->application,
+            $intergration->guild_id
+        );
+    }
     static public function genModelEmoji(DiscordEmoji $emoji): Emoji
     {
         return new Emoji(
@@ -1001,8 +1023,8 @@ abstract class ModelConverter
                 $discordMessage->tts,
 
             );
-        }else{
-        throw new AssertionError("Discord message type: {$discordMessage->type} not supported.");
+        } else {
+            throw new AssertionError("Discord message type: {$discordMessage->type} not supported.");
         }
     }
 

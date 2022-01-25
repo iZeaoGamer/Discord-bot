@@ -32,6 +32,7 @@ use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
 use Discord\Parts\WebSockets\TypingStart as DiscordTypingStart;
 use Discord\Parts\Channel\StageInstance as DiscordStageInstance;
 use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
+use Discord\Parts\Guild\Integration as DiscordIntergration;
 use Discord\Parts\Guild\Emoji as DiscordEmoji;
 use Discord\Parts\Interactions\Command\Command as DiscordCommand;
 use JaxkDev\DiscordBot\Bot\Client;
@@ -83,7 +84,14 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUpdate 
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventDelete as ServerScheduledEventDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserAdd as ServerScheduledEventUserAddPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserRemove as ServerScheduledEventUserRemovePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationCreate as IntergrationCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationUpdate as IntergrationUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationDelete as IntergrationDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\UserUpdate as UserUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\WebhooksUpdate as WebhooksUpdatePacket;
 use Discord\Helpers\Collection;
+use Discord\WebSockets\Events\IntegrationCreate;
+use Discord\WebSockets\Events\UserUpdate;
 use Monolog\Logger;
 
 class DiscordEventHandler
@@ -158,6 +166,11 @@ class DiscordEventHandler
         $discord->on("GUILD_SCHEDULED_EVENT_DELETE", [$this, "onScheduleDelete"]);
         $discord->on("GUILD_SCHEDULED_EVENT_USER_ADD", [$this, "onScheduleUserAdd"]);
         $discord->on("GUILD_SCHEDULED_EVENT_USER_REMOVE", [$this, "onScheduleUserRemove"]);
+        $discord->on("USER_UPDATE", [$this, "onUserUpdate"]);
+        $discord->on("INTEGRATION_CREATE", [$this, "onIntergrationCreate"]);
+        $discord->on("INTEGRATION_UPDATE", [$this, "onIntergrationUpdate"]);
+        $discord->on("INTEGRATION_DELETE", [$this, "onIntergrationDelete"]);
+        $discord->on("WEBHOOKS_UPDATE", [$this, "onWebhooksUpdate"]);
     }
 
     /*
@@ -438,6 +451,27 @@ array(5) {
             $this->logger->debug("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
         });
     }
+    public function onUserUpdate(DiscordUser $new, DiscordUser $old){
+        $packet = new UserUpdatePacket(ModelConverter::genModelUser($new), ModelConverter::genModelUser($old));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onIntergrationCreate(DiscordIntergration $intergration){
+        $packet = new IntergrationCreatePacket(ModelConverter::genModelIntergration($intergration));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onIntergrationUpdate(DiscordIntergration $intergration){
+        $packet = new IntergrationUpdatePacket(ModelConverter::genModelIntergration($intergration));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onIntergrationDelete(?DiscordIntergration $intergration){
+        $packet = new IntergrationDeletePacket(($intergration === null ? null : ModelConverter::genModelIntergration($intergration)));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+    public function onWebhooksUpdate(DiscordGuild $guild, ?DiscordChannel $channel){
+        $packet = new WebhooksUpdatePacket(ModelConverter::genModelServer($guild), ($channel === null ? null : ModelConverter::genModelChannel($channel)));
+        $this->client->getThread()->writeOutboundData($packet);
+    }
+        
     public function onScheduleCreate(DiscordScheduledEvent $schedule): void
     {
         $packet = new ServerScheduledEventCreatePacket(ModelConverter::genModelScheduledEvent($schedule));

@@ -41,7 +41,8 @@ class MemberUpdated extends DiscordBotEvent
     {
         return $this->member;
     }
-    public function getOldMember(): ?Member{
+    public function getOldMember(): ?Member
+    {
         return $this->old;
     }
 }
