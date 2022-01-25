@@ -23,21 +23,21 @@ class UserUpdated extends DiscordBotEvent
 {
 
     /** @var User */
-    private $User;
+    private $user;
 
     /** @var User|null */
     private $old;
 
-    public function __construct(Plugin $plugin, User $User, ?User $old)
+    public function __construct(Plugin $plugin, User $user, ?User $old)
     {
         parent::__construct($plugin);
-        $this->User = $User;
+        $this->user = $user;
         $this->old = $old;
     }
 
     public function getUser(): User
     {
-        return $this->User;
+        return $this->user;
     }
     public function getOldUser(): ?User
     {

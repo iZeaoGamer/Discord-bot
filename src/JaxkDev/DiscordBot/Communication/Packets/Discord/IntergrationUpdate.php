@@ -19,17 +19,17 @@ class IntergrationUpdate extends Packet
 {
 
     /** @var Intergration */
-    private $Intergration;
+    private $intergration;
 
-    public function __construct(Intergration $Intergration)
+    public function __construct(Intergration $intergration)
     {
         parent::__construct();
-        $this->Intergration = $Intergration;
+        $this->intergration = $intergration;
     }
 
     public function getIntergration(): Intergration
     {
-        return $this->Intergration;
+        return $this->intergration;
     }
 
     public function serialize(): ?string
@@ -37,7 +37,7 @@ class IntergrationUpdate extends Packet
         return serialize(
             [
                 $this->UID,
-                $this->Intergration
+                $this->intergration
             ]
         );
     }
@@ -46,7 +46,7 @@ class IntergrationUpdate extends Packet
     {
         [
             $this->UID,
-            $this->Intergration
+            $this->intergration
         ] = unserialize($data);
     }
 }

@@ -32,7 +32,7 @@ class WebhooksUpdate extends Packet
         $this->channel = $channel;
     }
 
-    public function getServer(): server
+    public function getServer(): Server
     {
         return $this->server;
     }

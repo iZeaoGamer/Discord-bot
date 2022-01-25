@@ -19,17 +19,17 @@ class IntergrationDelete extends Packet
 {
 
     /** @var Intergration|null */
-    private $Intergration;
+    private $intergration;
 
-    public function __construct(?Intergration $Intergration)
+    public function __construct(?Intergration $intergration)
     {
         parent::__construct();
-        $this->Intergration = $Intergration;
+        $this->intergration = $intergration;
     }
 
     public function getOldIntergration(): ?Intergration
     {
-        return $this->Intergration;
+        return $this->intergration;
     }
 
     public function serialize(): ?string
@@ -37,7 +37,7 @@ class IntergrationDelete extends Packet
         return serialize(
             [
                 $this->UID,
-                $this->Intergration
+                $this->intergration
             ]
         );
     }
@@ -46,7 +46,7 @@ class IntergrationDelete extends Packet
     {
         [
             $this->UID,
-            $this->Intergration
+            $this->intergration
         ] = unserialize($data);
     }
 }

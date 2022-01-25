@@ -25,16 +25,16 @@ class IntergrationCreated extends DiscordBotEvent
 {
 
     /** @var Intergration */
-    private $Intergration;
+    private $intergration;
 
-    public function __construct(Plugin $plugin, Intergration $Intergration)
+    public function __construct(Plugin $plugin, Intergration $intergration)
     {
         parent::__construct($plugin);
-        $this->Intergration = $Intergration;
+        $this->intergration = $intergration;
     }
 
     public function getIntergration(): Intergration
     {
-        return $this->Intergration;
+        return $this->intergration;
     }
 }
