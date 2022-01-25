@@ -19,7 +19,7 @@ class IntergrationCreate extends Packet
 {
 
     /** @var Intergration */
-    private $Intergration;
+    private $intergration;
 
     public function __construct(Intergration $intergration)
     {
