@@ -315,7 +315,7 @@ abstract class ModelConverter
             $channels
         );
     }
-    static public function genModelWelcomeChannel(DiscordWelcomeChannel $channel)
+    static public function genModelWelcomeChannel(DiscordWelcomeChannel $channel): WelcomeChannel
     {
         return new WelcomeChannel(
             $channel->channel_id,
@@ -396,7 +396,7 @@ abstract class ModelConverter
             $changes ?? []
         );
     }
-    static public function genModelEntryChange(DiscordChange $change)
+    static public function genModelEntryChange(DiscordChange $change): Change
     {
         return new Change(
             $change->new_value,
@@ -417,7 +417,7 @@ abstract class ModelConverter
             $option->role_name
         );
     }
-    static public function genModelIntergration(DiscordIntergration $intergration)
+    static public function genModelIntergration(DiscordIntergration $intergration): Intergration
     {
         return new Intergration(
             $intergration->id,
@@ -890,7 +890,7 @@ abstract class ModelConverter
             $sticker->pack_id
         );
     }
-    static public function genModelReaction(DiscordReaction $react)
+    static public function genModelReaction(DiscordReaction $react): Reaction
     {
         return new Reaction(
             $react->message_id,
