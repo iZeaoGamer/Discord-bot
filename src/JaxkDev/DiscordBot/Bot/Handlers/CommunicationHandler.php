@@ -1568,7 +1568,6 @@ class CommunicationHandler
                 $dc->channel_id = $c->getChannelId();
                 $dc->topic = $c->getTopic();
                 $dc->privacy_level = $c->getPrivacyLevel();
-                $dc->discoverable_disabled = $c->isDisabled();
                 $dc->guild_id = $c->getServerId();
                 $guild->stage_instances->save($dc)->then(function (DiscordStage $stage) use ($pk) {
                     $this->resolveRequest($pk->getUID(), true, "Updated Stage.", [ModelConverter::genModelStage($stage)]);
