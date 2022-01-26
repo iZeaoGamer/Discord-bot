@@ -30,9 +30,6 @@ class Stage implements \Serializable
     /** @var int */
     private $privacyLevel; //leave empty to make it public.
 
-    /** @var bool */
-    private $disableDiscovery = false;
-
     /**
      * Stage constructor.
      *
@@ -49,15 +46,13 @@ class Stage implements \Serializable
         string $channel_id,
         string $topic,
         ?string $id = null,
-        int $privacy_level = 1,
-        bool $disableDiscovery = false
+        int $privacy_level = 1
     ) {
         $this->setServerId($server_id);
         $this->setChannelId($channel_id);
         $this->setTopic($topic);
         $this->setId($id);
         $this->setPrivacyLevel($privacy_level);
-        $this->setDisableDiscovery($disableDiscovery);
     }
     public function getServerId(): string
     {
@@ -104,14 +99,6 @@ class Stage implements \Serializable
         }
         $this->privacyLevel = $privacyLevel;
     }
-    public function isDisabled(): bool
-    {
-        return $this->disableDiscovery;
-    }
-    public function setDisableDiscovery(bool $disable): void
-    {
-        $this->disableDiscovery = $disable;
-    }
     //----- Serialization -----//
 
     public function serialize(): ?string
@@ -121,8 +108,7 @@ class Stage implements \Serializable
             $this->channelId,
             $this->topic,
             $this->id,
-            $this->privacyLevel,
-            $this->disableDiscovery
+            $this->privacyLevel
         ]);
     }
 
@@ -133,8 +119,7 @@ class Stage implements \Serializable
             $this->channelId,
             $this->topic,
             $this->id,
-            $this->privacyLevel,
-            $this->disableDiscovery
+            $this->privacyLevel
         ] = unserialize($data);
     }
 }

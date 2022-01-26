@@ -574,8 +574,7 @@ abstract class ModelConverter
             $stage->channel_id,
             $stage->topic,
             $stage->id,
-            $stage->privacy_level,
-            $stage->discoverable_disabled
+            $stage->privacy_level
         );
     }
 
