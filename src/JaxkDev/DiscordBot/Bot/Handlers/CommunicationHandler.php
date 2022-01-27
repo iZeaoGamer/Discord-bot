@@ -406,7 +406,7 @@ class CommunicationHandler
                         }
                     }
                 }
-                if($interaction->getType() === 4){
+                if ($interaction->getType() === 4) {
                     return; //todo somewhat implement autocomplete support to Responding to an interaction.
                     //for now, do not respond to auto complete interactions.
                 }
@@ -414,6 +414,7 @@ class CommunicationHandler
                     $di->acknowledge()->then(function () use ($builder, $di, $pk) {
                         $di->updateMessage($builder);
                     });
+                } else {
                     $di->acknowledgeWithResponse($pk->isEphemeral())->then(function () use ($builder, $di, $pk) {
                         $di->updateOriginalResponse($builder)->then(function (DiscordMessage $message) use ($pk) {
                             $this->resolveRequest($pk->getUID(), true, "Successfully executed new Interaction class.", [ModelConverter::genModelMessage($message)]);
@@ -483,24 +484,24 @@ class CommunicationHandler
 
                     /** @var DiscordChoice[] */
                     $choices = [];
-                    foreach($command->getOptions() as $option){
-                        foreach($option->getChoices() as $choiceModel){
+                    foreach ($command->getOptions() as $option) {
+                        foreach ($option->getChoices() as $choiceModel) {
                             $choice = new DiscordChoice($this->client->getDiscordClient());
                             $choice->name = $choiceModel->getName();
                             $choice->value = $choiceModel->getValue();
                             $choices[] = $choice;
                         }
                     }
-                    if($interaction->type === 4){
-                        $interaction->autoCompleteResult($choices)->then(function() use ($pk, $builder, $interaction){
+                    if ($interaction->type === 4) {
+                        $interaction->autoCompleteResult($choices)->then(function () use ($pk, $builder, $interaction) {
                             $this->resolveRequest($pk->getUID(), true, "Added Discord Interaction Model AutoComplete.", [ModelConverter::genModelInteraction($interaction)]);
                         });
-                    }else{
-                    $interaction->acknowledgeWithResponse()->then(function () use ($pk, $builder, $interaction) {
+                    } else {
+                        $interaction->acknowledgeWithResponse()->then(function () use ($pk, $builder, $interaction) {
 
-                        $this->resolveRequest($pk->getUID(), true, "Added Discord Interaction model.", [ModelConverter::genModelInteraction($interaction)]);
-                    });
-                }
+                            $this->resolveRequest($pk->getUID(), true, "Added Discord Interaction model.", [ModelConverter::genModelInteraction($interaction)]);
+                        });
+                    }
                 } catch (\Throwable $e) {
                     $this->resolveRequest($pk->getUID(), false, "Failed to add interaction model. {$e->getMessage()}", [$e->getMessage(), $e->getTraceAsString()]);
                 }
