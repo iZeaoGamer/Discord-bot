@@ -216,12 +216,13 @@ class Option extends Part
      */
     public function addChoice(Choice $choice): self
     {
-        if (count($this->choices) >= 25) {
-            throw new \OverflowException('Option can only have a maximum of 25 Choices.');
+        if ($this->choices !== null) {
+            if (count($this->choices) >= 25) {
+                throw new \OverflowException('Option can only have a maximum of 25 Choices.');
+            }
+
+            $this->attributes['choices'][] = $choice->getRawAttributes();
         }
-
-        $this->attributes['choices'][] = $choice->getRawAttributes();
-
         return $this;
     }
 
@@ -252,7 +253,7 @@ class Option extends Part
     /**
      * Removes a choice.
      *
-      * @param string|Choice $choice Choice object or name to remove.
+     * @param string|Choice $choice Choice object or name to remove.
      *
      * @return $this
      */
