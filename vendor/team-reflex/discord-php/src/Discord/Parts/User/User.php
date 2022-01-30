@@ -72,7 +72,7 @@ class User extends Part
 
     /**
      * Gets the private channel for the user.
-     *
+     * 
      * @return ExtendedPromiseInterface
      */
     public function getPrivateChannel(): ExtendedPromiseInterface
@@ -95,6 +95,8 @@ class User extends Part
      * Takes a `MessageBuilder` or content of the message for the first parameter. If the first parameter
      * is an instance of `MessageBuilder`, the rest of the arguments are disregarded.
      *
+     * @see https://discord.com/developers/docs/resources/channel#create-message
+     * 
      * @param MessageBuilder|string $message          The message builder that should be converted into a message, or the string content of the message.
      * @param bool                  $tts              Whether the message is TTS.
      * @param Embed|array|null      $embed            An embed object or array to send in the message.
@@ -113,6 +115,8 @@ class User extends Part
     /**
      * Broadcasts that you are typing to the channel. Lasts for 5 seconds.
      *
+     * @see https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
+     * 
      * @return ExtendedPromiseInterface
      * @throws \Exception
      */
@@ -123,7 +127,7 @@ class User extends Part
         });
     }
 
-     /**
+    /**
      * Returns the username with the discriminator.
      *
      * @return string Username#Discriminator

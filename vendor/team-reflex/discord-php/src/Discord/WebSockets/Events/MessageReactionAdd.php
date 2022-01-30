@@ -14,7 +14,6 @@ namespace Discord\WebSockets\Events;
 use Discord\Parts\WebSockets\MessageReaction;
 use Discord\WebSockets\Event;
 use Discord\Helpers\Deferred;
-use Discord\Parts\Channel\Reaction;
 
 class MessageReactionAdd extends Event
 {
@@ -43,7 +42,7 @@ class MessageReactionAdd extends Event
                 }
 
                 // New reaction added
-                if (! $addedReaction) {
+                if (!$addedReaction) {
                     $message->reactions->push($message->reactions->create([
                         'count' => 1,
                         'me' => $reaction->user_id == $this->discord->id,
@@ -51,6 +50,10 @@ class MessageReactionAdd extends Event
                     ], true));
                 }
             }
+        }
+
+        if (isset($data->member->user)) {
+            $this->cacheUser($data->member->user);
         }
 
         $deferred->resolve($reaction);

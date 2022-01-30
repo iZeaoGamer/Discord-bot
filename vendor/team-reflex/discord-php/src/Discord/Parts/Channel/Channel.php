@@ -228,6 +228,8 @@ class Channel extends Part
     /**
      * Returns the channels pinned messages.
      *
+     * @see https://discord.com/developers/docs/resources/channel#get-pinned-messages
+     *
      * @return ExtendedPromiseInterface<Collection<Message>>
      */
     public function getPinnedMessages(): ExtendedPromiseInterface
@@ -250,6 +252,8 @@ class Channel extends Part
 
     /**
      * Sets permissions in a channel.
+     *
+     * @see https://discord.com/developers/docs/resources/channel#edit-channel-permissions
      *
      * @param Part  $part  A role or member.
      * @param array $allow An array of permissions to allow.
@@ -290,6 +294,8 @@ class Channel extends Part
     /**
      * Sets an overwrite to the channel.
      *
+     * @see https://discord.com/developers/docs/resources/channel#edit-channel-permissions
+     * 
      * @param Part      $part      A role or member.
      * @param Overwrite $overwrite An overwrite object.
      * @param string|null $reason    Reason for Audit Log.
@@ -466,6 +472,8 @@ class Channel extends Part
     /**
      * Creates an invite for the channel.
      *
+     * @see https://discord.com/developers/docs/resources/channel#create-channel-invite
+     * 
      * @param array $options An array of options. All fields are optional.
      * @param int   $options['max_age']   The time that the invite will be valid in seconds.
      * @param int   $options['max_uses']  The amount of times the invite can be used.
@@ -512,6 +520,8 @@ class Channel extends Part
     /**
      * Bulk deletes an array of messages.
      *
+     * @see https://discord.com/developers/docs/resources/channel#bulk-delete-messages
+     * 
      * @param array|Traversable $messages An array of messages to delete.
      * @param string|null       $reason   Reason for Audit Log (only for bulk messages).
      *
@@ -570,6 +580,8 @@ class Channel extends Part
     /**
      * Deletes a given number of messages, in order of time sent.
      *
+     * @see https://discord.com/developers/docs/resources/channel#bulk-delete-messages
+     * 
      * @param int         $value
      * @param string|null $reason Reason for Audit Log. (only for bulk messages)
      *
@@ -585,6 +597,8 @@ class Channel extends Part
     /**
      * Fetches message history.
      *
+     * @see https://discord.com/developers/docs/resources/channel#get-channel-messages
+     * 
      * @param array $options
      *
      * @throws NoPermissionsException
@@ -649,6 +663,8 @@ class Channel extends Part
     /**
      * Adds a message to the channels pinboard.
      *
+     * @see https://discord.com/developers/docs/resources/channel#pin-message
+     * 
      * @param Message     $message The message to pin.
      * @param string|null $reason  Reason for Audit Log.
      * 
@@ -690,6 +706,8 @@ class Channel extends Part
     /**
      * Removes a message from the channels pinboard.
      *
+     * @see https://discord.com/developers/docs/resources/channel#unpin-message
+     * 
      * @param Message     $message The message to un-pin.
      * @param string|null $reason  Reason for Audit Log.
      *
@@ -731,6 +749,8 @@ class Channel extends Part
     /**
      * Returns the channels invites.
      *
+     * @see https://discord.com/developers/docs/resources/channel#get-channel-invites
+     * 
      * @return ExtendedPromiseInterface<Collection<Invite>>
      */
     public function getInvites(): ExtendedPromiseInterface
@@ -768,6 +788,8 @@ class Channel extends Part
     /**
      * Starts a thread in the channel.
      *
+     * @see https://discord.com/developers/docs/resources/channel#start-thread-without-message
+     * 
      * @param string      $name                  the name of the thread.
      * @param bool        $private               whether the thread should be private. cannot start a private thread in a news channel.
      * @param int         $auto_archive_duration number of minutes of inactivity until the thread is auto-archived. one of 60, 1440, 4320, 10080.
@@ -903,6 +925,8 @@ class Channel extends Part
     /**
      * Edit a message in the channel.
      *
+     * @see https://discord.com/developers/docs/resources/channel#edit-message
+     * 
      * @param Message        $message The message to update.
      * @param MessageBuilder $message Contains the new contents of the message. Note that fields not specified in the builder will not be overwritten.
      *
@@ -918,6 +942,8 @@ class Channel extends Part
     /**
      * Sends an embed to the channel.
      *
+     * @see Channel::sendMessage()
+     * 
      * @param Embed $embed Embed to send.
      *
      * @return ExtendedPromiseInterface<Message>
@@ -931,6 +957,8 @@ class Channel extends Part
     /**
      * Sends a file to the channel.
      *
+     * @see Channel::sendMessage()
+     * 
      * @param string      $filepath The path to the file to be sent.
      * @param string|null $filename The name to send the file as.
      * @param string|null $content  Message content to send with the file.
@@ -956,6 +984,8 @@ class Channel extends Part
     /**
      * Broadcasts that you are typing to the channel. Lasts for 5 seconds.
      *
+     * @see https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
+     * 
      * @throws \RuntimeException
      *
      * @return ExtendedPromiseInterface

@@ -25,24 +25,15 @@ class InviteCreate extends Event
     {
         $invite = $this->factory->create(Invite::class, $data, true);
 
-        // User caching from inviter
         if (isset($data->inviter)) {
-            if ($user = $this->discord->users->get('id', $data->inviter->id)) {
-                $user->fill((array) $data->inviter);
-            } else {
-                $this->discord->users->pushItem($this->factory->part(User::class, (array) $data->inviter, true));
-            }
+            // User caching from inviter
+            $this->cacheUser($data->inviter);
         }
 
-        // User caching from target user
         if (isset($data->target_user)) {
-            if ($user = $this->discord->users->get('id', $data->target_user->id)) {
-                $user->fill((array) $data->target_user);
-            } else {
-                $this->discord->users->pushItem($this->factory->part(User::class, (array) $data->target_user, true));
-            }
+            // User caching from target user
+            $this->cacheUser($data->target_user);
         }
-
 
         $deferred->resolve($invite);
     }

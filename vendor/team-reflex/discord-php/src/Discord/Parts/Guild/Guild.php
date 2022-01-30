@@ -244,6 +244,8 @@ class Guild extends Part
     /**
      * Returns the channels invites.
      *
+     * @see https://discord.com/developers/docs/resources/guild#get-guild-invites
+     * 
      * @return ExtendedPromiseInterface
      * @throws \Exception
      */
@@ -264,6 +266,8 @@ class Guild extends Part
     /**
      * Unbans a member. Alias for `$guild->bans->unban($user)`.
      *
+     * @see BanRepository::unban()
+     * 
      * @param User|string $user
      *
      * @return ExtendedPromiseInterface
@@ -477,6 +481,8 @@ class Guild extends Part
     /**
      * Gets the voice regions available.
      *
+     * @see https://discord.com/developers/docs/resources/voice#list-voice-regions
+     * 
      * @return ExtendedPromiseInterface
      */
     public function getVoiceRegions(): ExtendedPromiseInterface
@@ -497,6 +503,8 @@ class Guild extends Part
     /**
      * Creates a role.
      *
+     * @see https://discord.com/developers/docs/resources/guild#create-guild-role
+     * 
      * @param array $data The data to fill the role with.
      *
      * @return ExtendedPromiseInterface
@@ -514,6 +522,8 @@ class Guild extends Part
     /**
      * Creates an Emoji for the guild.
      *
+     * @see https://discord.com/developers/docs/resources/emoji#create-guild-emoji
+     * 
      * @param array $options        An array of options.
      *                              name => name of the emoji
      *                              image => the 128x128 emoji image
@@ -632,6 +642,8 @@ class Guild extends Part
     /**
      * Returns an audit log object for the query.
      *
+     * @see https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
+     * 
      * @param array $options An array of options.
      *                       user_id => filter the log for actions made by a user
      *                       action_type => the type of audit log event
@@ -686,6 +698,8 @@ class Guild extends Part
      * The `$roles` array should be an associative array where the LHS key is the position,
      * and the RHS value is a `Role` object or a string ID, e.g. [1 => 'role_id_1', 3 => 'role_id_3'].
      *
+     * @see https://discord.com/developers/docs/resources/guild#modify-guild-role-positions
+     * 
      * @param array $roles
      *
      * @return ExtendedPromiseInterface
@@ -710,6 +724,8 @@ class Guild extends Part
     /**
      * Returns a list of guild member objects whose username or nickname starts with a provided string.
      *
+     * @see https://discord.com/developers/docs/resources/guild#search-guild-members
+     * 
      * @param array $options An array of options.
      *                       query => query string to match username(s) and nickname(s) against
      *                       limit => how many entries are returned (default 1, minimum 1, maximum 1000)
@@ -753,6 +769,8 @@ class Guild extends Part
     /**
      * Get the Welcome Screen for the guild.
      *
+     * @see https://discord.com/developers/docs/resources/guild#get-guild-welcome-screen
+     * 
      * @param bool $fresh Whether we should skip checking the cache.
      *
      * @return ExtendedPromiseInterface
@@ -774,6 +792,8 @@ class Guild extends Part
     /**
      * Modify the guild's Welcome Screen. Requires the MANAGE_GUILD permission.
      *
+     * @see https://discord.com/developers/docs/resources/guild#modify-guild-welcome-screen
+     * 
      * @param array $options An array of options.
      *                       enabled => whether the welcome screen is enabled
      *                       welcome_channels => channels linked in the welcome screen and their display options (maximum 5)
@@ -805,6 +825,8 @@ class Guild extends Part
     /**
      * Fetch the Widget Settings for the guild.
      *
+     * @see https://discord.com/developers/docs/resources/guild#get-guild-widget-settings
+     * 
      * @return ExtendedPromiseInterface
      */
     public function getWidgetSettings(): ExtendedPromiseInterface
@@ -820,6 +842,8 @@ class Guild extends Part
     /**
      * Modify a guild widget settings object for the guild. All attributes may be passed in with JSON and modified. Requires the MANAGE_GUILD permission.
      *
+     * @see https://discord.com/developers/docs/resources/guild#modify-guild-widget
+     * 
      * @param array $options An array of options.
      *                       enabled => whether the widget is enabled
      *                       channel_id => the widget channel id
@@ -833,9 +857,8 @@ class Guild extends Part
             'enabled',
             'channel_id',
         ])
-            ->setRequired('enabled')
             ->setAllowedTypes('enabled', 'bool')
-            ->setAllowedTypes('channel_id', 'string');
+            ->setAllowedTypes('channel_id', ['string', 'null']);
 
         $options = $resolver->resolve($options);
 
@@ -859,7 +882,7 @@ class Guild extends Part
      */
     public function getWidget(): ExtendedPromiseInterface
     {
-        return $this->factory->part(Widget::class)->fetch();
+        return $this->factory->part(Widget::class, ['id' => $this->id])->fetch();
     }
 
 

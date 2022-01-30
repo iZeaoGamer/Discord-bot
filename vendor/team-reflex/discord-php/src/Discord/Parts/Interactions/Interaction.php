@@ -175,6 +175,8 @@ class Interaction extends Part
      * Acknowledges an interaction without returning a response.
      * Only valid for message component interactions.
      *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction
+     * 
      * @throws \LogicException
      * 
      * @return ExtendedPromiseInterface
@@ -198,6 +200,8 @@ class Interaction extends Part
      * Acknowledges an interaction, creating a placeholder response message which can be edited later
      * through the `updateOriginalResponse` function.
      *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction
+     * 
      * @throws \LogicException
      * 
      * @return ExtendedPromiseInterface
@@ -218,6 +222,8 @@ class Interaction extends Part
      * Updates the message that the interaction was triggered from.
      * Only valid for message component interactions.
      *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction
+     * 
      * @param MessageBuilder $builder The new message content.
      *
      * @throws \LogicException
@@ -239,6 +245,8 @@ class Interaction extends Part
     /**
      * Retrieves the original interaction response.
      *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#get-original-interaction-response
+     * 
      * @throws \RuntimeException
      * 
      * @return ExtendedPromiseInterface<Message>
@@ -258,6 +266,8 @@ class Interaction extends Part
     /**
      * Updates the original interaction response.
      *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
+     * 
      * @param MessageBuilder $builder New message contents.
      *
      * @throws \RuntimeException
@@ -286,6 +296,8 @@ class Interaction extends Part
     /**
      * Deletes the original interaction response.
      *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
+     * 
      * @throws \RuntimeException
      * 
      * @return ExtendedPromiseInterface
@@ -302,6 +314,8 @@ class Interaction extends Part
     /**
      * Sends a follow-up message to the interaction.
      *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-followup-message
+     * 
      * @param MessageBuilder $builder   Message to send.
      * @param bool           $ephemeral Whether the created follow-up should be ephemeral.
      *
@@ -331,33 +345,12 @@ class Interaction extends Part
             return $this->factory->create(Message::class, $response, true);
         });
     }
-    /** 
-     * Deletes a follow up message.
-     * @param MessageBuilder $builder
-     * 
-     * @throws \RuntimeException
-     * 
-     * @return ExtendedPromiseInterface
-     */
-    public function deleteFollowUpMessage(MessageBuilder $builder): ExtendedPromiseInterface
-    {
-        if (!$this->responded) {
-            return reject(new \RuntimeException('Cannot delete a follow-up message as the interaction has not been responded to.'));
-        }
-        if ($builder->requiresMultipart()) {
-            $multipart = $builder->toMultipart();
-
-            return $this->http->delete(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $this->message->id), (string) $multipart, $multipart->getHeaders());
-        }
-
-        return $this->http->delete(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $this->message->id), $builder);
-        //})()->then(function ($response) {
-        //      return $this->factory->create(Message::class, $response, true);
-    }
 
     /**
      * Responds to the interaction with a message.
      *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
+     * 
      * @param MessageBuilder $builder   Message to respond with.
      * @param bool           $ephemeral Whether the created message should be ephemeral.
      *
@@ -387,6 +380,8 @@ class Interaction extends Part
      * This is a seperate function so that it can be overloaded when responding via
      * webhook.
      *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
+     * 
      * @param array          $payload   Response payload.
      * @param Multipart|null $multipart Optional multipart payload.
      *
@@ -419,6 +414,8 @@ class Interaction extends Part
     /**
      * Updates a non ephemeral follow up message.
      *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
+     * 
      * @param string         $message_id Message to update.
      * @param MessageBuilder $builder    New message contents.
      *
@@ -446,8 +443,53 @@ class Interaction extends Part
     }
 
     /**
+     * Retrieves a non ephemeral follow up message.
+     *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
+     *
+     * @param string $message_id Message to get.
+     *
+     * @throws \RuntimeException
+     *
+     * @return ExtendedPromiseInterface<Message>
+     */
+    public function getFollowUpMessage(string $message_id): ExtendedPromiseInterface
+    {
+        if (!$this->responded) {
+            return reject(new \RuntimeException('Interaction has not been responded to.'));
+        }
+
+        return $this->http->get(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $message_id))
+            ->then(function ($response) {
+                return $this->factory->create(Message::class, $response, true);
+            });
+    }
+
+    /**
+     * Deletes a non ephemeral follow up message.
+     *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#delete-followup-message
+     *
+     * @param string $message_id Message to delete.
+     *
+     * @throws \RuntimeException
+     *
+     * @return ExtendedPromiseInterface
+     */
+    public function deleteFollowUpMessage(string $message_id): ExtendedPromiseInterface
+    {
+        if (!$this->responded) {
+            return reject(new \RuntimeException('Interaction has not been responded to.'));
+        }
+
+        return $this->http->delete(Endpoint::bind(Endpoint::INTERACTION_FOLLOW_UP, $this->application_id, $this->token, $message_id));
+    }
+
+    /**
      * Responds to the interaction with auto complete suggestions.
      *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction
+     * 
      * @param array|Choice[] $choice Autocomplete choices (max of 25 choices)
      *
      * @throws \LogicException

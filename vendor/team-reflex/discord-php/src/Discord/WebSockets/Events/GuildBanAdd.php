@@ -30,12 +30,8 @@ class GuildBanAdd extends Event
             $this->discord->guilds->push($guild);
         }
 
-        // User caching
-        if ($user = $this->discord->users->get('id', $data->user->id)) {
-            $user->fill((array) $data->user);
-        } else {
-            $this->discord->users->pushItem($this->factory->part(User::class, (array) $data->user, true));
-        }
+        $this->cacheUser($data->user);
+
 
 
         $deferred->resolve($ban);

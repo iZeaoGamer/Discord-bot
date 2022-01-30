@@ -30,13 +30,8 @@ class GuildScheduledEventDelete extends Event
             $guild->guild_scheduled_events->pull($scheduled_event->id);
         }
 
-        // User caching
         if (isset($data->creator)) {
-            if ($user = $this->discord->users->get('id', $data->creator->id)) {
-                $user->fill((array) $data->creator);
-            } else {
-                $this->discord->users->pushItem($this->factory->part(User::class, (array) $data->creator, true));
-            }
+            $this->cacheUser($data->creator);
         }
 
         $deferred->resolve($scheduled_event);
