@@ -360,7 +360,7 @@ class Http
             }
         }, function (Exception $e) use ($request, $deferred) {
             $this->logger->warning($request . ' failed: ' . $e->getMessage());
-            
+
             $deferred->reject($e);
             $request->getDeferred()->reject($e);
         });
