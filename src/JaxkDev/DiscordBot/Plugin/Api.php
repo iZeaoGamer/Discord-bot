@@ -118,6 +118,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRespondInteraction;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFollowupMessage;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadAchive;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadJoin;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadLeave;
@@ -217,7 +218,7 @@ class Api
         return ApiResolver::create($pk->getUID());
     }
 
-    /** Responds to an interaction without the hack.
+    /** Creates an interaction response without the hack.
      * @param Interaction $interaction
      * @param MessageBuilder|null $builder
      * @param strong $content
@@ -228,6 +229,20 @@ class Api
      */
     public function createInteractionResponse(Interaction $interaction, ?MessageBuilder $builder = null, string $content = "", ?Embed $embed = null, bool $ephemeral = false): PromiseInterface{
         $pk = new RequestRespondInteraction($interaction, $builder, $content, $embed, $ephemeral);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+     /** Responds to an interaction with respondWithMessage().
+     * @param Interaction $interaction
+     * @param MessageBuilder|null $builder
+     * @param strong $content
+     * @param Embed|null $embed
+     * @param bool $ephemeral
+     * 
+     * @return PromiseInterface Resolves with a Message Model.
+     */
+    public function respondInteractionWithMessage(Interaction $interaction, ?MessageBuilder $builder = null, string $content = "", ?Embed $embed = null, bool $ephemeral = false): PromiseInterface{
+        $pk = new RequestFollowupMessage($interaction, $builder, $content, $embed, $ephemeral);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
