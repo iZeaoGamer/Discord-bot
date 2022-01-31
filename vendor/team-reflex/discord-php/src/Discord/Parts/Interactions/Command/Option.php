@@ -220,12 +220,11 @@ class Option extends Part
             if (count($this->choices) >= 25) {
                 throw new \OverflowException('Option can only have a maximum of 25 Choices.');
             }
-
-            $this->attributes['choices'][] = $choice->getRawAttributes();
         }
+
+        $this->attributes['choices'][] = $choice->getRawAttributes();
         return $this;
     }
-
     /**
      * Removes an option.
      *
