@@ -81,7 +81,7 @@ class Interaction extends Part
      *
      * @var bool
      */
-    protected $responded = false;
+    public $responded = false;
 
     /**
      * Returns the data associated with the interaction.
@@ -181,10 +181,10 @@ class Interaction extends Part
      * 
      * @return ExtendedPromiseInterface
      */
-    public function acknowledge(): ExtendedPromiseInterface
+    public function acknowledge(bool $ephemeral = false): ExtendedPromiseInterface
     {
         if ($this->type == InteractionType::APPLICATION_COMMAND) {
-            return $this->acknowledgeWithResponse();
+            return $this->acknowledgeWithResponse($ephemeral);
         }
 
         if ($this->type != InteractionType::MESSAGE_COMPONENT) {

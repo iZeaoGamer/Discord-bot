@@ -160,6 +160,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUnachive;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFollowupMessage;
 use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Plugin\Utils;
+use Discord\WebSockets\Event;
 
 class CommunicationHandler
 {
@@ -172,6 +173,13 @@ class CommunicationHandler
 
     /** @var Logger */
     private $logger;
+
+    /**
+     * Listener for when the interaction is called.
+     *
+     * @var callable|null
+     */
+    private $listener;
 
     public function __construct(Client $client)
     {
@@ -276,7 +284,7 @@ class CommunicationHandler
         elseif ($pk instanceof RequestDeleteCommand) $this->handleDeleteCommand($pk);
         elseif ($pk instanceof RequestFetchCommands) $this->handleFetchCommands($pk);
         elseif ($pk instanceof RequestRespondInteraction) $this->handleInteractionRespond($pk);
-        elseif($pk instanceof RequestFollowupMessage) $this->handleFollowupMessage($pk);
+        elseif ($pk instanceof RequestFollowupMessage) $this->handleFollowupMessage($pk);
         elseif ($pk instanceof RequestThreadAchive) $this->handleThreadAchive($pk);
         elseif ($pk instanceof RequestThreadUnachive) $this->handleThreadUnachive($pk);
         elseif ($pk instanceof RequestThreadJoin) $this->handleThreadJoin($pk);
@@ -474,6 +482,73 @@ class CommunicationHandler
             }
         }
     }
+    /**
+     * Sets the callable listener for the button. The `$callback` will be called when the button
+     * is pressed.
+     *
+     * If you do not respond to or acknowledge the `Interaction`, it will be acknowledged for you.
+     * Note that if you intend to respond to or acknowledge the interaction inside a promise, you should
+     * return a promise that resolves *after* you respond or acknowledge.
+     *
+     * The callback will only be called once with the `$oneOff` parameter set to true.
+     * This can be changed to false, and the callback will be called each time the button is pressed.
+     * To remove the listener, you can pass `$callback` as null.
+     *
+     * The button listener will not persist when the bot restarts.
+     *
+     * @param callable $callback Callback to call when the button is pressed. Will be called with the interaction object.
+     * @param bool     $oneOff   Whether the listener should be removed after the button is pressed for the first time.
+     *
+     * @throws \LogicException
+     * 
+     */
+    public function setListener(?callable $callback, bool $ephemeral = false, bool $oneOff = false)
+    {
+        $discord = $this->client->getDiscordClient();
+        // Remove any existing listener
+        if ($this->listener) {
+            $discord->removeListener(Event::INTERACTION_CREATE, $this->listener);
+        }
+
+        if ($callback == null) {
+            return $this;
+        }
+
+
+        $this->listener = function (DiscordInteraction $interaction) use ($callback, $ephemeral, $oneOff) {
+
+            $response = $callback($interaction);
+            $ack = function () use ($interaction, $ephemeral) {
+                // attempt to acknowledge interaction if it has not already been responded to.
+                try {
+                    $interaction->acknowledge($ephemeral);
+                } catch (\Exception $e) {
+                }
+            };
+
+            if ($response instanceof PromiseInterface) {
+                $response->then($ack);
+            } else {
+                $ack();
+            }
+
+            if ($oneOff) {
+                $this->removeListener();
+            }
+        };
+
+        $discord->on(Event::INTERACTION_CREATE, $this->listener);
+    }
+
+    /**
+     * Removes the listener from the button.
+     *
+     * @return $this
+     */
+    public function removeListener()
+    {
+        $this->setListener(null);
+    }
     private function handleFollowupMessage(RequestFollowupMessage $pk): void
     {
         $interaction = $pk->getInteraction();
@@ -603,12 +678,28 @@ class CommunicationHandler
                     return; //todo somewhat implement autocomplete support to Responding to an interaction.
                     //for now, do not respond to auto complete interactions.
                 }
-                        $di->respondWithMessage($builder, $pk->isEphemeral())->then(function (DiscordMessage $message) use ($pk) {
-                            $this->resolveRequest($pk->getUID(), true, "Successfully executed new Interaction class.", [ModelConverter::genModelMessage($message)]);
-                        }, function (\Throwable $e) use ($pk) {
-                            $this->resolveRequest($pk->getUID(), false, "Failed to execute new interaction class.", [$e->getMessage(), $e->getTraceAsString()]);
-                        });
+
+                //   if($interaction->getType() === 3){
+                $this->setListener(function (DiscordInteraction $interaction) use ($builder, $pk) {
+                    if ($interaction->type === 3) {
+
+                        $this->logger->info("Listened to Interaction.");
+                        try {
+
+                            $interaction->acknowledge($pk->isEphemeral())->then(function () use ($interaction, $pk, $builder) {
+                                $interaction->sendFollowupMessage($builder, $pk->isEphemeral())->then(function (DiscordMessage $message) use ($pk) {
+                                    $this->resolveRequest($pk->getUID(), true, "Sent followup message.", [ModelConverter::genModelMessage($message)]);
+                                    $this->client->getLogger()->info("Sent followup message.");
+                                }, function (\Throwable $e) use ($pk) {
+                                    $this->client->getLogger()->info("Failed to send Followup message. {$e->getMessage()}");
+                                    $this->resolveRequest($pk->getUID(), false, "Failed to send followup message.", [$e->getMessage(), $e->getTraceAsString()]);
+                                });
+                            });
+                        } catch (\Throwable $e) {
+                        }
+                    }
                 });
+            });
         } else {
             if ($resolvedModel) {
                 $users = [];
@@ -637,11 +728,24 @@ class CommunicationHandler
                 }
             }
 
-           
-            $di->respondWithMessage($builder, $pk->isEphemeral())->then(function (DiscordMessage $message) use ($pk) {
-                $this->resolveRequest($pk->getUID(), true, "Successfully executed new Interaction class.", [ModelConverter::genModelMessage($message)]);
-            }, function (\Throwable $e) use ($pk) {
-                $this->resolveRequest($pk->getUID(), false, "Failed to execute new interaction class.", [$e->getMessage(), $e->getTraceAsString()]);
+            $this->setListener(function (DiscordInteraction $interaction) use ($builder, $pk) {
+                if ($interaction->type === 3) {
+                    $this->logger->info("Listened to Interaction.");
+                    try {
+
+                        $interaction->acknowledge($pk->isEphemeral())->then(function () use ($interaction, $pk, $builder) {
+                            $interaction->sendFollowupMessage($builder, $pk->isEphemeral())->then(function (DiscordMessage $message) use ($interaction, $pk) {
+                                $this->resolveRequest($pk->getUID(), true, "Sent followup message.", [ModelConverter::genModelMessage($message)]);
+                                $this->client->getLogger()->info("Sent followup message.");
+                                $interaction->responded = false;
+                            }, function (\Throwable $e) use ($pk) {
+                                $this->client->getLogger()->info("Failed to send Followup message. {$e->getMessage()}");
+                                $this->resolveRequest($pk->getUID(), false, "Failed to send followup message.", [$e->getMessage(), $e->getTraceAsString()]);
+                            });
+                        });
+                    } catch (\Throwable $e) {
+                    }
+                }
             });
         }
     }
