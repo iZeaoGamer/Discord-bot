@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\Sticker;
+use JaxkDev\DiscordBot\Models\Server\Sticker;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestStickerUpdate extends Packet

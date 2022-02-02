@@ -90,8 +90,6 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationDelete as Inter
 use JaxkDev\DiscordBot\Communication\Packets\Discord\UserUpdate as UserUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\WebhooksUpdate as WebhooksUpdatePacket;
 use Discord\Helpers\Collection;
-use Discord\WebSockets\Events\IntegrationCreate;
-use Discord\WebSockets\Events\UserUpdate;
 use Monolog\Logger;
 
 class DiscordEventHandler

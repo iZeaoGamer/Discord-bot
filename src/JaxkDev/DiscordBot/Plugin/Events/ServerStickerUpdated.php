@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Sticker;
+use JaxkDev\DiscordBot\Models\Server\Sticker;
 use pocketmine\plugin\Plugin;
 
 /**

@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Ban;
+use JaxkDev\DiscordBot\Models\Server\Ban;
 use pocketmine\plugin\Plugin;
 
 /**

@@ -15,7 +15,7 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 use Discord\Builders\MessageBuilder;
-use JaxkDev\DiscordBot\Models\Messages\Message;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Message;
 
 class RequestModifyInteraction extends Packet
 {

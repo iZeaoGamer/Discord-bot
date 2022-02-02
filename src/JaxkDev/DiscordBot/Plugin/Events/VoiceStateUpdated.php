@@ -12,8 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Member;
-use JaxkDev\DiscordBot\Models\VoiceState;
+use JaxkDev\DiscordBot\Models\User\Member;
+use JaxkDev\DiscordBot\Models\WebSockets\VoiceState;
 use pocketmine\plugin\Plugin;
 
 /**

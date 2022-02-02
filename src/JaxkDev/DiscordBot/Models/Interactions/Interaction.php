@@ -14,9 +14,9 @@ namespace JaxkDev\DiscordBot\Models\Interactions;
 
 use JaxkDev\DiscordBot\Models\Interactions\Request\InteractionData;
 
-use JaxkDev\DiscordBot\Models\Messages\Message;
-use JaxkDev\DiscordBot\Models\User;
-use JaxkDev\DiscordBot\Models\Member;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Message;
+use JaxkDev\DiscordBot\Models\User\User;
+use JaxkDev\DiscordBot\Models\User\Member;
 
 class Interaction implements \Serializable
 

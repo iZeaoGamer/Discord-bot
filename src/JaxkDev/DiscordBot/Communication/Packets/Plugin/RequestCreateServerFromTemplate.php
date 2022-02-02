@@ -13,7 +13,7 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\Server;
+use JaxkDev\DiscordBot\Models\Server\Server;
 
 class RequestCreateServerFromTemplate extends Packet
 {

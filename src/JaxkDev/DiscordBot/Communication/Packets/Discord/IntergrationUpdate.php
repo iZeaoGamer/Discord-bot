@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
-use JaxkDev\DiscordBot\Models\Intergration;
+use JaxkDev\DiscordBot\Models\Server\Intergration;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class IntergrationUpdate extends Packet

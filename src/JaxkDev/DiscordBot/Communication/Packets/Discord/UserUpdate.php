@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
-use JaxkDev\DiscordBot\Models\User;
+use JaxkDev\DiscordBot\Models\User\User;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class UserUpdate extends Packet

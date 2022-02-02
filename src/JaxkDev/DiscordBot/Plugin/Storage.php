@@ -12,19 +12,19 @@
 
 namespace JaxkDev\DiscordBot\Plugin;
 
-use JaxkDev\DiscordBot\Models\Ban;
+use JaxkDev\DiscordBot\Models\Server\Ban;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
-use JaxkDev\DiscordBot\Models\Invite;
-use JaxkDev\DiscordBot\Models\Member;
-use JaxkDev\DiscordBot\Models\Role;
-use JaxkDev\DiscordBot\Models\Messages\Message;
-use JaxkDev\DiscordBot\Models\Server;
-use JaxkDev\DiscordBot\Models\User;
-use JaxkDev\DiscordBot\Models\ServerTemplate;
-use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\Thread\Thread;
+use JaxkDev\DiscordBot\Models\Server\Invite;
+use JaxkDev\DiscordBot\Models\User\Member;
+use JaxkDev\DiscordBot\Models\Server\Role;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Message;
+use JaxkDev\DiscordBot\Models\Server\Server;
+use JaxkDev\DiscordBot\Models\User\User;
+use JaxkDev\DiscordBot\Models\Server\ServerTemplate;
+use JaxkDev\DiscordBot\Models\Server\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
 use JaxkDev\DiscordBot\Models\Channels\DMChannel;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
@@ -66,7 +66,7 @@ class Storage
 
     /** @var Array<string, string[]> */
     private static $channel_server_map = [];
-    /** @var Array<string, ThreadChannel> */
+    /** @var Array<string, Thread> */
     private static $thread_map = [];
 
     /** @var Array<string, string[]> */
@@ -387,14 +387,14 @@ class Storage
     }
 
     /** @param string $id
-     * @return ThreadChannel|null
+     * @return Thread|null
      */
-    public static function getThread(string $id): ?ThreadChannel
+    public static function getThread(string $id): ?Thread
     {
         return self::$thread_map[$id] ?? null;
     }
 
-    /** @return ThreadChannel[] */
+    /** @return Thread[] */
     public static function getThreads(): array
     {
         return array_values(self::$thread_map);
@@ -402,7 +402,7 @@ class Storage
 
     /**
      * @param string $server_id
-     * @return ThreadChannel[]
+     * @return Thread[]
      */
     public static function getThreadsByServer(string $server_id): array
     {
@@ -427,12 +427,12 @@ class Storage
             return false;
         }
         $thread = Storage::getThread($id);
-        if (!$thread instanceof ThreadChannel) {
+        if (!$thread instanceof Thread) {
             return false;
         }
         return true;
     }
-    public static function addThread(ThreadChannel $channel): void
+    public static function addThread(Thread $channel): void
     {
         if ($channel->getId() === null) {
             throw new \AssertionError("Failed to add thread channel to storage, ID not found.");
@@ -442,7 +442,7 @@ class Storage
         self::$thread_map[$channel->getId()] = $channel;
     }
 
-    public static function updateThread(ThreadChannel $channel): void
+    public static function updateThread(Thread $channel): void
     {
         if ($channel->getId() === null) {
             throw new \AssertionError("Failed to update thread channel in storage, ID not found.");
@@ -457,7 +457,7 @@ class Storage
     public static function removeThread(string $channel_id): void
     {
         $channel = self::getThread($channel_id);
-        if (!$channel instanceof ThreadChannel) return; //Already deleted or not added.
+        if (!$channel instanceof Thread) return; //Already deleted or not added.
         unset(self::$thread_map[$channel_id]);
         $server_id = $channel->getServerId();
 
@@ -494,7 +494,7 @@ class Storage
             return false;
         }
         $thread = Storage::getThread($id);
-        if ($thread instanceof ThreadChannel) {
+        if ($thread instanceof Thread) {
             return false;
         }
         $dm = Storage::getDMChannel($id);

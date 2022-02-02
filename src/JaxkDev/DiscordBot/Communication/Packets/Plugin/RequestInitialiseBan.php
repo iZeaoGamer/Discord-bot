@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\Ban;
+use JaxkDev\DiscordBot\Models\Server\Ban;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestInitialiseBan extends Packet

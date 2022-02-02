@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\Emoji;
+use JaxkDev\DiscordBot\Models\Server\Emoji;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestEmojiUpdate extends Packet

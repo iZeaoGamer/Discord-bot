@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\ServerTemplate;
+use JaxkDev\DiscordBot\Models\Server\ServerTemplate;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestTemplateUpdate extends Packet

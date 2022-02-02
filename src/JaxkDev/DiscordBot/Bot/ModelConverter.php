@@ -57,54 +57,54 @@ use Discord\Parts\Interactions\Command\Overwrite as DiscordCommandOverwrite;
 use Discord\Parts\Interactions\Command\Permission as DiscordCommandPermission;
 use Discord\Parts\Interactions\Request\Resolved as DiscordResolved;
 use Discord\Parts\User\Client as DiscordClient;
-use JaxkDev\DiscordBot\Models\Activity;
-use JaxkDev\DiscordBot\Models\Ban;
+use JaxkDev\DiscordBot\Models\User\Activity;
+use JaxkDev\DiscordBot\Models\Server\Ban;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\TextChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 use JaxkDev\DiscordBot\Models\Channels\DMChannel;
-use JaxkDev\DiscordBot\Models\Invite;
-use JaxkDev\DiscordBot\Models\Member;
-use JaxkDev\DiscordBot\Models\Messages\Attachment;
-use JaxkDev\DiscordBot\Models\Messages\Embed\Author;
+use JaxkDev\DiscordBot\Models\Server\Invite;
+use JaxkDev\DiscordBot\Models\User\Member;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Attachment;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Embed\Author;
 use Discord\Parts\Interactions\Request\InteractionData as DiscordInteractData;
 use Discord\Parts\Interactions\Request\Option as DiscordInteractOption;
-use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
-use JaxkDev\DiscordBot\Models\Messages\Embed\Field;
-use JaxkDev\DiscordBot\Models\Messages\Embed\Footer;
-use JaxkDev\DiscordBot\Models\Messages\Embed\Image;
-use JaxkDev\DiscordBot\Models\Messages\Embed\Video;
-use JaxkDev\DiscordBot\Models\Messages\Message;
-use JaxkDev\DiscordBot\Models\Messages\CommandMessage;
-use JaxkDev\DiscordBot\Models\Messages\Reply as ReplyMessage;
-use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
-use JaxkDev\DiscordBot\Models\Messages\Reaction;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Embed\Embed;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Embed\Field;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Embed\Footer;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Embed\Image;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Embed\Video;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Message;
+use JaxkDev\DiscordBot\Models\Channels\Messages\CommandMessage;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Reply as ReplyMessage;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Webhook as WebhookMessage;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Reaction;
 use JaxkDev\DiscordBot\Models\Permissions\ChannelPermissions;
 use JaxkDev\DiscordBot\Models\Permissions\RolePermissions;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Thread\Thread;
 use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 use JaxkDev\DiscordBot\Models\Interactions\Request\InteractionData;
 use JaxkDev\DiscordBot\Models\Interactions\Request\Option;
-use JaxkDev\DiscordBot\Models\Role;
-use JaxkDev\DiscordBot\Models\Server;
-use JaxkDev\DiscordBot\Models\User;
-use JaxkDev\DiscordBot\Models\VoiceState;
-use JaxkDev\DiscordBot\Models\Webhook;
-use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
-use JaxkDev\DiscordBot\Models\AuditLog\AuditLog;
-use JaxkDev\DiscordBot\Models\AuditLog\Options;
-use JaxkDev\DiscordBot\Models\AuditLog\Entry;
-use JaxkDev\DiscordBot\Models\AuditLog\Change;
-use JaxkDev\DiscordBot\Models\Sticker;
+use JaxkDev\DiscordBot\Models\Server\Role;
+use JaxkDev\DiscordBot\Models\Server\Server;
+use JaxkDev\DiscordBot\Models\User\User;
+use JaxkDev\DiscordBot\Models\WebSockets\VoiceState;
+use JaxkDev\DiscordBot\Models\Server\Webhook;
+use JaxkDev\DiscordBot\Models\Server\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\Server\AuditLog\AuditLog;
+use JaxkDev\DiscordBot\Models\Server\AuditLog\Options;
+use JaxkDev\DiscordBot\Models\Server\AuditLog\Entry;
+use JaxkDev\DiscordBot\Models\Server\AuditLog\Change;
+use JaxkDev\DiscordBot\Models\Server\Sticker;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
-use JaxkDev\DiscordBot\Models\Emoji;
-use JaxkDev\DiscordBot\Models\ServerTemplate;
-use JaxkDev\DiscordBot\Models\WelcomeScreen;
-use JaxkDev\DiscordBot\Models\WelcomeChannel;
-use JaxkDev\DiscordBot\Models\Intergration;
+use JaxkDev\DiscordBot\Models\Server\Emoji;
+use JaxkDev\DiscordBot\Models\Server\ServerTemplate;
+use JaxkDev\DiscordBot\Models\Server\WelcomeScreen;
+use JaxkDev\DiscordBot\Models\Server\WelcomeChannel;
+use JaxkDev\DiscordBot\Models\Server\Intergration;
 use JaxkDev\DiscordBot\Models\OAuth\Application;
-use Jaxkdev\DiscordBot\Models\Client;
+use Jaxkdev\DiscordBot\Models\User\Client;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Choice;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Option as CommandOption;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Overwrite as CommandOverwrite;
@@ -483,6 +483,12 @@ abstract class ModelConverter
         );
     }
 
+    //todo add Server Widget Model.
+    /*
+    static public function getServerWidget(){
+        return null;
+    }*/
+
     /** @param DiscordInteraction
      * @return Interaction
      */
@@ -799,9 +805,9 @@ abstract class ModelConverter
                 return null;
         }
     }
-    static public function genModelThread(DiscordThread $thread): ThreadChannel
+    static public function genModelThread(DiscordThread $thread): Thread
     {
-        return new ThreadChannel(
+        return new Thread(
             $thread->name,
             $thread->guild_id,
             $thread->owner_id,
@@ -812,6 +818,12 @@ abstract class ModelConverter
             $thread->id
         );
     }
+
+    // todo add Thread Member Model.
+    /* static public function genModelThreadMember(){
+        return null;
+    }
+    */
 
     static public function genModelCategoryChannel(DiscordChannel $discordChannel): CategoryChannel
     {
@@ -1166,4 +1178,5 @@ abstract class ModelConverter
             $ban->reason
         );
     }
+    //... todo add all parts as models support.
 }

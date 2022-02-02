@@ -12,18 +12,18 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
-use JaxkDev\DiscordBot\Models\Ban;
+use JaxkDev\DiscordBot\Models\Server\Ban;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
-use JaxkDev\DiscordBot\Models\Invite;
-use JaxkDev\DiscordBot\Models\Member;
-use JaxkDev\DiscordBot\Models\Role;
-use JaxkDev\DiscordBot\Models\Server;
-use JaxkDev\DiscordBot\Models\User;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
-use JaxkDev\DiscordBot\Models\ServerTemplate;
+use JaxkDev\DiscordBot\Models\Server\Invite;
+use JaxkDev\DiscordBot\Models\User\Member;
+use JaxkDev\DiscordBot\Models\Server\Role;
+use JaxkDev\DiscordBot\Models\Server\Server;
+use JaxkDev\DiscordBot\Models\User\User;
+use JaxkDev\DiscordBot\Models\Thread\Thread;
+use JaxkDev\DiscordBot\Models\Server\ServerTemplate;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
-use JaxkDev\DiscordBot\Models\Messages\Message;
+use JaxkDev\DiscordBot\Models\Server\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Message;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
 
 class DiscordDataDump extends Packet
@@ -32,7 +32,7 @@ class DiscordDataDump extends Packet
     /** @var Server[] */
     private $servers = [];
 
-    /** @var ThreadChannel[] */
+    /** @var Thread[] */
     private $threads = [];
 
     /** @var ServerChannel[] */
@@ -84,12 +84,12 @@ class DiscordDataDump extends Packet
         $this->servers[] = $server;
     }
 
-    /** @return ThreadChannel[] */
+    /** @return Thread[] */
     public function getThreads(): array
     {
         return $this->threads;
     }
-    public function addThread(ThreadChannel $channel): void
+    public function addThread(Thread $channel): void
     {
         $this->threads[] = $channel;
     }

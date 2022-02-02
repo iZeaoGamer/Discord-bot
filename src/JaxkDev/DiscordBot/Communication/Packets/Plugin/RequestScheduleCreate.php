@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\Server\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestScheduleCreate extends Packet

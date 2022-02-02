@@ -82,27 +82,27 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateWelcomeScreen;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateServerFromTemplate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCrossPostMessage;
 use JaxkDev\DiscordBot\Libs\React\Promise\PromiseInterface;
-use JaxkDev\DiscordBot\Models\Activity;
-use JaxkDev\DiscordBot\Models\Ban;
+use JaxkDev\DiscordBot\Models\User\Activity;
+use JaxkDev\DiscordBot\Models\Server\Ban;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Thread\Thread;
 use JaxkDev\DiscordBot\Models\Channels\DMChannel;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
-use JaxkDev\DiscordBot\Models\ServerTemplate;
-use JaxkDev\DiscordBot\Models\Server;
+use JaxkDev\DiscordBot\Models\Server\ServerTemplate;
+use JaxkDev\DiscordBot\Models\Server\Server;
 use JaxkDev\DiscordBot\Models\Channels\Stage;
-use JaxkDev\DiscordBot\Models\Sticker;
-use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
-use JaxkDev\DiscordBot\Models\Messages\Reaction;
-use JaxkDev\DiscordBot\Models\Emoji;
-use JaxkDev\DiscordBot\Models\Invite;
-use JaxkDev\DiscordBot\Models\Member;
-use JaxkDev\DiscordBot\Models\Messages\Message;
-use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
-use JaxkDev\DiscordBot\Models\Webhook;
-use JaxkDev\DiscordBot\Models\Role;
-use JaxkDev\DiscordBot\Models\Messages\Embed\Embed;
+use JaxkDev\DiscordBot\Models\Server\Sticker;
+use JaxkDev\DiscordBot\Models\Server\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Reaction;
+use JaxkDev\DiscordBot\Models\Server\Emoji;
+use JaxkDev\DiscordBot\Models\Server\Invite;
+use JaxkDev\DiscordBot\Models\User\Member;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Message;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Webhook as WebhookMessage;
+use JaxkDev\DiscordBot\Models\Server\Webhook;
+use JaxkDev\DiscordBot\Models\Server\Role;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Embed\Embed;
 use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 
 use Discord\Builders\MessageBuilder;
@@ -156,12 +156,12 @@ class Api
 
     /** Joins a new thread
      * 
-     * @param ThreadChannel $thread
+     * @param Thread $thread
      * @param string $parent_id ID of the channel the thread is in.
      * 
      * @return PromiseInterface Resolves with no data.
     */
-    public function joinThread(ThreadChannel $thread, string $parent_id): PromiseInterface{
+    public function joinThread(Thread $thread, string $parent_id): PromiseInterface{
         if(!Utils::validDiscordSnowflake($parent_id)){
             return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
         }
@@ -172,12 +172,12 @@ class Api
 
     /** Leaves a thread
      * 
-     * @param ThreadChannel $thread
+     * @param Thread $thread
      * @param string $parent_id ID of the channel the thread is in.
      * 
      * @return PromiseInterface Resolves with no data.
     */
-    public function leaveThread(ThreadChannel $thread, string $parent_id): PromiseInterface{
+    public function leaveThread(Thread $thread, string $parent_id): PromiseInterface{
         if(!Utils::validDiscordSnowflake($parent_id)){
             return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
         }
@@ -188,12 +188,12 @@ class Api
 
      /** Achives a thread
      * 
-     * @param ThreadChannel $thread
+     * @param Thread $thread
      * @param string $parent_id ID of the channel the thread is in.
      * 
      * @return PromiseInterface Resolves with no data.
     */
-    public function achiveThread(ThreadChannel $thread, string $parent_id): PromiseInterface{
+    public function achiveThread(Thread $thread, string $parent_id): PromiseInterface{
         if(!Utils::validDiscordSnowflake($parent_id)){
             return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
         }
@@ -204,12 +204,12 @@ class Api
 
      /** Un achives a thread
      * 
-     * @param ThreadChannel $thread
+     * @param Thread $thread
      * @param string $parent_id ID of the channel the thread is in.
      * 
      * @return PromiseInterface Resolves with no data.
     */
-    public function unachiveThread(ThreadChannel $thread, string $parent_id): PromiseInterface{
+    public function unachiveThread(Thread $thread, string $parent_id): PromiseInterface{
         if(!Utils::validDiscordSnowflake($parent_id)){
             return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
         }
@@ -1637,12 +1637,12 @@ class Api
     /** 
      * Starts a thread in a channel.
      * 
-     * @param ThreadChannel $channel
+     * @param Thread $channel
      * @param string|null $reason
      * 
      * @return PromiseInterface Resolves with a Thread Channel model.
      */
-    public function startChannelThread(ThreadChannel $channel, ?string $reason = null): PromiseInterface
+    public function startChannelThread(Thread $channel, ?string $reason = null): PromiseInterface
     {
         $pk = new RequestThreadCreate($channel, $reason);
         $this->plugin->writeOutboundData($pk);
@@ -1676,11 +1676,11 @@ class Api
     /** 
      * Updates a thread.
      * 
-     * @param ThreadChannel $channel
+     * @param Thread $channel
      * 
      * @return PromiseInterface Resolves with a Thread Channel Model.
      */
-    public function updateThread(ThreadChannel $channel, string $parent_id)
+    public function updateThread(Thread $channel, string $parent_id)
     {
         if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Thread Channel ID: {$channel->getId()} must be present."));

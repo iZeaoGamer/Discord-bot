@@ -12,8 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Activity;
-use JaxkDev\DiscordBot\Models\Member;
+use JaxkDev\DiscordBot\Models\User\Activity;
+use JaxkDev\DiscordBot\Models\User\Member;
 use pocketmine\plugin\Plugin;
 
 /**

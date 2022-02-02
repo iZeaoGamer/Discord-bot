@@ -13,24 +13,21 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Thread\Thread;
 
 class ThreadUpdate extends Packet
 {
 
-    /** @var string */
-    private $member_id;
-
-    /** @var ThreadChannel */
+    /** @var Thread */
     private $thread;
 
-    public function __construct(ThreadChannel $channel)
+    public function __construct(Thread $channel)
     {
         parent::__construct();
         $this->thread = $channel;
     }
 
-    public function getChannel(): ThreadChannel
+    public function getChannel(): Thread
     {
         return $this->thread;
     }

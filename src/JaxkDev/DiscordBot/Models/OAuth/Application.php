@@ -14,7 +14,7 @@ namespace JaxkDev\DiscordBot\Models\OAuth;
 
 use JaxkDev\DiscordBot\Plugin\Utils;
 
-use JaxkDev\DiscordBot\Models\User;
+use JaxkDev\DiscordBot\Models\User\User;
 
 class Application implements \Serializable
 {

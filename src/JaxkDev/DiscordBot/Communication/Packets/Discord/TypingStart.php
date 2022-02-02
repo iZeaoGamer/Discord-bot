@@ -13,7 +13,6 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\VoiceState;
 
 class TypingStart extends Packet
 {

@@ -13,13 +13,13 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
-use JaxkDev\DiscordBot\Models\Member;
-use JaxkDev\DiscordBot\Models\Role;
-use JaxkDev\DiscordBot\Models\Server;
-use JaxkDev\DiscordBot\Models\Messages\Message;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
-use JaxkDev\DiscordBot\Models\ServerTemplate;
-use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\User\Member;
+use JaxkDev\DiscordBot\Models\Server\Role;
+use JaxkDev\DiscordBot\Models\Server\Server;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Message;
+use JaxkDev\DiscordBot\Models\Thread\Thread;
+use JaxkDev\DiscordBot\Models\Server\ServerTemplate;
+use JaxkDev\DiscordBot\Models\Server\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
@@ -29,7 +29,7 @@ class ServerJoin extends Packet
     /** @var Server */
     private $server;
 
-    /** @var ThreadChannel[] */
+    /** @var Thread[] */
     private $threads;
 
     /** @var ServerChannel[] */
@@ -57,7 +57,7 @@ class ServerJoin extends Packet
      * ServerJoin constructor.
      *
      * @param Server          $server
-     * @param ThreadChannel[] $threads
+     * @param Thread[] $threads
      * @param ServerChannel[] $channels
      * @param Member[]        $members
      * @param Role[]          $roles
@@ -85,7 +85,7 @@ class ServerJoin extends Packet
         return $this->server;
     }
 
-    /** @return ThreadChannel[] */
+    /** @return Thread[] */
     public function getThreads(): array
     {
         return $this->threads;

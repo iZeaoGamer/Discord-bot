@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Invite;
+use JaxkDev\DiscordBot\Models\Server\Invite;
 use pocketmine\plugin\Plugin;
 
 /**

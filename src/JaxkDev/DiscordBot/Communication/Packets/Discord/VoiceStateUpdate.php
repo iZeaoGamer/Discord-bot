@@ -13,7 +13,7 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\VoiceState;
+use JaxkDev\DiscordBot\Models\WebSockets\VoiceState;
 
 class VoiceStateUpdate extends Packet
 {

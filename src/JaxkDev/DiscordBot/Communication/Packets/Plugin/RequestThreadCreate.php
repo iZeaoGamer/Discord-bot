@@ -12,26 +12,26 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Thread\Thread;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestThreadCreate extends Packet
 {
 
-    /** @var ThreadChannel */
+    /** @var Thread */
     private $thread;
 
     /** @var string|null */
     private $reason;
 
-    public function __construct(ThreadChannel $thread, ?string $reason = null)
+    public function __construct(Thread $thread, ?string $reason = null)
     {
         parent::__construct();
         $this->thread = $thread;
         $this->reason = $reason;
     }
 
-    public function getChannel(): ThreadChannel
+    public function getChannel(): Thread
     {
         return $this->thread;
     }

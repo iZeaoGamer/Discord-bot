@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
+use JaxkDev\DiscordBot\Models\Thread\Thread;
 use pocketmine\plugin\Plugin;
 
 /**
@@ -24,16 +24,16 @@ use pocketmine\plugin\Plugin;
 class ThreadUpdated extends DiscordBotEvent
 {
 
-    /** @var ThreadChannel */
+    /** @var Thread */
     private $channel;
 
-    public function __construct(Plugin $plugin, ThreadChannel $channel)
+    public function __construct(Plugin $plugin, Thread $channel)
     {
         parent::__construct($plugin);
         $this->channel = $channel;
     }
 
-    public function getChannel(): ThreadChannel
+    public function getChannel(): Thread
     {
         return $this->channel;
     }

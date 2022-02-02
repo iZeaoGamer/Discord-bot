@@ -13,7 +13,7 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\Role;
+use JaxkDev\DiscordBot\Models\Server\Role;
 
 class RequestUpdateRole extends Packet
 {

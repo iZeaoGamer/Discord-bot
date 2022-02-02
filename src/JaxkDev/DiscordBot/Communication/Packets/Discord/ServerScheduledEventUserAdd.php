@@ -12,10 +12,10 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
-use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
-use JaxkDev\DiscordBot\Models\Server;
+use JaxkDev\DiscordBot\Models\Server\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\Server\Server;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\User;
+use JaxkDev\DiscordBot\Models\User\User;
 
 class ServerScheduledEventUserAdd extends Packet
 {

@@ -12,11 +12,11 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\ServerScheduledEvent;
+use JaxkDev\DiscordBot\Models\Server\ServerScheduledEvent;
 use pocketmine\plugin\Plugin;
 
-use JaxkDev\DiscordBot\Models\Server;
-use JaxkDev\DiscordBot\Models\User;
+use JaxkDev\DiscordBot\Models\Server\Server;
+use JaxkDev\DiscordBot\Models\User\User;
 
 /**
  * Emitted when a Scheduled Event has been created.

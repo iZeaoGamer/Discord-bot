@@ -13,7 +13,7 @@
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
-use JaxkDev\DiscordBot\Models\Server;
+use JaxkDev\DiscordBot\Models\Server\Server;
 use pocketmine\plugin\Plugin;
 
 /**

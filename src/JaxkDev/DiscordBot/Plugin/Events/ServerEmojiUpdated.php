@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Emoji;
+use JaxkDev\DiscordBot\Models\Server\Emoji;
 use pocketmine\plugin\Plugin;
 
 /**

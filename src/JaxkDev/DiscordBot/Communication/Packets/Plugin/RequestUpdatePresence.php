@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
-use JaxkDev\DiscordBot\Models\Activity;
+use JaxkDev\DiscordBot\Models\User\Activity;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class RequestUpdatePresence extends Packet

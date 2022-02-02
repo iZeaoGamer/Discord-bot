@@ -129,10 +129,10 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAcceptInvite;
 use JaxkDev\DiscordBot\Models\Channels\CategoryChannel;
 use JaxkDev\DiscordBot\Models\Channels\TextChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
-use JaxkDev\DiscordBot\Models\Member;
-use JaxkDev\DiscordBot\Models\Messages\Reply;
+use JaxkDev\DiscordBot\Models\User\Member;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Reply;
 
-use JaxkDev\DiscordBot\Models\Role;
+use JaxkDev\DiscordBot\Models\Server\Role;
 use JaxkDev\DiscordBot\Plugin\ApiRejection;
 use Monolog\Logger;
 use React\Promise\Deferred;
@@ -158,7 +158,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadJoin;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadLeave;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUnachive;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFollowupMessage;
-use JaxkDev\DiscordBot\Models\Messages\Webhook as WebhookMessage;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Plugin\Utils;
 use Discord\WebSockets\Event;
 
