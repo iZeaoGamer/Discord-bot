@@ -766,7 +766,7 @@ class Guild extends Part
         });
     }
 
-     /**
+    /**
      * Returns the number of members that would be removed in a prune operation.
      * Requires the KICK_MEMBERS permission.
      *
@@ -785,10 +785,10 @@ class Guild extends Part
             'days',
             'include_roles',
         ])
-        ->setDefault('days', 7)
-        ->setAllowedTypes('days', 'int')
-        ->setAllowedTypes('include_roles', 'array')
-        ->setAllowedValues('days', range(1, 30));
+            ->setDefault('days', 7)
+            ->setAllowedTypes('days', 'int')
+            ->setAllowedTypes('include_roles', 'array')
+            ->setAllowedValues('days', range(1, 30));
 
         $options = $resolver->resolve($options);
 
@@ -826,11 +826,11 @@ class Guild extends Part
             'compute_prune_count',
             'include_roles',
         ])
-        ->setDefaults(['days' => 7, 'compute_prune_count' => true])
-        ->setAllowedTypes('days', 'int')
-        ->setAllowedTypes('compute_prune_count', 'bool')
-        ->setAllowedTypes('include_roles', 'array')
-        ->setAllowedValues('days', range(1, 30));
+            ->setDefaults(['days' => 7, 'compute_prune_count' => true])
+            ->setAllowedTypes('days', 'int')
+            ->setAllowedTypes('compute_prune_count', 'bool')
+            ->setAllowedTypes('include_roles', 'array')
+            ->setAllowedValues('days', range(1, 30));
 
         $options = $resolver->resolve($options);
 
@@ -905,7 +905,7 @@ class Guild extends Part
      *
      * @see https://discord.com/developers/docs/resources/guild#get-guild-widget-settings
      * 
-     * @return ExtendedPromiseInterface
+     * @return ExtendedPromiseInterface<Widget>
      */
     public function getWidgetSettings(): ExtendedPromiseInterface
     {
@@ -926,7 +926,7 @@ class Guild extends Part
      *                       enabled => whether the widget is enabled
      *                       channel_id => the widget channel id
      *
-     * @return ExtendedPromiseInterface The updated guild widget object.
+     * @return ExtendedPromiseInterface<Widget> The updated guild widget object.
      */
     public function updateWidgetSettings(array $options, ?string $reason = null): ExtendedPromiseInterface
     {
@@ -956,7 +956,7 @@ class Guild extends Part
     /**
      * Get the Widget for the guild.
      *
-     * @return ExtendedPromiseInterface<WelcomeScreen>
+     * @return ExtendedPromiseInterface<Widget>
      */
     public function getWidget(): ExtendedPromiseInterface
     {

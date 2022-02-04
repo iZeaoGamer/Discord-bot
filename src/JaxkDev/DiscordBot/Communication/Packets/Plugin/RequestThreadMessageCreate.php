@@ -32,13 +32,17 @@ class RequestThreadMessageCreate extends Packet
     /** @var string|null */
     private $reason;
 
-    public function __construct(string $message_id, string $channel_id, string $name, int $duration, ?string $reason = null)
+    /** @var string|null */
+    private $thread_id;
+
+    public function __construct(string $message_id, string $channel_id, string $name, int $duration, ?string $reason = null, ?string $thread_id = null)
     {
         parent::__construct();
         $this->message_id = $message_id;
         $this->channel_id = $channel_id;
         $this->threadName = $name;
         $this->duration = $duration;
+        $this->thread_id = $thread_id;
     }
 
     public function getMessageId(): string
@@ -62,6 +66,10 @@ class RequestThreadMessageCreate extends Packet
     {
         return $this->reason;
     }
+    public function getThreadId(): ?string
+    {
+        return $this->thread_id;
+    }
 
     public function serialize(): ?string
     {
@@ -71,7 +79,8 @@ class RequestThreadMessageCreate extends Packet
             $this->channel_id,
             $this->threadName,
             $this->duration,
-            $this->reason
+            $this->reason,
+            $this->thread_id
         ]);
     }
 
@@ -83,7 +92,8 @@ class RequestThreadMessageCreate extends Packet
             $this->channel_id,
             $this->threadName,
             $this->duration,
-            $this->reason
+            $this->reason,
+            $this->thread_id
         ] = unserialize($data);
     }
 }

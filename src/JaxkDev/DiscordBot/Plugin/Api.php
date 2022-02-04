@@ -117,16 +117,19 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchPrune;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchWidgetSettings;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRespondInteraction;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFollowupMessage;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyWidget;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadAchive;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadJoin;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadLeave;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestThreadUnachive;
 
 use function JaxkDev\DiscordBot\Libs\React\Promise\reject as rejectPromise;
+
 /**
  * For internal and developers use for interacting with the discord bot.
  *
@@ -144,7 +147,44 @@ class Api
         $this->plugin = $plugin;
     }
 
-
+    /**
+     ** Fetches Server Prune Count.
+     * 
+     * @param string $server_id
+     * 
+     * @return PromiseInterface Resolves with a Widget Model.
+     */
+    public function fetchWidget(string $server_id): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($server_id)) {
+            return rejectPromise(new ApiRejection("Server ID: '{$server_id}' is invalid."));
+        }
+        $pk = new RequestFetchWidgetSettings($server_id);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    /** Starts Server Pruning.
+     * 
+     * @param string $server_id
+     * @param string[] $included_roles
+     * @param int $days
+     * @param bool $compute_prune_count
+     * @param string|null $reason
+     * 
+     * @return PromiseInterface Resolves with int.
+     */
+    public function modifyWidget(string $server_id, bool $enabled, ?string $channel_id = null, ?string $reason = null): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($server_id)) {
+            return rejectPromise(new ApiRejection("Server ID: '{$server_id}' is invalid."));
+        }
+        if ($channel_id !== null and !Utils::validDiscordSnowflake($channel_id)) {
+            return rejectPromise(new ApiRejection("Channel ID: '{$channel_id}' is invalid!"));
+        }
+        $pk = new RequestModifyWidget($server_id, $enabled, $channel_id, $reason);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
     /** Fetches Server Prune Count.
      * 
      * @param string $server_id
@@ -153,7 +193,16 @@ class Api
      * 
      * @return PromiseInterface Resolves with int.
      */
-    public function fetchPrune(string $server_id, array $included_roles, int $days = 7): PromiseInterface{
+    public function fetchPrune(string $server_id, array $included_roles, int $days = 7): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($server_id)) {
+            return rejectPromise(new ApiRejection("Server ID: '{$server_id}' is invalid."));
+        }
+        foreach ($included_roles as $role) {
+            if (!Utils::validDiscordSnowflake($role)) {
+                return rejectPromise(new ApiRejection("Role ID: '{$role}' is invalid."));
+            }
+        }
         $pk = new RequestFetchPrune($server_id, $included_roles, $days);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -168,7 +217,16 @@ class Api
      * 
      * @return PromiseInterface Resolves with int.
      */
-    public function beginPrune(string $server_id, array $included_roles, int $days = 7, bool $compute_prune_count = true, ?string $reason = null): PromiseInterface{
+    public function beginPrune(string $server_id, array $included_roles, int $days = 7, bool $compute_prune_count = true, ?string $reason = null): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($server_id)) {
+            return rejectPromise(new ApiRejection("Server ID: '{$server_id}' is invalid."));
+        }
+        foreach ($included_roles as $role) {
+            if (!Utils::validDiscordSnowflake($role)) {
+                return rejectPromise(new ApiRejection("Role ID: '{$role}' is invalid."));
+            }
+        }
         $pk = new RequestBeginPrune($server_id, $included_roles, $days, $compute_prune_count, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -179,7 +237,8 @@ class Api
      * 
      * @return PromiseInterface Resolves with a Invite Model.
      */
-    public function acceptInvite(Invite $invite): PromiseInterface{
+    public function acceptInvite(Invite $invite): PromiseInterface
+    {
         $pk = new RequestAcceptInvite($invite);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -191,9 +250,10 @@ class Api
      * @param string $parent_id ID of the channel the thread is in.
      * 
      * @return PromiseInterface Resolves with no data.
-    */
-    public function joinThread(Thread $thread, string $parent_id): PromiseInterface{
-        if(!Utils::validDiscordSnowflake($parent_id)){
+     */
+    public function joinThread(Thread $thread, string $parent_id): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($parent_id)) {
             return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
         }
         $pk = new RequestThreadJoin($thread, $parent_id);
@@ -207,9 +267,10 @@ class Api
      * @param string $parent_id ID of the channel the thread is in.
      * 
      * @return PromiseInterface Resolves with no data.
-    */
-    public function leaveThread(Thread $thread, string $parent_id): PromiseInterface{
-        if(!Utils::validDiscordSnowflake($parent_id)){
+     */
+    public function leaveThread(Thread $thread, string $parent_id): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($parent_id)) {
             return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
         }
         $pk = new RequestThreadLeave($thread, $parent_id);
@@ -217,15 +278,16 @@ class Api
         return ApiResolver::create($pk->getUID());
     }
 
-     /** Achives a thread
+    /** Achives a thread
      * 
      * @param Thread $thread
      * @param string $parent_id ID of the channel the thread is in.
      * 
      * @return PromiseInterface Resolves with no data.
-    */
-    public function achiveThread(Thread $thread, string $parent_id): PromiseInterface{
-        if(!Utils::validDiscordSnowflake($parent_id)){
+     */
+    public function achiveThread(Thread $thread, string $parent_id): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($parent_id)) {
             return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
         }
         $pk = new RequestThreadAchive($thread, $parent_id);
@@ -233,15 +295,16 @@ class Api
         return ApiResolver::create($pk->getUID());
     }
 
-     /** Un achives a thread
+    /** Un achives a thread
      * 
      * @param Thread $thread
      * @param string $parent_id ID of the channel the thread is in.
      * 
      * @return PromiseInterface Resolves with no data.
-    */
-    public function unachiveThread(Thread $thread, string $parent_id): PromiseInterface{
-        if(!Utils::validDiscordSnowflake($parent_id)){
+     */
+    public function unachiveThread(Thread $thread, string $parent_id): PromiseInterface
+    {
+        if (!Utils::validDiscordSnowflake($parent_id)) {
             return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
         }
         $pk = new RequestThreadUnachive($thread, $parent_id);
@@ -258,12 +321,13 @@ class Api
      * 
      * @return PromiseInterface Resolves with a Message Model.
      */
-    public function createInteractionResponse(Interaction $interaction, ?MessageBuilder $builder = null, string $content = "", ?Embed $embed = null, bool $ephemeral = false): PromiseInterface{
+    public function createInteractionResponse(Interaction $interaction, ?MessageBuilder $builder = null, string $content = "", ?Embed $embed = null, bool $ephemeral = false): PromiseInterface
+    {
         $pk = new RequestRespondInteraction($interaction, $builder, $content, $embed, $ephemeral);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
-     /** Responds to an interaction with respondWithMessage().
+    /** Responds to an interaction with respondWithMessage().
      * @param Interaction $interaction
      * @param MessageBuilder|null $builder
      * @param strong $content
@@ -272,7 +336,8 @@ class Api
      * 
      * @return PromiseInterface Resolves with a Message Model.
      */
-    public function respondInteractionWithMessage(Interaction $interaction, ?MessageBuilder $builder = null, string $content = "", ?Embed $embed = null, bool $ephemeral = false): PromiseInterface{
+    public function respondInteractionWithMessage(Interaction $interaction, ?MessageBuilder $builder = null, string $content = "", ?Embed $embed = null, bool $ephemeral = false): PromiseInterface
+    {
         $pk = new RequestFollowupMessage($interaction, $builder, $content, $embed, $ephemeral);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -346,10 +411,11 @@ class Api
     /** Cross posts a message to the followed servers.
      * @param string $message_id
      * @param string $channel_id
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Message Model.
      */
-    public function crossPostMessage(string $message_id, string $channel_id): PromiseInterface
+    public function crossPostMessage(string $message_id, string $channel_id, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Message ID: '{$message_id}' is invalid!"));
@@ -357,7 +423,10 @@ class Api
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Channel ID: '{$channel_id}' is invalid!"));
         }
-        $pk = new RequestCrossPostMessage($message_id, $channel_id);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestCrossPostMessage($message_id, $channel_id, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -400,24 +469,32 @@ class Api
 
     /** Creates a reaction.
      * @param Reaction $reaction
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Reaction Model.
      */
-    public function createReaction(Reaction $reaction): PromiseInterface
+    public function createReaction(Reaction $reaction, ?string $thread_id = null): PromiseInterface
     {
-        $pk = new RequestCreateReaction($reaction);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestCreateReaction($reaction, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
 
     /** Updates a reaction. ID must be present.
      * @param Reaction $reaction
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Reaction Model.
      */
-    public function updateReaction(Reaction $reaction): PromiseInterface
+    public function updateReaction(Reaction $reaction, ?string $thread_id = null): PromiseInterface
     {
-        $pk = new RequestUpdateReaction($reaction);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestUpdateReaction($reaction, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -426,10 +503,11 @@ class Api
      * @param string $channel_id
      * @param string $message_id
      * @param string $reaction_id
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function deleteReaction(string $channel_id, string $message_id, string $reaction_id): PromiseInterface
+    public function deleteReaction(string $channel_id, string $message_id, string $reaction_id, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Channel ID: {$channel_id} is invalid!"));
@@ -440,7 +518,10 @@ class Api
         if (!Utils::validDiscordSnowflake($reaction_id)) {
             return rejectPromise(new ApiRejection("Reaction ID: {$reaction_id} is invalid!"));
         }
-        $pk = new RequestDeleteReaction($channel_id, $message_id, $reaction_id);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestDeleteReaction($channel_id, $message_id, $reaction_id, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -449,10 +530,11 @@ class Api
      * @param string $channel_id
      * @param string $message_id
      * @param string $reaction_id
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Reaction Model.
      */
-    public function fetchReaction(string $channel_id, string $message_id, string $reaction_id): PromiseInterface
+    public function fetchReaction(string $channel_id, string $message_id, string $reaction_id, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Channel ID: {$channel_id} is invalid!"));
@@ -463,7 +545,10 @@ class Api
         if (!Utils::validDiscordSnowflake($reaction_id)) {
             return rejectPromise(new ApiRejection("Reaction ID: {$reaction_id} is invalid!"));
         }
-        $pk = new RequestFetchReaction($channel_id, $message_id, $reaction_id);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestFetchReaction($channel_id, $message_id, $reaction_id, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -647,15 +732,19 @@ class Api
     /** Creates a reply delay
      * @param Message $message
      * @param int $delay (In seconds)
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Message model.
      */
-    public function delayReply(Message $message, int $delay): PromiseInterface
+    public function delayReply(Message $message, int $delay, ?string $thread_id = null): PromiseInterface
     {
         if ($delay <= 0) {
             return rejectPromise(new ApiRejection("Reply Delay counter: {$delay} must be above 0."));
         }
-        $pk = new RequestDelayReply($message, $delay);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestDelayReply($message, $delay, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -664,10 +753,11 @@ class Api
      * @param string $message_id
      * @param string $channel_id
      * @param int $delay (In seconds)
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function delayDelete(string $message_id, string $channel_id, int $delay): PromiseInterface
+    public function delayDelete(string $message_id, string $channel_id, int $delay, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message id {$message_id}"));
@@ -678,7 +768,10 @@ class Api
         if ($delay <= 0) {
             return rejectPromise(new ApiRejection("Delete Delay counter: {$delay} must be above 0."));
         }
-        $pk = new RequestDelayDelete($message_id, $channel_id, $delay);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestDelayDelete($message_id, $channel_id, $delay, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -687,12 +780,16 @@ class Api
      * 
      * @param MessageBuilder $builder
      * @param Message $message
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Interaction Model. If Interaction not found, returns a Message Model instead.
      */
-    public function createInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false): PromiseInterface
+    public function createInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false, ?string $thread_id = null): PromiseInterface
     {
-        $pk = new RequestCreateInteraction($builder, $message, $ephemeral);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestCreateInteraction($builder, $message, $ephemeral, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -700,15 +797,19 @@ class Api
     /** Modifys an interaction.
      * @param MessageBuilder $builder
      * @param Message $message
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Interaction Model. If Interaction not found, returns a Message Model instead.
      */
-    public function modifyInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false): PromiseInterface
+    public function modifyInteraction(MessageBuilder $builder, Message $message, bool $ephemeral = false, ?string $thread_id = null): PromiseInterface
     {
         if (strlen($message->getContent()) > 2000) {
             return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
         }
-        $pk = new RequestModifyInteraction($builder, $message, $ephemeral);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestModifyInteraction($builder, $message, $ephemeral, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -831,11 +932,10 @@ class Api
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
         }
-        if($thread_id){
-        if(!Utils::validDiscordSnowflake($thread_id)){
+
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
             return rejectPromise(new ApiRejection("Thread Channel ID: {$thread_id} is invalid."));
         }
-    }
         $pk = new RequestFetchPinnedMessages($channel_id, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -858,11 +958,9 @@ class Api
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
         }
-        if($thread_id){
-        if(!Utils::validDiscordSnowflake($thread_id)){
-            return rejectPromise(new ApiRejection("Thread Channel ID: {$thread_id} is invalid."));
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
         }
-    }
         $pk = new RequestFetchMessage($channel_id, $message_id, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -886,11 +984,9 @@ class Api
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
         }
-        if($thread_id){
-        if(!Utils::validDiscordSnowflake($thread_id)){
-            return rejectPromise(new ApiRejection("Thread Channel ID: {$thread_id} is invalid."));
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
         }
-    }
         $pk = new RequestPinMessage($channel_id, $message_id, $thread_id, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -914,11 +1010,9 @@ class Api
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
         }
-        if($thread_id){
-        if(!Utils::validDiscordSnowflake($thread_id)){
-            return rejectPromise(new ApiRejection("Thread Channel ID: {$thread_id} is invalid."));
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
         }
-    }
         $pk = new RequestUnpinMessage($channel_id, $message_id, $thread_id, $reason);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
@@ -1033,10 +1127,11 @@ class Api
      * @param string $message_id
      * @param string $user_id
      * @param string $emoji Raw emoji eg '👍'
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function removeReaction(string $channel_id, string $message_id, string $user_id, string $emoji): PromiseInterface
+    public function removeReaction(string $channel_id, string $message_id, string $user_id, string $emoji, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -1047,7 +1142,10 @@ class Api
         if (!Utils::validDiscordSnowflake($user_id)) {
             return rejectPromise(new ApiRejection("Invalid user ID '$user_id'."));
         }
-        $pk = new RequestRemoveReaction($channel_id, $message_id, $user_id, $emoji);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestRemoveReaction($channel_id, $message_id, $user_id, $emoji, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1059,10 +1157,11 @@ class Api
      * @param string      $message_id
      * @param string|null $emoji If no emoji specified ALL reactions by EVERYONE will be deleted,
      *                                  if specified everyone's reaction with that emoji will be removed.
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function removeAllReactions(string $channel_id, string $message_id, ?string $emoji = null): PromiseInterface
+    public function removeAllReactions(string $channel_id, string $message_id, ?string $emoji = null, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -1070,7 +1169,10 @@ class Api
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
         }
-        $pk = new RequestRemoveAllReactions($channel_id, $message_id, $emoji);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestRemoveAllReactions($channel_id, $message_id, $emoji, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1083,10 +1185,11 @@ class Api
      * @param string $channel_id
      * @param string $message_id
      * @param string $emoji            MUST BE THE ACTUAL EMOJI CHARACTER eg '👍'
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Message Model.
      */
-    public function addReaction(string $channel_id, string $message_id, string $emoji): PromiseInterface
+    public function addReaction(string $channel_id, string $message_id, string $emoji, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -1094,7 +1197,10 @@ class Api
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
         }
-        $pk = new RequestAddReaction($channel_id, $message_id, $emoji);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestAddReaction($channel_id, $message_id, $emoji, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1216,10 +1322,11 @@ class Api
      * Sends the Message to discord.
      *
      * @param Message $message
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Message model.
      */
-    public function sendMessage(Message $message): PromiseInterface
+    public function sendMessage(Message $message, ?string $thread_id = null): PromiseInterface
     {
         if ($message instanceof WebhookMessage) {
             //You can execute webhooks yourself using Api::fetchWebhooks() and use its token.
@@ -1228,7 +1335,10 @@ class Api
         if (strlen($message->getContent()) > 2000) {
             return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
         }
-        $pk = new RequestSendMessage($message);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestSendMessage($message, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1240,10 +1350,12 @@ class Api
      * @param string      $file_path Full file path on disk.
      * @param string      $message   Optional text/message to send with the file
      * @param string|null $file_name Optional file_name to show in discord, Prefix with 'SPOILER_' to make as spoiler.
+     * @param bool $tts
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Message model.
      */
-    public function sendFile(string $channel_id, string $file_path, string $message = "", string $file_name = null): PromiseInterface
+    public function sendFile(string $channel_id, string $file_path, string $message = "", string $file_name = null, bool $tts = false, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -1257,7 +1369,10 @@ class Api
         if ($file_name === null) {
             $file_name = basename($file_path);
         }
-        $pk = new RequestSendFile($channel_id, $file_name, $file_path, $message);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestSendFile($channel_id, $file_name, $file_path, $message, $tts, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1268,10 +1383,11 @@ class Api
      * Note you can't convert a 'REPLY' message to a normal 'MESSAGE'.
      *
      * @param Message $message
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Message model.
      */
-    public function editMessage(Message $message): PromiseInterface
+    public function editMessage(Message $message, ?string $thread_id = null): PromiseInterface
     {
         if ($message->getId() === null) {
             return rejectPromise(new ApiRejection("Message must have a valid ID to be able to edit it."));
@@ -1282,7 +1398,10 @@ class Api
         if (strlen($message->getContent()) > 2000) {
             return rejectPromise(new ApiRejection("Message content cannot be larger than 2000 characters for bots."));
         }
-        $pk = new RequestEditMessage($message);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestEditMessage($message, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1292,10 +1411,11 @@ class Api
      *
      * @param string $message_id
      * @param string $channel_id
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function deleteMessage(string $message_id, string $channel_id): PromiseInterface
+    public function deleteMessage(string $message_id, string $channel_id, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -1303,7 +1423,10 @@ class Api
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
         }
-        $pk = new RequestDeleteMessage($message_id, $channel_id);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestDeleteMessage($message_id, $channel_id, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1313,10 +1436,11 @@ class Api
      * @param string $channel_id
      * @param int $deleteLimit
      * @param string|null $reason
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with no data.
      */
-    public function bulkDelete(string $channel_id, int $deleteLimit, ?string $reason = null): PromiseInterface
+    public function bulkDelete(string $channel_id, int $deleteLimit, ?string $reason = null, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
@@ -1325,7 +1449,10 @@ class Api
             return rejectPromise(new ApiRejection("Delete limit {$deleteLimit} is invalid."));
         }
 
-        $pk = new RequestMessageBulkDelete($channel_id, $deleteLimit);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestMessageBulkDelete($channel_id, $deleteLimit, $reason, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1641,15 +1768,16 @@ class Api
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
-    
+
     /** Unmutes a Member that's in the current boice channel. Unmuted Member's Voice Channel ID must be present. 
      * @param string $userID
      * @param VoiceChannel $channel
      * @param string|null $reason
      * 
      * @return PromiseInterface Resolves with a VoiceChannel Model.
-    */
-    public function unmuteMember(string $userID, VoiceChannel $channel, ?string $reason = null): PromiseInterface{
+     */
+    public function unmuteMember(string $userID, VoiceChannel $channel, ?string $reason = null): PromiseInterface
+    {
         if ($channel->getId() === null) {
             return rejectPromise(new ApiRejection("Voice Channel ID must be present."));
         }
@@ -1688,10 +1816,11 @@ class Api
      * @param string $name
      * @param int $duration
      * @param string|null $reason
+     * @param string|null $thread_id
      * 
      * @return PromiseInterface Resolves with a Message Model.
      */
-    public function startMessageThread(string $message_id, string $channel_id, string $name, int $duration, ?string $reason = null): PromiseInterface
+    public function startMessageThread(string $message_id, string $channel_id, string $name, int $duration, ?string $reason = null, ?string $thread_id = null): PromiseInterface
     {
         if (!Utils::validDiscordSnowflake($message_id)) {
             return rejectPromise(new ApiRejection("Invalid message ID '$message_id'."));
@@ -1699,7 +1828,10 @@ class Api
         if (!Utils::validDiscordSnowflake($channel_id)) {
             return rejectPromise(new ApiRejection("Invalid channel ID '$channel_id'."));
         }
-        $pk = new RequestThreadMessageCreate($message_id, $channel_id, $name, $duration, $reason);
+        if ($thread_id !== null and !Utils::validDiscordSnowflake($thread_id)) {
+            return rejectPromise(new ApiRejection("Thread ID: '{$thread_id}' is invalid."));
+        }
+        $pk = new RequestThreadMessageCreate($message_id, $channel_id, $name, $duration, $reason, $thread_id);
         $this->plugin->writeOutboundData($pk);
         return ApiResolver::create($pk->getUID());
     }
@@ -1719,7 +1851,7 @@ class Api
         if (!Utils::validDiscordSnowflake($channel->getId())) {
             return rejectPromise(new ApiRejection("Thread Channel ID: {$channel->getId()} is invalid!"));
         }
-        if(!Utils::validDiscordSnowflake($parent_id)){
+        if (!Utils::validDiscordSnowflake($parent_id)) {
             return rejectPromise(new ApiRejection("Channel ID: {$parent_id} is invalid."));
         }
         $pk = new RequestThreadUpdate($channel, $parent_id);

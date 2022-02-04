@@ -21,22 +21,31 @@ class RequestSendMessage extends Packet
     /** @var Message */
     private $message;
 
-    public function __construct(Message $message)
+    /** @var string|null */
+    private $thread_id;
+
+    public function __construct(Message $message, ?string $thread_id)
     {
         parent::__construct();
         $this->message = $message;
+        $this->thread_id = $thread_id;
     }
 
     public function getMessage(): Message
     {
         return $this->message;
     }
+    public function getThreadId(): ?string
+    {
+        return $this->thread_id;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->message
+            $this->message,
+            $this->thread_id
         ]);
     }
 
@@ -44,7 +53,8 @@ class RequestSendMessage extends Packet
     {
         [
             $this->UID,
-            $this->message
+            $this->message,
+            $this->thread_id
         ] = unserialize($data);
     }
 }

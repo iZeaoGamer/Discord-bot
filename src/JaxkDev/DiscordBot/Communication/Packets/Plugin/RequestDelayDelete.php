@@ -27,12 +27,16 @@ class RequestDelayDelete extends Packet
     /** @var int */
     private $delay;
 
-    public function __construct(string $message_id, string $channel_id, int $delay)
+    /** @var string|null */
+    private $thread_id;
+
+    public function __construct(string $message_id, string $channel_id, int $delay, ?string $thread_id)
     {
         parent::__construct();
         $this->message_id = $message_id;
         $this->channel_id = $channel_id;
         $this->delay = $delay;
+        $this->thread_id = $thread_id;
     }
 
     public function getMessageId(): string
@@ -47,13 +51,18 @@ class RequestDelayDelete extends Packet
     {
         return $this->delay;
     }
+    public function getThreadId(): ?string
+    {
+        return $this->thread_id;
+    }
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
             $this->message_id,
             $this->channel_id,
-            $this->delay
+            $this->delay,
+            $this->thread_id
         ]);
     }
 
@@ -63,7 +72,8 @@ class RequestDelayDelete extends Packet
             $this->UID,
             $this->message_id,
             $this->channel_id,
-            $this->delay
+            $this->delay,
+            $this->thread_id
         ] = unserialize($data);
     }
 }

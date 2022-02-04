@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Models\Thread;
 
-class Thread
+class Thread implements \Serializable
 {
 
 

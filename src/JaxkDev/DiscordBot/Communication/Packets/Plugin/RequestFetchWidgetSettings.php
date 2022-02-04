@@ -13,39 +13,30 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
-use JaxkDev\DiscordBot\Models\Channels\Messages\Message;
 
-class RequestEditMessage extends Packet
+class RequestFetchWidgetSettings extends Packet
 {
 
-    /** @var Message */
-    private $message;
+    /** @var string */
+    private $server_id;
 
-    /** @var string|null */
-    private $thread_id;
 
-    public function __construct(Message $message, ?string $thread_id)
+
+    public function __construct(string $server_id)
     {
         parent::__construct();
-        $this->message = $message;
-        $this->thread_id = $thread_id;
+        $this->server_id = $server_id;
     }
 
-    public function getMessage(): Message
+    public function getServerId(): string
     {
-        return $this->message;
+        return $this->server_id;
     }
-    public function getThreadId(): ?string
-    {
-        return $this->thread_id;
-    }
-
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->message,
-            $this->thread_id
+            $this->server_id
         ]);
     }
 
@@ -53,8 +44,7 @@ class RequestEditMessage extends Packet
     {
         [
             $this->UID,
-            $this->message,
-            $this->thread_id
+            $this->server_id
         ] = unserialize($data);
     }
 }

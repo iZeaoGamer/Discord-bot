@@ -26,12 +26,16 @@ class RequestRemoveAllReactions extends Packet
     /** @var null|string */
     private $emoji;
 
-    public function __construct(string $channel_id, string $message_id, ?string $emoji = null)
+    /** @var string|null */
+    private $thread_id;
+
+    public function __construct(string $channel_id, string $message_id, ?string $emoji = null, ?string $thread_id = null)
     {
         parent::__construct();
         $this->channel_id = $channel_id;
         $this->message_id = $message_id;
         $this->emoji = $emoji;
+        $this->thread_id = $thread_id;
     }
 
     public function getChannelId(): string
@@ -48,6 +52,10 @@ class RequestRemoveAllReactions extends Packet
     {
         return $this->emoji;
     }
+    public function getThreadId(): ?string
+    {
+        return $this->thread_id;
+    }
 
     public function serialize(): ?string
     {
@@ -55,7 +63,8 @@ class RequestRemoveAllReactions extends Packet
             $this->UID,
             $this->channel_id,
             $this->message_id,
-            $this->emoji
+            $this->emoji,
+            $this->thread_id
         ]);
     }
 
@@ -65,7 +74,8 @@ class RequestRemoveAllReactions extends Packet
             $this->UID,
             $this->channel_id,
             $this->message_id,
-            $this->emoji
+            $this->emoji,
+            $this->thread_id
         ] = unserialize($data);
     }
 }

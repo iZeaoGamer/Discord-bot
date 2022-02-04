@@ -23,11 +23,15 @@ class RequestCrossPostMessage extends Packet
     /** @var string */
     private $channel_id;
 
-    public function __construct(string $message_id, string $channel_id)
+    /** @var string|null */
+    private $thread_id;
+
+    public function __construct(string $message_id, string $channel_id, ?string $thread_id)
     {
         parent::__construct();
         $this->message_id = $message_id;
         $this->channel_id = $channel_id;
+        $this->thread_id = $thread_id;
     }
     public function getMessageID(): string
     {
@@ -37,12 +41,17 @@ class RequestCrossPostMessage extends Packet
     {
         return $this->channel_id;
     }
+    public function getThreadId(): ?string
+    {
+        return $this->thread_id;
+    }
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
             $this->message_id,
-            $this->channel_id
+            $this->channel_id,
+            $this->thread_id
         ]);
     }
 
@@ -51,7 +60,8 @@ class RequestCrossPostMessage extends Packet
         [
             $this->UID,
             $this->message_id,
-            $this->channel_id
+            $this->channel_id,
+            $this->thread_id
         ] = unserialize($data);
     }
 }

@@ -29,6 +29,7 @@ use Discord\Parts\Guild\GuildTemplate as DiscordTemplate;
 use Discord\Parts\Channel\StageInstance as DiscordStage;
 use Discord\Parts\Interactions\Interaction as DiscordInteraction;
 use Discord\Parts\Guild\Guild as DiscordGuild;
+use Discord\Parts\Guild\Widget as DiscordWidget;
 use Discord\Parts\Guild\WelcomeScreen as DiscordWelcomeScreen;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
@@ -163,6 +164,8 @@ use JaxkDev\DiscordBot\Plugin\Utils;
 use Discord\WebSockets\Event;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestBeginPrune;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchPrune;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchWidgetSettings;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestModifyWidget;
 
 class CommunicationHandler
 {
@@ -294,6 +297,8 @@ class CommunicationHandler
         elseif ($pk instanceof RequestAcceptInvite) $this->handleInviteAccept($pk);
         elseif ($pk instanceof RequestFetchPrune) $this->handleServerFetchPrune($pk);
         elseif ($pk instanceof RequestBeginPrune) $this->handleServerBeginPrune($pk);
+        elseif ($pk instanceof RequestFetchWidgetSettings) $this->handleServerFetchWidget($pk);
+        elseif ($pk instanceof RequestModifyWidget) $this->handleServerUpdateWidget($pk);
     }
     private function handleInteractionRespond(RequestRespondInteraction $pk): void
     {
@@ -815,29 +820,29 @@ class CommunicationHandler
                     $do = $do->setType($option->getType());
                     $do = $do->setName($option->getName());
                     $do = $do->setDescription($option->getDescription());
-                    if($option->getType() !== $option::SUB_COMMAND and $option->getType() !== $option::SUB_COMMAND_GROUP){
-                    $do = $do->setRequired($option->isRequired());
+                    if ($option->getType() !== $option::SUB_COMMAND and $option->getType() !== $option::SUB_COMMAND_GROUP) {
+                        $do = $do->setRequired($option->isRequired());
                     }
-                    if($option->getType() === $option::CHANNEL){
-                    $do = $do->setChannelTypes($option->getChannelTypes());
+                    if ($option->getType() === $option::CHANNEL) {
+                        $do = $do->setChannelTypes($option->getChannelTypes());
                     }
-                    if($option->getType() === $option::STRING or $option->getType() === $option::NUMBER or $option->getType() === $option::INTEGER){
-                    $do = $do->setAutoComplete($option->isAutoComplete());
+                    if ($option->getType() === $option::STRING or $option->getType() === $option::NUMBER or $option->getType() === $option::INTEGER) {
+                        $do = $do->setAutoComplete($option->isAutoComplete());
                     }
                     foreach ($option->getSubOptions() as $sub) {
                         $subOption = new DiscordCommandOption($this->client->getDiscordClient());
-                     
+
                         $subOption = $subOption->setType($sub->getType());
                         $subOption = $subOption->setName($sub->getName());
                         $subOption = $subOption->setDescription($sub->getDescription());
-                        if($sub->getType() !== $sub::SUB_COMMAND and $sub->getType() !== $sub::SUB_COMMAND_GROUP){
-                        $subOption = $subOption->setRequired($sub->isRequired());
+                        if ($sub->getType() !== $sub::SUB_COMMAND and $sub->getType() !== $sub::SUB_COMMAND_GROUP) {
+                            $subOption = $subOption->setRequired($sub->isRequired());
                         }
-                        if($sub->getType() === $sub::CHANNEL){
-                        $subOption = $subOption->setChannelTypes($sub->getChannelTypes());
+                        if ($sub->getType() === $sub::CHANNEL) {
+                            $subOption = $subOption->setChannelTypes($sub->getChannelTypes());
                         }
-                        if($sub->getType() === $sub::STRING or $sub->getType() === $sub::NUMBER or $sub->getType() === $sub::INTEGER){
-                        $subOption = $subOption->setAutoComplete($sub->isAutoComplete());
+                        if ($sub->getType() === $sub::STRING or $sub->getType() === $sub::NUMBER or $sub->getType() === $sub::INTEGER) {
+                            $subOption = $subOption->setAutoComplete($sub->isAutoComplete());
                         }
                         foreach ($sub->getChoices() as $choice) {
                             $ch = new DiscordChoice($this->client->getDiscordClient());
@@ -847,17 +852,17 @@ class CommunicationHandler
                                 $subOption = $subOption->addChoice($ch);
                             }
                         }
-                     
+
                         $do = $do->addOption($subOption);
-                    foreach ($option->getChoices() as $choice) {
-                        $ch = new DiscordChoice($this->client->getDiscordClient());
-                        $ch = $ch->setName($choice->getName());
-                        $ch = $ch->setValue($choice->getValue());
-                        if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
-                            $do = $do->addChoice($ch);
+                        foreach ($option->getChoices() as $choice) {
+                            $ch = new DiscordChoice($this->client->getDiscordClient());
+                            $ch = $ch->setName($choice->getName());
+                            $ch = $ch->setValue($choice->getValue());
+                            if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
+                                $do = $do->addChoice($ch);
+                            }
                         }
-                    }
-                    $options[] = $do;
+                        $options[] = $do;
                     }
                 }
 
@@ -918,29 +923,29 @@ class CommunicationHandler
                 $do = $do->setType($option->getType());
                 $do = $do->setName($option->getName());
                 $do = $do->setDescription($option->getDescription());
-                if($option->getType() !== $option::SUB_COMMAND and $option->getType() !== $option::SUB_COMMAND_GROUP){
-                $do = $do->setRequired($option->isRequired());
+                if ($option->getType() !== $option::SUB_COMMAND and $option->getType() !== $option::SUB_COMMAND_GROUP) {
+                    $do = $do->setRequired($option->isRequired());
                 }
-                if($option->getType() === $option::CHANNEL){
-                $do = $do->setChannelTypes($option->getChannelTypes());
+                if ($option->getType() === $option::CHANNEL) {
+                    $do = $do->setChannelTypes($option->getChannelTypes());
                 }
-                if($option->getType() === $option::STRING or $option->getType() === $option::NUMBER or $option->getType() === $option::INTEGER){
-                $do = $do->setAutoComplete($option->isAutoComplete());
+                if ($option->getType() === $option::STRING or $option->getType() === $option::NUMBER or $option->getType() === $option::INTEGER) {
+                    $do = $do->setAutoComplete($option->isAutoComplete());
                 }
                 foreach ($option->getSubOptions() as $sub) {
                     $subOption = new DiscordCommandOption($this->client->getDiscordClient());
-                 
+
                     $subOption = $subOption->setType($sub->getType());
                     $subOption = $subOption->setName($sub->getName());
                     $subOption = $subOption->setDescription($sub->getDescription());
-                    if($sub->getType() !== $sub::SUB_COMMAND and $sub->getType() !== $sub::SUB_COMMAND_GROUP){
-                    $subOption = $subOption->setRequired($sub->isRequired());
+                    if ($sub->getType() !== $sub::SUB_COMMAND and $sub->getType() !== $sub::SUB_COMMAND_GROUP) {
+                        $subOption = $subOption->setRequired($sub->isRequired());
                     }
-                    if($sub->getType() === $sub::CHANNEL){
-                    $subOption = $subOption->setChannelTypes($sub->getChannelTypes());
+                    if ($sub->getType() === $sub::CHANNEL) {
+                        $subOption = $subOption->setChannelTypes($sub->getChannelTypes());
                     }
-                    if($sub->getType() === $sub::STRING or $sub->getType() === $sub::NUMBER or $sub->getType() === $sub::INTEGER){
-                    $subOption = $subOption->setAutoComplete($sub->isAutoComplete());
+                    if ($sub->getType() === $sub::STRING or $sub->getType() === $sub::NUMBER or $sub->getType() === $sub::INTEGER) {
+                        $subOption = $subOption->setAutoComplete($sub->isAutoComplete());
                     }
                     foreach ($sub->getChoices() as $choice) {
                         $ch = new DiscordChoice($this->client->getDiscordClient());
@@ -950,17 +955,17 @@ class CommunicationHandler
                             $subOption = $subOption->addChoice($ch);
                         }
                     }
-                 
+
                     $do = $do->addOption($subOption);
-                foreach ($option->getChoices() as $choice) {
-                    $ch = new DiscordChoice($this->client->getDiscordClient());
-                    $ch = $ch->setName($choice->getName());
-                    $ch = $ch->setValue($choice->getValue());
-                    if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
-                        $do = $do->addChoice($ch);
+                    foreach ($option->getChoices() as $choice) {
+                        $ch = new DiscordChoice($this->client->getDiscordClient());
+                        $ch = $ch->setName($choice->getName());
+                        $ch = $ch->setValue($choice->getValue());
+                        if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
+                            $do = $do->addChoice($ch);
+                        }
                     }
-                }
-                $options[] = $do;
+                    $options[] = $do;
                 }
             }
 
@@ -1250,7 +1255,7 @@ class CommunicationHandler
             $this->resolveRequest($pk->getUID(), false, "Message Id must be present!");
             return;
         }
-        $this->getMessage($pk, $message->getChannelId(), $message->getId(), function (DiscordMessage $msg) use ($message, $pk) {
+        $this->getMessage($pk, $message->getChannelId(), $message->getId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($message, $pk) {
             $text = "";
             if ($message instanceof WebhookMessage) {
                 $embed = $message->getEmbeds();
@@ -1280,7 +1285,7 @@ class CommunicationHandler
     }
     private function handleDelayDelete(RequestDelayDelete $pk): void
     {
-        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $msg) use ($pk) {
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($pk) {
 
             $msg->delayedDelete(1000 * $pk->getDelay())->then(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Delayed delete with success!");
@@ -1294,7 +1299,7 @@ class CommunicationHandler
 
     private function handleDeleteWebhook(RequestDeleteWebhook $pk): void
     {
-        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+        $this->getChannel($pk, $pk->getChannelId(), null, function (DiscordChannel $channel) use ($pk) {
             $channel->webhooks->fetch($pk->getWebhookId())->then(function (DiscordWebhook $webhook) use ($channel, $pk) {
                 $channel->webhooks->delete($webhook)->then(function () use ($pk) {
                     $this->resolveRequest($pk->getUID());
@@ -1314,7 +1319,7 @@ class CommunicationHandler
         if ($pk->getWebhook()->getId() === null) {
             throw new \AssertionError("Webhook ID must be present.");
         }
-        $this->getChannel($pk, $pk->getWebhook()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+        $this->getChannel($pk, $pk->getWebhook()->getChannelId(), null, function (DiscordChannel $channel) use ($pk) {
             $channel->webhooks->fetch($pk->getWebhook()->getId())->then(function (DiscordWebhook $webhook) use ($channel, $pk) {
                 $webhook->name = $pk->getWebhook()->getName();
                 $webhook->avatar = $pk->getWebhook()->getAvatar();
@@ -1334,7 +1339,7 @@ class CommunicationHandler
 
     private function handleCreateWebhook(RequestCreateWebhook $pk): void
     {
-        $this->getChannel($pk, $pk->getWebhook()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+        $this->getChannel($pk, $pk->getWebhook()->getChannelId(), null, function (DiscordChannel $channel) use ($pk) {
             $channel->webhooks->save($channel->webhooks->create([
                 'name' => $pk->getWebhook()->getName(),
                 'avatar' => $pk->getWebhook()->getAvatar()
@@ -1449,7 +1454,7 @@ class CommunicationHandler
 
     private function handleFetchWebhooks(RequestFetchWebhooks $pk): void
     {
-        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+        $this->getChannel($pk, $pk->getChannelId(), null, function (DiscordChannel $channel) use ($pk) {
             $channel->webhooks->freshen()->then(function (DiscordWebhookRepository $repository) use ($pk) {
                 $webhooks = [];
                 /** @var DiscordWebhook $webhook */
@@ -1466,35 +1471,20 @@ class CommunicationHandler
 
     private function handleFetchPinnedMessages(RequestFetchPinnedMessages $pk): void
     {
-        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
-            if ($pk->getThreadId()) {
-                $channel->threads->fetch($pk->getThreadId())->done(function (DiscordThread $thread) use ($pk) {
-                    $thread->getPinnedMessages()->then(function (Collection $collection) use ($pk) {
-                        $messages = [];
-                        foreach ($collection->toArray() as $message) {
-                            $messages[] = ModelConverter::genModelMessage($message);
-                        }
-                        $this->resolveRequest($pk->getUID(), true, "Fetched pinned messages.", $messages);
-                    }, function (\Throwable $e) use ($pk) {
-                        $this->resolveRequest($pk->getUID(), false, "Failed to fetch pinned messages.", [$e->getMessage(), $e->getTraceAsString()]);
-                        $this->logger->debug("Failed to fetch pinned messages ({$pk->getUID()}) - {$e->getMessage()}");
-                    });
-                });
-            } else {
-                $channel->getPinnedMessages()->then(function (Collection $collection) use ($pk) {
-                    $messages = [];
-                    foreach ($collection->toArray() as $message) {
-                        $messages[] = ModelConverter::genModelMessage($message);
-                    }
-                    $this->resolveRequest($pk->getUID(), true, "Fetched pinned messages.", $messages);
-                }, function (\Throwable $e) use ($pk) {
-                    $this->resolveRequest($pk->getUID(), false, "Failed to fetch pinned messages.", [$e->getMessage(), $e->getTraceAsString()]);
-                    $this->logger->debug("Failed to fetch pinned messages ({$pk->getUID()}) - {$e->getMessage()}");
-                });
-            }
+        $this->getChannel($pk, $pk->getChannelId(), $pk->getThreadId(), function ($channel) use ($pk) {
+            /** @var DiscordChannel|DiscordThread $channel */
+            $channel->getPinnedMessages()->then(function (Collection $collection) use ($pk) {
+                $messages = [];
+                foreach ($collection->toArray() as $message) {
+                    $messages[] = ModelConverter::genModelMessage($message);
+                }
+                $this->resolveRequest($pk->getUID(), true, "Fetched pinned messages.", $messages);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to fetch pinned messages.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to fetch pinned messages ({$pk->getUID()}) - {$e->getMessage()}");
+            });
         });
     }
-
     private function handleFetchMessage(RequestFetchMessage $pk): void
     {
         $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $message) use ($pk) {
@@ -1504,56 +1494,31 @@ class CommunicationHandler
 
     private function handleUnpinMessage(RequestUnpinMessage $pk): void
     {
-        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
-            if ($pk->getThreadId()) {
-                $channel->threads->fetch($pk->getThreadId())->done(function (DiscordThread $thread) use ($pk) {
-                    $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $message) use ($thread, $pk) {
-                        $thread->unpinMessage($message, $pk->getReason())->then(function () use ($pk) {
-                            $this->resolveRequest($pk->getUID(), true, "Successfully unpinned the message.");
-                        }, function (\Throwable $e) use ($pk) {
-                            $this->resolveRequest($pk->getUID(), false, "Failed to unpin the message.", [$e->getMessage(), $e->getTraceAsString()]);
-                            $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
-                        });
-                    });
+        $this->getChannel($pk, $pk->getChannelId(), $pk->getThreadId(), function ($channel) use ($pk) {
+            /** @var DiscordChannel|DiscordThread $channel */
+            $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $message) use ($channel, $pk) {
+                $channel->unpinMessage($message, $pk->getReason())->then(function () use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Successfully unpinned the message.");
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to unpin the message.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
                 });
-            } else {
-                $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $message) use ($channel, $pk) {
-                    $channel->unpinMessage($message, $pk->getReason())->then(function () use ($pk) {
-                        $this->resolveRequest($pk->getUID(), true, "Successfully unpinned the message.");
-                    }, function (\Throwable $e) use ($pk) {
-                        $this->resolveRequest($pk->getUID(), false, "Failed to unpin the message.", [$e->getMessage(), $e->getTraceAsString()]);
-                        $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
-                    });
-                });
-            }
+            });
         });
     }
 
     private function handlePinMessage(RequestPinMessage $pk): void
     {
-        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
-            if ($pk->getThreadId()) {
-                $channel->threads->fetch($pk->getThreadId())->done(function (DiscordThread $thread) use ($pk) {
-                    $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $message) use ($thread, $pk) {
-                        $thread->pinMessage($message, $pk->getReason())->then(function (DiscordMessage $message) use ($pk) {
-                            $this->resolveRequest($pk->getUID(), true, "Successfully pinned the message.", [ModelConverter::genModelMessage($message)]);
-                        }, function (\Throwable $e) use ($pk) {
-                            $this->resolveRequest($pk->getUID(), false, "Failed to pin the message.", [$e->getMessage(), $e->getTraceAsString()]);
-                            $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
-                        });
-                    });
+        $this->getChannel($pk, $pk->getChannelId(), $pk->getThreadId(), function (DiscordChannel $channel) use ($pk) {
+            /** @var DiscordChannel|DiscordThread $channel */
+            $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $message) use ($channel, $pk) {
+                $channel->pinMessage($message, $pk->getReason())->then(function (DiscordMessage $message) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), true, "Successfully pinned the message.", [ModelConverter::genModelMessage($message)]);
+                }, function (\Throwable $e) use ($pk) {
+                    $this->resolveRequest($pk->getUID(), false, "Failed to pin the message.", [$e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
                 });
-            } else {
-
-                $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($channel, $pk) {
-                    $channel->pinMessage($message, $pk->getReason())->then(function (DiscordMessage $message) use ($pk) {
-                        $this->resolveRequest($pk->getUID(), true, "Successfully pinned the message.", [ModelConverter::genModelMessage($message)]);
-                    }, function (\Throwable $e) use ($pk) {
-                        $this->resolveRequest($pk->getUID(), false, "Failed to pin the message.", [$e->getMessage(), $e->getTraceAsString()]);
-                        $this->logger->debug("Failed to pin the message ({$pk->getUID()}) - {$e->getMessage()}");
-                    });
-                });
-            }
+            });
         });
     }
 
@@ -1565,36 +1530,61 @@ class CommunicationHandler
             }, function (\Throwable $e) use ($pk) {
                 //Shouldn't happen unless not in server/connection issues.
                 $this->resolveRequest($pk->getUID(), false, "Failed to leave server.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to leave server? ({$pk->getUID()}) - {$e->getMessage()}");
+                $this->logger->debug("Failed to leave server ({$pk->getUID()}) - {$e->getMessage()}");
+            });
+        });
+    }
+    private function handleServerFetchWidget(RequestFetchWidgetSettings $pk): void
+    {
+        $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
+            $guild->getWidgetSettings()->then(function (DiscordWidget $widget) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Fetched Discord Widget Settings.", [ModelConverter::genModelServerWidget($widget)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to fetch Widget settings.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to fetch Widget settings ({$pk->getUID()}) - {$e->getMessage()}");
+            });
+        });
+    }
+    private function handleServerUpdateWidget(RequestModifyWidget $pk): void
+    {
+        $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
+            $guild->updateWidgetSettings([
+                "enabled" => $pk->isEnabled(),
+                "channel_id" => $pk->getChannelId()
+            ])->then(function (DiscordWidget $widget) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Modified Widget Settings", [ModelConverter::genModelServerWidget($widget)]);
+            }, function (\Throwable $e) use ($pk) {
+                $this->resolveRequest($pk->getUID(), false, "Failed to modify Widget settings.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to modify widget settings ({$pk->getUID()}) - {$e->getMessage()}");
             });
         });
     }
     private function handleServerFetchPrune(RequestFetchPrune $pk): void
     {
         $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
-           $guild->getPruneCount([
-               "days" => $pk->getDays(),
-               "include_roles" => $pk->getIncludedRoles()
-           ])->then(function(int $count) use ($pk){
-               $this->resolveRequest($pk->getUID(), true, "Fetched server prune count.", [$count]);
-           }, function(\Throwable $e) use ($pk){
+            $guild->getPruneCount([
+                "days" => $pk->getDays(),
+                "include_roles" => $pk->getIncludedRoles()
+            ])->then(function (int $count) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Fetched server prune count.", [$count]);
+            }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to fetch server prune count.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to fetch server prune count? ({$pk->getUID()}) - {$e->getMessage()}");
+                $this->logger->debug("Failed to fetch server prune count ({$pk->getUID()}) - {$e->getMessage()}");
             });
         });
     }
     private function handleServerBeginPrune(RequestBeginPrune $pk): void
     {
         $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
-           $guild->beginPrune([
-               "days" => $pk->getDays(),
-               "compute_prune_count" => $pk->isPruneCount(),
-               "include_roles" => $pk->getIncludedRoles()
-           ], $pk->getReason())->then(function(?int $count) use ($pk){
-               $this->resolveRequest($pk->getUID(), true, "Server pruning started.", [$count ?? 0]);
-           }, function(\Throwable $e) use ($pk){
+            $guild->beginPrune([
+                "days" => $pk->getDays(),
+                "compute_prune_count" => $pk->isPruneCount(),
+                "include_roles" => $pk->getIncludedRoles()
+            ], $pk->getReason())->then(function (?int $count) use ($pk) {
+                $this->resolveRequest($pk->getUID(), true, "Server pruning started.", [$count ?? 0]);
+            }, function (\Throwable $e) use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to start Server pruning.", [$e->getMessage(), $e->getTraceAsString()]);
-                $this->logger->debug("Failed to start server pruning? ({$pk->getUID()}) - {$e->getMessage()}");
+                $this->logger->debug("Failed to start server pruning ({$pk->getUID()}) - {$e->getMessage()}");
             });
         });
     }
@@ -1771,7 +1761,7 @@ class CommunicationHandler
 
     private function handleRemoveReaction(RequestRemoveReaction $pk): void
     {
-        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $msg) use ($pk) {
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($pk) {
             $msg->deleteReaction($pk->getUserId() === $this->client->getDiscordClient()->id ? DiscordMessage::REACT_DELETE_ME : DiscordMessage::REACT_DELETE_ID, $pk->getEmoji(), $pk->getUserId())->then(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Successfully removed reaction.");
             }, function (\Throwable $e) use ($pk) {
@@ -1783,7 +1773,7 @@ class CommunicationHandler
 
     private function handleRemoveAllReactions(RequestRemoveAllReactions $pk): void
     {
-        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $msg) use ($pk) {
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($pk) {
             $msg->deleteReaction(($e = $pk->getEmoji()) === null ? DiscordMessage::REACT_DELETE_ALL : DiscordMessage::REACT_DELETE_EMOJI, $e)->then(function () use ($pk, $e) {
                 $this->resolveRequest($pk->getUID(), true, "Successfully bulk removed all " . ($e === null ? "" : "'$e' ") . "reactions");
             }, function (\Throwable $e) use ($pk) {
@@ -1795,7 +1785,7 @@ class CommunicationHandler
 
     private function handleAddReaction(RequestAddReaction $pk): void
     {
-        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $msg) use ($pk) {
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($pk) {
             $msg->react($pk->getEmoji())->then(function () use ($msg, $pk) {
                 $this->resolveRequest($pk->getUID(), true, "Reaction added.", [ModelConverter::genModelMessage($msg)]);
             }, function (\Throwable $e) use ($pk) {
@@ -1806,7 +1796,7 @@ class CommunicationHandler
     }
     private function handleFetchReaction(RequestFetchReaction $pk): void
     {
-        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $msg) use ($pk) {
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($pk) {
             $msg->reactions->fetch($pk->getReactionId())->done(function (DiscordReaction $reaction) use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Fetched Reaction Message.", [ModelConverter::genModelReaction($reaction)]);
             }, function (\Throwable $e) use ($pk) {
@@ -1816,7 +1806,7 @@ class CommunicationHandler
     }
     private function handleCreateReaction(RequestCreateReaction $pk): void
     {
-        $this->getMessage($pk, $pk->getReaction()->getChannelId(), $pk->getReaction()->getMessageId(), function (DiscordMessage $msg) use ($pk) {
+        $this->getMessage($pk, $pk->getReaction()->getChannelId(), $pk->getReaction()->getMessageId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($pk) {
             $r = $pk->getReaction();
             $dr = $msg->reactions->create([
                 "emoji" => $r->getEmoji()
@@ -1848,7 +1838,7 @@ class CommunicationHandler
             $this->resolveRequest($pk->getUID(), false, "Reaction ID must be present!");
             return;
         }
-        $this->getMessage($pk, $pk->getReaction()->getChannelId(), $pk->getReaction()->getMessageId(), function (DiscordMessage $msg) use ($pk) {
+        $this->getMessage($pk, $pk->getReaction()->getChannelId(), $pk->getReaction()->getMessageId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($pk) {
 
             $msg->reactions->fetch($pk->getReaction()->getID())->then(function (DiscordReaction $dr) use ($msg, $pk) {
                 $r = $pk->getReaction();
@@ -1870,7 +1860,7 @@ class CommunicationHandler
     }
     private function handleDeleteReaction(RequestDeleteReaction $pk): void
     {
-        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $message) use ($pk) {
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $message) use ($pk) {
             $message->reactions->fetch($pk->getReactionId())->done(function (DiscordReaction $reaction) use ($message, $pk) {
                 $message->reactions->delete($reaction)->then(function () use ($pk) {
                     $this->resolveRequest($pk->getUID(), true, "Reaction deleted.");
@@ -1942,7 +1932,8 @@ class CommunicationHandler
     }
     private function handleBulkDelete(RequestMessageBulkDelete $pk): void
     {
-        $this->getChannel($pk, $pk->getChannelID(), function (DiscordChannel $channel) use ($pk) {
+        $this->getChannel($pk, $pk->getChannelID(), $pk->getThreadId(), function ($channel) use ($pk) {
+            /** @var DiscordChannel|DiscordThread $channel */
             $channel->getMessageHistory([
                 "limit" => $pk->getValue()
             ])->then(function ($messages) use ($pk, $channel) {
@@ -2132,7 +2123,7 @@ class CommunicationHandler
 
     private function handleMessageStartThread(RequestThreadMessageCreate $pk): void
     {
-        $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), function (DiscordMessage $message) use ($pk) {
+        $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), $pk->getThreadId(), function (DiscordMessage $message) use ($pk) {
             $message->startThread($pk->getName(), $pk->getDuration(), $pk->getReason())->then(function () use ($message, $pk) {
                 $this->resolveRequest($pk->getUID(), false, "Successfully created thread message.", [ModelConverter::genModelMessage($message)]);
             }, function (\Throwable $e) use ($pk) {
@@ -2143,7 +2134,7 @@ class CommunicationHandler
     private function handleCrossPost(RequestCrossPostMessage $pk): void
     {
 
-        $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), function (DiscordMessage $discord) use ($pk) {
+        $this->getMessage($pk, $pk->getChannelID(), $pk->getMessageID(), $pk->getThreadId(), function (DiscordMessage $discord) use ($pk) {
             $discord->crosspost()->done(function (DiscordMessage $message) use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Cross posted with success!", [ModelConverter::genModelMessage($message)]);
             }, function (\Throwable $e) use ($pk) {
@@ -2336,7 +2327,7 @@ class CommunicationHandler
     private function handleDeleteChannel(RequestDeleteChannel $pk): void
     {
         $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
-            $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($guild, $pk) {
+            $this->getChannel($pk, $pk->getChannelId(), null, function (DiscordChannel $channel) use ($guild, $pk) {
                 $guild->channels->delete($channel)->then(function () use ($pk) {
                     $this->resolveRequest($pk->getUID(), true, "Channel deleted.");
                 }, function (\Throwable $e) use ($pk) {
@@ -2349,7 +2340,7 @@ class CommunicationHandler
 
     private function handleBroadcastTyping(RequestBroadcastTyping $pk): void
     {
-        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+        $this->getChannel($pk, $pk->getChannelId(), null, function (DiscordChannel $channel) use ($pk) {
             $channel->broadcastTyping()->done(function () use ($pk) {
                 $this->resolveRequest($pk->getUID());
                 $this->logger->debug("BroadcastTyping - success ({$pk->getUID()})");
@@ -2651,7 +2642,7 @@ class CommunicationHandler
             $this->resolveRequest($pk->getUID(), false, "Channel ID must be present.");
             return;
         }
-        $this->getChannel($pk, $channel->getID(), function (DiscordChannel $discordChannel) use ($channel, $pk) {
+        $this->getChannel($pk, $channel->getID(), null, function (DiscordChannel $discordChannel) use ($channel, $pk) {
             if ($discordChannel->type !== $discordChannel::TYPE_VOICE) {
                 $this->resolveRequest($pk->getUID(), false, "Channel {$channel->getId()} is not a voice channel.");
                 return;
@@ -2670,7 +2661,7 @@ class CommunicationHandler
             $this->resolveRequest($pk->getUID(), false, "Channel ID must be present.");
             return;
         }
-        $this->getChannel($pk, $channel->getID(), function (DiscordChannel $discordChannel) use ($channel, $pk) {
+        $this->getChannel($pk, $channel->getID(), null, function (DiscordChannel $discordChannel) use ($channel, $pk) {
             if ($discordChannel->type !== $discordChannel::TYPE_VOICE) {
                 $this->resolveRequest($pk->getUID(), false, "Channel ID: {$channel->getId()} is not a Voice Channel.");
                 return;
@@ -2689,7 +2680,7 @@ class CommunicationHandler
             $this->resolveRequest($pk->getUID(), false, "Channel ID must be present.");
             return;
         }
-        $this->getChannel($pk, $channel->getID(), function (DiscordChannel $discordChannel) use ($channel, $pk) {
+        $this->getChannel($pk, $channel->getID(), null, function (DiscordChannel $discordChannel) use ($channel, $pk) {
             if ($discordChannel->type !== $discordChannel::TYPE_VOICE) {
                 $this->resolveRequest($pk->getUID(), false, "Channel ID: {$channel->getId()} is not a Voice Channel.");
                 return;
@@ -2705,7 +2696,7 @@ class CommunicationHandler
 
     private function handleSendFile(RequestSendFile $pk): void
     {
-        $this->getChannel($pk, $pk->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+        $this->getChannel($pk, $pk->getChannelId(), $pk->getThreadId(), function (DiscordChannel $channel) use ($pk) {
             if (!$channel->allowText()) {
                 $this->resolveRequest($pk->getUID(), false, "Failed to send file, Invalid channel - text is not allowed.");
                 $this->logger->debug("Failed to send file ({$pk->getUID()}) - Channel does not allow text.");
@@ -2731,7 +2722,7 @@ class CommunicationHandler
             $this->resolveRequest($pk->getUID(), false, "Message ID must be present.");
             return;
         }
-        $this->getMessage($pk, $m->getChannelId(), $m->getId(), function (DiscordMessage $message) use ($m, $pk) {
+        $this->getMessage($pk, $m->getChannelId(), $m->getId(), $pk->getThreadId(), function (DiscordMessage $message) use ($m, $pk) {
             $builder = $pk->getMessageBuilder();
             if ($m instanceof WebhookMessage) {
                 $e = $m->getEmbeds();
@@ -2788,7 +2779,7 @@ class CommunicationHandler
                     $this->logger->debug("Failed to modify interaction ({$pk->getUID()}) - Reply message has no referenced message ID.");
                     return;
                 }
-                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($builder, $pk, $de) {
+                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($builder, $pk, $de) {
                     $builder = $builder->setReplyTo($msg);
                     $msg->edit($builder)->done(function (DiscordMessage $msg) use ($pk) {
 
@@ -2841,7 +2832,7 @@ class CommunicationHandler
     }
     private function handleCreateInteraction(RequestCreateInteraction $pk): void
     {
-        $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+        $this->getChannel($pk, $pk->getMessage()->getChannelId(), $pk->getThreadId(), function (DiscordChannel $channel) use ($pk) {
             $m = $pk->getMessage();
             $builder = $pk->getMessageBuilder();
             if ($m instanceof WebhookMessage) {
@@ -2899,7 +2890,7 @@ class CommunicationHandler
                     $this->logger->debug("Failed to send interaction ({$pk->getUID()}) - Reply message has no referenced message ID.");
                     return;
                 }
-                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $builder, $pk, $de) {
+                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($channel, $builder, $pk, $de) {
                     $builder = $builder->setReplyTo($msg);
                     if ($pk->isEphemeral()) {
                         $builder->_setFlags(64);
@@ -2943,7 +2934,7 @@ class CommunicationHandler
 
     private function handleSendMessage(RequestSendMessage $pk): void
     {
-        $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+        $this->getChannel($pk, $pk->getMessage()->getChannelId(), $pk->getThreadId(), function (DiscordChannel $channel) use ($pk) {
             $m = $pk->getMessage();
             if ($m instanceof WebhookMessage) {
                 $e = $m->getEmbeds();
@@ -2993,7 +2984,7 @@ class CommunicationHandler
                     $this->logger->debug("Failed to send message ({$pk->getUID()}) - Reply message has no referenced message ID.");
                     return;
                 }
-                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), function (DiscordMessage $msg) use ($channel, $pk, $de) {
+                $this->getMessage($pk, $m->getChannelId(), $m->getReferencedMessageId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($channel, $pk, $de) {
 
                     $channel->sendMessage($pk->getMessage()->getContent(), $pk->getMessage()->isTTS(), $de, null, $msg)->done(function (DiscordMessage $msg) use ($pk) {
                         $this->resolveRequest($pk->getUID(), true, "Message sent.", [ModelConverter::genModelMessage($msg)]);
@@ -3022,7 +3013,7 @@ class CommunicationHandler
             $this->resolveRequest($pk->getUID(), false, "No message ID provided.");
             return;
         }
-        $this->getChannel($pk, $pk->getMessage()->getChannelId(), function (DiscordChannel $channel) use ($pk) {
+        $this->getChannel($pk, $pk->getMessage()->getChannelId(), $pk->getThreadId(), function (DiscordChannel $channel) use ($pk) {
 
             $builder = MessageBuilder::new();
             $m = $pk->getMessage();
@@ -3072,7 +3063,7 @@ class CommunicationHandler
                     $builder = $builder->setEmbeds([$de]);
                 }
             }
-            $this->getMessage($pk, $m->getChannelId(), $m->getId(), function (DiscordMessage $msg) use ($m, $builder, $channel, $pk, $de) {
+            $this->getMessage($pk, $m->getChannelId(), $m->getId(), $pk->getThreadId(), function (DiscordMessage $msg) use ($m, $builder, $channel, $pk, $de) {
 
                 $builder = $builder->setContent($m->getContent());
                 $builder = $builder->setStickers($m->getStickers());
@@ -3090,7 +3081,7 @@ class CommunicationHandler
 
     private function handleDeleteMessage(RequestDeleteMessage $pk): void
     {
-        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), function (DiscordMessage $dMessage) use ($pk) {
+        $this->getMessage($pk, $pk->getChannelId(), $pk->getMessageId(), $pk->getThreadId(), function (DiscordMessage $dMessage) use ($pk) {
             $dMessage->delete()->done(function () use ($pk) {
                 $this->resolveRequest($pk->getUID(), false, "Successfully deleted message.");
             }, function (\Throwable $e) use ($pk) {
@@ -3165,7 +3156,7 @@ class CommunicationHandler
     private function handleInitialiseInvite(RequestInitialiseInvite $pk): void
     {
         $invite = $pk->getInvite();
-        $this->getChannel($pk, $invite->getChannelId(), function (DiscordChannel $channel) use ($pk, $invite) {
+        $this->getChannel($pk, $invite->getChannelId(), null, function (DiscordChannel $channel) use ($pk, $invite) {
             /** @phpstan-ignore-next-line Poorly documented function on discord.php's side. */
             $channel->createInvite([
                 "max_age" => $invite->getMaxAge(),
@@ -3252,7 +3243,7 @@ class CommunicationHandler
     }
 
     //Includes DM Channels.
-    private function getChannel(Packet $pk, string $channel_id, callable $cb): void
+    private function getChannel(Packet $pk, string $channel_id, ?string $thread_id = null, callable $cb): void
     {
         $c = $this->client->getDiscordClient()->getChannel($channel_id);
         if ($c === null) {
@@ -3270,6 +3261,11 @@ class CommunicationHandler
                 });
             }
         } else {
+            if ($thread_id) {
+                $c->threads->fetch($thread_id)->then(function (DiscordThread $thread) use ($cb, $pk) {
+                    $cb($thread);
+                });
+            }
             $cb($c);
         }
     }
@@ -3280,9 +3276,9 @@ class CommunicationHandler
     }
 
 
-    private function getMessage(Packet $pk, string $channel_id, string $message_id, callable $cb): void
+    private function getMessage(Packet $pk, string $channel_id, string $message_id, ?string $thread_id = null, callable $cb): void
     {
-        $this->getChannel($pk, $channel_id, function (DiscordChannel $channel) use ($pk, $message_id, $cb) {
+        $this->getChannel($pk, $channel_id, $thread_id, function ($channel) use ($pk, $message_id, $cb) {
 
             $channel->messages->fetch($message_id)->done(function (DiscordMessage $dMessage) use ($cb) {
                 $cb($dMessage);

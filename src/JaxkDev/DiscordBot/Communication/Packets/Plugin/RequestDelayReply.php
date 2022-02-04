@@ -24,12 +24,16 @@ class RequestDelayReply extends Packet
     /** @var int */
     private $delay;
 
+    /** @var string|null */
+    private $thread_id;
 
-    public function __construct(Message $message, int $delay)
+
+    public function __construct(Message $message, int $delay, ?string $thread_id)
     {
         parent::__construct();
         $this->message = $message;
         $this->delay = $delay;
+        $this->thread_id = $thread_id;
     }
 
     public function getMessage(): Message
@@ -40,12 +44,17 @@ class RequestDelayReply extends Packet
     {
         return $this->delay;
     }
+    public function getThreadId(): ?string
+    {
+        return $this->thread_id;
+    }
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
             $this->message,
-            $this->delay
+            $this->delay,
+            $this->thread_id
         ]);
     }
 
@@ -54,7 +63,8 @@ class RequestDelayReply extends Packet
         [
             $this->UID,
             $this->message,
-            $this->delay
+            $this->delay,
+            $this->thread_id
         ] = unserialize($data);
     }
 }

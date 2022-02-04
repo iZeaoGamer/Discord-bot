@@ -19,6 +19,7 @@ use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
 use Discord\Parts\Guild\Sticker as DiscordSticker;
 use Discord\Parts\Thread\Thread as DiscordThread;
+use Discord\Parts\Thread\Member as DiscordThreadMember;
 use Discord\Parts\Channel\Reaction as DiscordReaction;
 use Discord\Parts\Channel\Overwrite as DiscordOverwrite;
 use Discord\Parts\Channel\Webhook as DiscordWebhook;
@@ -32,6 +33,7 @@ use Discord\Parts\Guild\Ban as DiscordBan;
 use Discord\Parts\Guild\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\Guild\Emoji as DiscordEmoji;
+use Discord\Parts\Guild\Widget as DiscordWidget;
 use Discord\Parts\Guild\AuditLog\Change as DiscordChange;
 use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
 use Discord\Parts\Permissions\RolePermission as DiscordRolePermission;
@@ -83,6 +85,7 @@ use JaxkDev\DiscordBot\Models\Channels\Messages\Reaction;
 use JaxkDev\DiscordBot\Models\Permissions\ChannelPermissions;
 use JaxkDev\DiscordBot\Models\Permissions\RolePermissions;
 use JaxkDev\DiscordBot\Models\Thread\Thread;
+use JaxkDev\DiscordBot\Models\Thread\Member as ThreadMember;
 use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 use JaxkDev\DiscordBot\Models\Interactions\Request\InteractionData;
 use JaxkDev\DiscordBot\Models\Interactions\Request\Option;
@@ -102,6 +105,7 @@ use JaxkDev\DiscordBot\Models\Server\Emoji;
 use JaxkDev\DiscordBot\Models\Server\ServerTemplate;
 use JaxkDev\DiscordBot\Models\Server\WelcomeScreen;
 use JaxkDev\DiscordBot\Models\Server\WelcomeChannel;
+use JaxkDev\DiscordBot\Models\Server\Widget;
 use JaxkDev\DiscordBot\Models\Server\Intergration;
 use JaxkDev\DiscordBot\Models\OAuth\Application;
 use Jaxkdev\DiscordBot\Models\User\Client;
@@ -483,11 +487,19 @@ abstract class ModelConverter
         );
     }
 
-    //todo add Server Widget Model.
-    /*
-    static public function getServerWidget(){
-        return null;
-    }*/
+
+    
+    static public function genModelServerWidget(DiscordWidget $widget): Widget
+    {
+        return new Widget(
+            $widget->id,
+            $widget->name,
+            $widget->presence_count,
+            $widget->instant_invite,
+            $widget->channels,
+            $widget->members
+        );
+    }
 
     /** @param DiscordInteraction
      * @return Interaction
@@ -818,12 +830,15 @@ abstract class ModelConverter
             $thread->id
         );
     }
-
-    // todo add Thread Member Model.
-    /* static public function genModelThreadMember(){
-        return null;
+     static public function genModelThreadMember(DiscordThreadMember $member): ThreadMember{
+        return new ThreadMember(
+            $member->join_timestamp->getTimestamp(),
+            $member->flags,
+            $member->id,
+            $member->user_id
+        );
     }
-    */
+    
 
     static public function genModelCategoryChannel(DiscordChannel $discordChannel): CategoryChannel
     {

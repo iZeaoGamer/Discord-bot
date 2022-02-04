@@ -22,22 +22,31 @@ class RequestUpdateReaction extends Packet
     /** @var Reaction */
     private $reaction;
 
-    public function __construct(Reaction $reaction)
+    /** @var string|null */
+    private $thread_id;
+
+    public function __construct(Reaction $reaction, ?string $thread_id)
     {
         parent::__construct();
         $this->reaction = $reaction;
+        $this->thread_id = $thread_id;
     }
 
     public function getReaction(): Reaction
     {
         return $this->reaction;
     }
+    public function getThreadId(): ?string
+    {
+        return $this->thread_id;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->reaction
+            $this->reaction,
+            $this->thread_id
         ]);
     }
 
@@ -45,7 +54,8 @@ class RequestUpdateReaction extends Packet
     {
         [
             $this->UID,
-            $this->reaction
+            $this->reaction,
+            $this->thread_id
         ] = unserialize($data);
     }
 }

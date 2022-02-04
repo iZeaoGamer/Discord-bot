@@ -43,7 +43,7 @@ class RequestFetchMessage extends Packet
     {
         return $this->channel_id;
     }
-    public function getThreadId(): string
+    public function getThreadId(): ?string
     {
         return $this->thread_id;
     }

@@ -14,47 +14,55 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Plugin;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class RequestDeleteMessage extends Packet
+class RequestModifyWidget extends Packet
 {
 
     /** @var string */
-    private $message_id;
+    private $server_id;
 
-    /** @var string */
+    /** @var bool */
+    private $enabled;
+
+    /** @var string|null */
     private $channel_id;
 
     /** @var string|null */
-    private $thread_id;
+    private $reason;
 
-    public function __construct(string $message_id, string $channel_id, ?string $thread_id)
+
+    public function __construct(string $server_id, bool $enabled, ?string $channel_id, ?string $reason = null)
     {
         parent::__construct();
-        $this->message_id = $message_id;
+        $this->server_id = $server_id;
+        $this->enabled = $enabled;
         $this->channel_id = $channel_id;
-        $this->thread_id = $thread_id;
+        $this->reason = $reason;
     }
 
-    public function getMessageId(): string
+    public function getServerId(): string
     {
-        return $this->message_id;
+        return $this->server_id;
     }
-
-    public function getChannelId(): string
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+    public function getChannelId(): ?string
     {
         return $this->channel_id;
     }
-    public function getThreadId(): ?string
+    public function getReason(): ?string
     {
-        return $this->thread_id;
+        return $this->reason;
     }
-
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->message_id,
+            $this->server_id,
+            $this->enabled,
             $this->channel_id,
-            $this->thread_id
+            $this->reason
         ]);
     }
 
@@ -62,9 +70,10 @@ class RequestDeleteMessage extends Packet
     {
         [
             $this->UID,
-            $this->message_id,
+            $this->server_id,
+            $this->enabled,
             $this->channel_id,
-            $this->thread_id
+            $this->reason
         ] = unserialize($data);
     }
 }

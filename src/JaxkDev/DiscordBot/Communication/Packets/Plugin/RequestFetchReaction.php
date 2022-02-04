@@ -26,12 +26,16 @@ class RequestFetchReaction extends Packet
     /** @var string */
     private $reaction_id;
 
-    public function __construct(string $channel_id, string $message_id, string $reaction_id)
+    /** @var string|null */
+    private $thread_id;
+
+    public function __construct(string $channel_id, string $message_id, string $reaction_id, ?string $thread_id)
     {
         parent::__construct();
         $this->channel_id = $channel_id;
         $this->message_id = $message_id;
         $this->reaction_id = $reaction_id;
+        $this->thread_id = $thread_id;
     }
 
     public function getChannelId(): string
@@ -48,6 +52,10 @@ class RequestFetchReaction extends Packet
     {
         return $this->reaction_id;
     }
+    public function getThreadId(): ?string
+    {
+        return $this->thread_id;
+    }
 
     public function serialize(): ?string
     {
@@ -55,7 +63,8 @@ class RequestFetchReaction extends Packet
             $this->UID,
             $this->channel_id,
             $this->message_id,
-            $this->reaction_id
+            $this->reaction_id,
+            $this->thread_id
         ]);
     }
 
@@ -65,7 +74,8 @@ class RequestFetchReaction extends Packet
             $this->UID,
             $this->channel_id,
             $this->message_id,
-            $this->reaction_id
+            $this->reaction_id,
+            $this->thread_id
         ] = unserialize($data);
     }
 }

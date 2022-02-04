@@ -29,12 +29,16 @@ class RequestModifyInteraction extends Packet
     /** @var bool */
     private $ephemeral;
 
-    public function __construct(MessageBuilder $response, Message $message, bool $ephemeral)
+    /** @var string|null */
+    private $thread_id;
+
+    public function __construct(MessageBuilder $response, Message $message, bool $ephemeral, ?string $thread_id)
     {
         parent::__construct();
         $this->response = $response;
         $this->message = $message;
         $this->ephemeral = $ephemeral;
+        $this->thread_id = $thread_id;
     }
     public function getMessageBuilder(): MessageBuilder
     {
@@ -48,6 +52,10 @@ class RequestModifyInteraction extends Packet
     {
         return $this->ephemeral;
     }
+    public function getThreadId(): ?string
+    {
+        return $this->thread_id;
+    }
 
 
     public function serialize(): ?string
@@ -56,7 +64,8 @@ class RequestModifyInteraction extends Packet
             $this->UID,
             $this->response,
             $this->message,
-            $this->ephemeral
+            $this->ephemeral,
+            $this->thread_id
 
         ]);
     }
@@ -67,7 +76,8 @@ class RequestModifyInteraction extends Packet
             $this->UID,
             $this->response,
             $this->message,
-            $this->ephemeral
+            $this->ephemeral,
+            $this->thread_id
         ] = unserialize($data);
     }
 }
