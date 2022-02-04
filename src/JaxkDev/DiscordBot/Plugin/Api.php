@@ -107,6 +107,7 @@ use JaxkDev\DiscordBot\Models\Interactions\Interaction;
 
 use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestAcceptInvite;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestBeginPrune;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestTimedOutMember;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateDMChannel;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateDMChannel;
@@ -115,6 +116,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestCreateCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestUpdateCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestDeleteCommand;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchCommands;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchPrune;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerCreate;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestStickerDelete;
 use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestRespondInteraction;
@@ -142,6 +144,35 @@ class Api
         $this->plugin = $plugin;
     }
 
+
+    /** Fetches Server Prune Count.
+     * 
+     * @param string $server_id
+     * @param string[] $included_roles
+     * @param int $days
+     * 
+     * @return PromiseInterface Resolves with int.
+     */
+    public function fetchPrune(string $server_id, array $included_roles, int $days = 7): PromiseInterface{
+        $pk = new RequestFetchPrune($server_id, $included_roles, $days);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
+    /** Starts Server Pruning.
+     * 
+     * @param string $server_id
+     * @param string[] $included_roles
+     * @param int $days
+     * @param bool $compute_prune_count
+     * @param string|null $reason
+     * 
+     * @return PromiseInterface Resolves with int.
+     */
+    public function beginPrune(string $server_id, array $included_roles, int $days = 7, bool $compute_prune_count = true, ?string $reason = null): PromiseInterface{
+        $pk = new RequestBeginPrune($server_id, $included_roles, $days, $compute_prune_count, $reason);
+        $this->plugin->writeOutboundData($pk);
+        return ApiResolver::create($pk->getUID());
+    }
     /** Accepts an invite invitation.
      * 
      * @param Invite $invite

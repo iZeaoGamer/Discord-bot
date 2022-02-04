@@ -167,6 +167,98 @@ $discord->on(Event::CHANNEL_PINS_UPDATE, function ($pins, Discord $discord) {
     // }
 });
 ```
+### Thread Create
+
+Called with a `Thread` object when a thread is created.
+
+```php
+$discord->on(Event::THREAD_CREATE, function (Thread $thread, Discord $discord) {
+    // ...
+});
+```
+
+### Thread Update
+
+Called with a `Thread` object when a thread is updated.
+
+```php
+$discord->on(Event::THREAD_UPDATE, function (?Thread $thread, Discord $discord, $oldScheduledEvent) {
+    // ...
+});
+```
+
+### Thread Delete
+
+Called with an old `THREAD_DELETE` object when a thread deleted.
+
+```php
+$discord->on(Event::THREAD_DELETE, function (?Thread $oldthread, Discord $discord) {
+    // ...
+});
+```
+
+### Thread List Sync
+
+Called when list of threads are synced.
+
+```php
+$discord->on(Event::THREAD_LIST_SYNC, function (Discord $discord) {
+    // ...
+});
+```
+
+### Thread Member Update
+
+Called when a thread member is updated.
+
+```php
+$discord->on(Event::THREAD_MEMBER_UPDATE, function (Member $threadmember, Discord $discord) {
+    // ...
+});
+```
+
+### Thread Members Update
+
+Called when a member is added to or removed from a thread.
+
+```php
+$discord->on(Event::THREAD_MEMBERS_UPDATE, function (Thread $thread, Discord $discord) {
+    // ...
+});
+```
+
+### Stage Instance Create
+
+Called with a `StageInstance` object when a stage instance is created.
+Requires the `Intents::GUILDS` intent.
+
+```php
+$discord->on(Event::STAGE_INSTANCE_CREATE, function (StageInstance $stageInstance, Discord $discord) {
+    // ...
+});
+```
+
+### Stage Instance Update
+
+Called with `StageInstance` objects when a stage instance is updated.
+Requires the `Intents::GUILDS` intent.
+
+```php
+$discord->on(Event::STAGE_INSTANCE_UPDATE, function (StageInstance $stageInstance, Discord $discord, $oldStageInstance) {
+    // ...
+});
+```
+
+### Stage Instance Delete
+
+Called with an old `StageInstance` object when a stage instance is deleted.
+Requires the `Intents::GUILDS` intent.
+
+```php
+$discord->on(Event::STAGE_INSTANCE_DELETE, function (StageInstance $oldStageInstance, Discord $discord) {
+    // ...
+});
+```
 
 ### Guild Create
 
@@ -215,6 +307,61 @@ $discord->on(Event::GUILD_DELETE, function (Guild $guild, Discord $discord, bool
 });
 ```
 
+### Guild Scheduled Event Create
+
+Called with a `ScheduledEvent` object when a guild's scheduled event is created.
+Requires the `Intents::GUILD_SCHEDULED_EVENTS` intent.
+
+```php
+$discord->on(Event::GUILD_SCHEDULED_EVENT_CREATE, function (ScheduledEvent $scheduledEvent, Discord $discord) {
+    // ...
+});
+```
+
+### Guild Scheduled Event Update
+
+Called with a `ScheduledEvent` object when a guild's scheduled event is updated.
+Requires the `Intents::GUILD_SCHEDULED_EVENTS` intent.
+
+```php
+$discord->on(Event::GUILD_SCHEDULED_EVENT_UPDATE, function (ScheduledEvent $scheduledEvent, Discord $discord, $oldScheduledEvent) {
+    // ...
+});
+```
+
+### Guild Scheduled Event Delete
+
+Called with an old `ScheduledEvent` object when a guild's scheduled event is deleted.
+Requires the `Intents::GUILD_SCHEDULED_EVENTS` intent.
+
+```php
+$discord->on(Event::GUILD_SCHEDULED_EVENT_UPDATE, function (ScheduledEvent $scheduledEvent, Discord $discord) {
+    // ...
+});
+```
+
+### Guild Scheduled Event Add
+
+Called when a member is added to a guild scheduled event.
+Requires the `Intents::GUILD_SCHEDULED_EVENTS` intent.
+
+```php
+$discord->on(Event::GUILD_SCHEDULED_EVENT_USER_ADD, function ($data, Discord $discord, $scheduledEvent, Guild $guild, $user) {
+    // ...
+});
+```
+
+### Guild Scheduled Event Remove
+
+Called when a member is removed to a guild scheduled event.
+Requires the `Intents::GUILD_SCHEDULED_EVENTS` intent.
+
+```php
+$discord->on(Event::GUILD_SCHEDULED_EVENT_USER_REMOVE, function ($data, Discord $discord, $scheduledEvent, Guild $guild, $user) {
+    // ...
+});
+```
+
 ### Guild Member Add
 
 Called with a `Member` object when a member joins a guild.
@@ -244,6 +391,27 @@ Requires the `Intents::GUILD_MEMBERS` intent. This intent is a priviliged intent
 
 ```php
 $discord->on(Event::GUILD_MEMBER_REMOVE, function (Member $member, Discord $discord) {
+    // ...
+});
+```
+### Guild Ban Add
+
+Called with a `Ban` object when a member is banned from a guild.
+Requires the `Intents::GUILD_BANS` intent.
+
+```php
+$discord->on(Event::GUILD_BAN_ADD, function (Ban $ban, Discord $discord) {
+    // ...
+});
+```
+
+### Guild Ban Remove
+
+Called with a `Ban` object when a member is unbanned from a guild.
+Requires the `Intents::GUILD_BANS` intent.
+
+```php
+$discord->on(Event::GUILD_BAN_REMOVE, function (Ban $ban, Discord $discord) {
     // ...
 });
 ```
@@ -280,6 +448,27 @@ $discord->on(Event::GUILD_ROLE_DELETE, function (Role $role, Discord $discord) {
     // ...
 });
 ```
+### Guild Emojis Update
+
+Called with Collections of `Emoji` object when a guild's emojis are added/updated/deleted.
+Requires the `Intents::GUILD_EMOJIS_AND_STICKERS` intent.
+
+```php
+$discord->on(Event::GUILD_EMOJIS_UPDATE, function ($emojis, Discord $discord, $oldemojis) {
+    // ...
+});
+```
+
+### Guild Stickers Update
+
+Called with Collections of `Sticker` object when a guild's stickers are added/updated/deleted.
+Requires the `Intents::GUILD_EMOJIS_AND_STICKERS` intent.
+
+```php
+$discord->on(Event::GUILD_STICKERS_UPDATE, function ($stickers, Discord $discord, $oldstickers) {
+    // ...
+});
+```
 
 ### Guild Integrations Update
 
@@ -288,6 +477,73 @@ Requires the `Intents::GUILD_INTEGRATIONS` intent.
 
 ```php
 $discord->on(Event::GUILD_INTEGRATIONS_UPDATE, function (Guild $guild, Discord $discord) {
+    // ...
+});
+```
+
+### Integrations Create
+
+Called with a `Integration` object when a guild's integration is created.
+Requires the `Intents::GUILD_INTEGRATIONS` intent.
+
+```php
+$discord->on(Event::INTEGRATION_CREATE, function (Integration $integration, Discord $discord) {
+    // ...
+});
+```
+
+### Integrations Update
+
+Called with a `Integration` object when a guild's integration is updated.
+Requires the `Intents::GUILD_INTEGRATIONS` intent.
+
+```php
+$discord->on(Event::INTEGRATION_UPDATE, function (Integration $integration, Discord $discord) {
+    // ...
+});
+```
+
+### Integrations Delete
+
+Called with an old `Integration` object when a guild's integration is deleted.
+May return `null` when Integration is not cached.
+Requires the `Intents::GUILD_INTEGRATIONS` intent.
+
+```php
+$discord->on(Event::INTEGRATION_DELETE, function (?Integration $oldIntegration, Discord $discord) {
+    // ...
+});
+```
+
+### Webhooks Update
+
+Called with a `Guild` and `Channel` object when a guild's webhooks are updated.
+Requires the `Intents::GUILD_WEBHOOKS` intent.
+
+```php
+$discord->on(Event::WEBHOOKS_UPDATE, function ($guild, Discord $discord, $channel) {
+    // ...
+});
+```
+
+### Interaction Create
+
+Called with an `Interaction` object when an interaction is created.
+Application Command & Message component listeners are processed prior to this event.
+Useful if you want to create a customized callback or have message component response after Bot restart.
+
+```php
+$discord->on(Event::INTERACTION_CREATE, function (Interaction $interaction, Discord $discord) {
+    // ...
+});
+```
+
+### Voice Server Update
+
+Called with a `VoiceServerUpdate` object when a guild's voice server is updated.
+
+```php
+$discord->on(Event::VOICE_SERVER_UPDATE, function ($guild, Discord $discord, $channel) {
     // ...
 });
 ```
@@ -347,6 +603,16 @@ Requires the `Intents::GUILD_VOICE_STATES` intent.
 
 ```php
 $discord->on(Event::VOICE_STATE_UPDATE, function (VoiceStateUpdate $state, Discord $discord) {
+    // ...
+});
+```
+
+### User Update
+
+Called with `User` object when your Bot User data updates.
+
+```php
+$discord->on(Event::USER_UPDATE, function (User $user, Discord $discord, User $oldUser) {
     // ...
 });
 ```

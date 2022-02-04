@@ -161,6 +161,8 @@ use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFollowupMessage;
 use JaxkDev\DiscordBot\Models\Channels\Messages\Webhook as WebhookMessage;
 use JaxkDev\DiscordBot\Plugin\Utils;
 use Discord\WebSockets\Event;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestBeginPrune;
+use JaxkDev\DiscordBot\Communication\Packets\Plugin\RequestFetchPrune;
 
 class CommunicationHandler
 {
@@ -290,6 +292,8 @@ class CommunicationHandler
         elseif ($pk instanceof RequestThreadJoin) $this->handleThreadJoin($pk);
         elseif ($pk instanceof RequestThreadLeave) $this->handleThreadLeave($pk);
         elseif ($pk instanceof RequestAcceptInvite) $this->handleInviteAccept($pk);
+        elseif ($pk instanceof RequestFetchPrune) $this->handleServerFetchPrune($pk);
+        elseif ($pk instanceof RequestBeginPrune) $this->handleServerBeginPrune($pk);
     }
     private function handleInteractionRespond(RequestRespondInteraction $pk): void
     {
@@ -803,6 +807,7 @@ class CommunicationHandler
                 if ($command->getServerId()) {
                     $c->guild_id = $command->getServerId();
                 }
+                /** @var DiscordCommandOption[] */
                 $options = [];
                 foreach ($command->getOptions() as $option) {
 
@@ -810,9 +815,40 @@ class CommunicationHandler
                     $do = $do->setType($option->getType());
                     $do = $do->setName($option->getName());
                     $do = $do->setDescription($option->getDescription());
+                    if($option->getType() !== $option::SUB_COMMAND and $option->getType() !== $option::SUB_COMMAND_GROUP){
                     $do = $do->setRequired($option->isRequired());
+                    }
+                    if($option->getType() === $option::CHANNEL){
                     $do = $do->setChannelTypes($option->getChannelTypes());
+                    }
+                    if($option->getType() === $option::STRING or $option->getType() === $option::NUMBER or $option->getType() === $option::INTEGER){
                     $do = $do->setAutoComplete($option->isAutoComplete());
+                    }
+                    foreach ($option->getSubOptions() as $sub) {
+                        $subOption = new DiscordCommandOption($this->client->getDiscordClient());
+                     
+                        $subOption = $subOption->setType($sub->getType());
+                        $subOption = $subOption->setName($sub->getName());
+                        $subOption = $subOption->setDescription($sub->getDescription());
+                        if($sub->getType() !== $sub::SUB_COMMAND and $sub->getType() !== $sub::SUB_COMMAND_GROUP){
+                        $subOption = $subOption->setRequired($sub->isRequired());
+                        }
+                        if($sub->getType() === $sub::CHANNEL){
+                        $subOption = $subOption->setChannelTypes($sub->getChannelTypes());
+                        }
+                        if($sub->getType() === $sub::STRING or $sub->getType() === $sub::NUMBER or $sub->getType() === $sub::INTEGER){
+                        $subOption = $subOption->setAutoComplete($sub->isAutoComplete());
+                        }
+                        foreach ($sub->getChoices() as $choice) {
+                            $ch = new DiscordChoice($this->client->getDiscordClient());
+                            $ch = $ch->setName($choice->getName());
+                            $ch = $ch->setValue($choice->getValue());
+                            if ($subOption->type === $subOption::STRING || $subOption->type === $subOption::INTEGER || $subOption->type === $subOption::NUMBER) {
+                                $subOption = $subOption->addChoice($ch);
+                            }
+                        }
+                     
+                        $do = $do->addOption($subOption);
                     foreach ($option->getChoices() as $choice) {
                         $ch = new DiscordChoice($this->client->getDiscordClient());
                         $ch = $ch->setName($choice->getName());
@@ -822,34 +858,11 @@ class CommunicationHandler
                         }
                     }
                     $options[] = $do;
-                    /** @var DiscordCommandOption[] $subs */
-                    $subs = [];
-                    foreach ($option->getSubOptions() as $sub) {
-                        $do2 = new DiscordCommandOption($this->client->getDiscordClient());
-                        $do2 = $do2->setType($sub->getType());
-                        $do2 = $do2->setName($sub->getName());
-                        $do2 = $do2->setDescription($sub->getDescription());
-                        $do2 = $do2->setRequired($sub->isRequired());
-                        $do2 = $do2->setChannelTypes($sub->getChannelTypes());
-                        $do2 = $do2->setAutoComplete($sub->isAutoComplete());
-                        foreach ($option->getChoices() as $choice) {
-                            $ch = new DiscordChoice($this->client->getDiscordClient());
-                            $ch = $ch->setName($choice->getName());
-                            $ch = $ch->setValue($choice->getValue());
-                            if ($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER) {
-                                $do2 = $do2->addChoice($ch);
-                            }
-                        }
-                        /** @var DiscordCommandOption[] $subs */
-                        $subs[] = $do2;
                     }
                 }
+
                 $c->options = $options;
 
-                /** @var DiscordCommandOption $subOption */
-                foreach ($options as $subOption) {
-                    $subOption->options = $subs;
-                }
                 $c->default_permission = $command->isDefaultPermission();
 
                 $guild->commands->save($c)->then(function (DiscordCommand $command2) use ($permissions, $command, $pk) {
@@ -897,15 +910,48 @@ class CommunicationHandler
             if (!empty($command->getDescription())) {
                 $c->description = $command->getDescription();
             }
+            /** @var DiscordCommandOption[] */
             $options = [];
             foreach ($command->getOptions() as $option) {
+
                 $do = new DiscordCommandOption($this->client->getDiscordClient());
                 $do = $do->setType($option->getType());
                 $do = $do->setName($option->getName());
                 $do = $do->setDescription($option->getDescription());
+                if($option->getType() !== $option::SUB_COMMAND and $option->getType() !== $option::SUB_COMMAND_GROUP){
                 $do = $do->setRequired($option->isRequired());
+                }
+                if($option->getType() === $option::CHANNEL){
                 $do = $do->setChannelTypes($option->getChannelTypes());
+                }
+                if($option->getType() === $option::STRING or $option->getType() === $option::NUMBER or $option->getType() === $option::INTEGER){
                 $do = $do->setAutoComplete($option->isAutoComplete());
+                }
+                foreach ($option->getSubOptions() as $sub) {
+                    $subOption = new DiscordCommandOption($this->client->getDiscordClient());
+                 
+                    $subOption = $subOption->setType($sub->getType());
+                    $subOption = $subOption->setName($sub->getName());
+                    $subOption = $subOption->setDescription($sub->getDescription());
+                    if($sub->getType() !== $sub::SUB_COMMAND and $sub->getType() !== $sub::SUB_COMMAND_GROUP){
+                    $subOption = $subOption->setRequired($sub->isRequired());
+                    }
+                    if($sub->getType() === $sub::CHANNEL){
+                    $subOption = $subOption->setChannelTypes($sub->getChannelTypes());
+                    }
+                    if($sub->getType() === $sub::STRING or $sub->getType() === $sub::NUMBER or $sub->getType() === $sub::INTEGER){
+                    $subOption = $subOption->setAutoComplete($sub->isAutoComplete());
+                    }
+                    foreach ($sub->getChoices() as $choice) {
+                        $ch = new DiscordChoice($this->client->getDiscordClient());
+                        $ch = $ch->setName($choice->getName());
+                        $ch = $ch->setValue($choice->getValue());
+                        if ($subOption->type === $subOption::STRING || $subOption->type === $subOption::INTEGER || $subOption->type === $subOption::NUMBER) {
+                            $subOption = $subOption->addChoice($ch);
+                        }
+                    }
+                 
+                    $do = $do->addOption($subOption);
                 foreach ($option->getChoices() as $choice) {
                     $ch = new DiscordChoice($this->client->getDiscordClient());
                     $ch = $ch->setName($choice->getName());
@@ -915,33 +961,11 @@ class CommunicationHandler
                     }
                 }
                 $options[] = $do;
-                $subs = [];
-                foreach ($option->getSubOptions() as $sub) {
-                    $do2 = new DiscordCommandOption($this->client->getDiscordClient());
-                    $do2 = $do2->setType($sub->getType());
-                    $do2 = $do2->setName($sub->getName());
-                    $do2 = $do2->setDescription($sub->getDescription());
-                    $do2 = $do2->setRequired($sub->isRequired());
-                    $do2 = $do2->setChannelTypes($sub->getChannelTypes());
-                    $do2 = $do2->setAutoComplete($sub->isAutoComplete());
-                    foreach ($option->getChoices() as $choice) {
-                        $ch = new DiscordChoice($this->client->getDiscordClient());
-                        $ch = $ch->setName($choice->getName());
-                        $ch = $ch->setValue($choice->getValue());
-                        if ($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER) {
-                            $do2 = $do2->addChoice($ch);
-                        }
-                    }
-                    /** @var DiscordCommandOption[] $sub */
-                    $subs[] = $do2;
                 }
             }
+
             $c->options = $options;
 
-            /** @var DiscordCommandOption $subOption */
-            foreach ($options as $subOption) {
-                $subOption->options = $subs;
-            }
             $c->default_permission = $command->isDefaultPermission();
             $app->commands->save($c)->then(function (DiscordCommand $command2) use ($permissions, $command, $pk) {
                 /** @var DiscordCommandPermission[] $perms */
@@ -1542,6 +1566,35 @@ class CommunicationHandler
                 //Shouldn't happen unless not in server/connection issues.
                 $this->resolveRequest($pk->getUID(), false, "Failed to leave server.", [$e->getMessage(), $e->getTraceAsString()]);
                 $this->logger->debug("Failed to leave server? ({$pk->getUID()}) - {$e->getMessage()}");
+            });
+        });
+    }
+    private function handleServerFetchPrune(RequestFetchPrune $pk): void
+    {
+        $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
+           $guild->getPruneCount([
+               "days" => $pk->getDays(),
+               "include_roles" => $pk->getIncludedRoles()
+           ])->then(function(int $count) use ($pk){
+               $this->resolveRequest($pk->getUID(), true, "Fetched server prune count.", [$count]);
+           }, function(\Throwable $e) use ($pk){
+                $this->resolveRequest($pk->getUID(), false, "Failed to fetch server prune count.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to fetch server prune count? ({$pk->getUID()}) - {$e->getMessage()}");
+            });
+        });
+    }
+    private function handleServerBeginPrune(RequestBeginPrune $pk): void
+    {
+        $this->getServer($pk, $pk->getServerId(), function (DiscordGuild $guild) use ($pk) {
+           $guild->beginPrune([
+               "days" => $pk->getDays(),
+               "compute_prune_count" => $pk->isPruneCount(),
+               "include_roles" => $pk->getIncludedRoles()
+           ], $pk->getReason())->then(function(?int $count) use ($pk){
+               $this->resolveRequest($pk->getUID(), true, "Server pruning started.", [$count ?? 0]);
+           }, function(\Throwable $e) use ($pk){
+                $this->resolveRequest($pk->getUID(), false, "Failed to start Server pruning.", [$e->getMessage(), $e->getTraceAsString()]);
+                $this->logger->debug("Failed to start server pruning? ({$pk->getUID()}) - {$e->getMessage()}");
             });
         });
     }
