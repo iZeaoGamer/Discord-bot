@@ -18,7 +18,7 @@ use JaxkDev\DiscordBot\Communication\Packets\Packet;
 class StageDelete extends Packet
 {
 
-    /** @var Stage */
+    /** @var Stage|null */
     private $stage;
 
     public function __construct(?Stage $stage)
