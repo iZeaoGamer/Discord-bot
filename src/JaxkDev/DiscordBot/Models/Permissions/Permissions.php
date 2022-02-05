@@ -18,8 +18,9 @@ use JaxkDev\DiscordBot\Plugin\Bitwise;
 abstract class Permissions implements \Serializable
 {
 
-        /**
+    /**
      * Array of permissions that only apply to stage channels.
+     * i.e. indicated S in documentation
      *
      * @var array
      */
@@ -34,6 +35,7 @@ abstract class Permissions implements \Serializable
 
     /**
      * Array of permissions that only apply to voice channels.
+     * i.e. indicated V in documentation
      *
      * @var array
      */
@@ -52,6 +54,7 @@ abstract class Permissions implements \Serializable
 
     /**
      * Array of permissions that only apply to text channels.
+     * i.e. indicated T in documentation
      *
      * @var array
      */
@@ -65,6 +68,7 @@ abstract class Permissions implements \Serializable
         'read_message_history' => 16,
         'mention_everyone' => 17,
         'use_external_emojis' => 18,
+        'manage_webhooks' => 29,
         'use_application_commands' => 31,
         'manage_threads' => 34,
         'create_public_threads' => 35,
@@ -75,6 +79,7 @@ abstract class Permissions implements \Serializable
 
     /**
      * Array of permissions that can only be applied to roles.
+     * i.e. indicated empty in documentation
      *
      * @var array
      */
@@ -88,12 +93,12 @@ abstract class Permissions implements \Serializable
         'change_nickname' => 26,
         'manage_nicknames' => 27,
         'manage_emojis_and_stickers' => 30,
-        'manage_events' => 33,
         'moderate_members' => 40,
     ];
 
     /**
      * Array of permissions for all roles.
+     * i.e. indicated T,V,S in documentation
      *
      * @var array
      */
@@ -102,7 +107,6 @@ abstract class Permissions implements \Serializable
         'manage_channels' => 4,
         'view_channel' => 10,
         'manage_roles' => 28,
-        'manage_webhooks' => 29,
     ];
 
     /** @var int|string */
@@ -167,7 +171,7 @@ abstract class Permissions implements \Serializable
         if ($this->permissions[$permission] === $state) return $this;
         $this->permissions[$permission] = $state;
         $this->bitwise ^= $posPermissions[$permission]; //todo test this first.
-      return $this;
+        return $this;
     }
 
     /**
@@ -175,7 +179,7 @@ abstract class Permissions implements \Serializable
      */
     private function recalculatePermissions(): void
     {
-        if($this->bitwise < 0){
+        if ($this->bitwise < 0) {
             throw new \AssertionError("Bitwise cannot be negative numbers.");
         }
         $this->permissions = [];
