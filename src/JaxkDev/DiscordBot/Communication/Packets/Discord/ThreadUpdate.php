@@ -21,10 +21,10 @@ class ThreadUpdate extends Packet
     /** @var Thread */
     private $thread;
 
-    public function __construct(Thread $channel)
+    public function __construct(Thread $thread)
     {
         parent::__construct();
-        $this->thread = $channel;
+        $this->thread = $thread;
     }
 
     public function getChannel(): Thread

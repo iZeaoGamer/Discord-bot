@@ -16,6 +16,14 @@ class Member implements \Serializable{
     /** @var int */
     private $flags;
 
+    /** Thread Member Constructor
+     * 
+     * @param int                   $join_timestamp
+     * @param int                   $flags
+     * @param string|null           $id
+     * @param string|null           $user_id
+     * 
+     */
     public function __construct(int $join_timestamp, int $flags, ?string $id = null, ?string $user_id = null)
     {
         $this->setJoinTimestamp($join_timestamp);
