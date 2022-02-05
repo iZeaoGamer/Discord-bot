@@ -12,6 +12,8 @@
 
 namespace JaxkDev\DiscordBot\Plugin;
 
+use Discord\WebSockets\Events\ThreadListSync;
+use Discord\WebSockets\Events\ThreadMembersUpdate;
 use JaxkDev\DiscordBot\Communication\Packets\Resolution as ResolutionPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\DiscordDataDump as DiscordDataDumpPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\BanAdd as BanAddPacket;
@@ -65,7 +67,11 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\WebhooksUpdate as WebhooksU
 use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationCreate as IntergrationCreatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationUpdate as IntergrationUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationDelete as IntergrationDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadListSync as ThreadListSyncPacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadMembersUpdate as ThreadMembersUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadMemberUpdate as ThreadMemberUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Heartbeat as HeartbeatPacket;
+
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 use JaxkDev\DiscordBot\Models\User\Activity;
 use JaxkDev\DiscordBot\Models\Channels\TextChannel;
@@ -125,6 +131,9 @@ use JaxkDev\DiscordBot\Plugin\Events\WebhooksUpdated as WebhooksUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\IntergrationCreated as IntergrationCreatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\IntergrationUpdated as IntergrationUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\IntergrationDeleted as IntergrationDeletedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\ThreadMemberUpdated as ThreadMemberUpdatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\ThreadMembersUpdated as ThreadMembersUpdatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\ThreadListSynced as ThreadListSyncedEvent;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
 use JaxkDev\DiscordBot\Models\Channels\DMChannel;
@@ -207,6 +216,9 @@ class BotCommunicationHandler
         elseif ($packet instanceof IntergrationCreatePacket) $this->handleIntergrationCreate($packet);
         elseif ($packet instanceof IntergrationUpdatePacket) $this->handleIntergrationUpdate($packet);
         elseif ($packet instanceof IntergrationDeletePacket) $this->handleIntergrationDelete($packet);
+        elseif ($packet instanceof ThreadListSyncPacket) $this->handleThreadListSync($packet);
+        elseif ($packet instanceof ThreadMemberUpdatePacket) $this->handleThreadMemberUpdate($packet);
+        elseif ($packet instanceof ThreadMembersUpdatePacket) $this->handleThreadMembersUpdate($packet); 
         elseif ($packet instanceof DiscordReadyPacket) $this->handleReady();
     }
 
@@ -219,6 +231,15 @@ class BotCommunicationHandler
         });
 
         (new DiscordReadyEvent($this->plugin))->call();
+    }
+    private function handleThreadListSync(ThreadListSyncPacket $packet): void{
+        (new ThreadListSyncedEvent($this->plugin))->call();
+    }
+    private function handleThreadMemberUpdate(ThreadMemberUpdatePacket $packet): void{
+        (new ThreadMemberUpdatedEvent($this->plugin, $packet->getThreadMember()))->call();
+    }
+    private function handleThreadMembersUpdate(ThreadMembersUpdatePacket $packet): void{
+        (new ThreadMembersUpdatedEvent($this->plugin, $packet->getThread()))->call();
     }
     private function handleUserUpdate(UserUpdatePacket $packet): void
     {
@@ -272,11 +293,11 @@ class BotCommunicationHandler
 
     private function handleEmojiUpdate(ServerEmojiUpdatePacket $packet): void
     {
-        (new ServerEmojiUpdatedEvent($this->plugin, $packet->getEmoji()))->call();
+        (new ServerEmojiUpdatedEvent($this->plugin, $packet->getNewEmojis(), $packet->getOldEmojis()))->call();
     }
     private function handleServerSticker(ServerStickerUpdatePacket $packet): void
     {
-        (new ServerStickerUpdatedEvent($this->plugin, $packet->getSticker()))->call();
+        (new ServerStickerUpdatedEvent($this->plugin, $packet->getNewStickers(), $packet->getOldStickers()))->call();
     }
     private function handleInteraction(InteractionCreatePacket $packet): void
     {
@@ -289,7 +310,7 @@ class BotCommunicationHandler
     }
     private function handleStageUpdate(StageUpdatePacket $packet)
     {
-        (new StageUpdatedEvent($this->plugin, $packet->getStage()))->call();
+        (new StageUpdatedEvent($this->plugin, $packet->getStage(), $packet->getOldStage()))->call();
         Storage::updateStage($packet->getStage());
     }
     private function handleStageDelete(StageDeletePacket $packet)
@@ -417,42 +438,22 @@ class BotCommunicationHandler
     }
     private function handleTypingStart(TypingStartPacket $packet): void
     {
-        (new TypingStartEvent($this->plugin, $packet->getUserId(), $packet->getChannelId(), $packet->getServerId()))->call();
+        (new TypingStartEvent($this->plugin, $packet->getTypingStart()))->call();
     }
 
     private function handleMessageReactionAdd(MessageReactionAddPacket $packet): void
     {
-        $channel = Storage::getChannel($packet->getChannelId());
-        if (!$channel instanceof ServerChannel) {
-            throw new \AssertionError("Channel '{$packet->getChannelId()}' does not exist in storage.");
-        }
-        $member = Storage::getMember($packet->getMemberId());
-        if ($member === null) {
-            throw new \AssertionError("Member '{$packet->getMemberId()}' does not exist in storage.");
-        }
-        (new MessageReactionAddEvent($this->plugin, $packet->getEmoji(), $packet->getMessageId(), $channel, $member))->call();
+        (new MessageReactionAddEvent($this->plugin, $packet->getMessageReaction()))->call();
     }
 
     private function handleMessageReactionRemove(MessageReactionRemovePacket $packet): void
     {
-        $channel = Storage::getChannel($packet->getChannelId());
-        if (!$channel instanceof ServerChannel) {
-            throw new \AssertionError("Channel '{$packet->getChannelId()}' does not exist in storage.");
-        }
-        $member = Storage::getMember($packet->getMemberId());
-        if ($member === null) {
-            throw new \AssertionError("Member '{$packet->getMemberId()}' does not exist in storage.");
-        }
-        (new MessageReactionRemoveEvent($this->plugin, $packet->getEmoji(), $packet->getMessageId(), $channel, $member))->call();
+        (new MessageReactionRemoveEvent($this->plugin, $packet->getMessageReaction()))->call();
     }
 
     private function handleMessageReactionRemoveAll(MessageReactionRemoveAllPacket $packet): void
     {
-        $channel = Storage::getChannel($packet->getChannelId());
-        if (!$channel instanceof ServerChannel) {
-            throw new \AssertionError("Channel '{$packet->getChannelId()}' does not exist in storage.");
-        }
-        (new MessageReactionRemoveAllEvent($this->plugin, $packet->getMessageId(), $channel))->call();
+        (new MessageReactionRemoveAllEvent($this->plugin, $packet->getMessageReaction()))->call();
     }
 
     private function handleMessageReactionRemoveEmoji(MessageReactionRemoveEmojiPacket $packet): void

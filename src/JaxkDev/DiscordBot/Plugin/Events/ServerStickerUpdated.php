@@ -16,22 +16,34 @@ use JaxkDev\DiscordBot\Models\Server\Sticker;
 use pocketmine\plugin\Plugin;
 
 /**
- * Emitted when an guild sticker gets updated.
+ * Emitted when an guild Sticker gets updated.
  * 
  */
 class ServerStickerUpdated extends DiscordBotEvent
 {
 
-    /** @var Sticker */
-    private $sticker;
+    /** @var Sticker[] */
+    private $newStickers = [];
 
-    public function __construct(Plugin $plugin, Sticker $sticker)
+    /** @var Sticker[] */
+    private $oldStickers = [];
+
+    public function __construct(Plugin $plugin, array $newStickers, array $oldStickers)
     {
         parent::__construct($plugin);
-        $this->sticker = $sticker;
+        $this->newStickers = $newStickers;
+        $this->oldStickers = $oldStickers;
     }
-    public function getSticker(): Sticker
+
+    /** @return Sticker[] */
+    public function getNewStickers(): array
     {
-        return $this->sticker;
+        return $this->newStickers;
+    }
+
+    /** @return Sticker[] */
+    public function getOldStickers(): array
+    {
+        return $this->oldStickers;
     }
 }

@@ -13,39 +13,30 @@
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
+use JaxkDev\DiscordBot\Models\WebSockets\MessageReaction;
 
 class MessageReactionRemoveAll extends Packet
 {
 
-    /** @var string */
-    private $message_id;
+    /** @var MessageReaction */
+    private $reaction;
 
-    /** @var string */
-    private $channel_id;
-
-    public function __construct(string $message_id, string $channel_id)
+    public function __construct(MessageReaction $reaction)
     {
         parent::__construct();
-        $this->message_id = $message_id;
-        $this->channel_id = $channel_id;
+        $this->reaction = $reaction;
     }
 
-    public function getMessageId(): string
-    {
-        return $this->message_id;
-    }
-
-    public function getChannelId(): string
-    {
-        return $this->channel_id;
-    }
+   public function getMessageReaction(): MessageReaction
+   {
+       return $this->reaction;
+   }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->message_id,
-            $this->channel_id
+            $this->reaction
         ]);
     }
 
@@ -53,8 +44,7 @@ class MessageReactionRemoveAll extends Packet
     {
         [
             $this->UID,
-            $this->message_id,
-            $this->channel_id
+            $this->reaction
         ] = unserialize($data);
     }
 }

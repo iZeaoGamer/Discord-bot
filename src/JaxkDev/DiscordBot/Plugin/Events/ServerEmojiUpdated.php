@@ -22,16 +22,28 @@ use pocketmine\plugin\Plugin;
 class ServerEmojiUpdated extends DiscordBotEvent
 {
 
-    /** @var Emoji */
-    private $emoji;
+    /** @var Emoji[] */
+    private $newEmojis = [];
 
-    public function __construct(Plugin $plugin, Emoji $emoji)
+    /** @var Emoji[] */
+    private $oldEmojis = [];
+
+    public function __construct(Plugin $plugin, array $newEmojis, array $oldEmojis)
     {
         parent::__construct($plugin);
-        $this->emoji = $emoji;
+        $this->newEmojis = $newEmojis;
+        $this->oldEmojis = $oldEmojis;
     }
-    public function getSticker(): Emoji
+
+    /** @return Emoji[] */
+    public function getNewEmojis(): array
     {
-        return $this->emoji;
+        return $this->newEmojis;
+    }
+
+    /** @return Emoji[] */
+    public function getOldEmojis(): array
+    {
+        return $this->oldEmojis;
     }
 }

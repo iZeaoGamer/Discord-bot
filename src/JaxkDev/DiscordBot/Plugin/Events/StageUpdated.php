@@ -27,14 +27,22 @@ class StageUpdated extends DiscordBotEvent
     /** @var Stage */
     private $stage;
 
-    public function __construct(Plugin $plugin, Stage $stage)
+    /** @var Stage|null */
+    private $old;
+
+    public function __construct(Plugin $plugin, Stage $stage, ?Stage $old)
     {
         parent::__construct($plugin);
         $this->stage = $stage;
+        $this->old = $old;
     }
 
     public function getStage(): Stage
     {
         return $this->stage;
+    }
+    public function getOldStage(): ?Stage
+    {
+        return $this->old;
     }
 }

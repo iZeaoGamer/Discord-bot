@@ -16,12 +16,12 @@ use JaxkDev\DiscordBot\Models\Thread\Thread;
 use pocketmine\plugin\Plugin;
 
 /**
- * Emitted when a thread gets created.
+ * Emitted when a thread's members list gets updated,
  * 
- * @see ThreadUpdated
- * @see ThreadDeleted
+ * @see ThreadListSynced
+ * @see ThreadMemberUpdated
  */
-class ThreadCreated extends DiscordBotEvent
+class ThreadMembersUpdated extends DiscordBotEvent
 {
 
     /** @var Thread */

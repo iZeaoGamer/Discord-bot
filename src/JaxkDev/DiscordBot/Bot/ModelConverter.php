@@ -15,6 +15,8 @@ namespace JaxkDev\DiscordBot\Bot;
 use AssertionError;
 use Carbon\Carbon;
 use Discord\Builders\Components\Component;
+use Discord\Parts\WebSockets\MessageReaction as DiscordMessageReaction;
+use Discord\Parts\WebSockets\TypingStart as DiscordTypingStart;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
 use Discord\Parts\Guild\Sticker as DiscordSticker;
@@ -115,6 +117,8 @@ use JaxkDev\DiscordBot\Models\Interactions\Command\Overwrite as CommandOverwrite
 use JaxkDev\DiscordBot\Models\Interactions\Command\Permission as CommandPermission;
 use JaxkDev\DiscordBot\Models\Interactions\Command\Command;
 use JaxkDev\DiscordBot\Models\Interactions\Request\Resolved;
+use JaxkDev\DiscordBot\Models\WebSockets\MessageReaction;
+use JaxkDev\DiscordBot\Models\WebSockets\TypingStart;
 
 use JaxkDev\DiscordBot\Models\Channels\Overwrite;
 use JaxkDev\DiscordBot\Plugin\Bitwise;
@@ -122,6 +126,26 @@ use JaxkDev\DiscordBot\Models\Permissions\Permissions;
 
 abstract class ModelConverter
 {
+
+    static public function genModelMessageReaction(DiscordMessageReaction $reaction): MessageReaction{
+        return new MessageReaction(
+            $reaction->message_id,
+            $reaction->channel_id,
+            self::genModelEmoji($reaction->emoji),
+            $reaction->user_id,
+            $reaction->guild_id,
+            $reaction->reaction_id
+        );
+    }
+    static public function genModelTypingStart(DiscordTypingStart $typing): TypingStart
+    {
+        return new TypingStart(
+            $typing->channel_id,
+            $typing->user_id,
+            $typing->timestamp->getTimestamp(),
+            $typing->guild_id
+        );
+    }
     static public function genModelChoice(DiscordChoice $choice): Choice
     {
         return new Choice($choice->name, $choice->value);
@@ -488,7 +512,7 @@ abstract class ModelConverter
     }
 
 
-    
+
     static public function genModelServerWidget(DiscordWidget $widget): Widget
     {
         return new Widget(
@@ -830,7 +854,8 @@ abstract class ModelConverter
             $thread->id
         );
     }
-     static public function genModelThreadMember(DiscordThreadMember $member): ThreadMember{
+    static public function genModelThreadMember(DiscordThreadMember $member): ThreadMember
+    {
         return new ThreadMember(
             $member->join_timestamp->getTimestamp(),
             $member->flags,
@@ -838,7 +863,7 @@ abstract class ModelConverter
             $member->user_id
         );
     }
-    
+
 
     static public function genModelCategoryChannel(DiscordChannel $discordChannel): CategoryChannel
     {

@@ -24,16 +24,16 @@ use pocketmine\plugin\Plugin;
 class StageDeleted extends DiscordBotEvent
 {
 
-    /** @var Stage */
+    /** @var Stage|null */
     private $stage;
 
-    public function __construct(Plugin $plugin, Stage $stage)
+    public function __construct(Plugin $plugin, ?Stage $stage)
     {
         parent::__construct($plugin);
         $this->stage = $stage;
     }
 
-    public function getStage(): Stage
+    public function getStage(): ?Stage
     {
         return $this->stage;
     }

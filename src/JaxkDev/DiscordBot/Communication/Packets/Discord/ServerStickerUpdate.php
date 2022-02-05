@@ -18,26 +18,41 @@ use JaxkDev\DiscordBot\Models\Server\Sticker;
 class ServerStickerUpdate extends Packet
 {
 
-    /** @var Sticker */
-    private $sticker;
+    /** @var Sticker[] */
+    private $newStickers = [];
 
-    /** @param Sticker $sticker */
-    public function __construct(Sticker $sticker)
+    /** @var Sticker[] */
+    private $oldStickers = [];
+
+
+    /** 
+     * @param Sticker[] $newStickers
+     * @param Sticker[] $oldStickers
+     */
+    public function __construct(array $newStickers, array $oldStickers)
     {
         parent::__construct();
-        $this->sticker = $sticker;
+        $this->newStickers = $newStickers;
+        $this->oldStickers = $oldStickers;
     }
 
-    public function getSticker(): Sticker
+    /** @return Sticker[] */
+    public function getNewStickers(): array
     {
-        return $this->sticker;
+        return $this->newStickers;
+    }
+
+    /** @return Sticker[] */
+    public function getOldStickers(): array{
+        return $this->oldStickers;
     }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->sticker
+            $this->newStickers,
+            $this->oldStickers
         ]);
     }
 
@@ -45,7 +60,8 @@ class ServerStickerUpdate extends Packet
     {
         [
             $this->UID,
-            $this->sticker
+            $this->newStickers,
+            $this->oldStickers
         ] = unserialize($data);
     }
 }

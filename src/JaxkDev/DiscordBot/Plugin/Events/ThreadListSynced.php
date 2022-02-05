@@ -16,25 +16,17 @@ use JaxkDev\DiscordBot\Models\Thread\Thread;
 use pocketmine\plugin\Plugin;
 
 /**
- * Emitted when a thread gets created.
+ * Emitted when a thread gets synced.
  * 
- * @see ThreadUpdated
- * @see ThreadDeleted
+ * @see ThreadMembersUpdated
+ * @see ThreadMemberUpdated
  */
-class ThreadCreated extends DiscordBotEvent
+class ThreadListSynced extends DiscordBotEvent
 {
 
-    /** @var Thread */
-    private $thread;
 
-    public function __construct(Plugin $plugin, Thread $thread)
+    public function __construct(Plugin $plugin)
     {
         parent::__construct($plugin);
-        $this->thread = $thread;
-    }
-
-    public function getThread(): Thread
-    {
-        return $this->thread;
     }
 }

@@ -21,22 +21,30 @@ class StageUpdate extends Packet
     /** @var Stage */
     private $stage;
 
-    public function __construct(Stage $stage)
+    /** @var Stage|null */
+    private $old;
+
+    public function __construct(Stage $stage, ?Stage $old)
     {
         parent::__construct();
         $this->stage = $stage;
+        $this->old = $old;
     }
 
     public function getStage(): Stage
     {
         return $this->stage;
     }
+    public function getOldStage(): ?Stage{
+        return $this->old;
+    }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->stage
+            $this->stage,
+            $this->old
         ]);
     }
 
@@ -44,7 +52,8 @@ class StageUpdate extends Packet
     {
         [
             $this->UID,
-            $this->stage
+            $this->stage,
+            $this->old
         ] = unserialize($data);
     }
 }

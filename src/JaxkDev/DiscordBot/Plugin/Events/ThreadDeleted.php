@@ -25,16 +25,16 @@ class ThreadDeleted extends DiscordBotEvent
 {
 
     /** @var Thread */
-    private $channel;
+    private $thread;
 
-    public function __construct(Plugin $plugin, Thread $channel)
+    public function __construct(Plugin $plugin, Thread $thread)
     {
         parent::__construct($plugin);
-        $this->channel = $channel;
+        $this->thread = $thread;
     }
 
-    public function getChannel(): Thread
+    public function getThread(): Thread
     {
-        return $this->channel;
+        return $this->thread;
     }
 }

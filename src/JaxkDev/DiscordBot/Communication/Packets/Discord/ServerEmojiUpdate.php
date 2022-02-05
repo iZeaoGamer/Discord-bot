@@ -18,26 +18,40 @@ use JaxkDev\DiscordBot\Models\Server\Emoji;
 class ServerEmojiUpdate extends Packet
 {
 
-    /** @var Emoji */
-    private $emoji;
+    /** @var Emoji[] */
+    private $newEmojis = [];
 
-    /** @param Emoji $sticker */
-    public function __construct(Emoji $emoji)
+    /** @var Emoji[] */
+    private $oldEmojis = [];
+
+    /** 
+     * @param Emoji[] $newEmojis
+     * @param Emoji[] $oldEmojis
+     */
+    public function __construct(array $newEmojis, array $oldEmojis)
     {
         parent::__construct();
-        $this->emoji = $emoji;
+        $this->newEmojis = $newEmojis;
+        $this->oldEmojis = $oldEmojis;
     }
 
-    public function getEmoji(): Emoji
+    /** @return Emoji[] */
+    public function getNewEmojis(): array
     {
-        return $this->emoji;
+        return $this->newEmojis;
+    }
+
+    /** @return Emoji[] */
+    public function getOldEmojis(): array{
+        return $this->oldEmojis;
     }
 
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-            $this->emoji
+            $this->newEmojis,
+            $this->oldEmojis
         ]);
     }
 
@@ -45,7 +59,8 @@ class ServerEmojiUpdate extends Packet
     {
         [
             $this->UID,
-            $this->emoji
+            $this->newEmojis,
+            $this->oldEmojis
         ] = unserialize($data);
     }
 }

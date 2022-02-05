@@ -14,36 +14,27 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-use JaxkDev\DiscordBot\Models\WebSockets\TypingStart as TypingStartModel;
-
-class TypingStart extends Packet
+class ThreadListSync extends Packet
 {
 
-   /** @var TypingStartModel */
-   private $typingStart;
 
-    public function __construct(TypingStartModel $start)
+    public function __construct()
     {
         parent::__construct();
-      $this->typingStart = $start;
     }
 
-    public function getTypingStart(): TypingStartModel{
-        return $this->typingStart;
-    }
+
     public function serialize(): ?string
     {
         return serialize([
-            $this->UID,
-           $this->typingStart
+            $this->UID
         ]);
     }
 
     public function unserialize($data): void
     {
         [
-            $this->UID,
-            $this->typingStart
+            $this->UID
         ] = unserialize($data);
     }
 }

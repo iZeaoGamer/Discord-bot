@@ -12,8 +12,9 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Channels\Channel;
 use pocketmine\plugin\Plugin;
+
+use JaxkDev\DiscordBot\Models\WebSockets\MessageReaction;
 
 /**
  * Emitted when ALL reactions are removed from a message.
@@ -25,26 +26,16 @@ use pocketmine\plugin\Plugin;
 class MessageReactionRemoveAll extends DiscordBotEvent
 {
 
-    /** @var string */
-    private $message_id;
+    /** @var MessageReaction */
+    private $reaction;
 
-    /** @var Channel */
-    private $channel;
-
-    public function __construct(Plugin $plugin, string $message_id, Channel $channel)
+    public function __construct(Plugin $plugin, MessageReaction $reaction)
     {
         parent::__construct($plugin);
-        $this->message_id = $message_id;
-        $this->channel = $channel;
+        $this->reaction = $reaction;
     }
-
-    public function getMessageId(): string
-    {
-        return $this->message_id;
-    }
-
-    public function getChannel(): Channel
-    {
-        return $this->channel;
-    }
+  public function getMessageReaction(): MessageReaction{
+      return $this->reaction;
+  }
 }
+

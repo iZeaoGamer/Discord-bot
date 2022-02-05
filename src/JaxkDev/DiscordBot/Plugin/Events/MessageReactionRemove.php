@@ -12,9 +12,9 @@
 
 namespace JaxkDev\DiscordBot\Plugin\Events;
 
-use JaxkDev\DiscordBot\Models\Channels\Channel;
-use JaxkDev\DiscordBot\Models\User\Member;
 use pocketmine\plugin\Plugin;
+
+use JaxkDev\DiscordBot\Models\WebSockets\MessageReaction;
 
 /**
  * Emitted when a reaction is removed from a message.
@@ -26,44 +26,16 @@ use pocketmine\plugin\Plugin;
 class MessageReactionRemove extends DiscordBotEvent
 {
 
-    /** @var string */
-    private $emoji;
+    /** @var MessageReaction */
+    private $reaction;
 
-    /** @var string */
-    private $message_id;
-
-    /** @var Channel */
-    private $channel;
-
-    /** @var Member */
-    private $member;
-
-    public function __construct(Plugin $plugin, string $emoji, string $message_id, Channel $channel, Member $member)
+    public function __construct(Plugin $plugin, MessageReaction $reaction)
     {
         parent::__construct($plugin);
-        $this->emoji = $emoji;
-        $this->message_id = $message_id;
-        $this->channel = $channel;
-        $this->member = $member;
+        $this->reaction = $reaction;
     }
-
-    public function getEmoji(): string
-    {
-        return $this->emoji;
-    }
-
-    public function getMessageId(): string
-    {
-        return $this->message_id;
-    }
-
-    public function getChannel(): Channel
-    {
-        return $this->channel;
-    }
-
-    public function getMember(): Member
-    {
-        return $this->member;
-    }
+  public function getMessageReaction(): MessageReaction{
+      return $this->reaction;
+  }
 }
+

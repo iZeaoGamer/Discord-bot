@@ -21,13 +21,13 @@ class StageDelete extends Packet
     /** @var Stage */
     private $stage;
 
-    public function __construct(Stage $stage)
+    public function __construct(?Stage $stage)
     {
         parent::__construct();
         $this->stage = $stage;
     }
 
-    public function getStage(): Stage
+    public function getStage(): ?Stage
     {
         return $this->stage;
     }
