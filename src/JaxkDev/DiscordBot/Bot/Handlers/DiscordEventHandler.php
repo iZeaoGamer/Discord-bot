@@ -459,41 +459,49 @@ array(5) {
             $this->logger->debug("Failed to fetch Messages from server '" . $guild->name . "' (" . $guild->id . ")" . $e->getMessage());
         });
     }
-    public function onThreadListSync(Discord $discord): void{
+    public function onThreadListSync(Discord $discord): void
+    {
         $packet = new ThreadListSyncPacket();
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onThreadMemberUpdate(DiscordThreadMember $member): void{
+    public function onThreadMemberUpdate(DiscordThreadMember $member): void
+    {
         $packet = new ThreadMemberUpdatePacket(ModelConverter::genModelThreadMember($member));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onThreadMembersUpdate(DiscordThread $thread): void{
+    public function onThreadMembersUpdate(DiscordThread $thread): void
+    {
         $packet = new ThreadMembersUpdatePacket(ModelConverter::genModelThread($thread));
         $this->client->getThread()->writeOutboundData($packet);
     }
 
 
-    public function onUserUpdate(DiscordUser $new, DiscordUser $old){
+    public function onUserUpdate(DiscordUser $new, DiscordUser $old)
+    {
         $packet = new UserUpdatePacket(ModelConverter::genModelUser($new), ModelConverter::genModelUser($old));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onIntergrationCreate(DiscordIntergration $intergration){
+    public function onIntergrationCreate(DiscordIntergration $intergration)
+    {
         $packet = new IntergrationCreatePacket(ModelConverter::genModelIntergration($intergration));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onIntergrationUpdate(DiscordIntergration $intergration){
+    public function onIntergrationUpdate(DiscordIntergration $intergration)
+    {
         $packet = new IntergrationUpdatePacket(ModelConverter::genModelIntergration($intergration));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onIntergrationDelete(?DiscordIntergration $intergration){
+    public function onIntergrationDelete(?DiscordIntergration $intergration)
+    {
         $packet = new IntergrationDeletePacket(($intergration === null ? null : ModelConverter::genModelIntergration($intergration)));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onWebhooksUpdate(DiscordGuild $guild, ?DiscordChannel $channel){
+    public function onWebhooksUpdate(DiscordGuild $guild, ?DiscordChannel $channel)
+    {
         $packet = new WebhooksUpdatePacket(ModelConverter::genModelServer($guild), ($channel === null ? null : ModelConverter::genModelChannel($channel)));
         $this->client->getThread()->writeOutboundData($packet);
     }
-        
+
     public function onScheduleCreate(DiscordScheduledEvent $schedule): void
     {
         $packet = new ServerScheduledEventCreatePacket(ModelConverter::genModelScheduledEvent($schedule));
@@ -532,14 +540,14 @@ array(5) {
         /** @var Emoji[] */
         $new = [];
         /** @var DiscordEmoji[] $emojis */
-        
-        foreach($emojis as $emoji){
+
+        foreach ($emojis as $emoji) {
             $new[] = ModelConverter::genModelEmoji($emoji);
         }
         /** @var Emoji[] */
         $old = [];
         /** @var DiscordEmoji[] $oldEmojis */
-        foreach($oldEmojis as $oldEmoji){
+        foreach ($oldEmojis as $oldEmoji) {
             $old[] = ModelConverter::genModelEmoji($oldEmoji);
         }
         $packet = new ServerEmojiUpdatePacket($new, $old);
@@ -554,7 +562,6 @@ array(5) {
     {
         $packet = new StageUpdatePacket(ModelConverter::genModelStage($stage), ($old !== null ? ModelConverter::genModelStage($old) : null));
         $this->client->getThread()->writeOutboundData($packet);
-
     }
     public function onStageDelete(?DiscordStageInstance $stage): void
     {
@@ -566,12 +573,12 @@ array(5) {
         $old = [];
         $new = [];
         /** @var DiscordSticker */
-        foreach($stickers as $sticker){
+        foreach ($stickers as $sticker) {
             $new[] = ModelConverter::genModelSticker($sticker);
         }
 
         /** @var DiscordSticker */
-        foreach($oldStickers as $oldSticker){
+        foreach ($oldStickers as $oldSticker) {
             $old[] = ModelConverter::genModelSticker($oldSticker);
         }
         $packet = new ServerStickerUpdatePacket($new, $old);
@@ -684,7 +691,7 @@ array(5) {
     public function onMessageReactionRemove(DiscordMessageReaction $reaction): void
     {
         $packet = new MessageReactionRemovePacket(
-           ModelConverter::genModelMessageReaction($reaction)
+            ModelConverter::genModelMessageReaction($reaction)
         );
         $this->client->getThread()->writeOutboundData($packet);
     }

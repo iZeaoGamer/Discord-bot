@@ -43,7 +43,8 @@ class ServerStickerUpdate extends Packet
     }
 
     /** @return Sticker[] */
-    public function getOldStickers(): array{
+    public function getOldStickers(): array
+    {
         return $this->oldStickers;
     }
 

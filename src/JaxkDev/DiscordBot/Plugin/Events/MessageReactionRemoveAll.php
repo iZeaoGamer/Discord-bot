@@ -34,8 +34,8 @@ class MessageReactionRemoveAll extends DiscordBotEvent
         parent::__construct($plugin);
         $this->reaction = $reaction;
     }
-  public function getMessageReaction(): MessageReaction{
-      return $this->reaction;
-  }
+    public function getMessageReaction(): MessageReaction
+    {
+        return $this->reaction;
+    }
 }
-

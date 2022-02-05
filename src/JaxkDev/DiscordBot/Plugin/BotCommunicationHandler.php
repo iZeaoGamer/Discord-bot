@@ -218,7 +218,7 @@ class BotCommunicationHandler
         elseif ($packet instanceof IntergrationDeletePacket) $this->handleIntergrationDelete($packet);
         elseif ($packet instanceof ThreadListSyncPacket) $this->handleThreadListSync($packet);
         elseif ($packet instanceof ThreadMemberUpdatePacket) $this->handleThreadMemberUpdate($packet);
-        elseif ($packet instanceof ThreadMembersUpdatePacket) $this->handleThreadMembersUpdate($packet); 
+        elseif ($packet instanceof ThreadMembersUpdatePacket) $this->handleThreadMembersUpdate($packet);
         elseif ($packet instanceof DiscordReadyPacket) $this->handleReady();
     }
 
@@ -232,13 +232,16 @@ class BotCommunicationHandler
 
         (new DiscordReadyEvent($this->plugin))->call();
     }
-    private function handleThreadListSync(ThreadListSyncPacket $packet): void{
+    private function handleThreadListSync(ThreadListSyncPacket $packet): void
+    {
         (new ThreadListSyncedEvent($this->plugin))->call();
     }
-    private function handleThreadMemberUpdate(ThreadMemberUpdatePacket $packet): void{
+    private function handleThreadMemberUpdate(ThreadMemberUpdatePacket $packet): void
+    {
         (new ThreadMemberUpdatedEvent($this->plugin, $packet->getThreadMember()))->call();
     }
-    private function handleThreadMembersUpdate(ThreadMembersUpdatePacket $packet): void{
+    private function handleThreadMembersUpdate(ThreadMembersUpdatePacket $packet): void
+    {
         (new ThreadMembersUpdatedEvent($this->plugin, $packet->getThread()))->call();
     }
     private function handleUserUpdate(UserUpdatePacket $packet): void

@@ -31,8 +31,8 @@ class TypingStart extends DiscordBotEvent
         parent::__construct($plugin);
         $this->typing = $typing;
     }
-  public function getTypingStart(): TypingStartModel{
-      return $this->typing;
-  }
+    public function getTypingStart(): TypingStartModel
+    {
+        return $this->typing;
+    }
 }
-

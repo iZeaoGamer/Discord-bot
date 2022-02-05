@@ -27,10 +27,10 @@ class MessageReactionRemove extends Packet
         $this->reaction = $reaction;
     }
 
-   public function getMessageReaction(): MessageReaction
-   {
-       return $this->reaction;
-   }
+    public function getMessageReaction(): MessageReaction
+    {
+        return $this->reaction;
+    }
 
     public function serialize(): ?string
     {
@@ -48,4 +48,3 @@ class MessageReactionRemove extends Packet
         ] = unserialize($data);
     }
 }
-

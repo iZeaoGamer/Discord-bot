@@ -127,7 +127,8 @@ use JaxkDev\DiscordBot\Models\Permissions\Permissions;
 abstract class ModelConverter
 {
 
-    static public function genModelMessageReaction(DiscordMessageReaction $reaction): MessageReaction{
+    static public function genModelMessageReaction(DiscordMessageReaction $reaction): MessageReaction
+    {
         return new MessageReaction(
             $reaction->message_id,
             $reaction->channel_id,

@@ -34,35 +34,43 @@ class TypingStart implements \Serializable
         $this->setTimestamp($timestamp);
         $this->setServerId($server_id);
     }
-    public function getChannelId(): string{
+    public function getChannelId(): string
+    {
         return $this->channel_id;
     }
-    public function setChannelId(string $channel_id): void{
-        if(!Utils::validDiscordSnowflake($channel_id)){
+    public function setChannelId(string $channel_id): void
+    {
+        if (!Utils::validDiscordSnowflake($channel_id)) {
             throw new \AssertionError("Channel ID: {$channel_id} is invalid.");
         }
         $this->channel_id = $channel_id;
     }
-    public function getUserId(): string{
+    public function getUserId(): string
+    {
         return $this->user_id;
     }
-    public function setUserId(string $user_id): void{
-        if(!Utils::validDiscordSnowflake($user_id)){
+    public function setUserId(string $user_id): void
+    {
+        if (!Utils::validDiscordSnowflake($user_id)) {
             throw new \AssertionError("User ID: {$user_id} is invalid.");
         }
         $this->user_id = $user_id;
     }
-    public function getTimestamp(): ?int{
+    public function getTimestamp(): ?int
+    {
         return $this->timestamp;
     }
-    public function setTimestamp(?int $timestamp){
+    public function setTimestamp(?int $timestamp)
+    {
         $this->timestamp = $timestamp;
     }
-    public function getServerId(): ?string{
+    public function getServerId(): ?string
+    {
         return $this->server_id;
     }
-    public function setServerId(?string $server_id): void{
-        if($server_id !== null and !Utils::validDiscordSnowflake($server_id)){
+    public function setServerId(?string $server_id): void
+    {
+        if ($server_id !== null and !Utils::validDiscordSnowflake($server_id)) {
             throw new \AssertionError("Server ID: {$server_id} is invalid.");
         }
         $this->server_id = $server_id;

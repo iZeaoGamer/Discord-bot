@@ -35,7 +35,8 @@ class StageUpdate extends Packet
     {
         return $this->stage;
     }
-    public function getOldStage(): ?Stage{
+    public function getOldStage(): ?Stage
+    {
         return $this->old;
     }
 

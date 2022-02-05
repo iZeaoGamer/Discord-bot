@@ -19,23 +19,24 @@ use JaxkDev\DiscordBot\Models\WebSockets\TypingStart as TypingStartModel;
 class TypingStart extends Packet
 {
 
-   /** @var TypingStartModel */
-   private $typingStart;
+    /** @var TypingStartModel */
+    private $typingStart;
 
     public function __construct(TypingStartModel $start)
     {
         parent::__construct();
-      $this->typingStart = $start;
+        $this->typingStart = $start;
     }
 
-    public function getTypingStart(): TypingStartModel{
+    public function getTypingStart(): TypingStartModel
+    {
         return $this->typingStart;
     }
     public function serialize(): ?string
     {
         return serialize([
             $this->UID,
-           $this->typingStart
+            $this->typingStart
         ]);
     }
 

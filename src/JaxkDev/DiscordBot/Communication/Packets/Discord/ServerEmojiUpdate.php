@@ -42,7 +42,8 @@ class ServerEmojiUpdate extends Packet
     }
 
     /** @return Emoji[] */
-    public function getOldEmojis(): array{
+    public function getOldEmojis(): array
+    {
         return $this->oldEmojis;
     }
 
