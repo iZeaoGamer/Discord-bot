@@ -12,32 +12,36 @@
 
 namespace JaxkDev\DiscordBot\Models\Interactions\Request;
 
-
+use JaxkDev\DiscordBot\Bot\ModelConverter;
 use JaxkDev\DiscordBot\Plugin\Utils;
 use JaxkDev\DiscordBot\Models\User;
 use JaxkDev\DiscordBot\Models\Member;
 use JaxkDev\DiscordBot\Models\Role;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
-use JaxkDev\DiscordBot\Models\Channels\ThreadChannel;
-use JaxkDev\DiscordBot\Models\Messages\Message;
+use JaxkDev\DiscordBot\Models\Thread\Thread;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Message;
+use JaxkDev\DiscordBot\Models\Channels\Messages\Attachment;
 
 class Resolved implements \Serializable
 {
 
-    /** @var User[]|null */
+    /** @var Array<string, User>|null */
     private $users;
 
-    /** @var Member[]|null */
+    /** @var Array<string, Member>|null */
     private $members;
 
-    /** @var Role[]|null */
+    /** @var Array<string, Role>|null */
     private $roles;
 
-    /** @var ServerChannel[]|ThreadChannel[]|null */
+    /** @var Array<string, ServerChannel|Thread>|null */
     private $channels;
 
-    /** @var Message[]|null */
+    /** @var Array<string, Message>|null */
     private $messages;
+
+    /** @var Array<string, Attachment>|null */
+    private $attachments;
 
     /** @var string|null */
     private $server_id;
@@ -46,12 +50,13 @@ class Resolved implements \Serializable
     /** 
      * Resolved Constructor
      *
-     * @param User[]|null                                   $users    The ids and User objects.
-     * @param Member[]|null                                 $members  The ids and partial Member objects.
-     * @param Role[]|null                                   $roles    The ids and Role objects.
-     * @param ServerChannel[]|ThreadChannel[]|null          $channels The ids and partial Channel objects.
-     * @param Message[]|null                                $messages The ids and partial Message objects.
-     * @param string|null                                   $server_id ID of the server passed from Interaction.
+     * @param Array<string, User>|null                                       $users          The ids and User objects.
+     * @param Array<string, Member>|null                                     $members        The ids and partial Member objects.
+     * @param Array<string, Role>|null                                       $roles          The ids and Role objects.
+     * @param Array<string, ServerChannel|Thread>|null                       $channels       The ids and partial Channel objects.
+     * @param Array<string, Message>|null                                    $messages       The ids and partial Message objects.
+     * @param Array<string, Attachment>|null                                 $attachments    The ids and partial Attachment objects.
+     * @param string|null   $server_id                                       ID of the server passed from Interaction.
      * 
      */
     public function __construct(
@@ -60,6 +65,7 @@ class Resolved implements \Serializable
         ?array $roles = null,
         ?array $channels = null,
         ?array $messages = null,
+        ?array $attachments = null,
         ?string $server_id = null
     ) {
         $this->setUsers($users);
@@ -67,16 +73,17 @@ class Resolved implements \Serializable
         $this->setRoles($roles);
         $this->setChannels($channels);
         $this->setMessages($messages);
+        $this->setAttachments($attachments);
         $this->setServerId($server_id);
     }
 
-    /** @return User[]|null */
+    /** @return Array<string, User>|null */
     public function getUsers(): ?array
     {
         return $this->users;
     }
 
-    /** @param User[]|null $users */
+    /** @param Array<string, User>|null $users */
     public function setUsers(?array $users)
     {
         if ($users) {
@@ -89,13 +96,13 @@ class Resolved implements \Serializable
         $this->users = $users;
     }
 
-    /** @return Member[]|null */
+    /** @return Array<string, Member>|null */
     public function getMembers(): ?array
     {
         return $this->members;
     }
 
-    /** @param Member[]|null $members */
+    /** @param Array<string, Member>|null $members */
     public function setMembers(?array $members)
     {
         if ($members) {
@@ -108,13 +115,13 @@ class Resolved implements \Serializable
         $this->members = $members;
     }
 
-    /** @return Role[]|null */
+    /** @return Array<string, Role>|null */
     public function getRoles(): ?array
     {
         return $this->roles;
     }
 
-    /** @param Role[]|null $roles */
+    /** @param Array<string, Role> $roles */
     public function setRoles(?array $roles)
     {
         if ($roles) {
@@ -127,13 +134,13 @@ class Resolved implements \Serializable
         $this->roles = $roles;
     }
 
-    /** @return ServerChannel[]|ThreadChannel[]|null */
+    /** @return Array<string, ServerChannel|Thread>|null */
     public function getChannels(): ?array
     {
         return $this->channels;
     }
 
-    /** @param ServerChannel[]|ThreadChannel[]|null $channels */
+    /** @param Array<string, ServerChannel|Thread>|null $channels */
     public function setChannels(?array $channels)
     {
         if ($channels) {
@@ -146,13 +153,13 @@ class Resolved implements \Serializable
         $this->channels = $channels;
     }
 
-    /** @return Message[]|null */
+    /** @return Array<string, Message>|null */
     public function getMessages(): ?array
     {
         return $this->messages;
     }
 
-    /** @param Message[]|null $messages  */
+    /** @param Array<string, Message>|null $messages  */
     public function setMessages(?array $messages)
     {
         if ($messages) {
@@ -163,6 +170,25 @@ class Resolved implements \Serializable
             }
         }
         $this->messages = $messages;
+    }
+
+    /** @return Array<string, Attachment>|null */
+    public function getAttachments(): ?array
+    {
+        return $this->attachments;
+    }
+
+    /** @param Array<string, Attachment>|null $attachments */
+    public function setAttachments(?array $attachments): void
+    {
+        if ($attachments) {
+            foreach ($attachments as $snowflake => $attachment) {
+                if (!Utils::validDiscordSnowflake($snowflake)) {
+                    throw new \AssertionError("Attachment ID: {$snowflake} is invalid.");
+                }
+            }
+        }
+        $this->attachments = $attachments;
     }
     public function getServerId(): ?string
     {
@@ -187,6 +213,7 @@ class Resolved implements \Serializable
             $this->roles,
             $this->channels,
             $this->messages,
+            $this->attachments,
             $this->server_id
         ]);
     }
@@ -199,6 +226,7 @@ class Resolved implements \Serializable
             $this->roles,
             $this->channels,
             $this->messages,
+            $this->attachments,
             $this->server_id
         ] = unserialize($data);
     }

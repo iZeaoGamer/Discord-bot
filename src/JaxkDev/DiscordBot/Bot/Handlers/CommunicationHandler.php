@@ -812,7 +812,6 @@ class CommunicationHandler
                 if ($command->getServerId()) {
                     $c->guild_id = $command->getServerId();
                 }
-                /** @var DiscordCommandOption[] */
                 $options = [];
                 foreach ($command->getOptions() as $option) {
 
@@ -820,54 +819,46 @@ class CommunicationHandler
                     $do = $do->setType($option->getType());
                     $do = $do->setName($option->getName());
                     $do = $do->setDescription($option->getDescription());
-                    if ($option->getType() !== $option::SUB_COMMAND and $option->getType() !== $option::SUB_COMMAND_GROUP) {
-                        $do = $do->setRequired($option->isRequired());
+                    $do = $do->setRequired($option->isRequired());
+                    $do = $do->setChannelTypes($option->getChannelTypes());
+                    $do = $do->setAutoComplete($option->isAutoComplete());
+                    foreach ($option->getChoices() as $choice) {
+                        $ch = new DiscordChoice($this->client->getDiscordClient());
+                        $ch = $ch->setName($choice->getName());
+                        $ch = $ch->setValue($choice->getValue());
+                        if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
+                            $do = $do->addChoice($ch);
+                        }
                     }
-                    if ($option->getType() === $option::CHANNEL) {
-                        $do = $do->setChannelTypes($option->getChannelTypes());
-                    }
-                    if ($option->getType() === $option::STRING or $option->getType() === $option::NUMBER or $option->getType() === $option::INTEGER) {
-                        $do = $do->setAutoComplete($option->isAutoComplete());
-                    }
+                    $options[] = $do;
+                    /** @var DiscordCommandOption[] $subs */
+                    $subs = [];
                     foreach ($option->getSubOptions() as $sub) {
-                        $subOption = new DiscordCommandOption($this->client->getDiscordClient());
-
-                        $subOption = $subOption->setType($sub->getType());
-                        $subOption = $subOption->setName($sub->getName());
-                        $subOption = $subOption->setDescription($sub->getDescription());
-                        if ($sub->getType() !== $sub::SUB_COMMAND and $sub->getType() !== $sub::SUB_COMMAND_GROUP) {
-                            $subOption = $subOption->setRequired($sub->isRequired());
-                        }
-                        if ($sub->getType() === $sub::CHANNEL) {
-                            $subOption = $subOption->setChannelTypes($sub->getChannelTypes());
-                        }
-                        if ($sub->getType() === $sub::STRING or $sub->getType() === $sub::NUMBER or $sub->getType() === $sub::INTEGER) {
-                            $subOption = $subOption->setAutoComplete($sub->isAutoComplete());
-                        }
-                        foreach ($sub->getChoices() as $choice) {
-                            $ch = new DiscordChoice($this->client->getDiscordClient());
-                            $ch = $ch->setName($choice->getName());
-                            $ch = $ch->setValue($choice->getValue());
-                            if ($subOption->type === $subOption::STRING || $subOption->type === $subOption::INTEGER || $subOption->type === $subOption::NUMBER) {
-                                $subOption = $subOption->addChoice($ch);
-                            }
-                        }
-
-                        $do = $do->addOption($subOption);
+                        $do2 = new DiscordCommandOption($this->client->getDiscordClient());
+                        $do2 = $do2->setType($sub->getType());
+                        $do2 = $do2->setName($sub->getName());
+                        $do2 = $do2->setDescription($sub->getDescription());
+                        $do2 = $do2->setRequired($sub->isRequired());
+                        $do2 = $do2->setChannelTypes($sub->getChannelTypes());
+                        $do2 = $do2->setAutoComplete($sub->isAutoComplete());
                         foreach ($option->getChoices() as $choice) {
                             $ch = new DiscordChoice($this->client->getDiscordClient());
                             $ch = $ch->setName($choice->getName());
                             $ch = $ch->setValue($choice->getValue());
-                            if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
-                                $do = $do->addChoice($ch);
+                            if ($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER) {
+                                $do2 = $do2->addChoice($ch);
                             }
                         }
-                        $options[] = $do;
+                        /** @var DiscordCommandOption[] $subs */
+                        $subs[] = $do2;
                     }
                 }
-
                 $c->options = $options;
 
+                /** @var DiscordCommandOption $subOption */
+                foreach ($options as $subOption) {
+                    $subOption->options = $subs;
+                }
                 $c->default_permission = $command->isDefaultPermission();
 
                 $guild->commands->save($c)->then(function (DiscordCommand $command2) use ($permissions, $command, $pk) {
@@ -915,62 +906,51 @@ class CommunicationHandler
             if (!empty($command->getDescription())) {
                 $c->description = $command->getDescription();
             }
-            /** @var DiscordCommandOption[] */
             $options = [];
             foreach ($command->getOptions() as $option) {
-
                 $do = new DiscordCommandOption($this->client->getDiscordClient());
                 $do = $do->setType($option->getType());
                 $do = $do->setName($option->getName());
                 $do = $do->setDescription($option->getDescription());
-                if ($option->getType() !== $option::SUB_COMMAND and $option->getType() !== $option::SUB_COMMAND_GROUP) {
-                    $do = $do->setRequired($option->isRequired());
+                $do = $do->setRequired($option->isRequired());
+                $do = $do->setChannelTypes($option->getChannelTypes());
+                $do = $do->setAutoComplete($option->isAutoComplete());
+                foreach ($option->getChoices() as $choice) {
+                    $ch = new DiscordChoice($this->client->getDiscordClient());
+                    $ch = $ch->setName($choice->getName());
+                    $ch = $ch->setValue($choice->getValue());
+                    if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
+                        $do = $do->addChoice($ch);
+                    }
                 }
-                if ($option->getType() === $option::CHANNEL) {
-                    $do = $do->setChannelTypes($option->getChannelTypes());
-                }
-                if ($option->getType() === $option::STRING or $option->getType() === $option::NUMBER or $option->getType() === $option::INTEGER) {
-                    $do = $do->setAutoComplete($option->isAutoComplete());
-                }
+                $options[] = $do;
+                $subs = [];
                 foreach ($option->getSubOptions() as $sub) {
-                    $subOption = new DiscordCommandOption($this->client->getDiscordClient());
-
-                    $subOption = $subOption->setType($sub->getType());
-                    $subOption = $subOption->setName($sub->getName());
-                    $subOption = $subOption->setDescription($sub->getDescription());
-                    if ($sub->getType() !== $sub::SUB_COMMAND and $sub->getType() !== $sub::SUB_COMMAND_GROUP) {
-                        $subOption = $subOption->setRequired($sub->isRequired());
-                    }
-                    if ($sub->getType() === $sub::CHANNEL) {
-                        $subOption = $subOption->setChannelTypes($sub->getChannelTypes());
-                    }
-                    if ($sub->getType() === $sub::STRING or $sub->getType() === $sub::NUMBER or $sub->getType() === $sub::INTEGER) {
-                        $subOption = $subOption->setAutoComplete($sub->isAutoComplete());
-                    }
-                    foreach ($sub->getChoices() as $choice) {
-                        $ch = new DiscordChoice($this->client->getDiscordClient());
-                        $ch = $ch->setName($choice->getName());
-                        $ch = $ch->setValue($choice->getValue());
-                        if ($subOption->type === $subOption::STRING || $subOption->type === $subOption::INTEGER || $subOption->type === $subOption::NUMBER) {
-                            $subOption = $subOption->addChoice($ch);
-                        }
-                    }
-
-                    $do = $do->addOption($subOption);
+                    $do2 = new DiscordCommandOption($this->client->getDiscordClient());
+                    $do2 = $do2->setType($sub->getType());
+                    $do2 = $do2->setName($sub->getName());
+                    $do2 = $do2->setDescription($sub->getDescription());
+                    $do2 = $do2->setRequired($sub->isRequired());
+                    $do2 = $do2->setChannelTypes($sub->getChannelTypes());
+                    $do2 = $do2->setAutoComplete($sub->isAutoComplete());
                     foreach ($option->getChoices() as $choice) {
                         $ch = new DiscordChoice($this->client->getDiscordClient());
                         $ch = $ch->setName($choice->getName());
                         $ch = $ch->setValue($choice->getValue());
-                        if ($do->type === $do::STRING || $do->type === $do::INTEGER || $do->type === $do::NUMBER) {
-                            $do = $do->addChoice($ch);
+                        if ($do2->type === $do2::STRING || $do2->type === $do2::INTEGER || $do2->type === $do2::NUMBER) {
+                            $do2 = $do2->addChoice($ch);
                         }
                     }
-                    $options[] = $do;
+                    /** @var DiscordCommandOption[] $sub */
+                    $subs[] = $do2;
                 }
             }
-
             $c->options = $options;
 
+            /** @var DiscordCommandOption $subOption */
+            foreach ($options as $subOption) {
+                $subOption->options = $subs;
+            }
             $c->default_permission = $command->isDefaultPermission();
             $app->commands->save($c)->then(function (DiscordCommand $command2) use ($permissions, $command, $pk) {
                 /** @var DiscordCommandPermission[] $perms */

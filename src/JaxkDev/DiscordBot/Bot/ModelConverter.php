@@ -271,12 +271,19 @@ abstract class ModelConverter
                 $messages[$snowflake][] = self::genModelMessage($message);
             }
         }
+        $attachments = [];
+        if ($resolve->attachments) {
+            foreach ($resolve->attachments as $snowflake => $attachment) {
+                $attachments[$snowflake][] = self::genModelAttachment($attachment);
+            }
+        }
         return new Resolved(
             $users,
             $members,
             $roles,
             $channels,
             $messages,
+            $attachments,
             $resolve->guild_id
         );
     }
@@ -568,7 +575,8 @@ abstract class ModelConverter
             ($data->resolved !== null ? self::genModelResolved($data->resolved) : null),
             $data->target_id,
             $data->guild_id,
-            $options
+            $options,
+            $data->components
         );
     }
     static function genModelOption(DiscordInteractOption $option): Option

@@ -387,7 +387,7 @@ array(5) {
                     "), Bot does not have 'manage_guild' permission.");
             }
             if ($permissions->manage_guild) {
-                $guild->guild_scheduled_events->freshen(true)->done(function () use ($guild) {
+                $guild->guild_scheduled_events->freshen(['with_user_count' => true])->done(function () use ($guild) {
                     $this->logger->debug("Successfully fetched " . sizeof($guild->guild_scheduled_events) .
                         " scheduled events from server '" . $guild->name . "' (" . $guild->id . ")");
                     if (sizeof($guild->guild_scheduled_events) === 0) return;
@@ -442,7 +442,6 @@ array(5) {
             "limit" => $limit
         ]);
         $messages->done(function (Collection $msgs) use ($guild, $channel) {
-            //   $channel->messages->freshen()->done(function () use ($channel, $guild) {
             $this->logger->debug("Successfully fetched " . sizeof($msgs->toArray()) . " Messages from channel: {$channel->name} in server '" .
                 $guild->name . "' (" . $guild->id . ")");
             $pk = new DiscordDataDumpPacket();
@@ -450,7 +449,6 @@ array(5) {
 
             /** @var DiscordMessage $message */
             foreach ($msgs as $message) {
-                //  foreach ($channel->messages as $message) {
                 $msg = ModelConverter::genModelMessage($message);
                 $pk->addMessage($msg);
             }

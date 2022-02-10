@@ -57,6 +57,7 @@ class Option implements \Serializable
     public const ROLE = 8;
     public const MENTIONABLE = 9; // Includes users and roles
     public const NUMBER = 10; // Any double between -2^53 and 2^53
+    public const ATTACHMENT = 11;
 
     /** Command Option Constructor
      * @param int               $type
@@ -100,8 +101,8 @@ class Option implements \Serializable
     }
     public function setType(int $type): void
     {
-        if ($type < self::SUB_COMMAND or $type > self::NUMBER) {
-            throw new \AssertionError("Option type: {$type} is invalid. It must be either from 1-10.");
+        if ($type < self::SUB_COMMAND or $type > self::ATTACHMENT) {
+            throw new \AssertionError("Option type: {$type} is invalid. It must be either from 1-11.");
         }
         $this->type = $type;
     }

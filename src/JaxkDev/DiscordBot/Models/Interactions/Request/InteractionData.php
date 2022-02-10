@@ -49,17 +49,21 @@ class InteractionData implements \Serializable
     /** @var Option[]|null */
     private $options;
 
+    /** @var object[]|null */
+    private $components;
+
     /** InteractionData Constructor
-     * @param string|null               $name
-     * @param int|null                  $type
-     * @param int|null                  $component_type
-     * @param string|null               $id
-     * @param string[]|null             $values
-     * @param string|null               $custom_id
-     * @param Resolved|null             $resolved
-     * @param string|null               $target_id
-     * @param string|null               $server_id
-     * @param Option[]                  $options
+     * @param string|null                   $name
+     * @param int|null                      $type
+     * @param int|null                      $component_type
+     * @param string|null                   $id
+     * @param string[]|null                 $values
+     * @param string|null                   $custom_id
+     * @param Resolved|null                 $resolved
+     * @param string|null                   $target_id
+     * @param string|null                   $server_id
+     * @param Option[]|null                 $options
+     * @param object[]|null                 $components
      * 
      */
     public function __construct(
@@ -72,7 +76,8 @@ class InteractionData implements \Serializable
         ?Resolved $resolved = null,
         ?string $target_id = null,
         ?string $server_id = null,
-        ?array $options = null
+        ?array $options = null,
+        ?array $components = null
     ) {
         $this->setName($name);
         $this->setType($type);
@@ -84,6 +89,7 @@ class InteractionData implements \Serializable
         $this->setTargetId($target_id);
         $this->setServerId($server_id);
         $this->setOptions($options);
+        $this->setComponents($components);
     }
     public function getName(): ?string
     {
@@ -130,11 +136,13 @@ class InteractionData implements \Serializable
     {
         $this->type = $type;
     }
-    public function setComponentType(?int $type): void{
+    public function setComponentType(?int $type): void
+    {
         $this->component_type = $type;
     }
 
-    public function getComponentType(): ?int{
+    public function getComponentType(): ?int
+    {
         return $this->component_type;
     }
 
@@ -172,15 +180,30 @@ class InteractionData implements \Serializable
         }
         $this->server_id = $server_id;
     }
-    
+
     /** @return Option[]|null */
-    public function getOptions(): ?array{
+    public function getOptions(): ?array
+    {
         return $this->options;
     }
 
     /** @param Option[]|null $options */
-    public function setOptions(?array $options): void{
+    public function setOptions(?array $options): void
+    {
         $this->options = $options;
+    }
+
+    /** @return object[]|null */
+    public function getComponents(): ?array
+    {
+        return $this->components;
+    }
+    /** @param object[]|null $components 
+     * 
+     */
+    public function setComponents(?array $components): void
+    {
+        $this->components = $components;
     }
 
 
