@@ -10,4 +10,5 @@ abstract class InteractionResponseType
   const DEFERRED_UPDATE_MESSAGE = 6;
   const UPDATE_MESSAGE = 7;
   const APPLICATION_COMMAND_AUTOCOMPLETE_RESULT = 8;
+  const MODAL = 9;
 }
