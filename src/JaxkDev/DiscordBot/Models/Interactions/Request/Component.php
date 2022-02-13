@@ -73,6 +73,7 @@ class Component implements \Serializable
      * @param int|null                  $max_length
      * @param bool|null                 $required
      * @param string|null               $value
+     * 
      */
     public function __construct(
         int $type,
