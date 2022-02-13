@@ -9,11 +9,12 @@
  * with this source code in the LICENSE.md file.
  */
 
-namespace Discord\Parts\Guild;
+namespace Discord\Parts\Channel;
 
 use Carbon\Carbon;
 use Discord\Http\Endpoint;
-use Discord\Parts\Channel\Channel;
+use Discord\Parts\Guild\Guild;
+use Discord\Parts\Guild\ScheduledEvent;
 use Discord\Parts\Part;
 use Discord\Parts\User\User;
 use React\Promise\ExtendedPromiseInterface;
@@ -124,7 +125,7 @@ class Invite extends Part
             return $guild;
         }
 
-        if (!isset($this->attributes['guild'])) {
+        if (! isset($this->attributes['guild'])) {
             return null;
         }
 
@@ -154,9 +155,9 @@ class Invite extends Part
      *
      * @throws \Exception
      *
-     * @return Channel    The Channel that you have been invited to.
+     * @return Channel The Channel that you have been invited to.
      */
-    protected function getChannelAttribute(): ?Channel
+    protected function getChannelAttribute(): Channel
     {
         if (isset($this->attributes['channel_id']) && $channel = $this->discord->getChannel($this->attributes['channel_id'])) {
             return $channel;
@@ -188,7 +189,7 @@ class Invite extends Part
      */
     protected function getInviterAttribute(): ?User
     {
-        if (!isset($this->attributes['inviter'])) {
+        if (! isset($this->attributes['inviter'])) {
             return null;
         }
 
@@ -204,7 +205,7 @@ class Invite extends Part
      *
      * @throws \Exception
      *
-     * @return Carbon     The time that the invite was created.
+     * @return Carbon The time that the invite was created.
      */
     protected function getCreatedAtAttribute(): Carbon
     {
@@ -216,11 +217,11 @@ class Invite extends Part
      *
      * @throws \Exception
      *
-     * @return User|null  The user whose stream to display for this voice channel stream invite.
+     * @return User|null The user whose stream to display for this voice channel stream invite.
      */
     protected function getTargetUserAttribute(): ?User
     {
-        if (!isset($this->attributes['target_user'])) {
+        if (! isset($this->attributes['target_user'])) {
             return null;
         }
 
@@ -240,12 +241,13 @@ class Invite extends Part
      */
     protected function getExpiresAtAttribute(): ?Carbon
     {
-        if (!isset($this->attributes['expires_at'])) {
+        if (! isset($this->attributes['expires_at'])) {
             return null;
         }
 
         return new Carbon($this->attributes['expires_at']);
     }
+
     /**
      * Returns the guild scheduled event on this invite.
      *
@@ -253,7 +255,7 @@ class Invite extends Part
      */
     protected function getGuildScheduledEventAttribute(): ?ScheduledEvent
     {
-        if (!isset($this->attributes['guild_scheduled_event'])) {
+        if (! isset($this->attributes['guild_scheduled_event'])) {
             return null;
         }
 

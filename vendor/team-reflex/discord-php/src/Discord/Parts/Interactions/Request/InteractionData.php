@@ -12,42 +12,51 @@
 namespace Discord\Parts\Interactions\Request;
 
 use Discord\Parts\Part;
+use Discord\Repository\Interaction\ComponentRepository;
 use Discord\Repository\Interaction\OptionRepository;
 
 /**
  * Represents the data associated with an interaction.
- * 
+ *
  * @see https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data-structure
  *
- * @property string           $id             ID of the invoked command.
- * @property string           $name           Name of the invoked command.
- * @property int              $type           The type of the invoked command.
- * @property Resolved|null    $resolved       Resolved users, members, roles and channels that are relevant.
- * @property OptionRepository $options        Parameters and values from the user.
- * @property string|null      $custom_id      Custom ID the component was created for. Not used for slash commands.
- * @property int|null         $component_type Type of the component. Not used for slash commands.
- * @property string[]|null    $values         Values selected in a select menu.
- * @property string|null      $target_id      Id the of user or message targetted by a user or message command.
- * @property object[]|null    $components     The values submitted by the user in modal.
- * @property string|null      $guild_id       ID of the guild passed from Interaction.
+ * @property string              $id             ID of the invoked command.
+ * @property string              $name           Name of the invoked command.
+ * @property int                 $type           The type of the invoked command.
+ * @property Resolved|null       $resolved       Resolved users, members, roles and channels that are relevant.
+ * @property OptionRepository    $options        Parameters and values from the user.
+ * @property string|null         $custom_id      Custom ID the component was created for. Not used for slash commands.
+ * @property int|null            $component_type Type of the component. Not used for slash commands.
+ * @property string[]|null       $values         Values selected in a select menu.
+ * @property string|null         $target_id      Id the of user or message targetted by a user or message command.
+ * @property ComponentRepository $components     The values submitted by the user in modal.
+ * @property string|null         $guild_id       ID of the guild passed from Interaction.
  */
 class InteractionData extends Part
 {
     /**
      * @inheritdoc
      */
-    protected $fillable = ['id', 'name', 'type', 'resolved', 'options', 'custom_id', 'component_type', 'values', 'target_id', 'guild_id'];
-
-    /**
-     * @inheritdoc
-     */
-    protected $visible = ['options'];
+    protected $fillable = [
+        'id',
+        'name',
+        'type',
+        'resolved',
+        'options',
+        'custom_id',
+        'component_type',
+        'values',
+        'target_id',
+        'components',
+        'guild_id',
+    ];
 
     /**
      * @inheritdoc
      */
     protected $repositories = [
         'options' => OptionRepository::class,
+        'components' => ComponentRepository::class,
     ];
 
     /**
@@ -61,6 +70,19 @@ class InteractionData extends Part
             $this->options->push($this->factory->create(Option::class, $option, true));
         }
     }
+
+    /**
+     * Sets the components of the interaction.
+     *
+     * @param array $components
+     */
+    protected function setComponentsAttribute($components)
+    {
+        foreach ($components as $component) {
+            $this->components->push($this->factory->create(Component::class, $component, true));
+        }
+    }
+
     /**
      * Returns a collection of resolved data.
      *

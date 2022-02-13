@@ -18,6 +18,8 @@ use Discord\Parts\User\User;
 /**
  * An emoji object represents a custom emoji.
  *
+ * @see https://discord.com/developers/docs/resources/emoji
+ *
  * @property string            $id             The identifier for the emoji.
  * @property string            $name           The name of the emoji.
  * @property Collection|Role[] $roles          The roles that are allowed to use the emoji.
@@ -35,15 +37,15 @@ class Emoji extends Part
      * @inheritdoc
      */
     protected $fillable = [
-        'id', 
-        'name', 
-        'roles', 
-        'user', 
-        'require_colons', 
-        'managed', 
-        'animated', 
-        'available', 
-        'guild_id'
+        'id',
+        'name',
+        'roles',
+        'user',
+        'require_colons',
+        'managed',
+        'animated',
+        'available',
+        'guild_id',
     ];
 
     /**
@@ -71,6 +73,7 @@ class Emoji extends Part
             return in_array($role->id, $this->attributes['roles']);
         });
     }
+
     /**
      * Gets the user that created the emoji.
      *
@@ -127,7 +130,7 @@ class Emoji extends Part
             'roles' => $this->attributes['roles'],
         ];
     }
-    
+
     /**
      * @inheritdoc
      */

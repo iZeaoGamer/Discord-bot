@@ -88,7 +88,7 @@ class SelectMenu extends Component
 
     /**
      * Creates a new select menu.
-     * 
+     *
      * @param string|null $custom_id The custom ID of the select menu. If not given, an UUID will be used
      */
     public function __construct(?string $custom_id)
@@ -100,7 +100,7 @@ class SelectMenu extends Component
      * Creates a new select menu.
      *
      * @param string|null $custom_id The custom ID of the select menu.
-     * 
+     *
      * @return self
      */
     public static function new(?string $custom_id = null): self
@@ -109,12 +109,12 @@ class SelectMenu extends Component
     }
 
     /**
-     * Sets the custom ID for the select menu
-     * 
+     * Sets the custom ID for the select menu.
+     *
      * @param string $custom_id
-     * 
+     *
      * @throws \LengthException
-     * 
+     *
      * @return $this
      */
     public function setCustomId($custom_id): self
@@ -135,7 +135,7 @@ class SelectMenu extends Component
      *
      * @throws \OverflowException
      * @throws \UnexpectedValueException
-     * 
+     *
      * @return $this
      */
     public function addOption(Option $option): self
@@ -181,7 +181,7 @@ class SelectMenu extends Component
      * @param string|null $placeholder
      *
      * @throws \LengthException
-     * 
+     *
      * @return $this
      */
     public function setPlaceholder(?string $placeholder): self
@@ -202,7 +202,7 @@ class SelectMenu extends Component
      * @param int|null $min_values
      *
      * @throws \LengthException
-     * 
+     *
      * @return $this
      */
     public function setMinValues(?int $min_values): self
@@ -223,12 +223,12 @@ class SelectMenu extends Component
      * @param int|null $max_values
      *
      * @throws \LengthException
-     * 
+     *
      * @return $this
      */
     public function setMaxValues(?int $max_values): self
     {
-        if (isset($max_values) && $max_values > 25) {
+        if ($max_values && $max_values > 25) {
             throw new \LengthException('Number must be less than or equal to 25.');
         }
 
@@ -418,7 +418,7 @@ class SelectMenu extends Component
             $content['min_values'] = $this->min_values;
         }
 
-        if (isset($this->max_values)) {
+        if ($this->max_values) {
             if ($this->max_values > count($this->options)) {
                 throw new \OutOfBoundsException('There are less options than the maximum number of options to be selected.');
             }
@@ -426,7 +426,7 @@ class SelectMenu extends Component
             $content['max_values'] = $this->max_values;
         }
 
-        if (isset($this->disabled)) {
+        if ($this->disabled) {
             $content['disabled'] = true;
         }
 

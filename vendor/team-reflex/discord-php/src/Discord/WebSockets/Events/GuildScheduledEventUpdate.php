@@ -29,17 +29,20 @@ class GuildScheduledEventUpdate extends Event
 
         if ($guild = $this->discord->guilds->get('id', $data->guild_id)) {
             if ($oldScheduledEvent = $guild->guild_scheduled_events->get('id', $data->id)) {
-                  // Swap
-                  $scheduledEventPart = $oldScheduledEvent;
-                  $oldScheduledEvent = clone $oldScheduledEvent;
-  
-                  $scheduledEventPart->fill((array) $data);
+                // Swap
+                $scheduledEventPart = $oldScheduledEvent;
+                $oldScheduledEvent = clone $oldScheduledEvent;
+
+                $scheduledEventPart->fill((array) $data);
             }
         }
 
         if (!$oldScheduledEvent) {
             /** @var ScheduledEvent */
             $scheduledEventPart = $this->factory->create(ScheduledEvent::class, $data, true);
+            if ($guild = $scheduledEventPart->guild) {
+                $guild->guild_scheduled_events->pushItem($scheduledEventPart);
+            }
         }
 
         if (isset($data->creator)) {

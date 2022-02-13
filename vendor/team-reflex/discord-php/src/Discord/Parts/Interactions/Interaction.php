@@ -11,7 +11,9 @@
 
 namespace Discord\Parts\Interactions;
 
+use Discord\Builders\Components\Component;
 use Discord\Builders\MessageBuilder;
+use Discord\Helpers\Collection;
 use Discord\Helpers\Multipart;
 use Discord\Http\Endpoint;
 use Discord\InteractionResponseType;
@@ -20,10 +22,12 @@ use Discord\Parts\Channel\Channel;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\Guild\Guild;
 use Discord\Parts\Interactions\Command\Choice;
+use Discord\Parts\Interactions\Request\Component as RequestComponent;
 use Discord\Parts\Interactions\Request\InteractionData;
 use Discord\Parts\Part;
 use Discord\Parts\User\Member;
 use Discord\Parts\User\User;
+use Discord\WebSockets\Event;
 use React\Promise\ExtendedPromiseInterface;
 
 use function React\Promise\reject;
@@ -32,7 +36,7 @@ use function React\Promise\reject;
  * Represents an interaction from Discord.
  *
  * @see https://discord.com/developers/docs/interactions/receiving-and-responding#interactions
- * @see \Discord\WebSockets\Events\InteractionCreate
+ *
  * @property string               $id             ID of the interaction.
  * @property string               $application_id ID of the application the interaction is for.
  * @property int                  $type           Type of interaction.
@@ -51,7 +55,6 @@ use function React\Promise\reject;
  */
 class Interaction extends Part
 {
-
     /**
      * @inheritdoc
      */
@@ -81,7 +84,7 @@ class Interaction extends Part
      *
      * @var bool
      */
-    public $responded = false;
+    protected $responded = false;
 
     /**
      * Returns the data associated with the interaction.
@@ -90,6 +93,10 @@ class Interaction extends Part
      */
     protected function getDataAttribute(): ?InteractionData
     {
+        if (!isset($this->attributes['data'])) {
+            return null;
+        }
+
         $adata = $this->attributes['data'];
         if (isset($this->attributes['guild_id'])) {
             $adata->guild_id = $this->guild_id;
@@ -150,6 +157,7 @@ class Interaction extends Part
         if ($this->member) {
             return $this->member->user;
         }
+
         if (!isset($this->attributes['user'])) {
             return null;
         }
@@ -176,19 +184,19 @@ class Interaction extends Part
      * Only valid for message component interactions.
      *
      * @see https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction
-     * 
+     *
      * @throws \LogicException
-     * 
+     *
      * @return ExtendedPromiseInterface
      */
-    public function acknowledge(bool $ephemeral = false): ExtendedPromiseInterface
+    public function acknowledge(): ExtendedPromiseInterface
     {
         if ($this->type == InteractionType::APPLICATION_COMMAND) {
-            return $this->acknowledgeWithResponse($ephemeral);
+            return $this->acknowledgeWithResponse();
         }
 
-        if ($this->type != InteractionType::MESSAGE_COMPONENT) {
-            return reject(new \LogicException('You can only acknowledge message component interactions.'));
+        if (!in_array($this->type, [InteractionType::MESSAGE_COMPONENT, InteractionType::MODAL_SUBMIT])) {
+            return reject(new \LogicException('You can only acknowledge message component or modal submit interactions.'));
         }
 
         return $this->respond([
@@ -201,15 +209,17 @@ class Interaction extends Part
      * through the `updateOriginalResponse` function.
      *
      * @see https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction
-     * 
+     *
+     * @param bool $ephemeral Whether the acknowledge should be ephemeral.
+     *
      * @throws \LogicException
-     * 
+     *
      * @return ExtendedPromiseInterface
      */
     public function acknowledgeWithResponse(bool $ephemeral = false): ExtendedPromiseInterface
     {
-        if (!in_array($this->type, [InteractionType::APPLICATION_COMMAND, InteractionType::MESSAGE_COMPONENT])) {
-            return reject(new \LogicException('You can only acknowledge application command or message component interactions.'));
+        if (!in_array($this->type, [InteractionType::APPLICATION_COMMAND, InteractionType::MESSAGE_COMPONENT, InteractionType::MODAL_SUBMIT])) {
+            return reject(new \LogicException('You can only acknowledge application command, message component, or modal submit interactions.'));
         }
 
         return $this->respond([
@@ -223,11 +233,11 @@ class Interaction extends Part
      * Only valid for message component interactions.
      *
      * @see https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction
-     * 
+     *
      * @param MessageBuilder $builder The new message content.
      *
      * @throws \LogicException
-     * 
+     *
      * @return ExtendedPromiseInterface
      */
     public function updateMessage(MessageBuilder $builder): ExtendedPromiseInterface
@@ -246,9 +256,9 @@ class Interaction extends Part
      * Retrieves the original interaction response.
      *
      * @see https://discord.com/developers/docs/interactions/receiving-and-responding#get-original-interaction-response
-     * 
+     *
      * @throws \RuntimeException
-     * 
+     *
      * @return ExtendedPromiseInterface<Message>
      */
     public function getOriginalResponse(): ExtendedPromiseInterface
@@ -267,11 +277,11 @@ class Interaction extends Part
      * Updates the original interaction response.
      *
      * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
-     * 
+     *
      * @param MessageBuilder $builder New message contents.
      *
      * @throws \RuntimeException
-     * 
+     *
      * @return ExtendedPromiseInterface<Message>
      */
     public function updateOriginalResponse(MessageBuilder $builder): ExtendedPromiseInterface
@@ -297,9 +307,9 @@ class Interaction extends Part
      * Deletes the original interaction response.
      *
      * @see https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
-     * 
+     *
      * @throws \RuntimeException
-     * 
+     *
      * @return ExtendedPromiseInterface
      */
     public function deleteOriginalResponse(): ExtendedPromiseInterface
@@ -315,12 +325,12 @@ class Interaction extends Part
      * Sends a follow-up message to the interaction.
      *
      * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-followup-message
-     * 
+     *
      * @param MessageBuilder $builder   Message to send.
      * @param bool           $ephemeral Whether the created follow-up should be ephemeral.
      *
      * @throws \RuntimeException
-     * 
+     *
      * @return ExtendedPromiseInterface<Message>
      */
     public function sendFollowUpMessage(MessageBuilder $builder, bool $ephemeral = false): ExtendedPromiseInterface
@@ -350,18 +360,18 @@ class Interaction extends Part
      * Responds to the interaction with a message.
      *
      * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
-     * 
+     *
      * @param MessageBuilder $builder   Message to respond with.
      * @param bool           $ephemeral Whether the created message should be ephemeral.
      *
      * @throws \LogicException
-     * 
+     *
      * @return ExtendedPromiseInterface
      */
     public function respondWithMessage(MessageBuilder $builder, bool $ephemeral = false): ExtendedPromiseInterface
     {
-        if (!in_array($this->type, [InteractionType::APPLICATION_COMMAND, InteractionType::MESSAGE_COMPONENT])) {
-            return reject(new \LogicException('You can only acknowledge application command or message component interactions.'));
+        if (!in_array($this->type, [InteractionType::APPLICATION_COMMAND, InteractionType::MESSAGE_COMPONENT, InteractionType::MODAL_SUBMIT])) {
+            return reject(new \LogicException('You can only acknowledge application command, message component, or modal submit interactions.'));
         }
 
         if ($ephemeral) {
@@ -381,12 +391,12 @@ class Interaction extends Part
      * webhook.
      *
      * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
-     * 
+     *
      * @param array          $payload   Response payload.
      * @param Multipart|null $multipart Optional multipart payload.
      *
      * @throws \RuntimeException
-     * 
+     *
      * @return ExtendedPromiseInterface
      */
     protected function respond(array $payload, ?Multipart $multipart = null): ExtendedPromiseInterface
@@ -411,16 +421,17 @@ class Interaction extends Part
 
         return $this->http->post(Endpoint::bind(Endpoint::INTERACTION_RESPONSE, $this->id, $this->token), $payload);
     }
+
     /**
      * Updates a non ephemeral follow up message.
      *
      * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
-     * 
+     *
      * @param string         $message_id Message to update.
      * @param MessageBuilder $builder    New message contents.
      *
      * @throws \RuntimeException
-     * 
+     *
      * @return ExtendedPromiseInterface<Message>
      */
     public function updateFollowUpMessage(string $message_id, MessageBuilder $builder)
@@ -489,11 +500,11 @@ class Interaction extends Part
      * Responds to the interaction with auto complete suggestions.
      *
      * @see https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction
-     * 
+     *
      * @param array|Choice[] $choice Autocomplete choices (max of 25 choices)
      *
      * @throws \LogicException
-     * 
+     *
      * @return ExtendedPromiseInterface
      */
     public function autoCompleteResult(array $choices): ExtendedPromiseInterface
@@ -506,5 +517,51 @@ class Interaction extends Part
             'type' => InteractionResponseType::APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
             'data' => ['choices' => $choices],
         ]);
+    }
+
+    /**
+     * Responds to the interaction with a popup modal.
+     *
+     * @see https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction
+     *
+     * @param string            $title      The title of the popup modal
+     * @param string            $custom_id  A developer-defined identifier for the component, max 100 characters
+     * @param array|Component[] $components Between 1 and 5 (inclusive) components that make up the modal contained in Action Row
+     * @param callable|null     $submit     The function to call once modal is submitted.
+     *
+     * @throws \LogicException
+     *
+     * @return ExtendedPromiseInterface
+     */
+    public function showModal(string $title, string $custom_id, array $components, ?callable $submit = null): ExtendedPromiseInterface
+    {
+        if (in_array($this->type, [InteractionType::PING, InteractionType::MODAL_SUBMIT])) {
+            return reject(new \LogicException('You cannot pop up a modal from a ping or modal submit interaction.'));
+        }
+
+        return $this->respond([
+            'type' => InteractionResponseType::MODAL,
+            'data' => [
+                'title' => $title,
+                'custom_id' => $custom_id,
+                'components' => $components,
+            ],
+        ])->then(function () use ($custom_id, $submit) {
+            if ($submit) {
+                $this->discord->once(Event::INTERACTION_CREATE, function (Interaction $interaction) use ($custom_id, $submit) {
+                    if ($interaction->type == InteractionType::MODAL_SUBMIT && $interaction->data->custom_id == $custom_id) {
+                        $components = Collection::for(RequestComponent::class, 'custom_id');
+                        foreach ($interaction->data->components as $actionrow) {
+                            if ($actionrow->type == Component::TYPE_ACTION_ROW) {
+                                foreach ($actionrow->components as $component) {
+                                    $components->pushItem($component);
+                                }
+                            }
+                        }
+                        $submit($interaction, $components);
+                    }
+                });
+            }
+        });
     }
 }

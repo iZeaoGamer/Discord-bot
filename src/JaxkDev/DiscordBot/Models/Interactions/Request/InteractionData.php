@@ -49,7 +49,7 @@ class InteractionData implements \Serializable
     /** @var Option[]|null */
     private $options;
 
-    /** @var object[]|null */
+    /** @var Component[]|null */
     private $components;
 
     /** InteractionData Constructor
@@ -63,7 +63,7 @@ class InteractionData implements \Serializable
      * @param string|null                   $target_id
      * @param string|null                   $server_id
      * @param Option[]|null                 $options
-     * @param object[]|null                 $components
+     * @param Component[]|null              $components
      * 
      */
     public function __construct(
@@ -193,12 +193,12 @@ class InteractionData implements \Serializable
         $this->options = $options;
     }
 
-    /** @return object[]|null */
+    /** @return Component[]|null */
     public function getComponents(): ?array
     {
         return $this->components;
     }
-    /** @param object[]|null $components 
+    /** @param Component[]|null $components 
      * 
      */
     public function setComponents(?array $components): void

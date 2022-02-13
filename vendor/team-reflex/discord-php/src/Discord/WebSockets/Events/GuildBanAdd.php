@@ -34,8 +34,6 @@ class GuildBanAdd extends Event
 
         $this->cacheUser($data->user);
 
-
-
         $deferred->resolve($banPart);
     }
 }

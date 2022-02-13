@@ -60,8 +60,8 @@ class Handlers
         $this->addHandler(Event::GUILD_BAN_ADD, \Discord\WebSockets\Events\GuildBanAdd::class);
         $this->addHandler(Event::GUILD_BAN_REMOVE, \Discord\WebSockets\Events\GuildBanRemove::class);
 
-           // Guild Emoji Event handler
-           $this->addHandler(Event::GUILD_EMOJIS_UPDATE, \Discord\WebSockets\Events\GuildEmojisUpdate::class);
+        // Guild Emoji Event handler
+        $this->addHandler(Event::GUILD_EMOJIS_UPDATE, \Discord\WebSockets\Events\GuildEmojisUpdate::class);
 
         // Guild Sticker Event handler
         $this->addHandler(Event::GUILD_STICKERS_UPDATE, \Discord\WebSockets\Events\GuildStickersUpdate::class);
@@ -101,10 +101,10 @@ class Handlers
         $this->addHandler(Event::THREAD_MEMBER_UPDATE, \Discord\WebSockets\Events\ThreadMemberUpdate::class);
         $this->addHandler(Event::THREAD_MEMBERS_UPDATE, \Discord\WebSockets\Events\ThreadMembersUpdate::class);
 
-         // Stage Instance Event Handlers
-         $this->addHandler(Event::STAGE_INSTANCE_CREATE, \Discord\WebSockets\Events\StageInstanceCreate::class);
-         $this->addHandler(Event::STAGE_INSTANCE_UPDATE, \Discord\WebSockets\Events\StageInstanceUpdate::class);
-         $this->addHandler(Event::STAGE_INSTANCE_DELETE, \Discord\WebSockets\Events\StageInstanceDelete::class);
+        // Stage Instance Event Handlers
+        $this->addHandler(Event::STAGE_INSTANCE_CREATE, \Discord\WebSockets\Events\StageInstanceCreate::class);
+        $this->addHandler(Event::STAGE_INSTANCE_UPDATE, \Discord\WebSockets\Events\StageInstanceUpdate::class);
+        $this->addHandler(Event::STAGE_INSTANCE_DELETE, \Discord\WebSockets\Events\StageInstanceDelete::class);
     }
 
     /**

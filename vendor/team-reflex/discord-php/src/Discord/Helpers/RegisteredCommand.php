@@ -66,7 +66,6 @@ class RegisteredCommand
      * @param Discord  $discord
      * @param string   $name
      * @param callable $callback
-     * @param callable|null $autocomplete_callback
      */
     public function __construct(Discord $discord, string $name, callable $callback = null, ?callable $autocomplete_callback = null)
     {
@@ -193,7 +192,7 @@ class RegisteredCommand
     }
 
     /**
-     * Get command name
+     * Get command name.
      *
      * @return string
      */
@@ -203,7 +202,7 @@ class RegisteredCommand
     }
 
     /**
-     * Get sub commands
+     * Get sub commands.
      *
      * @return RegisteredCommand[]|null
      */

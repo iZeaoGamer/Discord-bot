@@ -26,6 +26,7 @@ class GuildMemberRemove extends Event
     public function handle(Deferred &$deferred, $data): void
     {
         $memberPart = null;
+
         if ($guild = $this->discord->guilds->get('id', $data->guild_id)) {
             $memberPart = $guild->members->pull($data->user->id);
             --$guild->member_count;

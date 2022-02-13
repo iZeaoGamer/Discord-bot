@@ -48,7 +48,7 @@ class MessageCreate extends Event
             }
         }
 
-        if (isset($data->author) && !isset($data->webhook_id)) {
+        if (isset($data->author) && ! isset($data->webhook_id)) {
             $this->cacheUser($data->author);
         }
 

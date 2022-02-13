@@ -32,6 +32,7 @@ use Discord\Helpers\Deferred;
 use Discord\Http\Endpoint;
 use Discord\Http\Exceptions\NoPermissionsException;
 use Discord\Parts\Thread\Thread;
+use Discord\Repository\Channel\InviteRepository;
 use Discord\Repository\Channel\ThreadRepository;
 use React\Promise\ExtendedPromiseInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -45,7 +46,7 @@ use function React\Promise\resolve;
  * A Channel can be either a text or voice channel on a Discord guild.
  *
  * @see https://discord.com/developers/docs/resources/channel#channel-object
- * 
+ *
  * @property string              $id                            The unique identifier of the Channel.
  * @property int                 $type                          The type of the channel.
  * @property string|null         $guild_id                      The unique identifier of the guild that the channel belongs to. Only for text or voice channels.
@@ -76,6 +77,7 @@ use function React\Promise\resolve;
  * @property MessageRepository   $messages                      Text channel only - messages sent in the channel.
  * @property WebhookRepository   $webhooks                      Webhooks in the channel.
  * @property ThreadRepository    $threads                       Threads that belong to the channel.
+ * @property InviteRepository    $invites                       Invites in the channel.
  *
  * @method ExtendedPromiseInterface sendMessage(MessageBuilder $builder)
  * @method ExtendedPromiseInterface sendMessage(string $text, bool $tts = false, Embed|array $embed = null, array $allowed_mentions = null, ?Message $replyTo = null)
@@ -135,6 +137,7 @@ class Channel extends Part
         'messages' => MessageRepository::class,
         'webhooks' => WebhookRepository::class,
         'threads' => ThreadRepository::class,
+        'invites' => InviteRepository::class,
     ];
 
     /**
@@ -177,7 +180,6 @@ class Channel extends Part
         if ($this->recipient) {
             return $this->recipient->id;
         }
-        return null;
     }
 
     /**
@@ -255,11 +257,11 @@ class Channel extends Part
      *
      * @see https://discord.com/developers/docs/resources/channel#edit-channel-permissions
      *
-     * @param Part  $part  A role or member.
-     * @param array $allow An array of permissions to allow.
-     * @param array $deny  An array of permissions to deny.
+     * @param Part        $part   A role or member.
+     * @param array       $allow  An array of permissions to allow.
+     * @param array       $deny   An array of permissions to deny.
      * @param string|null $reason Reason for Audit Log.
-     * 
+     *
      * @throws InvalidOverwriteException
      *
      * @return ExtendedPromiseInterface
@@ -295,11 +297,11 @@ class Channel extends Part
      * Sets an overwrite to the channel.
      *
      * @see https://discord.com/developers/docs/resources/channel#edit-channel-permissions
-     * 
-     * @param Part      $part      A role or member.
-     * @param Overwrite $overwrite An overwrite object.
+     *
+     * @param Part        $part      A role or member.
+     * @param Overwrite   $overwrite An overwrite object.
      * @param string|null $reason    Reason for Audit Log.
-     * 
+     *
      * @throws NoPermissionsException
      * @throws InvalidOverwriteException
      *
@@ -361,9 +363,9 @@ class Channel extends Part
     /**
      * Moves a member to another voice channel.
      *
-     * @param Member|string The member to move. (either a Member part or the member ID)
+     * @param Member|string $member The member to move. (either a Member part or the member ID)
      * @param string|null   $reason Reason for Audit Log.
-     * 
+     *
      * @throws \RuntimeException
      * @throws NoPermissionsException
      *
@@ -398,9 +400,9 @@ class Channel extends Part
     /**
      * Mutes a member on a voice channel.
      *
-     * @param Member|string The member to mute. (either a Member part or the member ID)
+     * @param Member|string $member The member to mute. (either a Member part or the member ID)
      * @param string|null   $reason Reason for Audit Log.
-     * 
+     *
      * @throws \RuntimeException
      * @throws NoPermissionsException
      *
@@ -435,9 +437,9 @@ class Channel extends Part
     /**
      * Unmutes a member on a voice channel.
      *
-     * @param Member|string The member to unmute. (either a Member part or the member ID)
+     * @param Member|string $member The member to unmute. (either a Member part or the member ID)
      * @param string|null   $reason Reason for Audit Log.
-     * 
+     *
      * @throws \RuntimeException
      * @throws NoPermissionsException
      *
@@ -473,12 +475,15 @@ class Channel extends Part
      * Creates an invite for the channel.
      *
      * @see https://discord.com/developers/docs/resources/channel#create-channel-invite
-     * 
-     * @param array $options An array of options. All fields are optional.
-     * @param int   $options['max_age']   The time that the invite will be valid in seconds.
-     * @param int   $options['max_uses']  The amount of times the invite can be used.
-     * @param bool  $options['temporary'] Whether the invite is for temporary membership.
-     * @param bool  $options['unique']    Whether the invite code should be unique (useful for creating many unique one time use invites).
+     *
+     * @param array  $options                          An array of options. All fields are optional.
+     * @param int    $options['max_age']               The time that the invite will be valid in seconds.
+     * @param int    $options['max_uses']              The amount of times the invite can be used.
+     * @param bool   $options['temporary']             Whether the invite is for temporary membership.
+     * @param bool   $options['unique']                Whether the invite code should be unique (useful for creating many unique one time use invites).
+     * @param int    $options['target_type']           The type of target for this voice channel invite.
+     * @param string $options['target_user_id']        The id of the user whose stream to display for this invite, required if target_type is `Invite::TARGET_TYPE_STREAM`, the user must be streaming in the channel.
+     * @param string $options['target_application_id'] The id of the embedded application to open for this invite, required if target_type is `Invite::TARGET_TYPE_EMBEDDED_APPLICATION`, the application must have the EMBEDDED flag.
      *
      * @throws NoPermissionsException
      *
@@ -501,11 +506,17 @@ class Channel extends Part
                 'max_uses',
                 'temporary',
                 'unique',
+                'target_type',
+                'target_user_id',
+                'target_application_id',
             ])
             ->setAllowedTypes('max_age', 'int')
             ->setAllowedTypes('max_uses', 'int')
             ->setAllowedTypes('temporary', 'bool')
             ->setAllowedTypes('unique', 'bool')
+            ->setAllowedTypes('target_type', 'int')
+            ->setAllowedTypes('target_user_id', ['string', 'int'])
+            ->setAllowedTypes('target_application_id', ['string', 'int'])
             ->setAllowedValues('max_age', range(0, 604800))
             ->setAllowedValues('max_uses', range(0, 100));
 
@@ -521,7 +532,7 @@ class Channel extends Part
      * Bulk deletes an array of messages.
      *
      * @see https://discord.com/developers/docs/resources/channel#bulk-delete-messages
-     * 
+     *
      * @param array|Traversable $messages An array of messages to delete.
      * @param string|null       $reason   Reason for Audit Log (only for bulk messages).
      *
@@ -581,9 +592,9 @@ class Channel extends Part
      * Deletes a given number of messages, in order of time sent.
      *
      * @see https://discord.com/developers/docs/resources/channel#bulk-delete-messages
-     * 
+     *
      * @param int         $value
-     * @param string|null $reason Reason for Audit Log. (only for bulk messages)
+     * @param string|null $reason Reason for Audit Log (only for bulk messages).
      *
      * @return ExtendedPromiseInterface
      */
@@ -598,7 +609,7 @@ class Channel extends Part
      * Fetches message history.
      *
      * @see https://discord.com/developers/docs/resources/channel#get-channel-messages
-     * 
+     *
      * @param array $options
      *
      * @throws NoPermissionsException
@@ -664,10 +675,10 @@ class Channel extends Part
      * Adds a message to the channels pinboard.
      *
      * @see https://discord.com/developers/docs/resources/channel#pin-message
-     * 
+     *
      * @param Message     $message The message to pin.
      * @param string|null $reason  Reason for Audit Log.
-     * 
+     *
      * @throws NoPermissionsException
      * @throws \RuntimeException
      *
@@ -707,7 +718,7 @@ class Channel extends Part
      * Removes a message from the channels pinboard.
      *
      * @see https://discord.com/developers/docs/resources/channel#unpin-message
-     * 
+     *
      * @param Message     $message The message to un-pin.
      * @param string|null $reason  Reason for Audit Log.
      *
@@ -750,7 +761,7 @@ class Channel extends Part
      * Returns the channels invites.
      *
      * @see https://discord.com/developers/docs/resources/channel#get-channel-invites
-     * 
+     *
      * @return ExtendedPromiseInterface<Collection<Invite>>
      */
     public function getInvites(): ExtendedPromiseInterface
@@ -789,7 +800,7 @@ class Channel extends Part
      * Starts a thread in the channel.
      *
      * @see https://discord.com/developers/docs/resources/channel#start-thread-without-message
-     * 
+     *
      * @param string      $name                  the name of the thread.
      * @param bool        $private               whether the thread should be private. cannot start a private thread in a news channel.
      * @param int         $auto_archive_duration number of minutes of inactivity until the thread is auto-archived. one of 60, 1440, 4320, 10080.
@@ -834,6 +845,7 @@ class Channel extends Part
                 }
                 break;
         }
+
         $headers = [];
         if (isset($reason)) {
             $headers['X-Audit-Log-Reason'] = $reason;
@@ -853,6 +865,8 @@ class Channel extends Part
      *
      * Takes a `MessageBuilder` or content of the message for the first parameter. If the first parameter
      * is an instance of `MessageBuilder`, the rest of the arguments are disregarded.
+     *
+     * @see https://discord.com/developers/docs/resources/channel#create-message
      *
      * @param MessageBuilder|string $message          The message builder that should be converted into a message, or the string content of the message.
      * @param bool                  $tts              Whether the message is TTS.
@@ -926,7 +940,7 @@ class Channel extends Part
      * Edit a message in the channel.
      *
      * @see https://discord.com/developers/docs/resources/channel#edit-message
-     * 
+     *
      * @param Message        $message The message to update.
      * @param MessageBuilder $message Contains the new contents of the message. Note that fields not specified in the builder will not be overwritten.
      *
@@ -943,7 +957,7 @@ class Channel extends Part
      * Sends an embed to the channel.
      *
      * @see Channel::sendMessage()
-     * 
+     *
      * @param Embed $embed Embed to send.
      *
      * @return ExtendedPromiseInterface<Message>
@@ -958,7 +972,7 @@ class Channel extends Part
      * Sends a file to the channel.
      *
      * @see Channel::sendMessage()
-     * 
+     *
      * @param string      $filepath The path to the file to be sent.
      * @param string|null $filename The name to send the file as.
      * @param string|null $content  Message content to send with the file.
@@ -985,7 +999,7 @@ class Channel extends Part
      * Broadcasts that you are typing to the channel. Lasts for 5 seconds.
      *
      * @see https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
-     * 
+     *
      * @throws \RuntimeException
      *
      * @return ExtendedPromiseInterface
@@ -1071,6 +1085,16 @@ class Channel extends Part
     public function allowVoice()
     {
         return in_array($this->type, [self::TYPE_VOICE, self::TYPE_STAGE_CHANNEL]);
+    }
+
+    /**
+     * Returns if allow invite.
+     *
+     * @return bool if we can make invite or not.
+     */
+    public function allowInvite()
+    {
+        return in_array($this->type, [self::TYPE_TEXT, self::TYPE_VOICE, self::TYPE_NEWS, self::TYPE_STAGE_CHANNEL]);
     }
 
     /**

@@ -21,7 +21,7 @@ use Discord\Parts\User\User;
 /**
  * A TypingStart part is used when the `TYPING_START` event is fired on the WebSocket. It contains
  * information such as when the event was fired and then channel it was fired in.
- * 
+ *
  * @see https://discord.com/developers/docs/topics/gateway#typing-start
  *
  * @property string              $channel_id The unique identifier of the channel that the user started typing in.
@@ -43,7 +43,7 @@ class TypingStart extends Part
     /**
      * @inheritdoc
      */
-    protected $visible = ['channel', 'guild', 'user', 'member'];
+    protected $visible = ['channel', 'guild', 'user'];
 
     /**
      * Gets the channel attribute.
@@ -105,7 +105,7 @@ class TypingStart extends Part
      *
      * @throws \Exception
      *
-     * @return Carbon     The time that the user started typing.
+     * @return Carbon The time that the user started typing.
      */
     protected function getTimestampAttribute(): Carbon
     {

@@ -319,6 +319,13 @@ class VoiceClient extends EventEmitter
     protected $version = 4;
 
     /**
+     * The Config for DNS Resolver
+     *
+     * @var string|\React\Dns\Config
+     */
+    protected $dnsConfig;
+
+    /**
      * Constructs the Voice Client instance.
      *
      * @param WebSocket       $websocket The main WebSocket client.
@@ -338,6 +345,7 @@ class VoiceClient extends EventEmitter
         $this->mute = $data['mute'];
         $this->endpoint = str_replace([':80', ':443'], '', $data['endpoint']);
         $this->speakingStatus = new Collection([], 'ssrc');
+        $this->dnsConfig = $data['dnsConfig'];
     }
 
     /**
@@ -385,7 +393,7 @@ class VoiceClient extends EventEmitter
     {
         $this->logger->debug('connected to voice websocket');
 
-        $resolver = (new DNSFactory())->createCached('8.8.8.8', $this->loop);
+        $resolver = (new DNSFactory())->createCached($this->dnsConfig, $this->loop);
         $udpfac = new DatagramFactory($this->loop, $resolver);
 
         $this->voiceWebsocket = $ws;
@@ -735,6 +743,8 @@ class VoiceClient extends EventEmitter
     {
         $deferred = new Deferred();
 
+        $process = false;
+
         if (!$this->isReady()) {
             $deferred->reject(new Exception('Voice client is not ready yet.'));
 
@@ -750,6 +760,7 @@ class VoiceClient extends EventEmitter
                 $this->emit('stderr', [$d, $this]);
             });
 
+            $process = $stream;
             $stream = $stream->stdout;
         }
 
@@ -769,7 +780,7 @@ class VoiceClient extends EventEmitter
         });
 
         $count = 0;
-        $readOpus = function () use ($buffer, $deferred, &$readOpus, &$count) {
+        $readOpus = function () use ($buffer, $deferred, &$readOpus, &$count, $process) {
             // If the client is paused, delay by frame size and check again.
             if ($this->isPaused) {
                 $this->loop->addTimer($this->frameSize / 1000, $readOpus);
@@ -778,6 +789,13 @@ class VoiceClient extends EventEmitter
             }
 
             if ($this->stopAudio) {
+                if ($process instanceof Process) {
+                    foreach ($process->pipes as $pipe) {
+                        $pipe->close();
+                    }
+                    $process->terminate(15);
+                }
+
                 $this->reset();
                 $deferred->resolve();
 

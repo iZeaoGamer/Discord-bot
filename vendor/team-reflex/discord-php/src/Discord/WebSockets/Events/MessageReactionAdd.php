@@ -45,7 +45,7 @@ class MessageReactionAdd extends Event
                 }
 
                 // New reaction added
-                if (!$addedReaction) {
+                if (! $addedReaction) {
                     $message->reactions->push($message->reactions->create([
                         'count' => 1,
                         'me' => $reaction->user_id == $this->discord->id,

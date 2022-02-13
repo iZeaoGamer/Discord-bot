@@ -50,7 +50,7 @@ class Intents
     public const GUILD_BANS = (1 << 2);
 
     /**
-     * Guild emoji and sitcker events:.
+     * Guild emoji and sticker events:.
      *
      * - GUILD_EMOJIS_UPDATE
      * - GUILD_STICKERS_UPDATE
@@ -200,7 +200,7 @@ class Intents
     {
         return static::getAllIntents() & ~(static::GUILD_MEMBERS | static::GUILD_PRESENCES);
     }
-
+    
     /**
      * Converts an integer intent representation into an array of strings,
      * representing the enabled intents. Useful for debugging.

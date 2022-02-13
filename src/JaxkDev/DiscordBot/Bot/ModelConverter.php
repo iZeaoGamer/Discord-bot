@@ -19,8 +19,10 @@ use Discord\Parts\WebSockets\MessageReaction as DiscordMessageReaction;
 use Discord\Parts\WebSockets\TypingStart as DiscordTypingStart;
 use Discord\Parts\Channel\Channel as DiscordChannel;
 use Discord\Parts\Channel\Message as DiscordMessage;
+use Discord\Parts\Channel\Attachment as DiscordAttachment;
 use Discord\Parts\Guild\Sticker as DiscordSticker;
 use Discord\Parts\Thread\Thread as DiscordThread;
+use Discord\Parts\Interactions\Request\Component as DiscordComponent;
 use Discord\Parts\Thread\Member as DiscordThreadMember;
 use Discord\Parts\Channel\Reaction as DiscordReaction;
 use Discord\Parts\Channel\Overwrite as DiscordOverwrite;
@@ -32,7 +34,7 @@ use Discord\Parts\Embed\Footer as DiscordFooter;
 use Discord\Parts\Embed\Image as DiscordImage;
 use Discord\Parts\Embed\Video as DiscordVideo;
 use Discord\Parts\Guild\Ban as DiscordBan;
-use Discord\Parts\Guild\Invite as DiscordInvite;
+use Discord\Parts\Channel\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\Guild\Emoji as DiscordEmoji;
 use Discord\Parts\Guild\Widget as DiscordWidget;
@@ -68,7 +70,7 @@ use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
 use JaxkDev\DiscordBot\Models\Channels\TextChannel;
 use JaxkDev\DiscordBot\Models\Channels\VoiceChannel;
 use JaxkDev\DiscordBot\Models\Channels\DMChannel;
-use JaxkDev\DiscordBot\Models\Server\Invite;
+use JaxkDev\DiscordBot\Models\Channels\Invite;
 use JaxkDev\DiscordBot\Models\User\Member;
 use JaxkDev\DiscordBot\Models\Channels\Messages\Attachment;
 use JaxkDev\DiscordBot\Models\Channels\Messages\Embed\Author;
@@ -80,6 +82,7 @@ use JaxkDev\DiscordBot\Models\Channels\Messages\Embed\Footer;
 use JaxkDev\DiscordBot\Models\Channels\Messages\Embed\Image;
 use JaxkDev\DiscordBot\Models\Channels\Messages\Embed\Video;
 use JaxkDev\DiscordBot\Models\Channels\Messages\Message;
+use JaxkDev\DiscordBot\Models\Interactions\Request\Component as ModelComponent;
 use JaxkDev\DiscordBot\Models\Channels\Messages\CommandMessage;
 use JaxkDev\DiscordBot\Models\Channels\Messages\Reply as ReplyMessage;
 use JaxkDev\DiscordBot\Models\Channels\Messages\Webhook as WebhookMessage;
@@ -565,6 +568,12 @@ abstract class ModelConverter
         foreach ($data->options as $option) {
             $options[] = self::genModelOption($option);
         }
+        /** @var ModelComponent[]|null */
+        $components = [];
+        /** @var DiscordComponent */
+        foreach($data->components as $component){
+            $components[] = self::genModelComponent($component);
+        }
         return new InteractionData(
             $data->name,
             $data->type,
@@ -576,7 +585,7 @@ abstract class ModelConverter
             $data->target_id,
             $data->guild_id,
             $options,
-            $data->components
+            $components
         );
     }
     static function genModelOption(DiscordInteractOption $option): Option
@@ -1088,7 +1097,24 @@ abstract class ModelConverter
         }
     }
 
-    static public function genModelAttachment(\stdClass $attachment): Attachment
+    static public function genModelComponent(DiscordComponent $component): ModelComponent
+    {
+        
+        return new ModelComponent(
+            $component->type,
+            $component->custom_id,
+            $component->disabled,
+            $component->style,
+            $component->label,
+            ($component->emoji !== null ? self::genModelEmoji($component->emoji) : null),
+            $component->url,
+            $component->options,
+            $component->placeholder,
+            $component->min_values,
+            $component->max_values,
+        );
+    }
+    static public function genModelAttachment(DiscordAttachment $attachment): Attachment
     {
         return new Attachment(
             $attachment->id,

@@ -31,7 +31,7 @@ use Discord\Parts\Interactions\Interaction as DiscordInteraction;
 use Discord\Parts\Guild\Guild as DiscordGuild;
 use Discord\Parts\Guild\Widget as DiscordWidget;
 use Discord\Parts\Guild\WelcomeScreen as DiscordWelcomeScreen;
-use Discord\Parts\Guild\Invite as DiscordInvite;
+use Discord\Parts\Channel\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\User\Activity as DiscordActivity;
 use Discord\Parts\Guild\AuditLog\AuditLog as DiscordAuditLog;
@@ -52,6 +52,7 @@ use Discord\Parts\Interactions\Command\Permission as DiscordCommandPermission;
 use Discord\Parts\Interactions\Request\InteractionData as DiscordInteractData;
 use Discord\Parts\Interactions\Request\Option as DiscordInteractDataOption;
 use Discord\Parts\Interactions\Request\Resolved as DiscordResolved;
+use Discord\Parts\Interactions\Request\Component as DiscordComponent;
 
 use Discord\Builders\MessageBuilder;
 use JaxkDev\DiscordBot\Bot\Client;
@@ -335,9 +336,9 @@ class CommunicationHandler
         $data = new DiscordInteractData($this->client->getDiscordClient());
         $data->id = $interaction->getInteractionData()->getId();
         $data->name = $interaction->getInteractionData()->getName();
-        // if($interaction->getInteractionData()->getType() !== null){
         $data->type = $interaction->getInteractionData()->getType();
         $data->component_type = $interaction->getInteractionData()->getComponentType();
+
 
         /** @var DiscordInteractDataOption[] $options */
         $options = [];
@@ -362,7 +363,42 @@ class CommunicationHandler
         $di->token = $interaction->getToken();
         $di->version = $interaction->getVersion();
         if ($interaction->getServerId()) {
-            $this->getServer($pk, $interaction->getServerId(), function (DiscordGuild $guild) use ($builder, $resolvedModel, $resolved, $di, $pk, $interaction) {
+            $this->getServer($pk, $interaction->getServerId(), function (DiscordGuild $guild) use ($data, $builder, $resolvedModel, $resolved, $di, $pk, $interaction) {
+               /** @var DiscordComponent[] */
+                $components = [];
+                foreach($interaction->getInteractionData()->getComponents() as $component){
+                    $dcom = new DiscordComponent($this->client->getDiscordClient());
+                    $dcom->type = $component->getType();
+                    $dcom->custom_id = $component->getCustomId();
+                    $dcom->disabled = $component->isDisabled();
+                    $dcom->style = $component->getStyle();
+                    $dcom->label = $component->getLabel();
+                    $emoji = new DiscordEmoji($this->client->getDiscordClient());
+                    $emoji->id = $component->getEmoji()->getId();
+                    $emoji->name = $component->getEmoji()->getName();
+                    $emoji->animated = $component->getEmoji()->isAnimated();
+                    $dcom->url = $component->getUrl();
+                    $dcom->options = $component->getOptions();
+                    $dcom->placeholder = $component->getPlaceHolder();
+                    $dcom->min_values = $component->getMinValues();
+                    $dcom->max_values = $component->getMaxValues();
+                    $dcom->min_length = $component->getMinLength();
+                    $dcom->max_length = $component->getMaxLength();
+                    $dcom->required = $component->isRequired();
+                    $dcom->value = $component->getValue();
+                    $components[] = $dcom;
+                }
+                $data->components = $components;
+                
+                        
+                    /** @var DiscordUser $user */
+                    foreach ($this->client->getDiscordClient()->users as $user) {
+                        if ($interaction->getUser()) {
+                            if ($user->id === $interaction->getUser()->getId()) {
+                                $emoji->user = $user;
+                            }
+                        }
+                    }
                 if ($resolvedModel) {
 
                     $users = [];
@@ -420,7 +456,7 @@ class CommunicationHandler
                 /** @var DiscordUser $user */
                 foreach ($this->client->getDiscordClient()->users as $user) {
                     if ($interaction->getUser()) {
-                        if ($member->id === $interaction->getUser()->getId()) {
+                        if ($user->id === $interaction->getUser()->getId()) {
                             $di->user = $user;
                         }
                     }
@@ -433,7 +469,9 @@ class CommunicationHandler
                     $di->acknowledge()->then(function () use ($builder, $di, $pk) {
                         $di->updateMessage($builder);
                     });
-                } else {
+              //  } elseif($interaction->getInteractionData() !== null and $interaction->getType() !== 5 and $pk->getTitle() !== null){
+                //    $di->showModal($pk->getTitle(), $interaction->getInteractionData()->getCustomId() ?? "None", $components);
+                //todo add Model submit support the right way.
                     $di->acknowledgeWithResponse($pk->isEphemeral())->then(function () use ($builder, $di, $pk) {
                         $di->updateOriginalResponse($builder)->then(function (DiscordMessage $message) use ($pk) {
                             $this->resolveRequest($pk->getUID(), true, "Successfully executed new Interaction class.", [ModelConverter::genModelMessage($message)]);
@@ -446,6 +484,31 @@ class CommunicationHandler
                 }
             });
         } else {
+            /** @var DiscordComponent[] */
+            $components = [];
+            foreach($interaction->getInteractionData()->getComponents() as $component){
+                $dcom = new DiscordComponent($this->client->getDiscordClient());
+                $dcom->type = $component->getType();
+                $dcom->custom_id = $component->getCustomId();
+                $dcom->disabled = $component->isDisabled();
+                $dcom->style = $component->getStyle();
+                $dcom->label = $component->getLabel();
+                $emoji = new DiscordEmoji($this->client->getDiscordClient());
+                $emoji->id = $component->getEmoji()->getId();
+                $emoji->name = $component->getEmoji()->getName();
+                $emoji->animated = $component->getEmoji()->isAnimated();
+                $dcom->url = $component->getUrl();
+                $dcom->options = $component->getOptions();
+                $dcom->placeholder = $component->getPlaceHolder();
+                $dcom->min_values = $component->getMinValues();
+                $dcom->max_values = $component->getMaxValues();
+                $dcom->min_length = $component->getMinLength();
+                $dcom->max_length = $component->getMaxLength();
+                $dcom->required = $component->isRequired();
+                $dcom->value = $component->getValue();
+                $components[] = $dcom;
+            }
+            $data->components = $components;
             if ($resolvedModel) {
                 $users = [];
                 /** @var DiscordUser $user */
@@ -3142,8 +3205,10 @@ class CommunicationHandler
                 "max_age" => $invite->getMaxAge(),
                 "max_uses" => $invite->getMaxUses(),
                 "temporary" => $invite->isTemporary(),
-                "unique" => true
-            ])->done(function (DiscordInvite $dInvite) use ($pk) {
+                "unique" => true, 
+                "target_type" => $invite->getTargetType(),
+                "target_user" => ($invite->getTargetUser() !== null ? $invite->getTargetUser()->getId() : null)
+             ])->done(function (DiscordInvite $dInvite) use ($pk) {
                 $this->resolveRequest($pk->getUID(), true, "Invite initialised.", [ModelConverter::genModelInvite($dInvite)]);
                 $this->logger->debug("Invite initialised ({$pk->getUID()})");
             }, function (\Throwable $e) use ($pk) {

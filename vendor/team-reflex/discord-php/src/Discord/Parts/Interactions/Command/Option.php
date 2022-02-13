@@ -59,7 +59,7 @@ class Option extends Part
         'channel_types',
         'min_value',
         'max_value',
-        'autocomplete'
+        'autocomplete',
     ];
 
     /**
@@ -217,15 +217,15 @@ class Option extends Part
      */
     public function addChoice(Choice $choice): self
     {
-        if ($this->choices !== null) {
-            if (count($this->choices) >= 25) {
-                throw new \OverflowException('Option can only have a maximum of 25 Choices.');
-            }
+        if (count($this->choices) >= 25) {
+            throw new \OverflowException('Option can only have a maximum of 25 Choices.');
         }
 
         $this->attributes['choices'][] = $choice->getRawAttributes();
+
         return $this;
     }
+
     /**
      * Removes an option.
      *
@@ -238,6 +238,7 @@ class Option extends Part
         if ($option instanceof Option) {
             $option = $option->name;
         }
+
         if (!empty($this->attributes['options'])) {
             foreach ($this->attributes['options'] as $idx => $opt) {
                 if ($opt['name'] == $option) {

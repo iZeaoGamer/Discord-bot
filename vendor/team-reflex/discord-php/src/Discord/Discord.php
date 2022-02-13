@@ -52,7 +52,6 @@ use React\Promise\PromiseInterface;
 use React\Socket\Connector as SocketConnector;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-
 /**
  * The Discord client class.
  *
@@ -320,10 +319,12 @@ class Discord
         if (php_sapi_name() !== 'cli') {
             trigger_error('DiscordPHP will not run on a webserver. Please use PHP CLI to run a DiscordPHP bot.', E_USER_ERROR);
         }
+
         // x86 need gmp extension for big integer operation
         if (PHP_INT_SIZE === 4 && !Bitwise::init()) {
             trigger_error('ext-gmp is not loaded. Permissions will NOT work correctly!', E_USER_WARNING);
         }
+
         $options = $this->resolveOptions($options);
 
         $this->options = $options;
@@ -1063,13 +1064,13 @@ class Discord
     /**
      * Updates the clients presence.
      *
-     * @param  Activity|null $activity The current client activity, or null.
-     *                                 Note: The activity type _cannot_ be custom, and the only valid fields are `name`, `type` and `url`.
-     * @param  bool          $idle     Whether the client is idle.
-     * @param  string        $status   The current status of the client.
-     *                                 Must be one of the following:
-     *                                 online, dnd, idle, invisible, offline
-     * @param  bool          $afk      Whether the client is AFK.
+     * @param Activity|null $activity The current client activity, or null.
+     *                                Note: The activity type _cannot_ be custom, and the only valid fields are `name`, `type` and `url`.
+     * @param bool          $idle     Whether the client is idle.
+     * @param string        $status   The current status of the client.
+     *                                Must be one of the following:
+     *                                online, dnd, idle, invisible, offline
+     * @param bool          $afk      Whether the client is AFK.
      *
      * @throws \UnexpectedValueException
      */
@@ -1170,6 +1171,7 @@ class Discord
 
             $data['token'] = $vs->token;
             $data['endpoint'] = $vs->endpoint;
+            $data['dnsConfig'] = $discord->options['dnsConfig'];
             $this->logger->info('received token and endpoint for voice session', ['guild' => $channel->guild_id, 'token' => $vs->token, 'endpoint' => $vs->endpoint]);
 
             if (is_null($logger)) {
@@ -1298,6 +1300,7 @@ class Discord
                 'retrieveBans',
                 'intents',
                 'socket_options',
+                'dnsConfig',
             ])
             ->setDefaults([
                 'loop' => LoopFactory::create(),
@@ -1309,6 +1312,7 @@ class Discord
                 'retrieveBans' => false,
                 'intents' => Intents::getDefaultIntents(),
                 'socket_options' => [],
+                'dnsConfig' => '8.8.8.8'
             ])
             ->setAllowedTypes('token', 'string')
             ->setAllowedTypes('logger', ['null', LoggerInterface::class])
@@ -1319,7 +1323,8 @@ class Discord
             ->setAllowedTypes('storeMessages', 'bool')
             ->setAllowedTypes('retrieveBans', 'bool')
             ->setAllowedTypes('intents', ['array', 'int'])
-            ->setAllowedTypes('socket_options', 'array');
+            ->setAllowedTypes('socket_options', 'array')
+            ->setAllowedTypes('dnsConfig', ['string', \React\Dns\Config\Config::class]);
 
         $options = $resolver->resolve($options);
 
@@ -1520,15 +1525,16 @@ class Discord
 
         return null;
     }
+
     /**
      * Registeres a command with the client.
      *
-     * @param string|array $name
-     * @param callable     $callback
+     * @param string|array  $name
+     * @param callable      $callback
      * @param callable|null $autocomplete_callback
      *
      * @throws \LogicException
-     * 
+     *
      * @return RegisteredCommand
      */
     public function listenCommand($name, callable $callback = null, ?callable $autocomplete_callback = null): RegisteredCommand
@@ -1551,6 +1557,7 @@ class Discord
         if (!isset($this->application_commands[$baseCommand])) {
             $this->listenCommand($baseCommand);
         }
+
         return $this->application_commands[$baseCommand]->addSubCommand($name, $callback, $autocomplete_callback);
     }
 

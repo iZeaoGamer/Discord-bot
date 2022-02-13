@@ -28,7 +28,7 @@ class GuildRoleCreate extends Event
         $adata = (array) $data->role;
         $adata['guild_id'] = $data->guild_id;
 
-         /** @var Role */
+        /** @var Role */
         $rolePart = $this->factory->create(Role::class, $adata, true);
 
         if ($guild = $this->discord->guilds->get('id', $data->guild_id)) {

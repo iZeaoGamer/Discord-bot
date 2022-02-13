@@ -14,7 +14,7 @@ namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
 use JaxkDev\DiscordBot\Models\Server\Ban;
 use JaxkDev\DiscordBot\Models\Channels\ServerChannel;
-use JaxkDev\DiscordBot\Models\Server\Invite;
+use JaxkDev\DiscordBot\Models\Channels\Invite;
 use JaxkDev\DiscordBot\Models\User\Member;
 use JaxkDev\DiscordBot\Models\Server\Role;
 use JaxkDev\DiscordBot\Models\Server\Server;

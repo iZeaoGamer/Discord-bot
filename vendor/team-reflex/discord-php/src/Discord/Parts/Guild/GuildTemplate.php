@@ -18,11 +18,10 @@ use Discord\Parts\User\User;
 use React\Promise\ExtendedPromiseInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-
 /**
  * A Guild Template is a code that when used, creates a guild based on a snapshot of an existing guild.
  *
- *  @see https://discord.com/developers/docs/resources/guild-template
+ * @see https://discord.com/developers/docs/resources/guild-template
  *
  * @property string      $code                    The template code (unique ID).
  * @property string      $name                    Template name.
@@ -34,7 +33,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * @property Carbon      $updated_at              When this template was last synced to the source guild.
  * @property string      $source_guild_id         The ID of the guild this template is based on.
  * @property Guild       $source_guild            The guild this template is based on.
- * @property object[]    $serialized_source_guild The guild snapshot this template contains.
+ * @property object      $serialized_source_guild The guild snapshot this template contains.
  * @property bool        $is_dirty                Whether the template has unsynced changes.
  */
 class GuildTemplate extends Part
@@ -69,7 +68,7 @@ class GuildTemplate extends Part
     /**
      * Returns the source guild attribute.
      *
-     * @return Guild      The guild snapshot this template contains.
+     * @return Guild The guild snapshot this template contains.
      */
     protected function getSourceGuildAttribute(): Guild
     {
@@ -81,7 +80,7 @@ class GuildTemplate extends Part
     }
 
     /**
-     * Gets the user that created the emoji.
+     * Gets the user that created the template.
      *
      * @return User
      */
@@ -97,8 +96,8 @@ class GuildTemplate extends Part
     /**
      * Returns the created at attribute.
      *
-     * @return Carbon     The time that the guild template was created.
-     * 
+     * @return Carbon The time that the guild template was created.
+     *
      * @throws \Exception
      */
     protected function getCreatedAtAttribute(): Carbon
@@ -109,20 +108,21 @@ class GuildTemplate extends Part
     /**
      * Returns the updated at attribute.
      *
-     * @return Carbon     The time that the guild template was updated.
-     * 
+     * @return Carbon The time that the guild template was updated.
+     *
      * @throws \Exception
      */
     protected function getUpdatedAtAttribute(): Carbon
     {
         return new Carbon($this->attributes['updated_at']);
     }
+
     /**
      * Creates a guild from this template. Can be used only by bots in less than 10 guilds.
      *
      * @see https://discord.com/developers/docs/resources/guild-template#create-guild-from-guild-template
-     * 
-     * @param array       $options An array of options.
+     *
+     * @param array       $options         An array of options.
      * @param string      $options['name'] The name of the guild (2-100 characters).
      * @param string|null $options['icon'] The base64 128x128 image for the guild icon.
      *
@@ -153,6 +153,7 @@ class GuildTemplate extends Part
                 if (!$guild = $this->discord->guilds->offsetGet($response->id)) {
                     /** @var Guild */
                     $guild = $this->factory->create(Guild::class, $response, true);
+
                     foreach ($roles as $role) {
                         $guild->roles->push($guild->roles->create($role, true));
                     }
@@ -160,8 +161,10 @@ class GuildTemplate extends Part
                     foreach ($channels as $channel) {
                         $guild->channels->push($guild->channels->create($channel, true));
                     }
+
                     $this->discord->guilds->push($guild);
                 }
+
                 return $guild;
             });
     }

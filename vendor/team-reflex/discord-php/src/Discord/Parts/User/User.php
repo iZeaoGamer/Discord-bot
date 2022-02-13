@@ -18,27 +18,31 @@ use Discord\Parts\Part;
 use Discord\Parts\Channel\Message;
 use React\Promise\ExtendedPromiseInterface;
 
+use function React\Promise\resolve;
+
 /**
  * A user is a general user that is not attached to a guild.
  *
- * @property string     $id            The unique identifier of the user.
- * @property string     $username      The username of the user.
- * @property string     $avatar        The avatar URL of the user.
- * @property string     $avatar_hash   The avatar hash of the user.
- * @property string     $discriminator The discriminator of the user.
- * @property string     $displayname   The username and discriminator of the user.
- * @property bool       $bot           Whether the user is a bot.
- * @property bool       $system        Whether the user is a Discord system user.
- * @property bool       $mfa_enabled   Whether MFA is enabled.
- * @property string     $banner        The banner URL of the user.
- * @property string     $banner_hash   The banner hash of the user.
- * @property int        $accent_color  The user's banner color encoded as an integer representation of hexadecimal color code.
- * @property string     $locale        User locale.
- * @property bool       $verified      Whether the user is verified.
- * @property string     $email         User email.
- * @property int        $flags         User flags.
- * @property int        $premium_type  Type of nitro subscription.
- * @property int        $public_flags  Public flags on the user.
+ * @see https://discord.com/developers/docs/resources/user
+ *
+ * @property string      $id            The unique identifier of the user.
+ * @property string      $username      The username of the user.
+ * @property string      $discriminator The discriminator of the user.
+ * @property string      $displayname   The username and discriminator of the user.
+ * @property string      $avatar        The avatar URL of the user.
+ * @property string      $avatar_hash   The avatar hash of the user.
+ * @property bool|null   $bot           Whether the user is a bot.
+ * @property bool|null   $system        Whether the user is a Discord system user.
+ * @property bool|null   $mfa_enabled   Whether MFA is enabled.
+ * @property string|null $banner        The banner URL of the user.
+ * @property string|null $banner_hash   The banner hash of the user.
+ * @property int|null    $accent_color  The user's banner color encoded as an integer representation of hexadecimal color code.
+ * @property string|null $locale        User locale.
+ * @property bool|null   $verified      Whether the user is verified.
+ * @property string|null $email         User email.
+ * @property int|null    $flags         User flags.
+ * @property int|null    $premium_type  Type of nitro subscription.
+ * @property int|null    $public_flags  Public flags on the user.
  *
  * @method ExtendedPromiseInterface sendMessage(MessageBuilder $builder)
  * @method ExtendedPromiseInterface sendMessage(string $text, bool $tts = false, Embed|array $embed = null, array $allowed_mentions = null, ?Message $replyTo = null)
@@ -68,17 +72,35 @@ class User extends Part
     /**
      * @inheritdoc
      */
-    protected $fillable = ['id', 'username', 'avatar', 'discriminator', 'bot', 'system', 'mfa_enabled', 'banner', 'accent_color', 'locale', 'verified', 'email', 'flags', 'premium_type', 'public_flags'];
+    protected $fillable = [
+        'id',
+        'username',
+        'discriminator',
+        'avatar',
+        'bot',
+        'system',
+        'mfa_enabled',
+        'locale',
+        'verified',
+        'email',
+        'flags',
+        'banner',
+        'accent_color',
+        'premium_type',
+        'public_flags',
+    ];
 
     /**
      * Gets the private channel for the user.
-     * 
-     * @return ExtendedPromiseInterface
+     *
+     * @see https://discord.com/developers/docs/resources/user#create-dm
+     *
+     * @return ExtendedPromiseInterface<Channel>
      */
     public function getPrivateChannel(): ExtendedPromiseInterface
     {
         if ($channel = $this->discord->private_channels->get('recipient_id', $this->id)) {
-            return \React\Promise\resolve($channel);
+            return resolve($channel);
         }
 
         return $this->http->post(Endpoint::USER_CURRENT_CHANNELS, ['recipient_id' => $this->id])->then(function ($response) {
@@ -96,7 +118,7 @@ class User extends Part
      * is an instance of `MessageBuilder`, the rest of the arguments are disregarded.
      *
      * @see https://discord.com/developers/docs/resources/channel#create-message
-     * 
+     *
      * @param MessageBuilder|string $message          The message builder that should be converted into a message, or the string content of the message.
      * @param bool                  $tts              Whether the message is TTS.
      * @param Embed|array|null      $embed            An embed object or array to send in the message.
@@ -116,13 +138,14 @@ class User extends Part
      * Broadcasts that you are typing to the channel. Lasts for 5 seconds.
      *
      * @see https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
-     * 
-     * @return ExtendedPromiseInterface
+     *
      * @throws \Exception
+     *
+     * @return ExtendedPromiseInterface
      */
     public function broadcastTyping(): ExtendedPromiseInterface
     {
-        return $this->getPrivateChannel()->then(function ($channel) {
+        return $this->getPrivateChannel()->then(function (Channel $channel) {
             return $channel->broadcastTyping();
         });
     }
@@ -145,7 +168,7 @@ class User extends Part
      *
      * @return string The URL to the clients avatar.
      */
-    public function getAvatarAttribute(string $format = null, int $size = 1024): string
+    public function getAvatarAttribute(?string $format = null, int $size = 1024): string
     {
         if (empty($this->attributes['avatar'])) {
             $avatarDiscrim = (int) $this->discriminator % 5;
@@ -155,13 +178,14 @@ class User extends Part
 
         if (isset($format)) {
             $allowed = ['png', 'jpg', 'webp', 'gif'];
+
             if (!in_array(strtolower($format), $allowed)) {
                 $format = 'webp';
             }
         } elseif (strpos($this->attributes['avatar'], 'a_') === 0) {
             $format = 'gif';
         } else {
-            $format = 'jpg';
+            $format = 'webp';
         }
 
         return "https://cdn.discordapp.com/avatars/{$this->id}/{$this->attributes['avatar']}.{$format}?size={$size}";
@@ -185,7 +209,7 @@ class User extends Part
      *
      * @return string|null The URL to the clients banner.
      */
-    public function getBannerAttribute(string $format = null, int $size = 600): ?string
+    public function getBannerAttribute(?string $format = null, int $size = 600): ?string
     {
         if (empty($this->attributes['banner'])) {
             return null;
@@ -200,7 +224,7 @@ class User extends Part
         } elseif (strpos($this->attributes['banner'], 'a_') === 0) {
             $format = 'gif';
         } else {
-            $format = 'jpg';
+            $format = 'png';
         }
 
         return "https://cdn.discordapp.com/banners/{$this->id}/{$this->attributes['banner']}.{$format}?size={$size}";
@@ -209,11 +233,11 @@ class User extends Part
     /**
      * Returns the banner hash for the client.
      *
-     * @return string The client banner's hash.
+     * @return string|null The client banner's hash.
      */
-    protected function getBannerHashAttribute(): string
+    protected function getBannerHashAttribute(): ?string
     {
-        return $this->attributes['banner'];
+        return $this->attributes['banner'] ?? null;
     }
 
     /**

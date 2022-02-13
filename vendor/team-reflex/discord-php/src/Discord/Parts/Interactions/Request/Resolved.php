@@ -12,6 +12,7 @@
 namespace Discord\Parts\Interactions\Request;
 
 use Discord\Helpers\Collection;
+use Discord\Parts\Channel\Attachment;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\Guild\Role;
@@ -30,7 +31,7 @@ use Discord\Parts\User\User;
  * @property Collection|Role[]|null             $roles       The ids and Role objects.
  * @property Collection|Channel[]|Thread[]|null $channels    The ids and partial Channel objects.
  * @property Collection|Message[]|null          $messages    The ids and partial Message objects.
- * @property Collection|object[]|null           $attachments The ids and partial Attachment objects.
+ * @property Collection|Attachment[]|null       $attachments The ids and partial Attachment objects.
  * @property string|null                        $guild_id    ID of the guild passed from Interaction.
  */
 class Resolved extends Part
@@ -39,7 +40,6 @@ class Resolved extends Part
      * @inheritdoc
      */
     protected $fillable = ['users', 'members', 'roles', 'channels', 'messages', 'attachments', 'guild_id'];
-
 
     /**
      * Returns a collection of resolved users.
@@ -97,19 +97,6 @@ class Resolved extends Part
     }
 
     /**
-     * Returns a collection of resolved attachments.
-     *
-     * @return Collection|object[]|null Map of Snowflakes to attachments objects
-     */
-    protected function getAttachmentsAttribute(): ?Collection
-    {
-        if (!isset($this->attributes['attachments'])) {
-            return null;
-        }
-
-        return new Collection((array) $this->attributes['attachments']);
-    }
-    /**
      * Returns a collection of resolved roles.
      *
      * @return Collection|Role[]|null Map of Snowflakes to role objects
@@ -136,7 +123,6 @@ class Resolved extends Part
 
         return $collection;
     }
-
 
     /**
      * Returns a collection of resolved channels.
@@ -200,5 +186,25 @@ class Resolved extends Part
         }
 
         return $collection;
+    }
+
+    /**
+     * Returns a collection of resolved attachments.
+     *
+     * @return Collection|Attachment[]|null Map of Snowflakes to attachments objects
+     */
+    protected function getAttachmentsAttribute(): ?Collection
+    {
+        if (!isset($this->attributes['attachments'])) {
+            return null;
+        }
+
+        $attachments = Collection::for(Attachment::class);
+
+        foreach ($this->attributes['attachments'] as $attachment) {
+            $attachments->pushItem($this->factory->create(Attachment::class, $attachment, true));
+        }
+
+        return $attachments;
     }
 }

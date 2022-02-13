@@ -11,11 +11,6 @@
 
 namespace Discord\Builders\Components;
 
-use Discord\Discord;
-use Discord\Parts\Interactions\Interaction;
-use Discord\WebSockets\Event;
-use React\Promise\PromiseInterface;
-
 use function Discord\poly_strlen;
 
 /**
@@ -40,7 +35,7 @@ class TextInput extends Component
      *
      * @var int
      */
-    private $style = 1;
+    private $style;
 
     /**
      * Label for the text input.
@@ -50,14 +45,14 @@ class TextInput extends Component
     private $label;
 
     /**
-     * Minimum input length for a text input, min 0, max 4000
+     * Minimum input length for a text input, min 0, max 4000.
      *
      * @var int|null
      */
     private $min_length;
 
     /**
-     * Maximum input length for a text input, min 1, max 4000
+     * Maximum input length for a text input, min 1, max 4000.
      *
      * @var int|null
      */
@@ -68,10 +63,10 @@ class TextInput extends Component
      *
      * @var bool
      */
-    private $required = false;
+    private $required;
 
     /**
-     * Pre-filled value for text input. Max 4000 characters
+     * Pre-filled value for text input. Max 4000 characters.
      *
      * @var string|null
      */
@@ -85,43 +80,35 @@ class TextInput extends Component
     private $placeholder;
 
     /**
-     * Callback used to listen for `INTERACTION_CREATE` events.
-     *
-     * @var callable|null
-     */
-    private $listener;
-
-    /**
-     * Discord instance when the listener is set.
-     *
-     * @var Discord|null
-     */
-    private $discord;
-
-    /**
      * Creates a new text input.
      *
+     * @param string      $label     The label of the text input.
+     * @param int         $style     The style of the text input.
      * @param string|null $custom_id The custom ID of the text input. If not given, an UUID will be used
      */
-    public function __construct(?string $custom_id)
+    public function __construct(string $label, int $style, ?string $custom_id)
     {
+        $this->setLabel($label);
+        $this->setStyle($style);
         $this->setCustomId($custom_id ?? $this->generateUuid());
     }
 
     /**
      * Creates a new text input.
      *
+     * @param string      $label     The label of the text input.
+     * @param int         $style     The style of the text input.
      * @param string|null $custom_id The custom ID of the text input.
      *
      * @return self
      */
-    public static function new(?string $custom_id = null): self
+    public static function new(string $label, int $style, ?string $custom_id = null): self
     {
-        return new self($custom_id);
+        return new self($label, $style, $custom_id);
     }
 
     /**
-     * Sets the custom ID for the text input
+     * Sets the custom ID for the text input.
      *
      * @param string $custom_id
      *
@@ -141,7 +128,7 @@ class TextInput extends Component
     }
 
     /**
-     * Sets the style of the text button.
+     * Sets the style of the text input.
      *
      * @param int $style
      *
@@ -151,7 +138,7 @@ class TextInput extends Component
      */
     public function setStyle(int $style): self
     {
-        if (!in_array($style, [self::STYLE_SHORT, self::STYLE_PARAGRAPH])) {
+        if ($style < 1 || $style > 2) {
             throw new \InvalidArgumentException('Invalid text input style.');
         }
 
@@ -223,7 +210,7 @@ class TextInput extends Component
     }
 
     /**
-     * Sets the placeholder string to display if nothing is selected.
+     * Sets the placeholder string to display if text input is empty.
      * Maximum 100 characters. Null to clear placeholder.
      *
      * @param string|null $placeholder
@@ -278,82 +265,6 @@ class TextInput extends Component
     }
 
     /**
-     * Sets the callable listener for the text input. The `$callback` will be called when submitted.
-     *
-     * If you do not respond to or acknowledge the `Interaction`, it will be acknowledged for you.
-     * Note that if you intend to respond to or acknowledge the interaction inside a promise, you should
-     * return a promise that resolves *after* you respond or acknowledge.
-     *
-     * The callback will only be called once with the `$oneOff` parameter set to true.
-     * This can be changed to false, and the callback will be called each time the text input is submitted.
-     * To remove the listener, you can pass `$callback` as null.
-     *
-     * The text input listener will not persist when the bot restarts.
-     *
-     * @param callable $callback Callback to call when the text input is submitted. Will be called with the interaction object.
-     * @param Discord  $discord  Discord client.
-     * @param bool     $oneOff   Whether the listener should be removed after the text input is submitted for the first time.
-     *
-     * @throws \LogicException
-     *
-     * @return $this
-     */
-    public function setListener(?callable $callback, Discord $discord, bool $oneOff = false): self
-    {
-        if (!isset($this->custom_id)) {
-            $this->custom_id = $this->generateUuid();
-        }
-
-        // Remove any existing listener
-        if ($this->listener) {
-            $this->discord->removeListener(Event::INTERACTION_CREATE, $this->listener);
-        }
-
-        $this->discord = $discord;
-
-        if ($callback == null) {
-            return $this;
-        }
-
-        $this->listener = function (Interaction $interaction) use ($callback, $oneOff) {
-            if ($interaction->data->component_type == Component::TYPE_TEXT_INPUT && $interaction->data->custom_id == $this->custom_id) {
-                $response = $callback($interaction);
-                $ack = function () use ($interaction) {
-                    // attempt to acknowledge interaction if it has not already been responded to.
-                    try {
-                        $interaction->acknowledge();
-                    } catch (\Exception $e) {
-                    }
-                };
-
-                if ($response instanceof PromiseInterface) {
-                    $response->then($ack);
-                } else {
-                    $ack();
-                }
-
-                if ($oneOff) {
-                    $this->removeListener();
-                }
-            }
-        };
-
-        $discord->on(Event::INTERACTION_CREATE, $this->listener);
-
-        return $this;
-    }
-
-    /**
-     * Removes the listener from the text input.
-     *
-     * @return $this
-     */
-    public function removeListener(): self
-    {
-        return $this->setListener(null, $this->discord);
-    }
-
-    /**
      * Returns the Custom ID of the text input.
      *
      * @return string
@@ -374,7 +285,7 @@ class TextInput extends Component
     }
 
     /**
-     * Returns the minimum number of options that must be selected.
+     * Returns the minimum length of the text input.
      *
      * @return int|null
      */
@@ -384,7 +295,7 @@ class TextInput extends Component
     }
 
     /**
-     * Returns the maximum number of options that must be selected.
+     * Returns the maximum length of the text input.
      *
      * @return int|null
      */
@@ -427,11 +338,11 @@ class TextInput extends Component
             $content['max_length'] = $this->max_length;
         }
 
-        if ($this->required) {
-            $content['required'] = true;
+        if (isset($this->required)) {
+            $content['required'] = $this->required;
         }
 
-        if (isset($value)) {
+        if (isset($this->value)) {
             $content['value'] = $this->value;
         }
 

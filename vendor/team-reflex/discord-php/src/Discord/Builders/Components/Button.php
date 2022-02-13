@@ -92,10 +92,10 @@ class Button extends Component
     /**
      * Creates a new button.
      *
-     * @throws \InvalidArgumentException
-     * 
-     * @param int $style Style of the button.
+     * @param int         $style     Style of the button.
      * @param string|null $custom_id custom ID of the button. If not given, an UUID will be used
+     *
+     * @throws \InvalidArgumentException
      */
     public function __construct(int $style, ?string $custom_id)
     {
@@ -118,7 +118,7 @@ class Button extends Component
     /**
      * Creates a new button.
      *
-     * @param int $style Style of the button.
+     * @param int         $style     Style of the button.
      * @param string|null $custom_id custom ID of the button.
      *
      * @return self
@@ -137,7 +137,7 @@ class Button extends Component
      * @param int $style
      *
      * @throws \InvalidArgumentException
-     * 
+     *
      * @return $this
      */
     public function setStyle(int $style): self
@@ -169,6 +169,7 @@ class Button extends Component
      * @param string|null $label Label of the button. Maximum 80 characters.
      *
      * @throws \LengthException
+     *
      * @return $this
      */
     public function setLabel(?string $label): self
@@ -233,6 +234,7 @@ class Button extends Component
      *
      * @throws \LogicException
      * @throws \LengthException
+     *
      * @return $this
      */
     public function setCustomId(?string $custom_id): self
@@ -242,7 +244,7 @@ class Button extends Component
         }
 
         if (isset($custom_id) && poly_strlen($custom_id) > 100) {
-            throw new \LogicException('Custom ID must be maximum 100 characters.');
+            throw new \LengthException('Custom ID must be maximum 100 characters.');
         }
 
         $this->custom_id = $custom_id;
@@ -256,7 +258,7 @@ class Button extends Component
      * @param string|null $url
      *
      * @throws \LogicException
-     * 
+     *
      * @return $this
      */
     public function setUrl(?string $url): self
@@ -303,7 +305,7 @@ class Button extends Component
      * @param bool     $oneOff   Whether the listener should be removed after the button is pressed for the first time.
      *
      * @throws \LogicException
-     * 
+     *
      * @return $this
      */
     public function setListener(?callable $callback, Discord $discord, bool $oneOff = false): self
@@ -390,7 +392,7 @@ class Button extends Component
      *
      * @return array|null
      */
-    public function getEmoji(): array
+    public function getEmoji(): ?array
     {
         return $this->emoji;
     }

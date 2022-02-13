@@ -18,8 +18,8 @@ use Discord\Exceptions\FileNotFoundException;
 use Discord\Helpers\Multipart;
 use Discord\Http\Exceptions\RequestFailedException;
 use Discord\Parts\Channel\Message;
-use Discord\Parts\Guild\Sticker;
 use Discord\Parts\Embed\Embed;
+use Discord\Parts\Guild\Sticker;
 use JsonSerializable;
 
 use function Discord\poly_strlen;
@@ -88,7 +88,7 @@ class MessageBuilder implements JsonSerializable
     private $allowed_mentions;
 
     /**
-     * IDs of up to 3 stickers in the server to send in the message
+     * IDs of up to 3 stickers in the server to send in the message.
      *
      * @var array|null
      */
@@ -110,7 +110,7 @@ class MessageBuilder implements JsonSerializable
      * @param string $content Content of the message. Maximum 2000 characters.
      *
      * @throws \LengthException
-     * 
+     *
      * @return $this
      */
     public function setContent(string $content): self
@@ -154,7 +154,7 @@ class MessageBuilder implements JsonSerializable
      * @param Embed|array $embeds,...
      *
      * @throws \OverflowException
-     * 
+     *
      * @return $this
      */
     public function addEmbed(...$embeds): self
@@ -271,7 +271,7 @@ class MessageBuilder implements JsonSerializable
      *
      * @throws \InvalidArgumentException
      * @throws \OverflowException
-     * 
+     *
      * @return $this
      */
     public function addComponent(Component $component): self
@@ -346,13 +346,14 @@ class MessageBuilder implements JsonSerializable
 
         return $this;
     }
+
     /**
      * Adds a sticker to the message.
      *
      * @param string|Sticker $sticker Sticker to add.
      *
      * @throws \OverflowException
-     * 
+     *
      * @return $this
      */
     public function addSticker($sticker): self
@@ -379,6 +380,10 @@ class MessageBuilder implements JsonSerializable
      */
     public function removeSticker($sticker): self
     {
+        if ($sticker instanceof Sticker) {
+            $sticker = $sticker->id;
+        }
+
         if (($idx = array_search($sticker, $this->sticker_ids)) !== null) {
             array_splice($this->sticker_ids, $idx, 1);
         }
@@ -405,7 +410,7 @@ class MessageBuilder implements JsonSerializable
     }
 
     /**
-     * Returns all the stickers in the message.
+     * Returns all the sticker IDs in the message.
      *
      * @return Sticker[]
      */
@@ -413,6 +418,7 @@ class MessageBuilder implements JsonSerializable
     {
         return $this->sticker_ids;
     }
+
     /**
      * Sets the flags of the message.
      *
@@ -437,7 +443,7 @@ class MessageBuilder implements JsonSerializable
      */
     public function requiresMultipart(): bool
     {
-        return count($this->files) > 0;
+        return count($this->files);
     }
 
     /**
@@ -501,11 +507,12 @@ class MessageBuilder implements JsonSerializable
             $content['allowed_mentions'] = $this->allowed_mentions;
         }
 
-        if (count($this->embeds) > 0) {
+        if (count($this->embeds)) {
             $content['embeds'] = $this->embeds;
             $empty = false;
         }
-        if (count($this->sticker_ids) > 0) {
+
+        if (count($this->sticker_ids)) {
             $content['sticker_ids'] = $this->sticker_ids;
             $empty = false;
         }

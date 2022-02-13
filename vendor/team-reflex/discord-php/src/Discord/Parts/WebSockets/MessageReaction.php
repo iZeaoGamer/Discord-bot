@@ -187,8 +187,6 @@ class MessageReaction extends Part
     /**
      * Gets the member attribute.
      *
-     * @throws \Exception
-     *
      * @return Member|null
      */
     protected function getMemberAttribute(): ?Member
@@ -217,14 +215,14 @@ class MessageReaction extends Part
     }
 
     /**
-     * Delete this reaction
+     * Delete this reaction.
      *
      * @see Message::deleteReaction()
-     * 
+     *
      * @param int|null $type The type of deletion to perform.
      *
      * @throws \UnexpectedValueException
-     * 
+     *
      * @return ExtendedPromiseInterface
      */
     public function delete(?int $type = null): ExtendedPromiseInterface

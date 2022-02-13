@@ -76,7 +76,7 @@ abstract class Event
     public const CHANNEL_DELETE = 'CHANNEL_DELETE';
     public const CHANNEL_UPDATE = 'CHANNEL_UPDATE';
     public const CHANNEL_PINS_UPDATE = 'CHANNEL_PINS_UPDATE';
-
+    
     // Threads
     public const THREAD_CREATE = 'THREAD_CREATE';
     public const THREAD_UPDATE = 'THREAD_UPDATE';
@@ -151,7 +151,7 @@ abstract class Event
     abstract public function handle(Deferred &$deferred, $data);
 
     /**
-     * Cache User repository from Event data
+     * Cache User repository from Event data.
      *
      * @param object $userdata
      */

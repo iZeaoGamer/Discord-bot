@@ -96,7 +96,7 @@ use JaxkDev\DiscordBot\Models\Server\Sticker;
 use JaxkDev\DiscordBot\Models\Server\ServerScheduledEvent;
 use JaxkDev\DiscordBot\Models\Channels\Messages\Reaction;
 use JaxkDev\DiscordBot\Models\Server\Emoji;
-use JaxkDev\DiscordBot\Models\Server\Invite;
+use JaxkDev\DiscordBot\Models\Channels\Invite;
 use JaxkDev\DiscordBot\Models\User\Member;
 use JaxkDev\DiscordBot\Models\Channels\Messages\Message;
 use JaxkDev\DiscordBot\Models\Channels\Messages\Webhook as WebhookMessage;

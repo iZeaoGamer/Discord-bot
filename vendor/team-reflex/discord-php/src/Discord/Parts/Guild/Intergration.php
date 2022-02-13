@@ -17,7 +17,7 @@ use Discord\Parts\Part;
 use Discord\Parts\User\User;
 
 /**
- * An Integration is a guild integrations for Twitch, Youtube, Bot and Apps
+ * An Integration is a guild integrations for Twitch, Youtube, Bot and Apps.
  *
  * @see https://discord.com/developers/docs/resources/guild#integration-object
  *
@@ -37,7 +37,7 @@ use Discord\Parts\User\User;
  * @property int|null         $subscriber_count    How many subscribers this integration has.
  * @property bool|null        $revoked             Has this integration been revoked.
  * @property Application|null $application         The bot/OAuth2 application for discord integrations.
- * @property string|null       $guild_id
+ * @property Guild|null       $guild
  */
 class Integration extends Part
 {
@@ -70,7 +70,7 @@ class Integration extends Part
      */
     protected function getUserAttribute(): ?User
     {
-        if (! isset($this->attributes['user'])) {
+        if (!isset($this->attributes['user'])) {
             return null;
         }
 
@@ -90,7 +90,7 @@ class Integration extends Part
      */
     protected function getSyncedAtAttribute(): ?Carbon
     {
-        if (! isset($this->attributes['synced_at'])) {
+        if (!isset($this->attributes['synced_at'])) {
             return null;
         }
 
@@ -101,12 +101,12 @@ class Integration extends Part
      * Returns the application attribute.
      *
      * @todo return correct Application structure https://discord.com/developers/docs/resources/guild#integration-application-object
-     * 
+     *
      * @return Application|null
      */
     protected function getApplicationAttribute(): ?Application
     {
-        if (! isset($this->attributes['application'])) {
+        if (!isset($this->attributes['application'])) {
             return null;
         }
 
@@ -115,6 +115,7 @@ class Integration extends Part
         }
 
         $application = $this->factory->part(Application::class, (array) $this->attributes['application'], true);
+
         return $application;
     }
 

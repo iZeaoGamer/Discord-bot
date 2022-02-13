@@ -55,7 +55,7 @@ class ScheduledEvent extends Part
     public const STATUS_SCHEDULED = 1;
     public const STATUS_ACTIVE = 2;
     public const STATUS_COMPLETED = 3;
-    public const STATUS_CANCELED  = 4;
+    public const STATUS_CANCELED = 4;
 
     /**
      * @inheritdoc
@@ -76,14 +76,14 @@ class ScheduledEvent extends Part
         'entity_id',
         'entity_metadata',
         'creator',
-        'user_count'
+        'user_count',
     ];
 
     /**
      * Get a list of guild scheduled event users subscribed to a guild scheduled event. Returns a list of guild scheduled event user objects on success. Guild member data, if it exists, is included if the with_member query parameter is set.
      *
      * @see https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users
-     * 
+     *
      * @throws \RangeException
      *
      * @return ExtendedPromiseInterface
@@ -146,7 +146,7 @@ class ScheduledEvent extends Part
     /**
      * Returns the channel attribute.
      *
-     * @return Channel    The channel in which the scheduled event will be hosted, or null.
+     * @return Channel The channel in which the scheduled event will be hosted, or null.
      */
     protected function getChannelAttribute(): ?Channel
     {
@@ -195,7 +195,7 @@ class ScheduledEvent extends Part
      *
      * @throws \Exception
      *
-     * @return Carbon     The time the scheduled event will start.
+     * @return Carbon The time the scheduled event will start.
      */
     protected function getScheduledStartTimeAttribute(): Carbon
     {

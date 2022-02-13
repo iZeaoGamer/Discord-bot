@@ -12,7 +12,7 @@
 namespace Discord\Repository\Guild;
 
 use Discord\Http\Endpoint;
-use Discord\Parts\Guild\Invite;
+use Discord\Parts\Channel\Invite;
 use Discord\Repository\AbstractRepository;
 
 /**
@@ -34,7 +34,6 @@ class InviteRepository extends AbstractRepository
     protected $endpoints = [
         'all' => Endpoint::GUILD_INVITES,
         'get' => Endpoint::INVITE,
-        'create' => Endpoint::GUILD_INVITES,
         'delete' => Endpoint::INVITE,
     ];
 

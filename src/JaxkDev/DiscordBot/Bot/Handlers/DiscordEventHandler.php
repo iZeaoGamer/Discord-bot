@@ -20,7 +20,7 @@ use Discord\Parts\Thread\Thread as DiscordThread;
 use Discord\Parts\Thread\Member as DiscordThreadMember;
 use Discord\Parts\Guild\Ban as DiscordBan;
 use Discord\Parts\Guild\Guild as DiscordGuild;
-use Discord\Parts\Guild\Invite as DiscordInvite;
+use Discord\Parts\Channel\Invite as DiscordInvite;
 use Discord\Parts\Guild\Role as DiscordRole;
 use Discord\Parts\Guild\Sticker as DiscordSticker;
 use Discord\Parts\Guild\GuildTemplate as DiscordTemplate;

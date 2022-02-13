@@ -34,7 +34,7 @@ class StageInstanceDelete extends Event
             }
         }
 
-        if (!$stageInstancePart) {
+        if (! $stageInstancePart) {
             /** @var StageInstance */
             $stageInstancePart = $this->factory->create(StageInstance::class, $data);
         }

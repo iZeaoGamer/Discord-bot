@@ -35,8 +35,11 @@ class RequestRespondInteraction extends Packet
     /** @var bool */
     private $ephemeral;
 
+    /** @var string|null */
+    private $title; //null when not using text input as component type.
 
-    public function __construct(Interaction $command, MessageBuilder $builder = null, string $content = "", ?Embed $embed = null, bool $ephemeral = false)
+
+    public function __construct(Interaction $command, MessageBuilder $builder = null, string $content = "", ?Embed $embed = null, bool $ephemeral = false, ?string $title = null)
     {
         parent::__construct();
         $this->command = $command;
@@ -44,6 +47,7 @@ class RequestRespondInteraction extends Packet
         $this->content = $content;
         $this->embed = $embed;
         $this->ephemeral = $ephemeral;
+        $this->title = $title;
     }
 
     public function getInteraction(): Interaction
@@ -65,6 +69,9 @@ class RequestRespondInteraction extends Packet
     public function isEphemeral(): bool{
         return $this->ephemeral;
     }
+    public function getTitle(): ?string{
+        return $this->title;
+    }
     public function serialize(): ?string
     {
         return serialize([
@@ -73,7 +80,8 @@ class RequestRespondInteraction extends Packet
             $this->builder,
             $this->content,
             $this->embed,
-            $this->ephemeral
+            $this->ephemeral,
+            $this->title
         ]);
     }
 
@@ -85,7 +93,8 @@ class RequestRespondInteraction extends Packet
             $this->builder,
             $this->content,
             $this->embed,
-            $this->ephemeral
+            $this->ephemeral,
+            $this->title
         ] = unserialize($data);
     }
 }

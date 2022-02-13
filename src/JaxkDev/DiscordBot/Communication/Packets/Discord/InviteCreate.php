@@ -12,7 +12,7 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
-use JaxkDev\DiscordBot\Models\Server\Invite;
+use JaxkDev\DiscordBot\Models\Channels\Invite;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
 class InviteCreate extends Packet

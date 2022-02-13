@@ -10,7 +10,7 @@
  * Email   :: JaxkDev@gmail.com
  */
 
-namespace JaxkDev\DiscordBot\Models\Server;
+namespace JaxkDev\DiscordBot\Models\Channels;
 
 use JaxkDev\DiscordBot\Models\User\User;
 use JaxkDev\DiscordBot\Plugin\Utils;
@@ -257,54 +257,68 @@ class Invite implements \Serializable
         }
         $this->target_type = $target_type;
     }
-    public function getTargetUser(): ?User{
+    public function getTargetUser(): ?User
+    {
         return $this->target_user;
     }
-    public function setTargetUser(?User $user): void{
-        if($user){
-            if($user->getId() === null){
+    public function setTargetUser(?User $user): void
+    {
+        if ($user) {
+            if ($user->getId() === null) {
                 throw new \AssertionError("User ID must be present.");
             }
-            if(!Utils::validDiscordSnowflake($user->getId())){
+            if (!Utils::validDiscordSnowflake($user->getId())) {
                 throw new \AssertionError("User ID: {$user->getId()} is invalid.");
             }
         }
         $this->target_user = $user;
     }
-    public function getTargetApplication(): ?object{
+    public function getTargetApplication(): ?object
+    {
         return $this->target_application;
     }
-    public function setTargetApplication(?object $application): void{
+    public function setTargetApplication(?object $application): void
+    {
         $this->target_application = $application;
     }
-    public function getEstimatePresenceCount(): ?int{
+    public function getEstimatePresenceCount(): ?int
+    {
         return $this->approximate_presence_count;
     }
-    public function setEstimatePresenceCount(?int $approximate_presence_count){
+    public function setEstimatePresenceCount(?int $approximate_presence_count)
+    {
         $this->approximate_presence_count = $approximate_presence_count;
     }
-    public function getEstimateMemberCount(): ?int{
+    public function getEstimateMemberCount(): ?int
+    {
         return $this->approximate_member_count;
     }
-    public function setEstimateMemberCount(?int $approximate_member_count): void{
+    public function setEstimateMemberCount(?int $approximate_member_count): void
+    {
         $this->approximate_member_count = $approximate_member_count;
     }
-    public function getExpiresAt(): ?int{
+    public function getExpiresAt(): ?int
+    {
         return $this->expires_at;
     }
-    public function setExpiresAt(?int $expires_at){
+    public function setExpiresAt(?int $expires_at)
+    {
         $this->expires_at = $expires_at;
     }
-    public function getStageInstance(): ?object{
+    public function getStageInstance(): ?object
+    {
         return $this->stage_instance;
     }
-    public function setStageInstance(?object $stage_instance): void{
+    public function setStageInstance(?object $stage_instance): void
+    {
         $this->stage_instance = $stage_instance;
     }
-    public function getServerScheduledEvent(): ?object{
+    public function getServerScheduledEvent(): ?object
+    {
         return $this->server_scheduled_event;
     }
-    public function setServerScheduledEvent(?object $server_scheduled_event){
+    public function setServerScheduledEvent(?object $server_scheduled_event)
+    {
         $this->server_scheduled_event = $server_scheduled_event;
     }
 

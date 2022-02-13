@@ -27,6 +27,7 @@ class ChannelDelete extends Event
     {
         /** @var Channel */
         $channelPart = $this->factory->create(Channel::class, $data);
+
         if ($guild = $channelPart->guild) {
             if ($channelPart = $guild->channels->pull($data->id)) {
                 $channelPart->fill((array) $data);

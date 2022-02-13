@@ -16,7 +16,7 @@ use Discord\Parts\Guild\Emoji;
 use function Discord\poly_strlen;
 
 /**
- * Option for select menu component
+ * Option for select menu component.
  *
  * @see https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure
  */
@@ -62,7 +62,7 @@ class Option extends Component
      *
      * @param string      $label User-visible label for the option. Maximum 100 characters.
      * @param string|null $value Developer value for the option. Maximum 100 characters. Leave as null to automatically generate a UUID.
-     * 
+     *
      * @throws \LengthException
      */
     public function __construct(string $label, ?string $value)
@@ -98,7 +98,7 @@ class Option extends Component
      * @param string|null $description Description of the option. Maximum 100 characters.
      *
      * @throws \LengthException
-     * 
+     *
      * @return $this
      */
     public function setDescription(?string $description): self

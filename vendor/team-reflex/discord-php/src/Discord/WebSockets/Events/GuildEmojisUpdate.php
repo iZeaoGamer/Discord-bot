@@ -43,9 +43,9 @@ class GuildEmojisUpdate extends Event
             }
             /** @var Emoji */
             $emojiPart = $this->factory->create(Emoji::class, $emoji, true);
-
             $emojiParts->pushItem($emojiPart);
         }
+
         if ($guild) {
             $guild->emojis->merge($emojiParts);
         }

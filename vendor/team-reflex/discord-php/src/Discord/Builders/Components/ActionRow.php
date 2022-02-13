@@ -41,8 +41,9 @@ class ActionRow extends Component
      *
      * @param Component $component Component to add.
      *
+     * @throws \InvalidArgumentException
      * @throws \OverflowException
-     * 
+     *
      * @return $this
      */
     public function addComponent(Component $component): self
