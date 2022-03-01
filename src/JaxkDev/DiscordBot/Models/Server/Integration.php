@@ -16,7 +16,7 @@ use JaxkDev\DiscordBot\Models\OAuth\Application;
 use JaxkDev\DiscordBot\Plugin\Utils;
 use JaxkDev\DiscordBot\Models\User\User;
 
-class Intergration implements \Serializable
+class Integration implements \Serializable
 
 {
 
@@ -65,7 +65,7 @@ class Intergration implements \Serializable
     /** @var string|null */
     private $server_id;
 
-    /** Option Constructor
+    /** Integration Constructor
      * 
      * @param string                    $id
      * @param string                    $name
@@ -124,7 +124,7 @@ class Intergration implements \Serializable
     public function setId(string $id)
     {
         if (!Utils::validDiscordSnowflake($id)) {
-            throw new \AssertionError("Intergration ID: {$id} is invalid.");
+            throw new \AssertionError("integration ID: {$id} is invalid.");
         }
         $this->id = $id;
     }

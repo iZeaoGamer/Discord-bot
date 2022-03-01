@@ -289,7 +289,9 @@ class Client
         }
         if ($this->client instanceof Discord) {
             try {
-                $this->client->close(true);
+                $this->client->close(false);
+                $loop = $this->client->getLoop();
+                $loop->futureTick([$loop, 'stop']);
             } catch (Error $e) {
                 $this->logger->debug("Failed to close client, probably not started.");
             }

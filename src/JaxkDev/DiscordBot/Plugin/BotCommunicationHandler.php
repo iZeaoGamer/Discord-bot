@@ -64,9 +64,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserAdd
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserRemove as ServerScheduledEventUserRemovePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\UserUpdate as UserUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\WebhooksUpdate as WebhooksUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationCreate as IntergrationCreatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationUpdate as IntergrationUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationDelete as IntergrationDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\IntegrationCreate as IntegrationCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\IntegrationUpdate as IntegrationUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\IntegrationDelete as IntegrationDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadListSync as ThreadListSyncPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadMembersUpdate as ThreadMembersUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadMemberUpdate as ThreadMemberUpdatePacket;
@@ -128,9 +128,9 @@ use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledUserAdded as ServerScheduled
 use JaxkDev\DiscordBot\Plugin\Events\ServerScheduledUserRemoved as ServerScheduledUserRemovedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\UserUpdated as UserUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\WebhooksUpdated as WebhooksUpdatedEvent;
-use JaxkDev\DiscordBot\Plugin\Events\IntergrationCreated as IntergrationCreatedEvent;
-use JaxkDev\DiscordBot\Plugin\Events\IntergrationUpdated as IntergrationUpdatedEvent;
-use JaxkDev\DiscordBot\Plugin\Events\IntergrationDeleted as IntergrationDeletedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\IntegrationCreated as IntegrationCreatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\IntegrationUpdated as IntegrationUpdatedEvent;
+use JaxkDev\DiscordBot\Plugin\Events\IntegrationDeleted as IntegrationDeletedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ThreadMemberUpdated as ThreadMemberUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ThreadMembersUpdated as ThreadMembersUpdatedEvent;
 use JaxkDev\DiscordBot\Plugin\Events\ThreadListSynced as ThreadListSyncedEvent;
@@ -213,9 +213,9 @@ class BotCommunicationHandler
         elseif ($packet instanceof ServerScheduledEventUserRemovePacket) $this->handleScheduleRemoveUser($packet);
         elseif ($packet instanceof UserUpdatePacket) $this->handleUserUpdate($packet);
         elseif ($packet instanceof WebhooksUpdatePacket) $this->handleWebhooksUpdate($packet);
-        elseif ($packet instanceof IntergrationCreatePacket) $this->handleIntergrationCreate($packet);
-        elseif ($packet instanceof IntergrationUpdatePacket) $this->handleIntergrationUpdate($packet);
-        elseif ($packet instanceof IntergrationDeletePacket) $this->handleIntergrationDelete($packet);
+        elseif ($packet instanceof IntegrationCreatePacket) $this->handleIntegrationCreate($packet);
+        elseif ($packet instanceof IntegrationUpdatePacket) $this->handleIntegrationUpdate($packet);
+        elseif ($packet instanceof IntegrationDeletePacket) $this->handleIntegrationDelete($packet);
         elseif ($packet instanceof ThreadListSyncPacket) $this->handleThreadListSync($packet);
         elseif ($packet instanceof ThreadMemberUpdatePacket) $this->handleThreadMemberUpdate($packet);
         elseif ($packet instanceof ThreadMembersUpdatePacket) $this->handleThreadMembersUpdate($packet);
@@ -254,20 +254,20 @@ class BotCommunicationHandler
         (new WebhooksUpdatedEvent($this->plugin, $packet->getServer(), $packet->getChannel()))->call();
         //todo implement storaging for webhooks updates.
     }
-    private function handleIntergrationCreate(IntergrationCreatePacket $packet): void
+    private function handleIntegrationCreate(IntegrationCreatePacket $packet): void
     {
-        (new IntergrationCreatedEvent($this->plugin, $packet->getIntergration()))->call();
-        //todo implemment Storaging for Intergrations.
+        (new IntegrationCreatedEvent($this->plugin, $packet->getIntegration()))->call();
+        //todo implemment Storaging for Integrations.
     }
-    private function handleIntergrationUpdate(IntergrationUpdatePacket $packet): void
+    private function handleIntegrationUpdate(IntegrationUpdatePacket $packet): void
     {
-        (new IntergrationUpdatedEvent($this->plugin, $packet->getIntergration()))->call();
-        //todo implemment Storaging for Intergrations.
+        (new IntegrationUpdatedEvent($this->plugin, $packet->getIntegration()))->call();
+        //todo implemment Storaging for Integrations.
     }
-    private function handleIntergrationDelete(IntergrationDeletePacket $packet): void
+    private function handleIntegrationDelete(IntegrationDeletePacket $packet): void
     {
-        (new IntergrationDeletedEvent($this->plugin, $packet->getOldIntergration()))->call();
-        //todo implemment Storaging for Intergrations.
+        (new IntegrationDeletedEvent($this->plugin, $packet->getOldIntegration()))->call();
+        //todo implemment Storaging for Integrations.
     }
 
     private function handleScheduleCreate(ServerScheduledEventCreatePacket $packet): void

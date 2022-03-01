@@ -86,7 +86,7 @@ class Discord
      *
      * @var string Version.
      */
-    public const VERSION = 'v7.0.0';
+    public const VERSION = 'v7.0.2';
 
     /**
      * The logger.
@@ -1349,8 +1349,6 @@ class Discord
             $options['intents'] = $intent;
         }
 
-        $options['socket_options']['happy_eyeballs'] = false; //Discord doesn't use IPv6
-
         if ($options['loadAllMembers'] && !($options['intents'] & Intents::GUILD_MEMBERS)) {
             throw new IntentException('You have enabled the `loadAllMembers` option but have not enabled the required `GUILD_MEMBERS` intent.' .
                 'See the documentation on the `loadAllMembers` property for more information: http://discord-php.github.io/DiscordPHP/#basics');
@@ -1390,7 +1388,7 @@ class Discord
     public function close(bool $closeLoop = true): void
     {
         $this->closing = true;
-        $this->ws->close(Op::CLOSE_UNKNOWN_ERROR, 'discordphp closing...');
+        $this->ws->close($closeLoop ? Op::CLOSE_UNKNOWN_ERROR : Op::CLOSE_NORMAL, 'discordphp closing...');
         $this->emit('closed', [$this]);
         $this->logger->info('discord closed');
 

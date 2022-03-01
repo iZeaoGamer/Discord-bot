@@ -12,24 +12,24 @@
 
 namespace JaxkDev\DiscordBot\Communication\Packets\Discord;
 
-use JaxkDev\DiscordBot\Models\Server\Intergration;
+use JaxkDev\DiscordBot\Models\Server\Integration;
 use JaxkDev\DiscordBot\Communication\Packets\Packet;
 
-class IntergrationCreate extends Packet
+class IntegrationUpdate extends Packet
 {
 
-    /** @var Intergration */
-    private $intergration;
+    /** @var Integration */
+    private $integration;
 
-    public function __construct(Intergration $intergration)
+    public function __construct(Integration $integration)
     {
         parent::__construct();
-        $this->intergration = $intergration;
+        $this->integration = $integration;
     }
 
-    public function getIntergration(): Intergration
+    public function getIntegration(): Integration
     {
-        return $this->intergration;
+        return $this->integration;
     }
 
     public function serialize(): ?string
@@ -37,7 +37,7 @@ class IntergrationCreate extends Packet
         return serialize(
             [
                 $this->UID,
-                $this->intergration
+                $this->integration
             ]
         );
     }
@@ -46,7 +46,7 @@ class IntergrationCreate extends Packet
     {
         [
             $this->UID,
-            $this->intergration
+            $this->integration
         ] = unserialize($data);
     }
 }

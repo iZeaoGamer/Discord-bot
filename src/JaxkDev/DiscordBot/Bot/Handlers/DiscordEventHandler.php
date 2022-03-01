@@ -33,7 +33,7 @@ use Discord\Parts\WebSockets\VoiceStateUpdate as DiscordVoiceStateUpdate;
 use Discord\Parts\WebSockets\TypingStart as DiscordTypingStart;
 use Discord\Parts\Channel\StageInstance as DiscordStageInstance;
 use Discord\Parts\Guild\ScheduledEvent as DiscordScheduledEvent;
-use Discord\Parts\Guild\Integration as DiscordIntergration;
+use Discord\Parts\Guild\Integration as DiscordIntegration;
 use Discord\Parts\Guild\Emoji as DiscordEmoji;
 use Discord\Parts\Interactions\Command\Command as DiscordCommand;
 use JaxkDev\DiscordBot\Bot\Client;
@@ -85,9 +85,9 @@ use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUpdate 
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventDelete as ServerScheduledEventDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserAdd as ServerScheduledEventUserAddPacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ServerScheduledEventUserRemove as ServerScheduledEventUserRemovePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationCreate as IntergrationCreatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationUpdate as IntergrationUpdatePacket;
-use JaxkDev\DiscordBot\Communication\Packets\Discord\IntergrationDelete as IntergrationDeletePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\IntegrationCreate as IntegrationCreatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\IntegrationUpdate as IntegrationUpdatePacket;
+use JaxkDev\DiscordBot\Communication\Packets\Discord\IntegrationDelete as IntegrationDeletePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\UserUpdate as UserUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\WebhooksUpdate as WebhooksUpdatePacket;
 use JaxkDev\DiscordBot\Communication\Packets\Discord\ThreadListSync as ThreadListSyncPacket;
@@ -175,9 +175,9 @@ class DiscordEventHandler
         $discord->on("GUILD_SCHEDULED_EVENT_USER_ADD", [$this, "onScheduleUserAdd"]);
         $discord->on("GUILD_SCHEDULED_EVENT_USER_REMOVE", [$this, "onScheduleUserRemove"]);
         $discord->on("USER_UPDATE", [$this, "onUserUpdate"]);
-        $discord->on("INTEGRATION_CREATE", [$this, "onIntergrationCreate"]);
-        $discord->on("INTEGRATION_UPDATE", [$this, "onIntergrationUpdate"]);
-        $discord->on("INTEGRATION_DELETE", [$this, "onIntergrationDelete"]);
+        $discord->on("INTEGRATION_CREATE", [$this, "onIntegrationCreate"]);
+        $discord->on("INTEGRATION_UPDATE", [$this, "onIntegrationUpdate"]);
+        $discord->on("INTEGRATION_DELETE", [$this, "onIntegrationDelete"]);
         $discord->on("WEBHOOKS_UPDATE", [$this, "onWebhooksUpdate"]);
     }
 
@@ -479,19 +479,19 @@ array(5) {
         $packet = new UserUpdatePacket(ModelConverter::genModelUser($new), ModelConverter::genModelUser($old));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onIntergrationCreate(DiscordIntergration $intergration)
+    public function onIntegrationCreate(DiscordIntegration $integration)
     {
-        $packet = new IntergrationCreatePacket(ModelConverter::genModelIntergration($intergration));
+        $packet = new IntegrationCreatePacket(ModelConverter::genModelIntegration($integration));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onIntergrationUpdate(DiscordIntergration $intergration)
+    public function onIntegrationUpdate(DiscordIntegration $integration)
     {
-        $packet = new IntergrationUpdatePacket(ModelConverter::genModelIntergration($intergration));
+        $packet = new IntegrationUpdatePacket(ModelConverter::genModelIntegration($integration));
         $this->client->getThread()->writeOutboundData($packet);
     }
-    public function onIntergrationDelete(?DiscordIntergration $intergration)
+    public function onIntegrationDelete(?DiscordIntegration $integration)
     {
-        $packet = new IntergrationDeletePacket(($intergration === null ? null : ModelConverter::genModelIntergration($intergration)));
+        $packet = new IntegrationDeletePacket(($integration === null ? null : ModelConverter::genModelIntegration($integration)));
         $this->client->getThread()->writeOutboundData($packet);
     }
     public function onWebhooksUpdate(DiscordGuild $guild, ?DiscordChannel $channel)

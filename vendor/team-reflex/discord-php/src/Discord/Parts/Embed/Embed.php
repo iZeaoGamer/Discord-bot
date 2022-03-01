@@ -13,6 +13,7 @@ namespace Discord\Parts\Embed;
 
 use Carbon\Carbon;
 use Discord\Helpers\Collection;
+use Discord\Parts\Channel\Attachment;
 use Discord\Parts\Part;
 use function Discord\poly_strlen;
 
@@ -163,7 +164,7 @@ class Embed extends Part
     /**
      * Sets the description of this embed.
      *
-     * @param string $description Maximum length is 2048 characters.
+     * @param string $description Maximum length is 4096 characters.
      *
      * @throws \LengthException
      */
@@ -171,8 +172,8 @@ class Embed extends Part
     {
         if (poly_strlen($description) === 0) {
             $this->attributes['description'] = null;
-        } elseif (poly_strlen($description) > 2048) {
-            throw new \LengthException('Embed description can not be longer than 2048 characters');
+        } elseif (poly_strlen($description) > 4096) {
+            throw new \LengthException('Embed description can not be longer than 4096 characters');
         } else {
             if ($this->exceedsOverallLimit(poly_strlen($description))) {
                 throw new \LengthException('Embed text values collectively can not exceed than 6000 characters');
@@ -389,13 +390,17 @@ class Embed extends Part
     /**
      * Set the image of this embed.
      *
-     * @param string $url
+     * @param string|Attachment $url
      *
      * @return $this
      */
     public function setImage($url): self
     {
-        $this->image = ['url' => (string) $url];
+        if ($url instanceof Attachment) {
+            $this->image = ['url' => 'attachment://'.$url->filename];
+        } else {
+            $this->image = ['url' => (string) $url];
+        }
 
         return $this;
     }
